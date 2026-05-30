@@ -575,6 +575,48 @@ export class ApiClient {
         )
     }
 
+    // Plugin management
+    async listPlugins(sessionId: string) {
+        return await this.request<{ success: boolean; plugins?: Array<{ id: string; name: string; version: string; description?: string; permissions: string[]; enabled: boolean }>; error?: string }>(
+            `/api/sessions/${encodeURIComponent(sessionId)}/plugins`
+        )
+    }
+
+    async installPlugin(sessionId: string, pluginId: string, sourceUrl?: string, sourceType?: string) {
+        return await this.request<{ success: boolean; plugin?: unknown; error?: string }>(
+            `/api/sessions/${encodeURIComponent(sessionId)}/plugins/install`,
+            { method: 'POST', body: JSON.stringify({ pluginId, sourceUrl, sourceType }) }
+        )
+    }
+
+    async uninstallPlugin(sessionId: string, pluginId: string) {
+        return await this.request<{ success: boolean; error?: string }>(
+            `/api/sessions/${encodeURIComponent(sessionId)}/plugins/${encodeURIComponent(pluginId)}`,
+            { method: 'DELETE' }
+        )
+    }
+
+    // Skill management
+    async searchSkillsExternal(sessionId: string, query: string, limit?: number) {
+        return await this.request<{ success: boolean; results?: Array<{ name: string; description?: string; repo: string; path: string; stars?: number; author?: string }>; total?: number; error?: string }>(
+            `/api/sessions/${encodeURIComponent(sessionId)}/skills/search?q=${encodeURIComponent(query)}&limit=${limit ?? 20}`
+        )
+    }
+
+    async installSkillFromExternal(sessionId: string, name: string, repo: string, path?: string) {
+        return await this.request<{ success: boolean; skill?: unknown; error?: string }>(
+            `/api/sessions/${encodeURIComponent(sessionId)}/skills/install`,
+            { method: 'POST', body: JSON.stringify({ name, repo, path }) }
+        )
+    }
+
+    async uninstallSkill(sessionId: string, name: string) {
+        return await this.request<{ success: boolean; error?: string }>(
+            `/api/sessions/${encodeURIComponent(sessionId)}/skills/${encodeURIComponent(name)}`,
+            { method: 'DELETE' }
+        )
+    }
+
     async renameSession(sessionId: string, name: string): Promise<void> {
         await this.request(`/api/sessions/${encodeURIComponent(sessionId)}`, {
             method: 'PATCH',

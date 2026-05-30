@@ -37,7 +37,17 @@ export const RPC_METHODS = {
     ListCodexModels: 'listCodexModels',
     ListCursorModels: 'listCursorModels',
     ListOpencodeModels: 'listOpencodeModels',
-    ListOpencodeModelsForCwd: 'listOpencodeModelsForCwd'
+    ListOpencodeModelsForCwd: 'listOpencodeModelsForCwd',
+    PluginList: 'plugin-list',
+    PluginInstall: 'plugin-install',
+    PluginUninstall: 'plugin-uninstall',
+    PluginStorageGet: 'plugin-storage-get',
+    PluginStorageSet: 'plugin-storage-set',
+    PluginStorageDelete: 'plugin-storage-delete',
+    PluginStorageList: 'plugin-storage-list',
+    SkillSearch: 'skill-search',
+    SkillInstall: 'skill-install',
+    SkillUninstall: 'skill-uninstall'
 } as const
 
 export type RpcMethod = typeof RPC_METHODS[keyof typeof RPC_METHODS]

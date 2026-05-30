@@ -262,6 +262,48 @@ export class RpcGateway {
         }
     }
 
+    // Plugin management
+    async pluginList(sessionId: string): Promise<RpcCommandResponse> {
+        return await this.sessionRpc(sessionId, RPC_METHODS.PluginList, {}) as RpcCommandResponse
+    }
+
+    async pluginInstall(sessionId: string, options: { pluginId: string; sourceUrl?: string; sourceType?: string; archivePath?: string }): Promise<RpcCommandResponse> {
+        return await this.sessionRpc(sessionId, RPC_METHODS.PluginInstall, options) as RpcCommandResponse
+    }
+
+    async pluginUninstall(sessionId: string, pluginId: string): Promise<RpcCommandResponse> {
+        return await this.sessionRpc(sessionId, RPC_METHODS.PluginUninstall, { pluginId }) as RpcCommandResponse
+    }
+
+    async pluginStorageGet(sessionId: string, pluginId: string, key: string): Promise<RpcCommandResponse> {
+        return await this.sessionRpc(sessionId, RPC_METHODS.PluginStorageGet, { pluginId, key }) as RpcCommandResponse
+    }
+
+    async pluginStorageSet(sessionId: string, pluginId: string, key: string, value: string): Promise<RpcCommandResponse> {
+        return await this.sessionRpc(sessionId, RPC_METHODS.PluginStorageSet, { pluginId, key, value }) as RpcCommandResponse
+    }
+
+    async pluginStorageDelete(sessionId: string, pluginId: string, key: string): Promise<RpcCommandResponse> {
+        return await this.sessionRpc(sessionId, RPC_METHODS.PluginStorageDelete, { pluginId, key }) as RpcCommandResponse
+    }
+
+    async pluginStorageList(sessionId: string, pluginId: string, prefix?: string): Promise<RpcCommandResponse> {
+        return await this.sessionRpc(sessionId, RPC_METHODS.PluginStorageList, { pluginId, prefix }) as RpcCommandResponse
+    }
+
+    // Skill management
+    async skillSearch(sessionId: string, query: string, limit?: number): Promise<RpcCommandResponse> {
+        return await this.sessionRpc(sessionId, RPC_METHODS.SkillSearch, { query, limit }) as RpcCommandResponse
+    }
+
+    async skillInstall(sessionId: string, options: { name: string; repo: string; path?: string }): Promise<RpcCommandResponse> {
+        return await this.sessionRpc(sessionId, RPC_METHODS.SkillInstall, options) as RpcCommandResponse
+    }
+
+    async skillUninstall(sessionId: string, name: string): Promise<RpcCommandResponse> {
+        return await this.sessionRpc(sessionId, RPC_METHODS.SkillUninstall, { name }) as RpcCommandResponse
+    }
+
     async listCodexModelsForSession(sessionId: string): Promise<RpcListCodexModelsResponse> {
         return await this.sessionRpc(sessionId, RPC_METHODS.ListCodexModels, {}, MODEL_LIST_RPC_TIMEOUT_MS) as RpcListCodexModelsResponse
     }

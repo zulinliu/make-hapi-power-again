@@ -40,6 +40,7 @@ import FilesPage from '@/routes/sessions/files'
 import FilePage from '@/routes/sessions/file'
 import TerminalPage from '@/routes/sessions/terminal'
 import GitPage from '@/routes/sessions/git'
+import ExtensionsPage from '@/routes/sessions/extensions'
 import SettingsPage from '@/routes/settings'
 
 function BackIcon(props: { className?: string }) {
@@ -702,6 +703,12 @@ const sessionGitRoute = createRoute({
     component: GitPage,
 })
 
+const sessionExtensionsRoute = createRoute({
+    getParentRoute: () => sessionDetailRoute,
+    path: 'extensions',
+    component: ExtensionsPage,
+})
+
 const settingsRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: '/settings',
@@ -718,6 +725,7 @@ export const routeTree = rootRoute.addChildren([
             sessionTerminalRoute,
             sessionFilesRoute,
             sessionFileRoute,
+            sessionExtensionsRoute,
         ]),
     ]),
     browseRoute,
