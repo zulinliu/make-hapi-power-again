@@ -44,6 +44,9 @@ import ExtensionsPage from '@/routes/sessions/extensions'
 import ChangesPage from '@/routes/sessions/changes'
 import TimelinePage from '@/routes/sessions/timeline'
 import UndoPage from '@/routes/sessions/undo'
+import MobileChangesPage from '@/routes/mobile/changes'
+import MobileTerminalPage from '@/routes/mobile/terminal'
+import ShareViewPage from '@/routes/share'
 import SettingsPage from '@/routes/settings'
 
 function BackIcon(props: { className?: string }) {
@@ -730,6 +733,34 @@ const sessionUndoRoute = createRoute({
     component: UndoPage,
 })
 
+const mobileRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/m',
+})
+
+const mobileSessionRoute = createRoute({
+    getParentRoute: () => mobileRoute,
+    path: '$sessionId',
+})
+
+const mobileChangesRoute = createRoute({
+    getParentRoute: () => mobileSessionRoute,
+    path: 'changes',
+    component: MobileChangesPage,
+})
+
+const mobileTerminalRoute = createRoute({
+    getParentRoute: () => mobileSessionRoute,
+    path: 'terminal',
+    component: MobileTerminalPage,
+})
+
+const shareViewRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/s/$shareId',
+    component: ShareViewPage,
+})
+
 const settingsRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: '/settings',
@@ -754,6 +785,13 @@ export const routeTree = rootRoute.addChildren([
     ]),
     browseRoute,
     settingsRoute,
+    mobileRoute.addChildren([
+        mobileSessionRoute.addChildren([
+            mobileChangesRoute,
+            mobileTerminalRoute,
+        ]),
+    ]),
+    shareViewRoute,
 ])
 
 type RouterHistory = Parameters<typeof createRouter>[0]['history']
