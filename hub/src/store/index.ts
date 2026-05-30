@@ -23,13 +23,15 @@ export { PushStore } from './pushStore'
 export { SessionStore } from './sessionStore'
 export { UserStore } from './userStore'
 
-const SCHEMA_VERSION: number = 9
+const SCHEMA_VERSION: number = 10
 const REQUIRED_TABLES = [
     'sessions',
     'machines',
     'messages',
     'users',
-    'push_subscriptions'
+    'push_subscriptions',
+    'plugins',
+    'file_snapshots',
 ] as const
 
 export class Store {
@@ -114,6 +116,7 @@ export class Store {
             6: () => this.migrateFromV6ToV7(),
             7: () => this.migrateFromV7ToV8(),
             8: () => this.migrateFromV8ToV9(),
+            9: () => this.migrateFromV9ToV10(),
         })
 
         if (currentVersion === 0) {
@@ -241,6 +244,36 @@ export class Store {
                 UNIQUE(namespace, endpoint)
             );
             CREATE INDEX IF NOT EXISTS idx_push_subscriptions_namespace ON push_subscriptions(namespace);
+
+            CREATE TABLE IF NOT EXISTS plugins (
+                id TEXT PRIMARY KEY,
+                namespace TEXT NOT NULL DEFAULT 'default',
+                name TEXT NOT NULL,
+                version TEXT NOT NULL,
+                description TEXT,
+                enabled INTEGER DEFAULT 1,
+                config TEXT,
+                source_url TEXT,
+                source_type TEXT DEFAULT 'blob',
+                permissions TEXT,
+                created_at INTEGER NOT NULL,
+                updated_at INTEGER NOT NULL,
+                UNIQUE(namespace, name)
+            );
+            CREATE INDEX IF NOT EXISTS idx_plugins_namespace ON plugins(namespace);
+
+            CREATE TABLE IF NOT EXISTS file_snapshots (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                session_id TEXT NOT NULL,
+                namespace TEXT NOT NULL DEFAULT 'default',
+                file_path TEXT NOT NULL,
+                content_hash TEXT NOT NULL,
+                snapshot_type TEXT NOT NULL DEFAULT 'auto',
+                created_at INTEGER NOT NULL,
+                FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE
+            );
+            CREATE INDEX IF NOT EXISTS idx_file_snapshots_session ON file_snapshots(session_id, file_path);
+            CREATE INDEX IF NOT EXISTS idx_file_snapshots_hash ON file_snapshots(content_hash);
         `)
     }
 
@@ -401,18 +434,49 @@ export class Store {
     private migrateFromV8ToV9(): void {
         const columns = this.getMessageColumnNames()
         if (columns.size === 0) {
-            // No messages table yet — createSchema will build the up-to-date one.
             return
         }
         if (!columns.has('scheduled_at')) {
             this.db.exec('ALTER TABLE messages ADD COLUMN scheduled_at INTEGER')
         }
-        // Partial index for efficient mature scheduled message lookup.
-        // Idempotent via IF NOT EXISTS.
         this.db.exec(`
             CREATE INDEX IF NOT EXISTS idx_messages_scheduled_pending
                 ON messages(scheduled_at)
                 WHERE scheduled_at IS NOT NULL AND invoked_at IS NULL
+        `)
+    }
+
+    private migrateFromV9ToV10(): void {
+        this.db.exec(`
+            CREATE TABLE IF NOT EXISTS plugins (
+                id TEXT PRIMARY KEY,
+                namespace TEXT NOT NULL DEFAULT 'default',
+                name TEXT NOT NULL,
+                version TEXT NOT NULL,
+                description TEXT,
+                enabled INTEGER DEFAULT 1,
+                config TEXT,
+                source_url TEXT,
+                source_type TEXT DEFAULT 'blob',
+                permissions TEXT,
+                created_at INTEGER NOT NULL,
+                updated_at INTEGER NOT NULL,
+                UNIQUE(namespace, name)
+            );
+            CREATE INDEX IF NOT EXISTS idx_plugins_namespace ON plugins(namespace);
+
+            CREATE TABLE IF NOT EXISTS file_snapshots (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                session_id TEXT NOT NULL,
+                namespace TEXT NOT NULL DEFAULT 'default',
+                file_path TEXT NOT NULL,
+                content_hash TEXT NOT NULL,
+                snapshot_type TEXT NOT NULL DEFAULT 'auto',
+                created_at INTEGER NOT NULL,
+                FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE
+            );
+            CREATE INDEX IF NOT EXISTS idx_file_snapshots_session ON file_snapshots(session_id, file_path);
+            CREATE INDEX IF NOT EXISTS idx_file_snapshots_hash ON file_snapshots(content_hash);
         `)
     }
 
