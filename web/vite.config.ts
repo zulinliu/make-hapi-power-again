@@ -86,8 +86,8 @@ export default defineConfig({
                 name: 'HAPI',
                 short_name: 'HAPI',
                 description: 'AI-powered development assistant',
-                theme_color: '#ffffff',
-                background_color: '#ffffff',
+                theme_color: '#0A0A0B',
+                background_color: '#0A0A0B',
                 display: 'standalone',
                 orientation: 'portrait',
                 scope: base,
@@ -114,7 +114,8 @@ export default defineConfig({
                 ]
             },
             injectManifest: {
-                globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}']
+                globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+                maximumFileSizeToCacheInBytes: 4 * 1024 * 1024
             },
             devOptions: {
                 enabled: true,
