@@ -7,7 +7,7 @@
 ## Phases
 
 - [x] **Phase D1: 核心文档重写** — README.md + AGENTS.md
-- [ ] **Phase D2: 安全与贡献指南** — SECURITY.md + CONTRIBUTING.md
+- [x] **Phase D2: 安全与贡献指南** — SECURITY.md + CONTRIBUTING.md
 - [ ] **Phase D3: 模块文档重写** — hub/README.md + web/README.md + cli/README.md
 - [ ] **Phase D4: 最终审查与推送** — 全文档一致性检查 + 最终 commit
 
@@ -51,7 +51,7 @@
 | Phase | Status | Completed |
 |-------|--------|-----------|
 | D1. 核心文档 | Done | 2026-05-30 |
-| D2. 安全与贡献 | Not started | - |
+| D2. 安全与贡献 | Done | 2026-05-30 |
 | D3. 模块文档 | Not started | - |
 | D4. 最终审查 | Not started | - |
 
