@@ -3,7 +3,26 @@
  * 供 Hono 路由使用，验证请求中的文件路径参数
  */
 import type { Context, Next } from 'hono'
-import { sanitizePath } from '../../cli/src/modules/common/pathSecurity'
+
+function sanitizePath(input: string): string {
+  let path = input
+  let prev = ''
+  let iterations = 0
+  while (prev !== path && iterations < 5) {
+    prev = path
+    try {
+      path = decodeURIComponent(path)
+    } catch {
+      break
+    }
+    iterations++
+  }
+  path = path.replace(/\0/g, '')
+  if (typeof path.normalize === 'function') {
+    path = path.normalize('NFC')
+  }
+  return path
+}
 
 interface PathSecurityOptions {
   paramName?: string

@@ -21,6 +21,16 @@ const generatedImageSchema = z.object({
     imageId: z.string().min(1)
 })
 
+const branchActionSchema = z.object({
+    name: z.string().min(1).regex(/^[\w.\-\/]+$/, 'Invalid branch name'),
+    action: z.enum(['switch', 'delete']).optional()
+})
+
+const commitSchema = z.object({
+    message: z.string().min(1).max(5000).regex(/^[^\0]*$/, 'Message contains null bytes'),
+    paths: z.array(z.string().refine(p => !p.startsWith('-'), 'Path must not start with -')).optional()
+})
+
 function parseBooleanParam(value: string | undefined): boolean | undefined {
     if (value === 'true') return true
     if (value === 'false') return false
@@ -105,6 +115,113 @@ export function createGitRoutes(getSyncEngine: () => SyncEngine | null): Hono<We
             cwd: sessionPath,
             filePath: parsed.data.path,
             staged
+        }))
+        return c.json(result)
+    })
+
+    app.get('/sessions/:id/git-log', async (c) => {
+        const engine = requireSyncEngine(c, getSyncEngine)
+        if (engine instanceof Response) {
+            return engine
+        }
+
+        const sessionResult = requireSessionFromParam(c, engine)
+        if (sessionResult instanceof Response) {
+            return sessionResult
+        }
+
+        const sessionPath = sessionResult.session.metadata?.path
+        if (!sessionPath) {
+            return c.json({ success: false, error: 'Session path not available' })
+        }
+
+        const maxCount = Math.min(Math.max(parseInt(c.req.query('maxCount') ?? '50', 10) || 50, 1), 500)
+        const result = await runRpc(() => engine.getGitLog(sessionResult.sessionId, { cwd: sessionPath, maxCount }))
+        return c.json(result)
+    })
+
+    app.get('/sessions/:id/git-branches', async (c) => {
+        const engine = requireSyncEngine(c, getSyncEngine)
+        if (engine instanceof Response) {
+            return engine
+        }
+
+        const sessionResult = requireSessionFromParam(c, engine)
+        if (sessionResult instanceof Response) {
+            return sessionResult
+        }
+
+        const sessionPath = sessionResult.session.metadata?.path
+        if (!sessionPath) {
+            return c.json({ success: false, error: 'Session path not available' })
+        }
+
+        const result = await runRpc(() => engine.getGitBranchList(sessionResult.sessionId, sessionPath))
+        return c.json(result)
+    })
+
+    app.post('/sessions/:id/git-branches', async (c) => {
+        const engine = requireSyncEngine(c, getSyncEngine)
+        if (engine instanceof Response) {
+            return engine
+        }
+
+        const sessionResult = requireSessionFromParam(c, engine)
+        if (sessionResult instanceof Response) {
+            return sessionResult
+        }
+
+        const sessionPath = sessionResult.session.metadata?.path
+        if (!sessionPath) {
+            return c.json({ success: false, error: 'Session path not available' })
+        }
+
+        const parsed = branchActionSchema.safeParse(await c.req.json())
+        if (!parsed.success) {
+            return c.json({ error: 'Invalid request', details: parsed.error.flatten() }, 400)
+        }
+
+        const { name, action } = parsed.data
+
+        if (action === 'switch') {
+            const result = await runRpc(() => engine.switchGitBranch(sessionResult.sessionId, { cwd: sessionPath, name }))
+            return c.json(result)
+        }
+
+        if (action === 'delete') {
+            const result = await runRpc(() => engine.deleteGitBranch(sessionResult.sessionId, { cwd: sessionPath, name }))
+            return c.json(result)
+        }
+
+        const result = await runRpc(() => engine.createGitBranch(sessionResult.sessionId, { cwd: sessionPath, name }))
+        return c.json(result)
+    })
+
+    app.post('/sessions/:id/git-commit', async (c) => {
+        const engine = requireSyncEngine(c, getSyncEngine)
+        if (engine instanceof Response) {
+            return engine
+        }
+
+        const sessionResult = requireSessionFromParam(c, engine)
+        if (sessionResult instanceof Response) {
+            return sessionResult
+        }
+
+        const sessionPath = sessionResult.session.metadata?.path
+        if (!sessionPath) {
+            return c.json({ success: false, error: 'Session path not available' })
+        }
+
+        const parsed = commitSchema.safeParse(await c.req.json())
+        if (!parsed.success) {
+            return c.json({ error: 'Invalid request', details: parsed.error.flatten() }, 400)
+        }
+
+        const result = await runRpc(() => engine.createGitCommit(sessionResult.sessionId, {
+            cwd: sessionPath,
+            message: parsed.data.message,
+            paths: parsed.data.paths
         }))
         return c.json(result)
     })

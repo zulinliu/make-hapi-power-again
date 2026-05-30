@@ -5,9 +5,8 @@
 
 type EventHandler<T = unknown> = (payload: T) => void
 
-interface EventMap {
-  [key: string]: unknown
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+interface EventMap extends Record<string, unknown> {}
 
 export class EventBus<TEvents extends EventMap = EventMap> {
   private handlers = new Map<keyof TEvents, Set<EventHandler>>()
@@ -59,7 +58,8 @@ export class EventBus<TEvents extends EventMap = EventMap> {
 }
 
 /** Hapi Power 全局事件定义 */
-export interface HapiPowerEvents {
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface HapiPowerEvents extends Record<string, unknown> {
   'git:status-changed': { sessionId: string; namespace: string; branch: string; dirty: boolean }
   'git:commit-created': { sessionId: string; namespace: string; sha: string; message: string }
   'pty:session-created': { sessionId: string; namespace: string; pid: number; cols: number; rows: number }

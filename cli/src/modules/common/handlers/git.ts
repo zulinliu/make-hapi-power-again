@@ -258,7 +258,11 @@ export function registerGitHandlers(rpcHandlerManager: RpcHandlerManager, workin
         const resolved = resolveCwd(data.cwd, workingDirectory)
         if (resolved.error) return rpcError(resolved.error)
         if (!data.paths?.length) return rpcError('No paths specified')
-        return await runGitCommand(['add', ...data.paths], resolved.cwd, data.timeout)
+        // Validate paths don't start with - to prevent argument injection
+        for (const p of data.paths) {
+            if (p.startsWith('-')) return rpcError(`Invalid path: ${p}`)
+        }
+        return await runGitCommand(['add', '--', ...data.paths], resolved.cwd, data.timeout)
     })
 
     // Git Auto Commit (add + commit in one step, for GitInternalAPI)
@@ -269,7 +273,11 @@ export function registerGitHandlers(rpcHandlerManager: RpcHandlerManager, workin
 
         // Add specific paths or all tracked changes
         if (data.paths?.length) {
-            const addResult = await runGitCommand(['add', ...data.paths], resolved.cwd, data.timeout)
+            // Validate paths don't start with - to prevent argument injection
+            for (const p of data.paths) {
+                if (p.startsWith('-')) return rpcError(`Invalid path: ${p}`)
+            }
+            const addResult = await runGitCommand(['add', '--', ...data.paths], resolved.cwd, data.timeout)
             if (!addResult.success) return addResult
         } else {
             const addResult = await runGitCommand(['add', '-u'], resolved.cwd, data.timeout)

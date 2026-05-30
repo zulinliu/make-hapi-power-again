@@ -13,7 +13,7 @@ export default function GitPage() {
   const { sessionId } = useParams({ from: '/sessions/$sessionId/git' })
   const navigate = useNavigate()
   const { api } = useAppContext()
-  const { data: session, isLoading } = useSession(api, sessionId)
+  const { session, isLoading } = useSession(api, sessionId)
   const [activeTab, setActiveTab] = useState<Tab>('status')
 
   if (isLoading) return <LoadingState label="Loading..." />
@@ -26,8 +26,6 @@ export default function GitPage() {
     )
   }
 
-  const cwd = session.machine_id || ''
-
   const tabs: { id: Tab; label: string }[] = [
     { id: 'status', label: 'Status' },
     { id: 'history', label: 'History' },
@@ -36,7 +34,6 @@ export default function GitPage() {
 
   return (
     <div className="h-full flex flex-col" style={{ background: 'var(--hp-surface-0)' }}>
-      {/* Header */}
       <div className="flex items-center gap-3 px-4 h-12 border-b shrink-0" style={{ borderColor: 'var(--hp-border)' }}>
         <button onClick={() => navigate({ to: '/sessions/$sessionId', params: { sessionId } })}
           className="text-sm" style={{ color: 'var(--hp-text-tertiary)' }}>←</button>
@@ -44,7 +41,6 @@ export default function GitPage() {
         <span className="text-xs font-mono" style={{ color: 'var(--hp-text-tertiary)' }}>{sessionId.slice(0, 8)}</span>
       </div>
 
-      {/* Tabs */}
       <div className="flex border-b shrink-0" style={{ borderColor: 'var(--hp-border)' }}>
         {tabs.map((tab) => (
           <button
@@ -62,11 +58,10 @@ export default function GitPage() {
         ))}
       </div>
 
-      {/* Content */}
       <div className="flex-1 overflow-y-auto">
-        {activeTab === 'status' && <GitStatusPanel cwd={cwd} />}
-        {activeTab === 'history' && <GitHistory cwd={cwd} />}
-        {activeTab === 'branches' && <GitBranchManager cwd={cwd} />}
+        {activeTab === 'status' && <GitStatusPanel sessionId={sessionId} />}
+        {activeTab === 'history' && <GitHistory sessionId={sessionId} />}
+        {activeTab === 'branches' && <GitBranchManager sessionId={sessionId} />}
       </div>
     </div>
   )
