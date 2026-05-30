@@ -123,45 +123,55 @@ bun run dev:hub
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| GET | `/api/plugins` | 列出插件 |
-| POST | `/api/plugins/:id/activate` | 激活插件 |
-| POST | `/api/plugins/:id/deactivate` | 停用插件 |
+| GET | `/api/sessions/:id/plugins` | 列出会话插件 |
+| POST | `/api/sessions/:id/plugins/install` | 安装插件 |
+| DELETE | `/api/sessions/:id/plugins/:pluginId` | 卸载插件 |
+| GET | `/api/sessions/:id/plugins/:pluginId/storage` | 获取插件存储 |
+| POST | `/api/sessions/:id/plugins/:pluginId/storage` | 设置插件存储 |
+| DELETE | `/api/sessions/:id/plugins/:pluginId/storage/:key` | 删除插件存储 |
 
 ### Skill 管理 (`src/web/routes/skillManagement.ts`)
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| GET | `/api/skills/search` | 搜索 Skills |
-| POST | `/api/skills/install` | 安装 Skill |
-| DELETE | `/api/skills/:name` | 卸载 Skill |
+| GET | `/api/sessions/:id/skills/search` | 搜索 Skills（skills.sh） |
+| POST | `/api/sessions/:id/skills/install` | 安装 Skill |
+| DELETE | `/api/sessions/:id/skills/:name` | 卸载 Skill |
 
 ### 变更追踪 (`src/web/routes/changeTracking.ts`)
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| GET | `/api/sessions/:id/changes` | 获取文件变更列表 |
-| POST | `/api/sessions/:id/changes/approve` | 批量批准变更 |
-| POST | `/api/sessions/:id/changes/reject` | 批量拒绝变更 |
+| GET | `/api/sessions/:id/changes` | 获取文件变更列表（按组） |
+| POST | `/api/sessions/:id/changes/:changeId/review` | 审查单条变更 |
+| POST | `/api/sessions/:id/changes/bulk-review` | 批量审查变更 |
+| GET | `/api/sessions/:id/context` | 获取上下文状态 |
 
 ### 时间线 (`src/web/routes/timeline.ts`)
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
 | GET | `/api/sessions/:id/timeline` | 获取操作时间线 |
+| GET | `/api/sessions/:id/summaries` | 获取会话摘要 |
+| POST | `/api/sessions/:id/checkpoints` | 创建检查点 |
+| GET | `/api/sessions/:id/checkpoints` | 获取检查点列表 |
 
 ### 撤销 (`src/web/routes/undo.ts`)
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| POST | `/api/sessions/:id/undo` | 撤销变更 |
-| GET | `/api/sessions/:id/undo/preview` | 撤销影响预览 |
+| POST | `/api/sessions/:id/undo/preview` | 撤销影响预览 |
+| POST | `/api/sessions/:id/undo/execute` | 执行撤销 |
+| GET | `/api/sessions/:id/snapshots` | 获取快照列表 |
 
 ### 分享 (`src/web/routes/share.ts`)
 
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| POST | `/api/share` | 创建分享链接 |
-| GET | `/api/share/:token` | 获取分享内容 |
+| 方法 | 路径 | 认证 | 说明 |
+|------|------|------|------|
+| POST | `/api/sessions/:id/shares` | 需要 | 创建分享链接 |
+| GET | `/api/sessions/:id/shares` | 需要 | 列出分享 |
+| DELETE | `/api/shares/:shareId` | 需要 | 删除分享 |
+| GET | `/api/s/:shareId` | 无 | 公开访问分享内容 |
 
 ### 推送通知 (`src/web/routes/push.ts`)
 

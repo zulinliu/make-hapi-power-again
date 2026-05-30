@@ -39,9 +39,12 @@ React 19 + Vite + TanStack Router + TanStack Query + Tailwind CSS + Monaco Edito
 | `/sessions/$sessionId/timeline` | 操作时间线 | `TimelinePage` |
 | `/sessions/$sessionId/undo` | 撤销变更 | `UndoPage` |
 | `/settings` | 应用设置 | `SettingsPage` |
+| `/browse` | 工作区浏览 | `BrowsePage` |
 | `/extensions` | 扩展管理 | `ExtensionsPage` |
+| `/sessions/$sessionId/git` | Git 管理 | `GitPage` |
+| `/sessions/$sessionId/extensions` | 会话扩展 | `ExtensionsPage` |
 | `/orchestration` | 编排 Skill | `OrchestrationPage` |
-| `/share/$token` | 分享查看 | `SharePage` |
+| `/s/$shareId` | 分享查看 | `ShareViewPage` |
 | `/m/*` | 移动端路由 | `mobile/` |
 
 ## 认证
