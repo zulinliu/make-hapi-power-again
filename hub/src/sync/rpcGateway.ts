@@ -194,6 +194,30 @@ export class RpcGateway {
         return await this.sessionRpc(sessionId, RPC_METHODS.GitDiffFile, options) as RpcCommandResponse
     }
 
+    async getGitLog(sessionId: string, options: { cwd?: string; maxCount?: number }): Promise<RpcCommandResponse> {
+        return await this.sessionRpc(sessionId, RPC_METHODS.GitLog, options) as RpcCommandResponse
+    }
+
+    async getGitBranchList(sessionId: string, cwd?: string): Promise<RpcCommandResponse> {
+        return await this.sessionRpc(sessionId, RPC_METHODS.GitBranchList, { cwd }) as RpcCommandResponse
+    }
+
+    async createGitBranch(sessionId: string, options: { cwd?: string; name: string }): Promise<RpcCommandResponse> {
+        return await this.sessionRpc(sessionId, RPC_METHODS.GitBranchCreate, options) as RpcCommandResponse
+    }
+
+    async switchGitBranch(sessionId: string, options: { cwd?: string; name: string }): Promise<RpcCommandResponse> {
+        return await this.sessionRpc(sessionId, RPC_METHODS.GitBranchSwitch, options) as RpcCommandResponse
+    }
+
+    async deleteGitBranch(sessionId: string, options: { cwd?: string; name: string }): Promise<RpcCommandResponse> {
+        return await this.sessionRpc(sessionId, RPC_METHODS.GitBranchDelete, options) as RpcCommandResponse
+    }
+
+    async createGitCommit(sessionId: string, options: { cwd?: string; message: string; paths?: string[] }): Promise<RpcCommandResponse> {
+        return await this.sessionRpc(sessionId, RPC_METHODS.GitCommit, options) as RpcCommandResponse
+    }
+
     async readSessionFile(sessionId: string, path: string): Promise<RpcReadFileResponse> {
         return await this.sessionRpc(sessionId, RPC_METHODS.ReadFile, { path }) as RpcReadFileResponse
     }

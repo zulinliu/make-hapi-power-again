@@ -4,7 +4,6 @@ import { useAppContext } from '@/lib/app-context'
 interface GitFile {
   status: string
   path: string
-  originalPath?: string
 }
 
 interface StatusData {
@@ -12,10 +11,9 @@ interface StatusData {
   ahead: number
   behind: number
   files: GitFile[]
-  raw: string
 }
 
-export function GitStatusPanel({ cwd }: { cwd: string }) {
+export function GitStatusPanel({ sessionId }: { sessionId: string }) {
   const { api } = useAppContext()
   const [status, setStatus] = useState<StatusData | null>(null)
   const [loading, setLoading] = useState(false)
@@ -26,18 +24,18 @@ export function GitStatusPanel({ cwd }: { cwd: string }) {
     setLoading(true)
     setError(null)
     try {
-      const res = await api.gitStatus({ cwd })
-      if (res.success) {
+      const res = await api.getGitStatus(sessionId)
+      if (res.success && res.stdout) {
         setStatus(parseGitStatus(res.stdout))
       } else {
-        setError(res.stderr || 'Git status failed')
+        setError(res.error || 'Git status failed')
       }
-    } catch (e: any) {
-      setError(e.message)
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : String(e))
     } finally {
       setLoading(false)
     }
-  }, [api, cwd])
+  }, [api, sessionId])
 
   useEffect(() => { refresh() }, [refresh])
 
@@ -58,7 +56,6 @@ export function GitStatusPanel({ cwd }: { cwd: string }) {
 
   return (
     <div className="p-4 space-y-3">
-      {/* Branch + Sync Status */}
       <div className="flex items-center gap-2">
         <span className="text-xs font-mono px-2 py-0.5 rounded" style={{ background: 'var(--hp-primary-subtle)', color: 'var(--hp-primary)' }}>
           {status.branch}
@@ -72,7 +69,6 @@ export function GitStatusPanel({ cwd }: { cwd: string }) {
         <button onClick={refresh} className="ml-auto text-xs" style={{ color: 'var(--hp-text-tertiary)' }} title="Refresh">↻</button>
       </div>
 
-      {/* Changed Files */}
       {status.files.length === 0 ? (
         <p className="text-sm" style={{ color: 'var(--hp-text-tertiary)' }}>Working tree clean</p>
       ) : (
@@ -150,5 +146,5 @@ function parseGitStatus(raw: string): StatusData {
     }
   }
 
-  return { branch, ahead, behind, files, raw }
+  return { branch, ahead, behind, files }
 }

@@ -888,6 +888,30 @@ export class SyncEngine {
         return await this.rpcGateway.getGitDiffFile(sessionId, options)
     }
 
+    async getGitLog(sessionId: string, options: { cwd?: string; maxCount?: number }): Promise<RpcCommandResponse> {
+        return await this.rpcGateway.getGitLog(sessionId, options)
+    }
+
+    async getGitBranchList(sessionId: string, cwd?: string): Promise<RpcCommandResponse> {
+        return await this.rpcGateway.getGitBranchList(sessionId, cwd)
+    }
+
+    async createGitBranch(sessionId: string, options: { cwd?: string; name: string }): Promise<RpcCommandResponse> {
+        return await this.rpcGateway.createGitBranch(sessionId, options)
+    }
+
+    async switchGitBranch(sessionId: string, options: { cwd?: string; name: string }): Promise<RpcCommandResponse> {
+        return await this.rpcGateway.switchGitBranch(sessionId, options)
+    }
+
+    async deleteGitBranch(sessionId: string, options: { cwd?: string; name: string }): Promise<RpcCommandResponse> {
+        return await this.rpcGateway.deleteGitBranch(sessionId, options)
+    }
+
+    async createGitCommit(sessionId: string, options: { cwd?: string; message: string; paths?: string[] }): Promise<RpcCommandResponse> {
+        return await this.rpcGateway.createGitCommit(sessionId, options)
+    }
+
     async readSessionFile(sessionId: string, path: string): Promise<RpcReadFileResponse> {
         return await this.rpcGateway.readSessionFile(sessionId, path)
     }

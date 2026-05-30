@@ -5,10 +5,9 @@ interface Branch {
   name: string
   isCurrent: boolean
   isRemote: boolean
-  lastCommit: string
 }
 
-export function GitBranchManager({ cwd }: { cwd: string }) {
+export function GitBranchManager({ sessionId }: { sessionId: string }) {
   const { api } = useAppContext()
   const [branches, setBranches] = useState<Branch[]>([])
   const [loading, setLoading] = useState(false)
@@ -20,59 +19,66 @@ export function GitBranchManager({ cwd }: { cwd: string }) {
     setLoading(true)
     setError(null)
     try {
-      const res = await api.gitBranchList?.({ cwd })
-      if (res && res.success) {
+      const res = await api.getGitBranchList(sessionId)
+      if (res.success && res.stdout) {
         setBranches(parseBranches(res.stdout))
       } else {
-        setError(res?.stderr || 'Failed to load branches')
+        setError(res.error || 'Failed to load branches')
       }
-    } catch (e: any) {
-      setError(e.message)
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : String(e))
     } finally {
       setLoading(false)
     }
-  }, [api, cwd])
+  }, [api, sessionId])
 
   useEffect(() => { loadBranches() }, [loadBranches])
 
   const handleCreate = async () => {
     if (!api || !newBranchName.trim()) return
     try {
-      const res = await api.gitBranchCreate?.({ cwd, name: newBranchName.trim() })
-      if (res && res.success) {
+      const res = await api.createGitBranch(sessionId, newBranchName.trim())
+      if (res.success) {
         setNewBranchName('')
         loadBranches()
       } else {
-        setError(res?.stderr || 'Failed to create branch')
+        setError(res.error || 'Failed to create branch')
       }
-    } catch (e: any) {
-      setError(e.message)
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : String(e))
     }
   }
 
   const handleSwitch = async (name: string) => {
     if (!api) return
     try {
-      await api.gitBranchSwitch?.({ cwd, name })
-      loadBranches()
-    } catch (e: any) {
-      setError(e.message)
+      const res = await api.switchGitBranch(sessionId, name)
+      if (res.success) {
+        loadBranches()
+      } else {
+        setError(res.error || 'Failed to switch branch')
+      }
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : String(e))
     }
   }
 
   const handleDelete = async (name: string) => {
     if (!api) return
     try {
-      await api.gitBranchDelete?.({ cwd, name })
-      loadBranches()
-    } catch (e: any) {
-      setError(e.message)
+      const res = await api.deleteGitBranch(sessionId, name)
+      if (res.success) {
+        loadBranches()
+      } else {
+        setError(res.error || 'Failed to delete branch')
+      }
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : String(e))
     }
   }
 
   return (
     <div className="p-4 space-y-3">
-      {/* Create Branch */}
       <div className="flex gap-2">
         <input
           type="text"
@@ -103,7 +109,6 @@ export function GitBranchManager({ cwd }: { cwd: string }) {
 
       {error && <p className="text-xs" style={{ color: 'var(--hp-danger)' }}>{error}</p>}
 
-      {/* Branch List */}
       {loading ? (
         <p className="text-sm" style={{ color: 'var(--hp-text-tertiary)' }}>Loading...</p>
       ) : (
@@ -143,7 +148,6 @@ function parseBranches(raw: string): Branch[] {
     const isCurrent = line.startsWith('*')
     const isRemote = line.includes('remotes/')
     const cleanName = line.replace(/^\*?\s+/, '').split(/\s+/)[0]
-    const lastCommit = line.replace(/^\*?\s+\S+\s+/, '')
-    return { name: cleanName, isCurrent, isRemote, lastCommit }
+    return { name: cleanName, isCurrent, isRemote }
   })
 }
