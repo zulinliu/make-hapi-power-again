@@ -25,6 +25,9 @@ import { HappyThread } from '@/components/AssistantChat/HappyThread'
 import { QueuedMessagesBar } from '@/components/AssistantChat/QueuedMessagesBar'
 import { useHappyRuntime } from '@/lib/assistant-runtime'
 import { createAttachmentAdapter } from '@/lib/attachmentAdapter'
+import { ImagePasteDrop } from '@/components/ImagePasteDrop'
+import { Whiteboard } from '@/components/Whiteboard'
+import { useBinaryUpload } from '@/hooks/useBinaryUpload'
 import { useTranslation } from '@/lib/use-translation'
 import { SessionHeader } from '@/components/SessionHeader'
 import { TeamPanel } from '@/components/TeamPanel'
@@ -131,6 +134,8 @@ export function SessionChat(props: {
     const visibleGroupsRef = useRef<ToolGroupBlock[]>([])
     const [forceScrollToken, setForceScrollToken] = useState(0)
     const [outlineOpen, setOutlineOpen] = useState(false)
+    const [whiteboardOpen, setWhiteboardOpen] = useState(false)
+    const { uploadBinaryFile } = useBinaryUpload()
     const agentFlavor = props.session.metadata?.flavor ?? null
     const controlledByUser = props.session.agentState?.controlledByUser === true
     const codexCollaborationModeSupported = agentFlavor === 'codex' && !controlledByUser
@@ -573,6 +578,7 @@ export function SessionChat(props: {
                 onViewChanges={handleViewChanges}
                 onViewTimeline={handleViewTimeline}
                 onViewUndo={handleViewUndo}
+                onWhiteboard={() => setWhiteboardOpen(true)}
                 api={props.api}
                 onSessionDeleted={props.onBack}
             />
@@ -590,6 +596,19 @@ export function SessionChat(props: {
             ) : null}
 
             <AssistantRuntimeProvider runtime={runtime}>
+                <ImagePasteDrop
+                    sessionId={props.session.id}
+                    onImageUploaded={(file, path) => {
+                        const metadata: AttachmentMetadata = {
+                            id: `img-${Date.now()}`,
+                            filename: file.name,
+                            mimeType: file.type || 'image/png',
+                            size: file.size,
+                            path,
+                        }
+                        props.onSend('', [metadata])
+                    }}
+                >
                 <div className="relative flex min-h-0 flex-1 flex-col">
                     <HappyThread
                         key={props.session.id}
@@ -695,8 +714,14 @@ export function SessionChat(props: {
                         voiceMicMuted={voice?.micMuted}
                         onVoiceToggle={voice ? handleVoiceToggle : undefined}
                         onVoiceMicToggle={voice ? handleVoiceMicToggle : undefined}
+                        onVoiceTranscribed={(text: string) => {
+                            if (text.trim()) {
+                                props.onSend(text.trim())
+                            }
+                        }}
                     />
                 </div>
+                </ImagePasteDrop>
             </AssistantRuntimeProvider>
 
             {/* Voice session component - renders nothing but initializes ElevenLabs */}
@@ -705,6 +730,30 @@ export function SessionChat(props: {
                     api={props.api}
                     micMuted={voice.micMuted}
                     onStatusChange={voice.setStatus}
+                />
+            )}
+
+            {whiteboardOpen && (
+                <Whiteboard
+                    onClose={() => setWhiteboardOpen(false)}
+                    onSend={async (dataUrl) => {
+                        setWhiteboardOpen(false)
+                        const res = await fetch(dataUrl)
+                        const blob = await res.blob()
+                        const file = new File([blob], `whiteboard-${Date.now()}.png`, { type: 'image/png' })
+                        const result = await uploadBinaryFile(props.session.id, file)
+                        if (result.success && result.path) {
+                            const metadata: AttachmentMetadata = {
+                                id: `wb-${Date.now()}`,
+                                filename: file.name,
+                                mimeType: 'image/png',
+                                size: file.size,
+                                path: result.path,
+                                previewUrl: dataUrl,
+                            }
+                            props.onSend('白板绘图', [metadata])
+                        }
+                    }}
                 />
             )}
         </div>

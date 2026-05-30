@@ -19,6 +19,8 @@ import { createGitRoutes } from './routes/git'
 import { createCliRoutes } from './routes/cli'
 import { createPushRoutes } from './routes/push'
 import { createVoiceRoutes } from './routes/voice'
+import { createVoiceTranscriptionRoutes } from './routes/voiceTranscription'
+import { createOrchestrationRoutes } from './routes/orchestration'
 import { createPluginsRoutes } from './routes/plugins'
 import { createSkillManagementRoutes } from './routes/skillManagement'
 import { createChangeTrackingRoutes } from './routes/changeTracking'
@@ -114,6 +116,8 @@ function createWebApp(options: {
     app.route('/api', shareRoutes.protected)
     app.route('/api', createPushRoutes(options.store, options.vapidPublicKey))
     app.route('/api', createVoiceRoutes())
+    app.route('/api', createVoiceTranscriptionRoutes())
+    app.route('/api', createOrchestrationRoutes())
 
     // Skip static serving in relay mode, show helpful message on root
     if (options.relayMode) {
