@@ -90,6 +90,9 @@ export function SessionHeader(props: {
     onBack: () => void
     onViewFiles?: () => void
     onOpenOutline?: () => void
+    onViewTimeline?: () => void
+    onViewUndo?: () => void
+    onViewChanges?: () => void
     api: ApiClient | null
     onSessionDeleted?: () => void
 }) {
@@ -197,6 +200,45 @@ export function SessionHeader(props: {
                             aria-label={t('session.outline.open')}
                         >
                             <OutlineIcon />
+                        </button>
+                    ) : null}
+
+                    {props.onViewChanges ? (
+                        <button
+                            type="button"
+                            onClick={props.onViewChanges}
+                            className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--app-hint)] transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]"
+                            title="变更审查"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                            </svg>
+                        </button>
+                    ) : null}
+
+                    {props.onViewTimeline ? (
+                        <button
+                            type="button"
+                            onClick={props.onViewTimeline}
+                            className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--app-hint)] transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]"
+                            title="时间线"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
+                            </svg>
+                        </button>
+                    ) : null}
+
+                    {props.onViewUndo ? (
+                        <button
+                            type="button"
+                            onClick={props.onViewUndo}
+                            className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--app-hint)] transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]"
+                            title="撤销变更"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="1 4 1 10 7 10" /><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+                            </svg>
                         </button>
                     ) : null}
 

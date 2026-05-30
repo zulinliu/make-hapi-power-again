@@ -484,6 +484,27 @@ export function SessionChat(props: {
         })
     }, [navigate, props.session.id])
 
+    const handleViewChanges = useCallback(() => {
+        navigate({
+            to: '/sessions/$sessionId/changes',
+            params: { sessionId: props.session.id }
+        })
+    }, [navigate, props.session.id])
+
+    const handleViewTimeline = useCallback(() => {
+        navigate({
+            to: '/sessions/$sessionId/timeline',
+            params: { sessionId: props.session.id }
+        })
+    }, [navigate, props.session.id])
+
+    const handleViewUndo = useCallback(() => {
+        navigate({
+            to: '/sessions/$sessionId/undo',
+            params: { sessionId: props.session.id }
+        })
+    }, [navigate, props.session.id])
+
     // Scheduled message state — lifted here so useHappyRuntime can read the ref.
     //
     // pendingSchedule holds what the user selected (preset or absolute ms).
@@ -549,6 +570,9 @@ export function SessionChat(props: {
                 onBack={props.onBack}
                 onViewFiles={props.session.metadata?.path ? handleViewFiles : undefined}
                 onOpenOutline={() => setOutlineOpen(true)}
+                onViewChanges={handleViewChanges}
+                onViewTimeline={handleViewTimeline}
+                onViewUndo={handleViewUndo}
                 api={props.api}
                 onSessionDeleted={props.onBack}
             />
