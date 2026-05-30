@@ -38,7 +38,7 @@ function createApp(engineOverrides?: Partial<SyncEngine>) {
     })
 
     const engine = {
-        resolveSessionAccess: () => ({ ok: true, sessionId: 'session-1', session: { id: 'session-1' } }),
+        resolveSessionAccess: () => ({ ok: true as const, sessionId: 'session-1', session: { id: 'session-1', namespace: 'default', seq: 0, createdAt: Date.now(), updatedAt: Date.now(), active: false, activeAt: 0, metadata: null } }),
         pluginList,
         pluginInstall,
         pluginUninstall,
@@ -47,7 +47,7 @@ function createApp(engineOverrides?: Partial<SyncEngine>) {
         pluginStorageDelete,
         pluginStorageList,
         ...engineOverrides,
-    } as Partial<SyncEngine>
+    } as unknown as Partial<SyncEngine>
 
     const getSyncEngine = () => engine as SyncEngine
 
@@ -69,7 +69,7 @@ describe('plugins routes', () => {
             const response = await app.request('/api/sessions/session-1/plugins')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.success).toBe(true)
             expect(body.plugins).toHaveLength(1)
             expect(body.plugins[0].id).toBe('my-plugin')
@@ -101,7 +101,7 @@ describe('plugins routes', () => {
             })
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.success).toBe(true)
             expect(body.plugin.id).toBe('new-plugin')
         })
@@ -120,7 +120,7 @@ describe('plugins routes', () => {
             })
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.success).toBe(true)
         })
 
@@ -134,7 +134,7 @@ describe('plugins routes', () => {
             })
 
             expect(response.status).toBe(400)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.error).toBe('Invalid request')
         })
 
@@ -162,7 +162,7 @@ describe('plugins routes', () => {
             })
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.success).toBe(false)
             expect(body.error).toBe('Install failed')
         })
@@ -177,7 +177,7 @@ describe('plugins routes', () => {
             })
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.success).toBe(true)
         })
 
@@ -189,7 +189,7 @@ describe('plugins routes', () => {
             })
 
             expect(response.status).toBe(400)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.error).toBe('Invalid plugin ID')
         })
     })
@@ -201,7 +201,7 @@ describe('plugins routes', () => {
             const response = await app.request('/api/sessions/session-1/plugins/my-plugin/storage?key=my-key')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.success).toBe(true)
             expect(body.key).toBe('my-key')
             expect(body.value).toBe('value-for-my-key')
@@ -213,7 +213,7 @@ describe('plugins routes', () => {
             const response = await app.request('/api/sessions/session-1/plugins/my-plugin/storage')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.success).toBe(true)
             expect(body.entries).toHaveLength(1)
         })
@@ -224,7 +224,7 @@ describe('plugins routes', () => {
             const response = await app.request('/api/sessions/session-1/plugins/my-plugin/storage?prefix=config.')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.success).toBe(true)
             expect(body.entries[0].key).toBe('config.test-key')
         })
@@ -235,7 +235,7 @@ describe('plugins routes', () => {
             const response = await app.request('/api/sessions/session-1/plugins/BAD%20ID/storage?key=k')
 
             expect(response.status).toBe(400)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.error).toBe('Invalid plugin ID')
         })
     })
@@ -251,7 +251,7 @@ describe('plugins routes', () => {
             })
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.success).toBe(true)
         })
 
@@ -289,7 +289,7 @@ describe('plugins routes', () => {
             })
 
             expect(response.status).toBe(400)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.error).toBe('Invalid plugin ID')
         })
     })
@@ -303,7 +303,7 @@ describe('plugins routes', () => {
             })
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.success).toBe(true)
         })
 
@@ -315,7 +315,7 @@ describe('plugins routes', () => {
             })
 
             expect(response.status).toBe(400)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.error).toBe('Missing key parameter')
         })
 
@@ -327,7 +327,7 @@ describe('plugins routes', () => {
             })
 
             expect(response.status).toBe(400)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.error).toBe('Invalid plugin ID')
         })
     })
