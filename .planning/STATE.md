@@ -5,7 +5,7 @@
 See: .planning/PROJECT.md (updated 2026-05-30)
 
 **Core value:** 让 AI 编码代理拥有完整的开发者环境 — 代码编辑、终端操作、版本控制、插件扩展，全部在浏览器中完成。
-**Current focus:** Phase 0.5 完成，准备进入 Phase 1
+**Current focus:** Phase 1 完成，准备进入 Phase 2 + 3 并行
 
 ## Current State
 
@@ -13,7 +13,7 @@ See: .planning/PROJECT.md (updated 2026-05-30)
 - **Remote**: https://github.com/zulinliu/make-hapi-power-again.git
 - **Codebase**: hapi 上游全量拷贝（995 文件，151,570 行），作为 hapi-power 初始基线
 - **Design Docs**: 9 份设计文档已完成（主设计 + 7 模块 + 评审报告），三轮评审通过
-- **Phase**: Phase 0.5 技术验证完成（32/38 通过，84%）
+- **Phase**: Phase 1 架构基础完成（4/4 plans）
 
 ## What's Done
 
@@ -23,18 +23,17 @@ See: .planning/PROJECT.md (updated 2026-05-30)
 - ✓ 8 项安全发现（N-1~N-8）已修复并穿透
 - ✓ hapi 上游源码全量拷贝到 feat/v1 分支
 - ✓ GSD 项目规划文档创建（PROJECT.md + REQUIREMENTS.md + ROADMAP.md）
-- ✓ Phase 0.5 技术验证完成：
-  - Bun Terminal API: 5/6 通过（核心 PTY 功能正常）
-  - Socket.IO Binary: 4/4 通过（发现 string 比 binary 快 6x）
-  - Resource Limits: 4/4 通过（进程组清理有效）
-  - isomorphic-git: 4/6 通过（核心 Git 操作可用）
-  - Blob URL Import: 7/7 通过（插件系统方案验证）
-  - Path Security: 8/11 通过（3 个漏洞待修复）
+- ✓ Phase 0.5 技术验证完成（32/38 PoC 通过，84%）
+- ✓ Phase 1 架构基础完成：
+  - Plan 01-01: EventBus 泛型事件总线 + ApiResponse<T> 统一信封 + DB V10 迁移
+  - Plan 01-02: Cursor + Linear 融合设计令牌 + Inter/JetBrains Mono 字体
+  - Plan 01-03: sanitizePath 修复 3 个漏洞 + Hub 路径安全中间件 + 日志脱敏
+  - Plan 01-04: Sidebar 统一导航 + Vite 代码分割(Monaco/Mermaid/PDF)
 
 ## What's Next
 
-1. 修复 Path Security 3 个攻击向量（SEC-01）
-2. Phase 1: 架构基础（EventBus、设计系统、安全中间件、代码分割）
+1. Phase 2: Git 管理（可与 Phase 3 并行）
+2. Phase 3: PTY 终端（可与 Phase 2 并行）
 
 ## Key Findings (Phase 0.5)
 
