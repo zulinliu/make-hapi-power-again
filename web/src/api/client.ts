@@ -825,4 +825,50 @@ export class ApiClient {
             }>
         }>(`/api/sessions/${encodeURIComponent(sessionId)}/snapshots${query}`)
     }
+
+    async createShare(sessionId: string, scope: 'full' | 'changes' | 'terminal' | 'readonly', expiresIn?: number | null) {
+        return await this.request<{
+            success: boolean
+            share: {
+                id: string
+                sessionId: string
+                scope: string
+                createdAt: number
+                expiresAt: number | null
+                url: string
+            }
+        }>(`/api/sessions/${encodeURIComponent(sessionId)}/shares`, {
+            method: 'POST',
+            body: JSON.stringify({ scope, expiresIn })
+        })
+    }
+
+    async getShares(sessionId: string) {
+        return await this.request<{
+            success: boolean
+            shares: Array<{
+                id: string
+                sessionId: string
+                scope: string
+                createdAt: number
+                expiresAt: number | null
+                accessCount: number
+                lastAccessedAt: number | null
+            }>
+        }>(`/api/sessions/${encodeURIComponent(sessionId)}/shares`)
+    }
+
+    async deleteShare(shareId: string) {
+        await this.request(`/api/shares/${encodeURIComponent(shareId)}`, {
+            method: 'DELETE'
+        })
+    }
+
+    async accessShare(shareId: string) {
+        return await this.request<{
+            success: boolean
+            share: { id: string; scope: string; createdAt: number; expiresAt: number | null }
+            snapshot: Record<string, unknown>
+        }>(`/api/s/${encodeURIComponent(shareId)}`)
+    }
 }
