@@ -10,6 +10,8 @@ import { registerGitHandlers } from './handlers/git'
 import { registerRipgrepHandlers } from './handlers/ripgrep'
 import { registerSlashCommandHandlers } from './handlers/slashCommands'
 import { registerSkillsHandlers } from './handlers/skills'
+import { registerSkillManagementHandlers } from './handlers/skillManagement'
+import { registerPluginHandlers } from './handlers/plugins'
 import { registerUploadHandlers } from './handlers/uploads'
 
 export function registerCommonHandlers(rpcHandlerManager: RpcHandlerManager, workingDirectory: string): void {
@@ -23,6 +25,8 @@ export function registerCommonHandlers(rpcHandlerManager: RpcHandlerManager, wor
     registerDifftasticHandlers(rpcHandlerManager, workingDirectory)
     registerSlashCommandHandlers(rpcHandlerManager, workingDirectory)
     registerSkillsHandlers(rpcHandlerManager, workingDirectory)
+    registerSkillManagementHandlers(rpcHandlerManager)
+    registerPluginHandlers(rpcHandlerManager)
     registerGitHandlers(rpcHandlerManager, workingDirectory)
     registerUploadHandlers(rpcHandlerManager)
 }

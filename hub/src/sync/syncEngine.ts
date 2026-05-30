@@ -952,6 +952,40 @@ export class SyncEngine {
         return await this.rpcGateway.listSkills(sessionId, flavor)
     }
 
+    // Plugin management passthrough
+    async pluginList(sessionId: string) {
+        return await this.rpcGateway.pluginList(sessionId)
+    }
+    async pluginInstall(sessionId: string, options: { pluginId: string; sourceUrl?: string; sourceType?: string; archivePath?: string }) {
+        return await this.rpcGateway.pluginInstall(sessionId, options)
+    }
+    async pluginUninstall(sessionId: string, pluginId: string) {
+        return await this.rpcGateway.pluginUninstall(sessionId, pluginId)
+    }
+    async pluginStorageGet(sessionId: string, pluginId: string, key: string) {
+        return await this.rpcGateway.pluginStorageGet(sessionId, pluginId, key)
+    }
+    async pluginStorageSet(sessionId: string, pluginId: string, key: string, value: string) {
+        return await this.rpcGateway.pluginStorageSet(sessionId, pluginId, key, value)
+    }
+    async pluginStorageDelete(sessionId: string, pluginId: string, key: string) {
+        return await this.rpcGateway.pluginStorageDelete(sessionId, pluginId, key)
+    }
+    async pluginStorageList(sessionId: string, pluginId: string, prefix?: string) {
+        return await this.rpcGateway.pluginStorageList(sessionId, pluginId, prefix)
+    }
+
+    // Skill management passthrough
+    async skillSearch(sessionId: string, query: string, limit?: number) {
+        return await this.rpcGateway.skillSearch(sessionId, query, limit)
+    }
+    async skillInstall(sessionId: string, options: { name: string; repo: string; path?: string }) {
+        return await this.rpcGateway.skillInstall(sessionId, options)
+    }
+    async skillUninstall(sessionId: string, name: string) {
+        return await this.rpcGateway.skillUninstall(sessionId, name)
+    }
+
     async listCodexModelsForSession(sessionId: string): Promise<RpcListCodexModelsResponse> {
         return await this.rpcGateway.listCodexModelsForSession(sessionId)
     }
