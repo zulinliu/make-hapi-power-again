@@ -1,0 +1,68 @@
+/**
+ * Hapi Power Typography
+ * Inter (UI) + JetBrains Mono (Code)
+ * 响应式排版基于 clamp()
+ */
+
+/* === 字体引入 === */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfAZ9hjQ.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('https://fonts.gstatic.com/s/jetbrainsmono/v20/tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKxjPVmUsaaDhw.woff2') format('woff2');
+}
+
+/* === 排版令牌 === */
+:root {
+  --hp-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --hp-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  --hp-text-xs: clamp(0.6875rem, 0.65rem + 0.15vw, 0.75rem);
+  --hp-text-sm: clamp(0.8125rem, 0.78rem + 0.15vw, 0.875rem);
+  --hp-text-base: clamp(0.875rem, 0.84rem + 0.15vw, 0.9375rem);
+  --hp-text-lg: clamp(1rem, 0.96rem + 0.2vw, 1.125rem);
+  --hp-text-xl: clamp(1.125rem, 1.05rem + 0.35vw, 1.25rem);
+  --hp-text-2xl: clamp(1.25rem, 1.15rem + 0.5vw, 1.5rem);
+  --hp-text-3xl: clamp(1.5rem, 1.3rem + 1vw, 2rem);
+
+  --hp-leading-tight: 1.25;
+  --hp-leading-normal: 1.5;
+  --hp-leading-relaxed: 1.75;
+
+  --hp-tracking-tight: -0.01em;
+  --hp-tracking-normal: 0;
+  --hp-tracking-wide: 0.02em;
+
+  --hp-weight-normal: 400;
+  --hp-weight-medium: 500;
+  --hp-weight-semibold: 600;
+  --hp-weight-bold: 700;
+}
+
+/* === 基础排版 === */
+body {
+  font-family: var(--hp-font-sans);
+  font-size: var(--hp-text-base);
+  line-height: var(--hp-leading-normal);
+  letter-spacing: var(--hp-tracking-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+code, pre, kbd, samp {
+  font-family: var(--hp-font-mono);
+  font-size: 0.9em;
+}
+
+/* === 响应式断点 === */
+/* sm: 640px | md: 768px | lg: 1024px | xl: 1280px | 2xl: 1536px */
