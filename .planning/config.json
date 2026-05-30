@@ -1,0 +1,26 @@
+{
+  "version": "1.0",
+  "mode": "yolo",
+  "granularity": "standard",
+  "parallelization": true,
+  "commit_docs": true,
+  "model_profile": "balanced",
+  "workflow": {
+    "research": false,
+    "plan_check": true,
+    "verifier": true,
+    "nyquist_validation": true,
+    "auto_advance": true
+  },
+  "project": {
+    "name": "hapi-power",
+    "description": "AI编码代理全栈开发者工作台",
+    "is_brownfield": true,
+    "has_design_docs": true,
+    "design_docs_path": "docs/"
+  },
+  "planning": {
+    "sub_repos": [],
+    "commit_docs": true
+  }
+}
