@@ -1,3 +1,7 @@
+export type RegisterResult =
+    | { ok: true; entry: TerminalRegistryEntry }
+    | { ok: false; reason: 'global_limit' | 'session_mismatch' }
+
 export type TerminalRegistryEntry = {
     terminalId: string
     sessionId: string
@@ -8,8 +12,11 @@ export type TerminalRegistryEntry = {
 
 type TerminalRegistryOptions = {
     idleTimeoutMs: number
+    globalMax?: number
     onIdle?: (entry: TerminalRegistryEntry) => void
 }
+
+const DEFAULT_GLOBAL_MAX = 256
 
 export class TerminalRegistry {
     private readonly terminals = new Map<string, TerminalRegistryEntry>()
@@ -17,21 +24,28 @@ export class TerminalRegistry {
     private readonly terminalsBySession = new Map<string, Set<string>>()
     private readonly terminalsByCliSocket = new Map<string, Set<string>>()
     private readonly idleTimeoutMs: number
+    private readonly globalMax: number
     private readonly onIdle?: (entry: TerminalRegistryEntry) => void
 
     constructor(options: TerminalRegistryOptions) {
         this.idleTimeoutMs = options.idleTimeoutMs
+        this.globalMax = options.globalMax ?? DEFAULT_GLOBAL_MAX
         this.onIdle = options.onIdle
     }
 
-    register(terminalId: string, sessionId: string, socketId: string, cliSocketId: string): TerminalRegistryEntry | null {
+    register(terminalId: string, sessionId: string, socketId: string, cliSocketId: string): RegisterResult {
+        // Global cap
+        if (this.terminals.size >= this.globalMax) {
+            return { ok: false, reason: 'global_limit' }
+        }
+
         const existing = this.terminals.get(terminalId)
         if (existing) {
             if (existing.socketId === socketId) {
-                return existing
+                return { ok: true, entry: existing }
             }
             if (existing.sessionId !== sessionId) {
-                return null
+                return { ok: false, reason: 'session_mismatch' }
             }
             // Same session, different socket — stale entry from a previous
             // connection (e.g. socket reconnect in a PWA). Terminal IDs are
@@ -54,7 +68,7 @@ export class TerminalRegistry {
         this.addToIndex(this.terminalsByCliSocket, cliSocketId, terminalId)
         this.scheduleIdle(entry)
 
-        return entry
+        return { ok: true, entry }
     }
 
     markActivity(terminalId: string): void {
@@ -108,6 +122,14 @@ export class TerminalRegistry {
 
     countForSession(sessionId: string): number {
         return this.terminalsBySession.get(sessionId)?.size ?? 0
+    }
+
+    get globalCount(): number {
+        return this.terminals.size
+    }
+
+    get globalLimit(): number {
+        return this.globalMax
     }
 
     private scheduleIdle(entry: TerminalRegistryEntry): void {

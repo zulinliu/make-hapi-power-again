@@ -114,11 +114,16 @@ export function registerTerminalHandlers(socket: SocketWithData, deps: TerminalH
             return
         }
 
-        const entry = terminalRegistry.register(terminalId, sessionId, socket.id, cliSocketId)
-        if (!entry) {
-            emitTerminalError(terminalId, 'Terminal ID is already in use.')
+        const result = terminalRegistry.register(terminalId, sessionId, socket.id, cliSocketId)
+        if (!result.ok) {
+            const msg = result.reason === 'global_limit'
+                ? `Server terminal limit reached (${terminalRegistry.globalLimit}). Try again later.`
+                : 'Terminal session mismatch.'
+            emitTerminalError(terminalId, msg)
             return
         }
+
+        const entry = result.entry
 
         const cliSocket = cliNamespace.sockets.get(cliSocketId)
         if (!cliSocket) {
