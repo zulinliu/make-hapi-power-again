@@ -31,6 +31,12 @@ const commitSchema = z.object({
     paths: z.array(z.string().refine(p => !p.startsWith('-'), 'Path must not start with -')).optional()
 })
 
+const writeFileSchema = z.object({
+    path: z.string().min(1).regex(/^[^\0]*$/, 'Path contains null bytes'),
+    content: z.string().max(5 * 1024 * 1024), // 5MB
+    expectedHash: z.string().optional()
+})
+
 function parseBooleanParam(value: string | undefined): boolean | undefined {
     if (value === 'true') return true
     if (value === 'false') return false
@@ -248,6 +254,29 @@ export function createGitRoutes(getSyncEngine: () => SyncEngine | null): Hono<We
         }
 
         const result = await runRpc(() => engine.readSessionFile(sessionResult.sessionId, parsed.data.path))
+        return c.json(result)
+    })
+
+    app.put('/sessions/:id/file', async (c) => {
+        const engine = requireSyncEngine(c, getSyncEngine)
+        if (engine instanceof Response) {
+            return engine
+        }
+
+        const sessionResult = requireSessionFromParam(c, engine)
+        if (sessionResult instanceof Response) {
+            return sessionResult
+        }
+
+        const parsed = writeFileSchema.safeParse(await c.req.json())
+        if (!parsed.success) {
+            return c.json({ error: 'Invalid request', details: parsed.error.flatten() }, 400)
+        }
+
+        const result = await runRpc(() => engine.writeSessionFile(sessionResult.sessionId, {
+            ...parsed.data,
+            content: Buffer.from(parsed.data.content, 'utf-8').toString('base64')
+        }))
         return c.json(result)
     })
 
