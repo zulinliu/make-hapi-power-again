@@ -1,70 +1,140 @@
-# Contributing to HAPI
+# 贡献指南
 
-Thank you for your interest in contributing to HAPI! We welcome bug fixes, feature suggestions, and thoughtful contributions from the community.
+感谢你对 Hapi Power 的关注！欢迎提交 Bug 修复、功能建议和代码贡献。
 
-## Code of Conduct
+## 行为准则
 
-- **Be friendly and respectful** - Treat everyone with kindness and professionalism
-- **Help others** - Share knowledge and assist fellow contributors
-- **Give constructive feedback** - Focus on the code, not the person
-- **Be patient** - Remember that everyone has different experience levels
+- 友善尊重，专业沟通
+- 乐于助人，分享知识
+- 就事论事，建设性反馈
+- 保持耐心，尊重不同经验水平
 
-## AI-Generated Code Policy (Vibe Coding)
+## AI 生成代码
 
-If you used AI tools to generate code ("Vibe Coding"), please disclose the model in your PR description. Code is judged on merit — focused scope, tests, and the other expectations below apply equally regardless of how the code was authored.
+如果你使用 AI 工具生成代码，请在 PR 描述中声明使用的模型。代码以质量为准 — 无论代码如何编写，都需要通过同样的审查标准。
 
-## Pull Request Guidelines
+## 快速开始
 
-### No Mega PRs
+### 环境要求
 
-We do not accept oversized pull requests that introduce large features all at once. Large PRs are:
+- [Bun](https://bun.sh) >= 1.0
+- Node.js >= 18（node-pty 依赖）
 
-- Difficult to review thoroughly
-- More likely to introduce bugs
-- Harder to revert if issues arise
+### 安装与开发
 
-**If you want to add a significant feature, please open an issue first to discuss the approach.** We can help break it down into smaller, reviewable chunks.
+```bash
+# 克隆并安装
+git clone <repo-url> && cd make-hapi-power-again
+bun install
 
-### PR Best Practices
+# 开发模式（Hub + Web 并发）
+bun run dev
 
-- Keep PRs focused on a single concern
-- Write clear commit messages
-- Include relevant tests if applicable
-- Update documentation if needed
-- Reference related issues in your PR description
+# 类型检查
+bun run typecheck
 
-## Bug Reports
+# 运行测试
+bun run test
 
-Bug reports are always welcome! When reporting a bug, please include:
+# 构建
+bun run build
+```
 
-- A clear description of the issue
-- Steps to reproduce
-- Expected vs actual behavior
-- Your environment (OS, Node/Bun version, etc.)
-- Any relevant logs or screenshots
+### 项目结构
 
-## Feature Requests
+```
+cli/      CLI 二进制，代理封装
+hub/      Hono HTTP API + Socket.IO
+web/      React PWA 前端
+shared/   共享类型、Schema
+```
 
-Have an idea to improve HAPI? Open an issue with:
+详见 [AGENTS.md](AGENTS.md)。
 
-- A clear description of the feature
-- The problem it solves
-- Any implementation ideas you have
+## 代码规范
 
-## Getting Started
+### TypeScript
 
-1. Fork and clone the repository
-2. Install dependencies:
-   ```bash
-   bun install
-   ```
-3. Start development:
-   ```bash
-   bun run dev
-   ```
+- strict 模式，禁止 `any`（使用 `unknown` + 类型收窄）
+- Zod 做运行时验证
+- 路径别名 `@/*` 映射到 `./src/*`
+- 4 空格缩进
 
-See the [README](README.md) for more build options.
+### 文件组织
 
-## Questions?
+- 按功能/领域组织，不按文件类型
+- 文件 < 800 行，函数 < 50 行
+- 嵌套 < 4 层，优先提前返回
 
-If you have questions, feel free to open an issue. We're here to help!
+### 不可变数据
+
+始终创建新对象，不直接修改现有对象。
+
+### 错误处理
+
+- 每一层显式处理错误
+- 面向用户的错误信息要友好
+- 服务器端记录详细上下文
+- 永远不静默吞掉错误
+
+### 测试
+
+- 新功能必须有测试
+- 测试文件 `*.test.ts` 紧邻源码
+- 使用 Vitest 框架
+- 目标覆盖率 80%+
+
+## Pull Request 流程
+
+### 不接受巨型 PR
+
+不要在一个 PR 中引入大量功能。大型 PR 难以审查、容易引入 Bug、难以回滚。
+
+**如果要添加重要功能，请先开 Issue 讨论方案。** 我们可以帮你拆分成可审查的小块。
+
+### PR 规范
+
+- 一个 PR 聚焦一个关注点
+- 清晰的 commit 消息，使用约定式提交格式：
+
+```
+<type>: <描述>
+
+类型: feat, fix, refactor, docs, test, chore, perf, ci
+```
+
+- 包含相关测试
+- 更新相关文档
+- PR 描述中引用相关 Issue
+- 确保 `bun run typecheck` 通过
+
+### 审查标准
+
+| 级别 | 含义 | 处理 |
+|------|------|------|
+| CRITICAL | 安全漏洞或数据丢失风险 | 必须修复后合并 |
+| HIGH | Bug 或重大质量问题 | 应该修复后合并 |
+| MEDIUM | 可维护性问题 | 建议修复 |
+| LOW | 风格或小建议 | 可选 |
+
+## Bug 报告
+
+提交 Bug 报告时请包含：
+
+- 问题描述
+- 复现步骤
+- 期望行为 vs 实际行为
+- 运行环境（OS、Bun 版本等）
+- 相关日志或截图
+
+## 功能建议
+
+提交功能建议时请包含：
+
+- 功能描述
+- 解决的问题
+- 实现思路（如有）
+
+## 许可证
+
+贡献的代码将基于 AGPL-3.0 许可证发布，与项目保持一致。

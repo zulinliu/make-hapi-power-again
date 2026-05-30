@@ -8,6 +8,7 @@ import { constantTimeEquals } from '../utils/crypto'
 import { parseAccessToken } from '../utils/accessToken'
 import { registerCliHandlers } from './handlers/cli'
 import { registerTerminalHandlers } from './handlers/terminal'
+import { registerImageHandlers } from './handlers/image'
 import { RpcRegistry } from './rpcRegistry'
 import type { SyncEvent } from '../sync/syncEngine'
 import { TerminalRegistry } from './terminalRegistry'
@@ -42,6 +43,7 @@ export type SocketServerDeps = {
     onBackgroundTaskDelta?: (sessionId: string, delta: { started: number; completed: number }) => void
     onSessionActivity?: (sessionId: string, updatedAt: number) => void
     onSweepImmediateQueued?: (sessionId: string, now: number) => void
+    getSyncEngine?: () => import('../sync/syncEngine').SyncEngine | null
 }
 
 export function createSocketServer(deps: SocketServerDeps): {
@@ -144,15 +146,31 @@ export function createSocketServer(deps: SocketServerDeps): {
             return next(new Error('Invalid token'))
         }
     })
-    terminalNs.on('connection', (socket) => registerTerminalHandlers(socket, {
-        io,
-        getSession: (sessionId) => {
-            return deps.getSession?.(sessionId) ?? deps.store.sessions.getSession(sessionId)
-        },
-        terminalRegistry,
-        maxTerminalsPerSocket,
-        maxTerminalsPerSession
-    }))
+    terminalNs.on('connection', (socket) => {
+        registerTerminalHandlers(socket, {
+            io,
+            getSession: (sessionId) => {
+                return deps.getSession?.(sessionId) ?? deps.store.sessions.getSession(sessionId)
+            },
+            terminalRegistry,
+            maxTerminalsPerSocket,
+            maxTerminalsPerSession
+        })
+        registerImageHandlers(socket, {
+            uploadBinary: async (sessionId, filename, base64Content, mimeType) => {
+                const engine = deps.getSyncEngine?.()
+                if (!engine) {
+                    return { success: false, error: 'Sync engine not available' }
+                }
+                try {
+                    const result = await engine.uploadFile(sessionId, filename, base64Content, mimeType)
+                    return { success: result.success, path: result.path, error: result.error }
+                } catch (error) {
+                    return { success: false, error: error instanceof Error ? error.message : 'Upload failed' }
+                }
+            }
+        })
+    })
 
     return { io, engine, rpcRegistry }
 }

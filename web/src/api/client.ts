@@ -240,6 +240,48 @@ export class ApiClient {
         return await this.request<GitCommandResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/git-diff-file?${params.toString()}`)
     }
 
+    async getGitLog(sessionId: string, maxCount: number = 50): Promise<GitCommandResponse> {
+        const params = new URLSearchParams()
+        params.set('maxCount', `${maxCount}`)
+        return await this.request<GitCommandResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/git-log?${params.toString()}`)
+    }
+
+    async getGitBranchList(sessionId: string): Promise<GitCommandResponse> {
+        return await this.request<GitCommandResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/git-branches`)
+    }
+
+    async createGitBranch(sessionId: string, name: string): Promise<GitCommandResponse> {
+        return await this.request<GitCommandResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/git-branches`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name })
+        })
+    }
+
+    async switchGitBranch(sessionId: string, name: string): Promise<GitCommandResponse> {
+        return await this.request<GitCommandResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/git-branches`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, action: 'switch' })
+        })
+    }
+
+    async deleteGitBranch(sessionId: string, name: string): Promise<GitCommandResponse> {
+        return await this.request<GitCommandResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/git-branches`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, action: 'delete' })
+        })
+    }
+
+    async createGitCommit(sessionId: string, message: string, paths?: string[]): Promise<GitCommandResponse> {
+        return await this.request<GitCommandResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/git-commit`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message, paths })
+        })
+    }
+
     async searchSessionFiles(sessionId: string, query: string, limit?: number): Promise<FileSearchResponse> {
         const params = new URLSearchParams()
         if (query) {
@@ -281,6 +323,14 @@ export class ApiClient {
         const params = new URLSearchParams()
         params.set('path', path)
         return await this.request<FileReadResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/file?${params.toString()}`)
+    }
+
+    async writeSessionFile(sessionId: string, path: string, content: string, expectedHash?: string): Promise<{ success: boolean; error?: string }> {
+        return await this.request<{ success: boolean; error?: string }>(`/api/sessions/${encodeURIComponent(sessionId)}/file`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path, content, expectedHash })
+        })
     }
 
     async listSessionDirectory(sessionId: string, path?: string): Promise<ListDirectoryResponse> {
@@ -525,6 +575,163 @@ export class ApiClient {
         )
     }
 
+    // Plugin management
+    async listPlugins(sessionId: string) {
+        return await this.request<{ success: boolean; plugins?: Array<{ id: string; name: string; version: string; description?: string; permissions: string[]; enabled: boolean }>; error?: string }>(
+            `/api/sessions/${encodeURIComponent(sessionId)}/plugins`
+        )
+    }
+
+    async installPlugin(sessionId: string, pluginId: string, sourceUrl?: string, sourceType?: string) {
+        return await this.request<{ success: boolean; plugin?: unknown; error?: string }>(
+            `/api/sessions/${encodeURIComponent(sessionId)}/plugins/install`,
+            { method: 'POST', body: JSON.stringify({ pluginId, sourceUrl, sourceType }) }
+        )
+    }
+
+    async uninstallPlugin(sessionId: string, pluginId: string) {
+        return await this.request<{ success: boolean; error?: string }>(
+            `/api/sessions/${encodeURIComponent(sessionId)}/plugins/${encodeURIComponent(pluginId)}`,
+            { method: 'DELETE' }
+        )
+    }
+
+    // Skill management
+    async searchSkillsExternal(sessionId: string, query: string, limit?: number) {
+        return await this.request<{ success: boolean; results?: Array<{ name: string; description?: string; repo: string; path: string; stars?: number; author?: string }>; total?: number; error?: string }>(
+            `/api/sessions/${encodeURIComponent(sessionId)}/skills/search?q=${encodeURIComponent(query)}&limit=${limit ?? 20}`
+        )
+    }
+
+    async installSkillFromExternal(sessionId: string, name: string, repo: string, path?: string) {
+        return await this.request<{ success: boolean; skill?: unknown; error?: string }>(
+            `/api/sessions/${encodeURIComponent(sessionId)}/skills/install`,
+            { method: 'POST', body: JSON.stringify({ name, repo, path }) }
+        )
+    }
+
+    async uninstallSkill(sessionId: string, name: string) {
+        return await this.request<{ success: boolean; error?: string }>(
+            `/api/sessions/${encodeURIComponent(sessionId)}/skills/${encodeURIComponent(name)}`,
+            { method: 'DELETE' }
+        )
+    }
+
+    // Change tracking
+    async getChanges(sessionId: string, status?: string) {
+        const params = status ? `?status=${encodeURIComponent(status)}` : ''
+        return await this.request<{
+            success: boolean
+            groups: Array<{
+                id: string
+                changes: Array<{
+                    id: string
+                    filePath: string
+                    changeType: 'created' | 'modified' | 'deleted'
+                    beforeContent: string | null
+                    afterContent: string | null
+                    reviewStatus: 'pending' | 'approved' | 'rejected'
+                    reviewedAt: number | null
+                    timestamp: number
+                    messageId: string
+                }>
+                summary: string
+                agentDescription: string | null
+                createdAt: number
+            }>
+        }>(`/api/sessions/${encodeURIComponent(sessionId)}/changes${params}`)
+    }
+
+    async reviewChange(sessionId: string, changeId: string, action: 'approved' | 'rejected') {
+        return await this.request<{ success: boolean; changeId: string; status: string }>(
+            `/api/sessions/${encodeURIComponent(sessionId)}/changes/${encodeURIComponent(changeId)}/review`,
+            { method: 'POST', body: JSON.stringify({ action }) }
+        )
+    }
+
+    async bulkReviewChanges(sessionId: string, changeIds: string[], action: 'approved' | 'rejected') {
+        return await this.request<{ success: boolean; reviewedCount: number; status: string }>(
+            `/api/sessions/${encodeURIComponent(sessionId)}/changes/bulk-review`,
+            { method: 'POST', body: JSON.stringify({ changeIds, action }) }
+        )
+    }
+
+    // Context management
+    async getContext(sessionId: string) {
+        return await this.request<{
+            success: boolean
+            context: {
+                sessionId: string
+                usedTokens: number
+                contextWindow: number
+                messageCount: number
+                status: 'normal' | 'warning' | 'critical'
+                inputTokens: number
+                outputTokens: number
+            }
+        }>(`/api/sessions/${encodeURIComponent(sessionId)}/context`)
+    }
+
+    async getTimeline(sessionId: string, type?: string) {
+        const query = type ? `?type=${encodeURIComponent(type)}` : ''
+        return await this.request<{
+            success: boolean
+            entries: Array<{
+                id: string
+                type: 'tool_use' | 'file_change' | 'message' | 'summary' | 'checkpoint' | 'error'
+                timestamp: number
+                seq: number
+                data: Record<string, unknown>
+            }>
+            truncated: boolean
+        }>(`/api/sessions/${encodeURIComponent(sessionId)}/timeline${query}`)
+    }
+
+    async getSummaries(sessionId: string) {
+        return await this.request<{
+            success: boolean
+            summaries: Array<{
+                id: string
+                sessionId: string
+                content: string
+                createdAt: number
+                seq: number
+                isAuto: boolean
+            }>
+        }>(`/api/sessions/${encodeURIComponent(sessionId)}/summaries`)
+    }
+
+    async createCheckpoint(sessionId: string, label?: string) {
+        return await this.request<{
+            success: boolean
+            checkpoint: {
+                id: string
+                sessionId: string
+                label: string
+                fileCount: number
+                createdAt: number
+                snapshotIds: number[]
+            }
+        }>(`/api/sessions/${encodeURIComponent(sessionId)}/checkpoints`, {
+            method: 'POST',
+            body: JSON.stringify({ label })
+        })
+    }
+
+    async getCheckpoints(sessionId: string) {
+        return await this.request<{
+            success: boolean
+            checkpoints: Array<{
+                id: string
+                sessionId: string
+                label: string
+                fileCount: number
+                createdAt: number
+                snapshotIds: number[]
+            }>
+        }>(`/api/sessions/${encodeURIComponent(sessionId)}/checkpoints`)
+    }
+
     async renameSession(sessionId: string, name: string): Promise<void> {
         await this.request(`/api/sessions/${encodeURIComponent(sessionId)}`, {
             method: 'PATCH',
@@ -566,5 +773,102 @@ export class ApiClient {
             method: 'POST',
             body: JSON.stringify(event)
         })
+    }
+
+    async previewUndo(sessionId: string, scope: 'session' | 'step' | 'file', options?: { stepSeq?: number; filePath?: string }) {
+        return await this.request<{
+            success: boolean
+            preview: {
+                scope: 'session' | 'step' | 'file'
+                affectedFiles: Array<{
+                    filePath: string
+                    changeType: 'created' | 'modified' | 'deleted'
+                    canRevert: boolean
+                    reason?: string
+                }>
+                totalSnapshots: number
+                currentMaxSeq: number
+            }
+        }>(`/api/sessions/${encodeURIComponent(sessionId)}/undo/preview`, {
+            method: 'POST',
+            body: JSON.stringify({ scope, ...options })
+        })
+    }
+
+    async executeUndo(sessionId: string, scope: 'session' | 'step' | 'file', options?: { stepSeq?: number; filePath?: string; expectedMaxSeq?: number }) {
+        return await this.request<{
+            success: boolean
+            result: {
+                scope: 'session' | 'step' | 'file'
+                revertedFiles: string[]
+                skippedFiles: string[]
+                revertedAt: number
+                status: 'marked_for_restore'
+                message: string
+            }
+        }>(`/api/sessions/${encodeURIComponent(sessionId)}/undo/execute`, {
+            method: 'POST',
+            body: JSON.stringify({ scope, ...options })
+        })
+    }
+
+    async getSnapshots(sessionId: string, limit?: number) {
+        const query = limit ? `?limit=${encodeURIComponent(limit)}` : ''
+        return await this.request<{
+            success: boolean
+            snapshots: Array<{
+                id: number
+                filePath: string
+                contentHash: string
+                snapshotType: string
+                createdAt: number
+            }>
+        }>(`/api/sessions/${encodeURIComponent(sessionId)}/snapshots${query}`)
+    }
+
+    async createShare(sessionId: string, scope: 'full' | 'changes' | 'terminal' | 'readonly', expiresIn?: number | null) {
+        return await this.request<{
+            success: boolean
+            share: {
+                id: string
+                sessionId: string
+                scope: string
+                createdAt: number
+                expiresAt: number | null
+                url: string
+            }
+        }>(`/api/sessions/${encodeURIComponent(sessionId)}/shares`, {
+            method: 'POST',
+            body: JSON.stringify({ scope, expiresIn })
+        })
+    }
+
+    async getShares(sessionId: string) {
+        return await this.request<{
+            success: boolean
+            shares: Array<{
+                id: string
+                sessionId: string
+                scope: string
+                createdAt: number
+                expiresAt: number | null
+                accessCount: number
+                lastAccessedAt: number | null
+            }>
+        }>(`/api/sessions/${encodeURIComponent(sessionId)}/shares`)
+    }
+
+    async deleteShare(shareId: string) {
+        await this.request(`/api/shares/${encodeURIComponent(shareId)}`, {
+            method: 'DELETE'
+        })
+    }
+
+    async accessShare(shareId: string) {
+        return await this.request<{
+            success: boolean
+            share: { id: string; scope: string; createdAt: number; expiresAt: number | null }
+            snapshot: Record<string, unknown>
+        }>(`/api/s/${encodeURIComponent(shareId)}`)
     }
 }
