@@ -47,6 +47,7 @@ import UndoPage from '@/routes/sessions/undo'
 import MobileChangesPage from '@/routes/mobile/changes'
 import MobileTerminalPage from '@/routes/mobile/terminal'
 import ShareViewPage from '@/routes/share'
+import OrchestrationPage from '@/routes/orchestration'
 import SettingsPage from '@/routes/settings'
 
 function BackIcon(props: { className?: string }) {
@@ -767,6 +768,12 @@ const settingsRoute = createRoute({
     component: SettingsPage,
 })
 
+const orchestrationRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/orchestration',
+    component: OrchestrationPage,
+})
+
 export const routeTree = rootRoute.addChildren([
     indexRoute,
     sessionsRoute.addChildren([
@@ -785,6 +792,7 @@ export const routeTree = rootRoute.addChildren([
     ]),
     browseRoute,
     settingsRoute,
+    orchestrationRoute,
     mobileRoute.addChildren([
         mobileSessionRoute.addChildren([
             mobileChangesRoute,
