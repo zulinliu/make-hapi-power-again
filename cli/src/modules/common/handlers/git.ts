@@ -26,6 +26,60 @@ interface GitDiffFileRequest {
     timeout?: number
 }
 
+interface GitLogRequest {
+    cwd?: string
+    maxCount?: number
+    skip?: number
+    filePath?: string
+    timeout?: number
+}
+
+interface GitBranchCreateRequest {
+    cwd?: string
+    name: string
+    startPoint?: string
+    timeout?: number
+}
+
+interface GitBranchSwitchRequest {
+    cwd?: string
+    name: string
+    timeout?: number
+}
+
+interface GitBranchMergeRequest {
+    cwd?: string
+    name: string
+    timeout?: number
+}
+
+interface GitBranchDeleteRequest {
+    cwd?: string
+    name: string
+    force?: boolean
+    timeout?: number
+}
+
+interface GitCommitRequest {
+    cwd?: string
+    message: string
+    all?: boolean
+    timeout?: number
+}
+
+interface GitAddRequest {
+    cwd?: string
+    paths: string[]
+    timeout?: number
+}
+
+interface GitAutoCommitRequest {
+    cwd?: string
+    message: string
+    paths?: string[]
+    timeout?: number
+}
+
 type GitCommandResponse = CommandResponse
 
 function resolveCwd(requestedCwd: string | undefined, workingDirectory: string): { cwd: string; error?: string } {
@@ -124,5 +178,104 @@ export function registerGitHandlers(rpcHandlerManager: RpcHandlerManager, workin
             ? ['diff', '--cached', '--no-ext-diff', '--', data.filePath]
             : ['diff', '--no-ext-diff', '--', data.filePath]
         return await runGitCommand(args, resolved.cwd, data.timeout)
+    })
+
+    // Git Log
+    rpcHandlerManager.registerHandler<GitLogRequest, GitCommandResponse>(RPC_METHODS.GitLog, async (data) => {
+        const resolved = resolveCwd(data.cwd, workingDirectory)
+        if (resolved.error) return rpcError(resolved.error)
+        const args = ['log', '--oneline', '--graph', '--decorate']
+        if (data.maxCount) args.push(`--max-count=${data.maxCount}`)
+        if (data.skip) args.push(`--skip=${data.skip}`)
+        if (data.filePath) {
+            args.push('--', data.filePath)
+        }
+        return await runGitCommand(args, resolved.cwd, data.timeout)
+    })
+
+    // Git Branch List
+    rpcHandlerManager.registerHandler<GitStatusRequest, GitCommandResponse>(RPC_METHODS.GitBranchList, async (data) => {
+        const resolved = resolveCwd(data.cwd, workingDirectory)
+        if (resolved.error) return rpcError(resolved.error)
+        return await runGitCommand(['branch', '-a', '-v'], resolved.cwd, data.timeout)
+    })
+
+    // Git Branch Create
+    rpcHandlerManager.registerHandler<GitBranchCreateRequest, GitCommandResponse>(RPC_METHODS.GitBranchCreate, async (data) => {
+        const resolved = resolveCwd(data.cwd, workingDirectory)
+        if (resolved.error) return rpcError(resolved.error)
+        if (!data.name || !/^[\w.\-\/]+$/.test(data.name)) {
+            return rpcError('Invalid branch name')
+        }
+        const args = ['checkout', '-b', data.name]
+        if (data.startPoint) args.push(data.startPoint)
+        return await runGitCommand(args, resolved.cwd, data.timeout)
+    })
+
+    // Git Branch Switch
+    rpcHandlerManager.registerHandler<GitBranchSwitchRequest, GitCommandResponse>(RPC_METHODS.GitBranchSwitch, async (data) => {
+        const resolved = resolveCwd(data.cwd, workingDirectory)
+        if (resolved.error) return rpcError(resolved.error)
+        if (!data.name || !/^[\w.\-\/]+$/.test(data.name)) {
+            return rpcError('Invalid branch name')
+        }
+        return await runGitCommand(['checkout', data.name], resolved.cwd, data.timeout)
+    })
+
+    // Git Branch Merge
+    rpcHandlerManager.registerHandler<GitBranchMergeRequest, GitCommandResponse>(RPC_METHODS.GitBranchMerge, async (data) => {
+        const resolved = resolveCwd(data.cwd, workingDirectory)
+        if (resolved.error) return rpcError(resolved.error)
+        if (!data.name || !/^[\w.\-\/]+$/.test(data.name)) {
+            return rpcError('Invalid branch name')
+        }
+        return await runGitCommand(['merge', data.name], resolved.cwd, data.timeout)
+    })
+
+    // Git Branch Delete
+    rpcHandlerManager.registerHandler<GitBranchDeleteRequest, GitCommandResponse>(RPC_METHODS.GitBranchDelete, async (data) => {
+        const resolved = resolveCwd(data.cwd, workingDirectory)
+        if (resolved.error) return rpcError(resolved.error)
+        if (!data.name || !/^[\w.\-\/]+$/.test(data.name)) {
+            return rpcError('Invalid branch name')
+        }
+        const args = ['branch', data.force ? '-D' : '-d', data.name]
+        return await runGitCommand(args, resolved.cwd, data.timeout)
+    })
+
+    // Git Commit
+    rpcHandlerManager.registerHandler<GitCommitRequest, GitCommandResponse>(RPC_METHODS.GitCommit, async (data) => {
+        const resolved = resolveCwd(data.cwd, workingDirectory)
+        if (resolved.error) return rpcError(resolved.error)
+        if (!data.message) return rpcError('Commit message required')
+        const args = ['commit', '-m', data.message]
+        if (data.all) args.push('-a')
+        return await runGitCommand(args, resolved.cwd, data.timeout)
+    })
+
+    // Git Add
+    rpcHandlerManager.registerHandler<GitAddRequest, GitCommandResponse>(RPC_METHODS.GitAdd, async (data) => {
+        const resolved = resolveCwd(data.cwd, workingDirectory)
+        if (resolved.error) return rpcError(resolved.error)
+        if (!data.paths?.length) return rpcError('No paths specified')
+        return await runGitCommand(['add', ...data.paths], resolved.cwd, data.timeout)
+    })
+
+    // Git Auto Commit (add + commit in one step, for GitInternalAPI)
+    rpcHandlerManager.registerHandler<GitAutoCommitRequest, GitCommandResponse>(RPC_METHODS.GitAutoCommit, async (data) => {
+        const resolved = resolveCwd(data.cwd, workingDirectory)
+        if (resolved.error) return rpcError(resolved.error)
+        if (!data.message) return rpcError('Commit message required')
+
+        // Add specific paths or all tracked changes
+        if (data.paths?.length) {
+            const addResult = await runGitCommand(['add', ...data.paths], resolved.cwd, data.timeout)
+            if (!addResult.success) return addResult
+        } else {
+            const addResult = await runGitCommand(['add', '-u'], resolved.cwd, data.timeout)
+            if (!addResult.success) return addResult
+        }
+
+        return await runGitCommand(['commit', '-m', data.message], resolved.cwd, data.timeout)
     })
 }
