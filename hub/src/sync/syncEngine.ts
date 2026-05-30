@@ -916,6 +916,10 @@ export class SyncEngine {
         return await this.rpcGateway.readSessionFile(sessionId, path)
     }
 
+    async writeSessionFile(sessionId: string, options: { path: string; content: string; expectedHash?: string }): Promise<RpcCommandResponse> {
+        return await this.rpcGateway.writeSessionFile(sessionId, options)
+    }
+
     async readGeneratedImage(sessionId: string, imageId: string): Promise<RpcGeneratedImageResponse> {
         return await this.rpcGateway.readGeneratedImage(sessionId, imageId)
     }
