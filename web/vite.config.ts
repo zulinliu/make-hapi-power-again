@@ -29,6 +29,18 @@ function getVendorChunkName(id: string): string | undefined {
         return 'vendor-terminal'
     }
 
+    if (id.includes('/node_modules/monaco-editor/')) {
+        return 'vendor-monaco'
+    }
+
+    if (id.includes('/node_modules/mermaid/')) {
+        return 'vendor-mermaid'
+    }
+
+    if (id.includes('/node_modules/react-pdf/')) {
+        return 'vendor-pdf'
+    }
+
     if (
         id.includes('/node_modules/@assistant-ui/')
         || id.includes('/node_modules/remark-gfm/')
