@@ -90,7 +90,7 @@ bun run build:single-exe       # 构建单文件可执行程序
 
 | 目录/文件 | 说明 |
 |-----------|------|
-| `web/routes/` | REST API 端点（25 个路由文件） |
+| `web/routes/` | REST API 端点（20+ 路由文件） |
 | `web/server.ts` | Hono 应用注册所有路由 |
 | `socket/server.ts` | Socket.IO 服务器，注册命名空间 |
 | `socket/handlers/cli/` | `/cli` 命名空间事件处理 |
@@ -153,21 +153,21 @@ bun run build:single-exe       # 构建单文件可执行程序
 | 路由组 | 路径前缀 | 说明 |
 |--------|---------|------|
 | auth | `/api` | 认证（令牌获取/验证） |
-| sessions | `/api/sessions` | 会话 CRUD |
-| messages | `/api/sessions/:id/messages` | 消息查询 |
+| sessions | `/api/sessions` | 会话 CRUD、上传、权限模式 |
+| messages | `/api/sessions/:id/messages` | 消息查询、发送 |
 | events | `/api/events` | SSE 实时推送 |
-| git | `/api/git` | Git 操作（状态/历史/分支/diff/clone） |
-| cli | `/api/cli` | CLI 信息 |
-| machines | `/api/machines` | 机器信息 |
-| permissions | `/api/permissions` | 权限模式 |
-| plugins | `/api/plugins` | 插件管理 |
-| skillManagement | `/api/skills` | Skill 搜索/安装/卸载 |
-| changeTracking | `/api/sessions/:id/changes` | 变更追踪 |
-| timeline | `/api/sessions/:id/timeline` | 操作时间线 |
-| undo | `/api/sessions/:id/undo` | 撤销变更 |
-| share | `/api/share` | 会话分享 |
+| git | `/api/sessions/:id` | Git 操作（状态/历史/分支/diff/log/commit） |
+| cli | `/cli` | CLI 内部接口（会话/机器） |
+| machines | `/api/machines` | 机器信息、远程启动 |
+| permissions | `/api/sessions/:id/permissions` | 权限审批 |
+| plugins | `/api/sessions/:id/plugins` | 插件管理（session-scoped） |
+| skillManagement | `/api/sessions/:id/skills` | Skill 搜索/安装/卸载（session-scoped） |
+| changeTracking | `/api/sessions/:id` | 变更追踪、审查、上下文状态 |
+| timeline | `/api/sessions/:id` | 操作时间线、摘要、检查点 |
+| undo | `/api/sessions/:id` | 撤销预览/执行、快照列表 |
+| share | `/api/sessions/:id/shares` `/api/s/:shareId` | 会话分享（保护+公开） |
 | push | `/api/push` | Web Push 订阅 |
-| voice | `/api/voice` | 语音设置 |
+| voice | `/api/voice` | 语音设置（ElevenLabs） |
 | voiceTranscription | `/api/voice/transcribe` | Whisper 转录 |
 | orchestration | `/api/orchestration/skills` | 编排 Skill |
 
