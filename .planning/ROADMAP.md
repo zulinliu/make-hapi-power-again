@@ -12,9 +12,9 @@
 - [x] **Phase 3: PTY 终端** — xterm.js 终端 + Socket.IO 认证 + 资源限制
 - [x] **Phase 4: 文件管理 + 代码编辑** — 文件树 + Monaco Editor
 - [x] **Phase 5: 扩展系统** — 插件 + Skill + Claude Plugin 管理
-- [ ] **Phase 6: AI 工作流核心** — 变更审查 + 时间线 + 撤销 + 上下文管理
-- [ ] **Phase 7: 移动端 + 会话分享** — 移动速览 + 分享 + 推送通知
-- [ ] **Phase 8: 代理体验** — 二进制帧 + 语音 + Skill 编排 + 白板
+- [x] **Phase 6: AI 工作流核心** — 变更审查 + 时间线 + 撤销 + 上下文管理
+- [x] **Phase 7: 移动端 + 会话分享** — 移动速览 + 分享 + 推送通知
+- [x] **Phase 8: 代理体验** — 二进制帧 + 语音 + Skill 编排 + 白板
 
 ## Phase Details
 
@@ -30,7 +30,7 @@
 **Plans**: 1 plan
 
 Plans:
-- [ ] 00.5-01: 关键技术 PoC 验证（node-pty + Bun、isomorphic-git、Socket.IO binary）
+- [x] 00.5-01: 关键技术 PoC 验证（node-pty + Bun、isomorphic-git、Socket.IO binary）
 
 ### Phase 1: 架构基础
 **Goal**: 建立所有模块共享的基础设施：EventBus、设计系统、安全中间件、代码分割、统一导航
@@ -47,10 +47,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 01-01: EventBus 事件总线 + 统一错误格式 + 数据库迁移
-- [ ] 01-02: 设计系统实现（设计令牌 + Inter 字体 + 响应式断点 + 焦点环修正）
-- [ ] 01-03: 安全中间件 + Socket.IO 认证 + 日志脱敏
-- [ ] 01-04: 统一导航架构 + 代码分割配置
+- [x] 01-01: EventBus 事件总线 + 统一错误格式 + 数据库迁移
+- [x] 01-02: 设计系统实现（设计令牌 + Inter 字体 + 响应式断点 + 焦点环修正）
+- [x] 01-03: 安全中间件 + Socket.IO 认证 + 日志脱敏
+- [x] 01-04: 统一导航架构 + 代码分割配置
 
 ### Phase 2: Git 管理
 **Goal**: 浏览器内完整的 Git 可视化管理能力，含 GitInternalAPI 供其他模块调用
@@ -66,9 +66,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 02-01: Git 后端 API（状态/历史/分支/差异/凭证）
-- [ ] 02-02: GitInternalAPI + SSRF 防护 + 路径安全
-- [ ] 02-03: Git 前端界面（状态面板 + 历史记录 + 分支管理 + DiffView）
+- [x] 02-01: Git 后端 API（状态/历史/分支/差异/凭证）
+- [x] 02-02: GitInternalAPI + SSRF 防护 + 路径安全
+- [x] 02-03: Git 前端界面（状态面板 + 历史记录 + 分支管理 + DiffView）
 
 ### Phase 3: PTY 终端
 **Goal**: 浏览器内完整终端体验，含多会话、分屏、安全认证、资源限制
@@ -85,9 +85,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 03-01: PTY 后端（node-pty 集成 + Socket.IO 命名空间 + 认证中间件）
-- [ ] 03-02: PTY 资源限制 + 进程组清理 + CWD 校验
-- [ ] 03-03: PTY 前端（xterm.js + 多会话 + 分屏 + 二进制帧）
+- [x] 03-01: PTY 后端（node-pty 集成 + Socket.IO 命名空间 + 认证中间件）
+- [x] 03-02: PTY 资源限制 + 进程组清理 + CWD 校验
+- [x] 03-03: PTY 前端（xterm.js + 多会话 + 分屏 + 二进制帧）
 
 ### Phase 4: 文件管理 + 代码编辑
 **Goal**: 完整的文件管理 + 代码编辑能力，文件树浏览和 Monaco 编辑器协同工作
@@ -104,10 +104,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 04-01: 文件后端 API（CRUD + 搜索 + 上传/下载 + 剪贴板）
-- [ ] 04-02: 文件安全中间件 + 上传限制 + ZIP bomb 检测
-- [ ] 04-03: 文件树前端（react-complex-tree + 右键菜单 + 拖放 + 搜索）
-- [ ] 04-04: Monaco Editor 集成（懒加载 + 语言检测 + 自动保存 + 预览面板）
+- [x] 04-01: 文件后端 API（CRUD + 搜索 + 上传/下载 + 剪贴板）
+- [x] 04-02: 文件安全中间件 + 上传限制 + ZIP bomb 检测
+- [x] 04-03: 文件树前端（react-complex-tree + 右键菜单 + 拖放 + 搜索）
+- [x] 04-04: Monaco Editor 集成（懒加载 + 语言检测 + 自动保存 + 预览面板）
 
 ### Phase 5: 扩展系统
 **Goal**: 三层扩展架构（插件 + Skill + Claude Plugin），含安全隔离和权限控制
@@ -122,9 +122,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 05-01: 插件系统后端（加载/卸载/激活/停用 + 存储 API）
-- [ ] 05-02: 插件前端（PluginLoader + ErrorBoundary + 权限网关）
-- [ ] 05-03: Skill 管理 + Claude Plugin 管理（搜索/安装/卸载/更新）
+- [x] 05-01: 插件系统后端（加载/卸载/激活/停用 + 存储 API）
+- [x] 05-02: 插件前端（PluginLoader + ErrorBoundary + 权限网关）
+- [x] 05-03: Skill 管理 + Claude Plugin 管理（搜索/安装/卸载/更新）
 
 ### Phase 6: AI 工作流核心
 **Goal**: 变更审查 + 时间线 + 撤销 + 上下文管理，为 AI 代理操作提供完整审计链
@@ -141,10 +141,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 06-01: 变更审查后端（FileChange 数据模型 + 审查 API + 批量操作）
-- [ ] 06-02: 变更审查前端（分组列表 + DiffView + 三态徽章 + 快速审查）
-- [ ] 06-03: 时间线 + 摘要 + 检查点（TimelineEntry 提取 + 增量摘要 + 检查点自动创建）
-- [ ] 06-04: 撤销变更 + 上下文管理（Git 回滚 + 文件快照 + 用量可视化 + 压缩通知）
+- [x] 06-01: 变更审查后端（FileChange 数据模型 + 审查 API + 批量操作）
+- [x] 06-02: 变更审查前端（分组列表 + DiffView + 三态徽章 + 快速审查）
+- [x] 06-03: 时间线 + 摘要 + 检查点（TimelineEntry 提取 + 增量摘要 + 检查点自动创建）
+- [x] 06-04: 撤销变更 + 上下文管理（Git 回滚 + 文件快照 + 用量可视化 + 压缩通知）
 
 ### Phase 7: 移动端 + 会话分享
 **Goal**: 移动端速览 + 会话分享，让开发者在手机上也能审查变更和查看终端
@@ -160,9 +160,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 07-01: 移动端路由 + 布局 + 变更审查
-- [ ] 07-02: 移动端终端只读 + 推送通知（Web Push API）
-- [ ] 07-03: 会话分享（后端 API + 分享页面 + 范围/时效控制）
+- [x] 07-01: 移动端路由 + 布局 + 变更审查
+- [x] 07-02: 移动端终端只读 + 推送通知（Web Push API）
+- [x] 07-03: 会话分享（后端 API + 分享页面 + 范围/时效控制）
 
 ### Phase 8: 代理体验
 **Goal**: 二进制帧 + 语音 + Skill 编排 + 白板，增强代理与用户的交互维度
