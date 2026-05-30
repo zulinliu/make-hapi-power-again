@@ -22,12 +22,12 @@ function createApp(engineOverrides?: Partial<SyncEngine>) {
     })
 
     const engine = {
-        resolveSessionAccess: () => ({ ok: true, sessionId: 'session-1', session: { id: 'session-1' } }),
+        resolveSessionAccess: () => ({ ok: true as const, sessionId: 'session-1', session: { id: 'session-1', namespace: 'default', seq: 0, createdAt: Date.now(), updatedAt: Date.now(), active: false, activeAt: 0, metadata: null } }),
         skillSearch,
         skillInstall,
         skillUninstall,
         ...engineOverrides,
-    } as Partial<SyncEngine>
+    } as unknown as Partial<SyncEngine>
 
     const getSyncEngine = () => engine as SyncEngine
 
@@ -49,7 +49,7 @@ describe('skill management routes', () => {
             const response = await app.request('/api/sessions/session-1/skills/search?q=test')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.success).toBe(true)
             expect(body.results).toHaveLength(1)
             expect(body.total).toBe(1)
@@ -61,7 +61,7 @@ describe('skill management routes', () => {
             const response = await app.request('/api/sessions/session-1/skills/search?q=a')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.success).toBe(true)
             expect(body.results).toEqual([])
             expect(body.total).toBe(0)
@@ -73,7 +73,7 @@ describe('skill management routes', () => {
             const response = await app.request('/api/sessions/session-1/skills/search')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.success).toBe(true)
             expect(body.results).toEqual([])
             expect(body.total).toBe(0)
@@ -85,7 +85,7 @@ describe('skill management routes', () => {
             const response = await app.request('/api/sessions/session-1/skills/search?q=test&limit=10')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.success).toBe(true)
         })
 
@@ -105,7 +105,7 @@ describe('skill management routes', () => {
             const response = await app.request('/api/sessions/session-1/skills/search?q=test')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.success).toBe(false)
             expect(body.error).toBe('Search failed')
         })
@@ -135,7 +135,7 @@ describe('skill management routes', () => {
             })
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.success).toBe(true)
             expect(body.skill.name).toBe('my-skill')
             expect(body.skill.repo).toBe('org/my-skill-repo')
@@ -163,7 +163,7 @@ describe('skill management routes', () => {
             })
 
             expect(response.status).toBe(400)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.error).toBe('Invalid request')
         })
 
@@ -215,7 +215,7 @@ describe('skill management routes', () => {
             })
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.success).toBe(false)
             expect(body.error).toBe('Install failed')
         })
@@ -230,7 +230,7 @@ describe('skill management routes', () => {
             })
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.success).toBe(true)
             expect(body.message).toContain('my-skill')
         })
@@ -243,7 +243,7 @@ describe('skill management routes', () => {
             })
 
             expect(response.status).toBe(400)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.error).toBe('Invalid skill name')
         })
 
@@ -257,7 +257,7 @@ describe('skill management routes', () => {
             })
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.success).toBe(false)
             expect(body.error).toBe('Uninstall failed')
         })

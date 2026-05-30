@@ -30,8 +30,21 @@ function createApp(messages: Array<{ id: string; content: unknown; createdAt: nu
     } as unknown as Store
 
     const engine = {
-        resolveSessionAccess: () => ({ ok: true, sessionId: 'session-1', session: { id: 'session-1' } }),
-    } as Partial<SyncEngine>
+        resolveSessionAccess: () => ({
+            ok: true as const,
+            sessionId: 'session-1',
+            session: {
+                id: 'session-1',
+                namespace: 'default',
+                seq: 0,
+                createdAt: Date.now(),
+                updatedAt: Date.now(),
+                active: false,
+                activeAt: 0,
+                metadata: null,
+            }
+        }),
+    } as unknown as Partial<SyncEngine>
 
     const getSyncEngine = () => engine as SyncEngine
 
@@ -57,7 +70,7 @@ describe('undo routes', () => {
             })
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.success).toBe(true)
             expect(body.preview.scope).toBe('session')
             expect(body.preview.affectedFiles).toEqual([])
@@ -88,7 +101,7 @@ describe('undo routes', () => {
             })
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.preview.affectedFiles).toHaveLength(1)
             expect(body.preview.affectedFiles[0].filePath).toBe('src/new-file.ts')
             expect(body.preview.affectedFiles[0].changeType).toBe('created')
@@ -126,7 +139,7 @@ describe('undo routes', () => {
             })
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.preview.affectedFiles[0].changeType).toBe('created') // first editFile without prior writeFile = created
             // But with snapshot it should still detect
         })
@@ -154,7 +167,7 @@ describe('undo routes', () => {
             })
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.preview.affectedFiles).toHaveLength(1)
             expect(body.preview.affectedFiles[0].changeType).toBe('deleted')
         })
@@ -193,7 +206,7 @@ describe('undo routes', () => {
             })
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             // Only seq=1 should be included
             expect(body.preview.affectedFiles).toHaveLength(1)
             expect(body.preview.affectedFiles[0].filePath).toBe('src/a.ts')
@@ -233,7 +246,7 @@ describe('undo routes', () => {
             })
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.preview.affectedFiles).toHaveLength(1)
             expect(body.preview.affectedFiles[0].filePath).toBe('src/b.ts')
         })
@@ -251,7 +264,7 @@ describe('undo routes', () => {
             })
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.preview.currentMaxSeq).toBe(5)
         })
 
@@ -313,7 +326,7 @@ describe('undo routes', () => {
             })
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.success).toBe(true)
             expect(body.result.revertedFiles).toContain('src/new.ts')
             expect(body.result.skippedFiles).toEqual([])
@@ -344,7 +357,7 @@ describe('undo routes', () => {
             })
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             // editFile with no prior writeFile is treated as 'created'
             expect(body.result.revertedFiles).toContain('src/no-snapshot.ts')
         })
@@ -372,7 +385,7 @@ describe('undo routes', () => {
             })
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.result.revertedFiles).toContain('src/deleted.ts')
         })
 
@@ -399,7 +412,7 @@ describe('undo routes', () => {
             })
 
             expect(response.status).toBe(409)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.error).toContain('重新预览')
         })
 
@@ -426,7 +439,7 @@ describe('undo routes', () => {
             })
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.success).toBe(true)
         })
 
@@ -450,7 +463,7 @@ describe('undo routes', () => {
             const response = await app.request('/api/sessions/session-1/snapshots')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.success).toBe(true)
             expect(body.snapshots).toEqual([])
         })
@@ -481,7 +494,7 @@ describe('undo routes', () => {
             const response = await app.request('/api/sessions/session-1/snapshots')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.success).toBe(true)
             expect(body.snapshots.length).toBeGreaterThan(0)
             expect(body.snapshots[0].filePath).toBe('src/app.ts')
@@ -511,8 +524,21 @@ describe('undo routes', () => {
             } as unknown as Store
 
             const engine = {
-                resolveSessionAccess: () => ({ ok: true, sessionId: 'session-1', session: { id: 'session-1' } }),
-            } as Partial<SyncEngine>
+                resolveSessionAccess: () => ({
+                    ok: true as const,
+                    sessionId: 'session-1',
+                    session: {
+                        id: 'session-1',
+                        namespace: 'default',
+                        seq: 0,
+                        createdAt: Date.now(),
+                        updatedAt: Date.now(),
+                        active: false,
+                        activeAt: 0,
+                        metadata: null,
+                    }
+                }),
+            } as unknown as Partial<SyncEngine>
             const getSyncEngine = () => engine as SyncEngine
 
             const app = new Hono<WebAppEnv>()
@@ -525,7 +551,7 @@ describe('undo routes', () => {
             const response = await app.request('/api/sessions/session-1/snapshots?limit=5')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(getSnapshotsCalls).toEqual([5])
             expect(body.snapshots).toHaveLength(5)
         })

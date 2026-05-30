@@ -26,8 +26,8 @@ function createApp(messages: Array<{ id: string; content: unknown; createdAt: nu
     } as unknown as Store
 
     const engine = {
-        resolveSessionAccess: () => ({ ok: true, sessionId: 'session-1', session: { id: 'session-1' } }),
-    } as Partial<SyncEngine>
+        resolveSessionAccess: () => ({ ok: true as const, sessionId: 'session-1', session: { id: 'session-1', namespace: 'default', seq: 0, createdAt: Date.now(), updatedAt: Date.now(), active: false, activeAt: 0, metadata: null } }),
+    } as unknown as Partial<SyncEngine>
 
     const getSyncEngine = () => engine as SyncEngine
 
@@ -49,7 +49,7 @@ describe('timeline routes', () => {
             const response = await app.request('/api/sessions/session-1/timeline')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.success).toBe(true)
             expect(body.entries).toEqual([])
             expect(body.truncated).toBe(false)
@@ -69,7 +69,7 @@ describe('timeline routes', () => {
             const response = await app.request('/api/sessions/session-1/timeline')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.entries).toHaveLength(1)
             expect(body.entries[0].type).toBe('message')
             expect(body.entries[0].data.role).toBe('user')
@@ -90,7 +90,7 @@ describe('timeline routes', () => {
             const response = await app.request('/api/sessions/session-1/timeline')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.entries).toHaveLength(1)
             expect(body.entries[0].data.role).toBe('assistant')
         })
@@ -114,7 +114,7 @@ describe('timeline routes', () => {
             const response = await app.request('/api/sessions/session-1/timeline')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.entries).toHaveLength(1)
             expect(body.entries[0].type).toBe('tool_use')
             expect(body.entries[0].data.toolName).toBe('bash')
@@ -139,7 +139,7 @@ describe('timeline routes', () => {
             const response = await app.request('/api/sessions/session-1/timeline')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.entries[0].type).toBe('file_change')
         })
 
@@ -163,7 +163,7 @@ describe('timeline routes', () => {
             const response = await app.request('/api/sessions/session-1/timeline')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.entries[0].type).toBe('error')
             expect(body.entries[0].data.isError).toBe(true)
         })
@@ -188,7 +188,7 @@ describe('timeline routes', () => {
             const response = await app.request('/api/sessions/session-1/timeline')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.entries[0].type).toBe('tool_use')
             expect(body.entries[0].data.isError).toBe(false)
         })
@@ -212,7 +212,7 @@ describe('timeline routes', () => {
             const response = await app.request('/api/sessions/session-1/timeline')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.entries).toHaveLength(1)
             expect(body.entries[0].type).toBe('summary')
             expect(body.entries[0].data.isAuto).toBe(true)
@@ -237,7 +237,7 @@ describe('timeline routes', () => {
             const response = await app.request('/api/sessions/session-1/timeline')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             // Should have both message and checkpoint entries
             const checkpoints = body.entries.filter((e: { type: string }) => e.type === 'checkpoint')
             expect(checkpoints).toHaveLength(1)
@@ -270,7 +270,7 @@ describe('timeline routes', () => {
             const response = await app.request('/api/sessions/session-1/timeline?type=tool_use')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.entries).toHaveLength(1)
             expect(body.entries[0].type).toBe('tool_use')
         })
@@ -300,7 +300,7 @@ describe('timeline routes', () => {
             const response = await app.request('/api/sessions/session-1/timeline?type=all')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.entries).toHaveLength(2)
         })
 
@@ -316,7 +316,7 @@ describe('timeline routes', () => {
             const response = await app.request('/api/sessions/session-1/timeline')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.truncated).toBe(true)
         })
 
@@ -353,7 +353,7 @@ describe('timeline routes', () => {
             const response = await app.request('/api/sessions/session-1/summaries')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.success).toBe(true)
             expect(body.summaries).toHaveLength(1)
             expect(body.summaries[0].content).toBe('Summary text')
@@ -375,7 +375,7 @@ describe('timeline routes', () => {
             const response = await app.request('/api/sessions/session-1/summaries')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.summaries).toHaveLength(1)
             expect(body.summaries[0].isAuto).toBe(true)
         })
@@ -394,7 +394,7 @@ describe('timeline routes', () => {
             const response = await app.request('/api/sessions/session-1/summaries')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.summaries).toHaveLength(0)
         })
 
@@ -404,7 +404,7 @@ describe('timeline routes', () => {
             const response = await app.request('/api/sessions/session-1/summaries')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.summaries).toEqual([])
         })
     })
@@ -420,7 +420,7 @@ describe('timeline routes', () => {
             })
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.success).toBe(true)
             expect(body.checkpoint.id).toMatch(/^cp-/)
             expect(body.checkpoint.fileCount).toBe(0)
@@ -437,7 +437,7 @@ describe('timeline routes', () => {
             })
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.checkpoint.label).toBe('Before refactor')
         })
 
@@ -464,7 +464,7 @@ describe('timeline routes', () => {
             })
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.checkpoint.fileCount).toBe(1)
             expect(body.checkpoint.snapshotIds).toHaveLength(1)
         })
@@ -503,7 +503,7 @@ describe('timeline routes', () => {
             })
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.checkpoint.fileCount).toBe(1)
         })
 
@@ -527,7 +527,7 @@ describe('timeline routes', () => {
             const response = await app.request('/api/sessions/session-1/checkpoints')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.success).toBe(true)
             expect(body.checkpoints).toEqual([])
         })
@@ -559,7 +559,7 @@ describe('timeline routes', () => {
             const response = await app.request('/api/sessions/session-1/checkpoints')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.success).toBe(true)
             expect(body.checkpoints).toHaveLength(1)
             expect(body.checkpoints[0].fileCount).toBe(1)

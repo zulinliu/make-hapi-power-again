@@ -17,7 +17,7 @@ describe('orchestration routes', () => {
             const response = await app.request('/api/orchestration/skills')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.success).toBe(true)
             expect(body.skills).toBeInstanceOf(Array)
             expect(body.skills).toHaveLength(5)
@@ -27,7 +27,7 @@ describe('orchestration routes', () => {
             const app = createApp()
 
             const response = await app.request('/api/orchestration/skills')
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
 
             const patterns = body.skills.map((s: { pattern: string }) => s.pattern)
             expect(patterns).toContain('loop')
@@ -41,7 +41,7 @@ describe('orchestration routes', () => {
             const app = createApp()
 
             const response = await app.request('/api/orchestration/skills')
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
 
             for (const skill of body.skills) {
                 expect(skill.id).toMatch(/^orchestration-/)
@@ -61,7 +61,7 @@ describe('orchestration routes', () => {
             const response = await app.request('/api/orchestration/skills/orchestration-loop')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.success).toBe(true)
             expect(body.skill.id).toBe('orchestration-loop')
             expect(body.skill.pattern).toBe('loop')
@@ -74,7 +74,7 @@ describe('orchestration routes', () => {
             const response = await app.request('/api/orchestration/skills/orchestration-handoff')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.skill.pattern).toBe('handoff')
             expect(body.skill.config.preserveContext).toBe(true)
         })
@@ -85,7 +85,7 @@ describe('orchestration routes', () => {
             const response = await app.request('/api/orchestration/skills/orchestration-advisor')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.skill.pattern).toBe('advisor')
             expect(body.skill.config.consultBeforeAction).toBe(true)
         })
@@ -96,7 +96,7 @@ describe('orchestration routes', () => {
             const response = await app.request('/api/orchestration/skills/orchestration-committee')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.skill.pattern).toBe('committee')
             expect(body.skill.config.memberCount).toBe(3)
         })
@@ -107,7 +107,7 @@ describe('orchestration routes', () => {
             const response = await app.request('/api/orchestration/skills/orchestration-epic')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.skill.pattern).toBe('epic')
             expect(body.skill.config.parallelism).toBe(2)
         })
@@ -118,7 +118,7 @@ describe('orchestration routes', () => {
             const response = await app.request('/api/orchestration/skills/orchestration-nonexistent')
 
             expect(response.status).toBe(404)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.error).toBe('Skill not found')
         })
     })

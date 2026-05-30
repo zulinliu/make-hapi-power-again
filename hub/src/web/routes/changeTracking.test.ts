@@ -19,8 +19,8 @@ function createApp(messages: Array<{ id: string; content: unknown; createdAt: nu
     ;(store as unknown as { db: unknown }).db = db
 
     const engine = {
-        resolveSessionAccess: () => ({ ok: true, sessionId: 'session-1', session: { id: 'session-1' } }),
-    } as Partial<SyncEngine>
+        resolveSessionAccess: () => ({ ok: true as const, sessionId: 'session-1', session: { id: 'session-1', namespace: 'default', seq: 0, createdAt: Date.now(), updatedAt: Date.now(), active: false, activeAt: 0, metadata: null } }),
+    } as unknown as Partial<SyncEngine>
 
     const getSyncEngine = () => engine as SyncEngine
 
@@ -42,7 +42,7 @@ describe('change tracking routes', () => {
             const response = await app.request('/api/sessions/session-1/changes')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.success).toBe(true)
             expect(body.groups).toEqual([])
             expect(body.truncated).toBe(false)
@@ -73,7 +73,7 @@ describe('change tracking routes', () => {
             const response = await app.request('/api/sessions/session-1/changes')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.success).toBe(true)
             expect(body.groups).toHaveLength(1)
             expect(body.groups[0].changes).toHaveLength(1)
@@ -108,7 +108,7 @@ describe('change tracking routes', () => {
             const response = await app.request('/api/sessions/session-1/changes')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.groups).toHaveLength(1)
             expect(body.groups[0].changes[0].changeType).toBe('modified')
             expect(body.groups[0].changes[0].beforeContent).toBe('foo')
@@ -151,7 +151,7 @@ describe('change tracking routes', () => {
             const response = await app.request('/api/sessions/session-1/changes')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.groups).toHaveLength(1)
             // Same file should be tracked once, but as modified
             const change = body.groups[0].changes[0]
@@ -171,7 +171,7 @@ describe('change tracking routes', () => {
             const response = await app.request('/api/sessions/session-1/changes')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.truncated).toBe(true)
         })
 
@@ -201,7 +201,7 @@ describe('change tracking routes', () => {
             const response = await app.request('/api/sessions/session-1/changes?status=approved')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.groups[0].changes).toHaveLength(0)
         })
 
@@ -238,7 +238,7 @@ describe('change tracking routes', () => {
             })
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.success).toBe(true)
             expect(body.changeId).toBe('abc123456789')
             expect(body.status).toBe('approved')
@@ -254,7 +254,7 @@ describe('change tracking routes', () => {
             })
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.status).toBe('rejected')
         })
 
@@ -268,7 +268,7 @@ describe('change tracking routes', () => {
             })
 
             expect(response.status).toBe(400)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.error).toBe('Invalid change ID')
         })
 
@@ -308,7 +308,7 @@ describe('change tracking routes', () => {
 
             // First, get the changes to find the actual change id
             const listResponse = await app.request('/api/sessions/session-1/changes')
-            const listBody = await listResponse.json()
+            const listBody = await listResponse.json() as Record<string, any>
             const changeId = listBody.groups[0].changes[0].id
 
             // Approve the change
@@ -320,7 +320,7 @@ describe('change tracking routes', () => {
 
             // Now list changes and verify it's approved
             const updatedResponse = await app.request('/api/sessions/session-1/changes')
-            const updatedBody = await updatedResponse.json()
+            const updatedBody = await updatedResponse.json() as Record<string, any>
             expect(updatedBody.groups[0].changes[0].reviewStatus).toBe('approved')
         })
     })
@@ -339,7 +339,7 @@ describe('change tracking routes', () => {
             })
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.success).toBe(true)
             expect(body.reviewedCount).toBe(2)
             expect(body.status).toBe('approved')
@@ -358,7 +358,7 @@ describe('change tracking routes', () => {
             })
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.reviewedCount).toBe(0)
         })
 
@@ -411,7 +411,7 @@ describe('change tracking routes', () => {
             const response = await app.request('/api/sessions/session-1/context')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.success).toBe(true)
             expect(body.context.status).toBe('normal')
             expect(body.context.usedTokens).toBe(50000)
@@ -437,7 +437,7 @@ describe('change tracking routes', () => {
             const response = await app.request('/api/sessions/session-1/context')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.context.status).toBe('warning')
         })
 
@@ -459,7 +459,7 @@ describe('change tracking routes', () => {
             const response = await app.request('/api/sessions/session-1/context')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.context.status).toBe('critical')
         })
 
@@ -469,7 +469,7 @@ describe('change tracking routes', () => {
             const response = await app.request('/api/sessions/session-1/context')
 
             expect(response.status).toBe(200)
-            const body = await response.json()
+            const body = await response.json() as Record<string, any>
             expect(body.context.usedTokens).toBe(0)
             expect(body.context.contextWindow).toBe(200000)
             expect(body.context.status).toBe('normal')
