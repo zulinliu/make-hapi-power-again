@@ -2,6 +2,7 @@ import { Database } from 'bun:sqlite'
 import { chmodSync, closeSync, existsSync, mkdirSync, openSync } from 'node:fs'
 import { dirname } from 'node:path'
 
+import { FileSnapshotStore } from './fileSnapshotStore'
 import { MachineStore } from './machineStore'
 import { MessageStore } from './messageStore'
 import { PushStore } from './pushStore'
@@ -9,6 +10,7 @@ import { SessionStore } from './sessionStore'
 import { UserStore } from './userStore'
 
 export type {
+    StoredFileSnapshot,
     StoredMachine,
     StoredMessage,
     StoredPushSubscription,
@@ -17,6 +19,7 @@ export type {
     VersionedUpdateResult
 } from './types'
 export type { CancelQueuedMessageResult, LookupQueuedMessageResult } from './messages'
+export { FileSnapshotStore } from './fileSnapshotStore'
 export { MachineStore } from './machineStore'
 export { MessageStore } from './messageStore'
 export { PushStore } from './pushStore'
@@ -44,6 +47,7 @@ export class Store {
     readonly messages: MessageStore
     readonly users: UserStore
     readonly push: PushStore
+    readonly fileSnapshots: FileSnapshotStore
 
     constructor(dbPath: string) {
         this.dbPath = dbPath
@@ -85,6 +89,7 @@ export class Store {
         this.messages = new MessageStore(this.db)
         this.users = new UserStore(this.db)
         this.push = new PushStore(this.db)
+        this.fileSnapshots = new FileSnapshotStore(this.db)
     }
 
     close(): void {

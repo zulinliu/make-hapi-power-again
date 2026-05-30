@@ -41,6 +41,7 @@ import FilePage from '@/routes/sessions/file'
 import TerminalPage from '@/routes/sessions/terminal'
 import GitPage from '@/routes/sessions/git'
 import ExtensionsPage from '@/routes/sessions/extensions'
+import ChangesPage from '@/routes/sessions/changes'
 import SettingsPage from '@/routes/settings'
 
 function BackIcon(props: { className?: string }) {
@@ -709,6 +710,12 @@ const sessionExtensionsRoute = createRoute({
     component: ExtensionsPage,
 })
 
+const sessionChangesRoute = createRoute({
+    getParentRoute: () => sessionDetailRoute,
+    path: 'changes',
+    component: ChangesPage,
+})
+
 const settingsRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: '/settings',
@@ -726,6 +733,7 @@ export const routeTree = rootRoute.addChildren([
             sessionFilesRoute,
             sessionFileRoute,
             sessionExtensionsRoute,
+            sessionChangesRoute,
         ]),
     ]),
     browseRoute,

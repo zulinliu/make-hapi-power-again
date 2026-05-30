@@ -617,6 +617,61 @@ export class ApiClient {
         )
     }
 
+    // Change tracking
+    async getChanges(sessionId: string, status?: string) {
+        const params = status ? `?status=${encodeURIComponent(status)}` : ''
+        return await this.request<{
+            success: boolean
+            groups: Array<{
+                id: string
+                changes: Array<{
+                    id: string
+                    filePath: string
+                    changeType: 'created' | 'modified' | 'deleted'
+                    beforeContent: string | null
+                    afterContent: string | null
+                    reviewStatus: 'pending' | 'approved' | 'rejected'
+                    reviewedAt: number | null
+                    timestamp: number
+                    messageId: string
+                }>
+                summary: string
+                agentDescription: string | null
+                createdAt: number
+            }>
+        }>(`/api/sessions/${encodeURIComponent(sessionId)}/changes${params}`)
+    }
+
+    async reviewChange(sessionId: string, changeId: string, action: 'approved' | 'rejected') {
+        return await this.request<{ success: boolean; changeId: string; status: string }>(
+            `/api/sessions/${encodeURIComponent(sessionId)}/changes/${encodeURIComponent(changeId)}/review`,
+            { method: 'POST', body: JSON.stringify({ action }) }
+        )
+    }
+
+    async bulkReviewChanges(sessionId: string, changeIds: string[], action: 'approved' | 'rejected') {
+        return await this.request<{ success: boolean; reviewedCount: number; status: string }>(
+            `/api/sessions/${encodeURIComponent(sessionId)}/changes/bulk-review`,
+            { method: 'POST', body: JSON.stringify({ changeIds, action }) }
+        )
+    }
+
+    // Context management
+    async getContext(sessionId: string) {
+        return await this.request<{
+            success: boolean
+            context: {
+                sessionId: string
+                usedTokens: number
+                contextWindow: number
+                messageCount: number
+                status: 'normal' | 'warning' | 'critical'
+                inputTokens: number
+                outputTokens: number
+            }
+        }>(`/api/sessions/${encodeURIComponent(sessionId)}/context`)
+    }
+
     async renameSession(sessionId: string, name: string): Promise<void> {
         await this.request(`/api/sessions/${encodeURIComponent(sessionId)}`, {
             method: 'PATCH',
