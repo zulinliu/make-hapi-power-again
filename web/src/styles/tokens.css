@@ -1,0 +1,100 @@
+/**
+ * Hapi Power Design Tokens
+ * Cursor + Linear 融合风格
+ * 色彩系统基于 oklch 实现感知均匀
+ */
+
+:root {
+  /* === 语义色彩 === */
+  --hp-primary: oklch(55% 0.18 260);
+  --hp-primary-hover: oklch(50% 0.20 260);
+  --hp-primary-subtle: oklch(55% 0.08 260 / 0.12);
+  --hp-primary-text: oklch(100% 0 0);
+
+  --hp-success: oklch(62% 0.19 145);
+  --hp-success-subtle: oklch(62% 0.08 145 / 0.12);
+  --hp-warning: oklch(72% 0.17 70);
+  --hp-warning-subtle: oklch(72% 0.08 70 / 0.12);
+  --hp-danger: oklch(58% 0.22 25);
+  --hp-danger-subtle: oklch(58% 0.10 25 / 0.12);
+
+  /* === 表面层次 (Surface Layers) === */
+  --hp-canvas: oklch(98% 0.002 260);
+  --hp-surface-0: oklch(100% 0 0);
+  --hp-surface-1: oklch(99% 0.002 260);
+  --hp-surface-2: oklch(97% 0.003 260);
+  --hp-surface-3: oklch(95% 0.005 260);
+
+  /* === 文本 === */
+  --hp-text-primary: oklch(18% 0.01 260);
+  --hp-text-secondary: oklch(45% 0.01 260);
+  --hp-text-tertiary: oklch(62% 0.01 260);
+  --hp-text-disabled: oklch(75% 0.01 260);
+  --hp-text-inverse: oklch(100% 0 0);
+
+  /* === 边框与分割 === */
+  --hp-border: oklch(80% 0.005 260 / 0.25);
+  --hp-border-hover: oklch(65% 0.01 260 / 0.4);
+  --hp-divider: oklch(85% 0.003 260 / 0.2);
+
+  /* === 阴影 === */
+  --hp-shadow-xs: 0 1px 2px oklch(0% 0 0 / 0.04);
+  --hp-shadow-sm: 0 1px 3px oklch(0% 0 0 / 0.06), 0 1px 2px oklch(0% 0 0 / 0.04);
+  --hp-shadow-md: 0 4px 6px -1px oklch(0% 0 0 / 0.06), 0 2px 4px -2px oklch(0% 0 0 / 0.04);
+  --hp-shadow-lg: 0 10px 15px -3px oklch(0% 0 0 / 0.08), 0 4px 6px -4px oklch(0% 0 0 / 0.04);
+  --hp-shadow-focus: 0 0 0 2px oklch(55% 0.18 260 / 0.3);
+
+  /* === 圆角 === */
+  --hp-radius-sm: 6px;
+  --hp-radius-md: 8px;
+  --hp-radius-lg: 12px;
+  --hp-radius-xl: 16px;
+  --hp-radius-full: 9999px;
+
+  /* === 间距 === */
+  --hp-space-1: 4px;
+  --hp-space-2: 8px;
+  --hp-space-3: 12px;
+  --hp-space-4: 16px;
+  --hp-space-5: 20px;
+  --hp-space-6: 24px;
+  --hp-space-8: 32px;
+  --hp-space-10: 40px;
+  --hp-space-12: 48px;
+
+  /* === 过渡 === */
+  --hp-duration-fast: 120ms;
+  --hp-duration-normal: 200ms;
+  --hp-duration-slow: 300ms;
+  --hp-ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --hp-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* === 布局 === */
+  --hp-sidebar-width: 260px;
+  --hp-sidebar-collapsed-width: 56px;
+  --hp-header-height: 48px;
+  --hp-status-bar-height: 24px;
+}
+
+[data-theme="dark"] {
+  --hp-canvas: oklch(14% 0.005 260);
+  --hp-surface-0: oklch(17% 0.005 260);
+  --hp-surface-1: oklch(20% 0.006 260);
+  --hp-surface-2: oklch(24% 0.008 260);
+  --hp-surface-3: oklch(28% 0.010 260);
+
+  --hp-text-primary: oklch(95% 0.005 260);
+  --hp-text-secondary: oklch(72% 0.008 260);
+  --hp-text-tertiary: oklch(55% 0.008 260);
+  --hp-text-disabled: oklch(42% 0.005 260);
+
+  --hp-border: oklch(40% 0.008 260 / 0.35);
+  --hp-border-hover: oklch(55% 0.01 260 / 0.5);
+  --hp-divider: oklch(35% 0.005 260 / 0.3);
+
+  --hp-shadow-xs: 0 1px 2px oklch(0% 0 0 / 0.2);
+  --hp-shadow-sm: 0 1px 3px oklch(0% 0 0 / 0.3), 0 1px 2px oklch(0% 0 0 / 0.2);
+  --hp-shadow-md: 0 4px 6px -1px oklch(0% 0 0 / 0.3), 0 2px 4px -2px oklch(0% 0 0 / 0.2);
+  --hp-shadow-lg: 0 10px 15px -3px oklch(0% 0 0 / 0.4), 0 4px 6px -4px oklch(0% 0 0 / 0.2);
+  --hp-shadow-focus: 0 0 0 2px oklch(65% 0.18 260 / 0.4);
+}
