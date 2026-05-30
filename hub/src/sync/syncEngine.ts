@@ -888,8 +888,36 @@ export class SyncEngine {
         return await this.rpcGateway.getGitDiffFile(sessionId, options)
     }
 
+    async getGitLog(sessionId: string, options: { cwd?: string; maxCount?: number }): Promise<RpcCommandResponse> {
+        return await this.rpcGateway.getGitLog(sessionId, options)
+    }
+
+    async getGitBranchList(sessionId: string, cwd?: string): Promise<RpcCommandResponse> {
+        return await this.rpcGateway.getGitBranchList(sessionId, cwd)
+    }
+
+    async createGitBranch(sessionId: string, options: { cwd?: string; name: string }): Promise<RpcCommandResponse> {
+        return await this.rpcGateway.createGitBranch(sessionId, options)
+    }
+
+    async switchGitBranch(sessionId: string, options: { cwd?: string; name: string }): Promise<RpcCommandResponse> {
+        return await this.rpcGateway.switchGitBranch(sessionId, options)
+    }
+
+    async deleteGitBranch(sessionId: string, options: { cwd?: string; name: string }): Promise<RpcCommandResponse> {
+        return await this.rpcGateway.deleteGitBranch(sessionId, options)
+    }
+
+    async createGitCommit(sessionId: string, options: { cwd?: string; message: string; paths?: string[] }): Promise<RpcCommandResponse> {
+        return await this.rpcGateway.createGitCommit(sessionId, options)
+    }
+
     async readSessionFile(sessionId: string, path: string): Promise<RpcReadFileResponse> {
         return await this.rpcGateway.readSessionFile(sessionId, path)
+    }
+
+    async writeSessionFile(sessionId: string, options: { path: string; content: string; expectedHash?: string }): Promise<RpcCommandResponse> {
+        return await this.rpcGateway.writeSessionFile(sessionId, options)
     }
 
     async readGeneratedImage(sessionId: string, imageId: string): Promise<RpcGeneratedImageResponse> {
@@ -922,6 +950,40 @@ export class SyncEngine {
         error?: string
     }> {
         return await this.rpcGateway.listSkills(sessionId, flavor)
+    }
+
+    // Plugin management passthrough
+    async pluginList(sessionId: string) {
+        return await this.rpcGateway.pluginList(sessionId)
+    }
+    async pluginInstall(sessionId: string, options: { pluginId: string; sourceUrl?: string; sourceType?: string; archivePath?: string }) {
+        return await this.rpcGateway.pluginInstall(sessionId, options)
+    }
+    async pluginUninstall(sessionId: string, pluginId: string) {
+        return await this.rpcGateway.pluginUninstall(sessionId, pluginId)
+    }
+    async pluginStorageGet(sessionId: string, pluginId: string, key: string) {
+        return await this.rpcGateway.pluginStorageGet(sessionId, pluginId, key)
+    }
+    async pluginStorageSet(sessionId: string, pluginId: string, key: string, value: string) {
+        return await this.rpcGateway.pluginStorageSet(sessionId, pluginId, key, value)
+    }
+    async pluginStorageDelete(sessionId: string, pluginId: string, key: string) {
+        return await this.rpcGateway.pluginStorageDelete(sessionId, pluginId, key)
+    }
+    async pluginStorageList(sessionId: string, pluginId: string, prefix?: string) {
+        return await this.rpcGateway.pluginStorageList(sessionId, pluginId, prefix)
+    }
+
+    // Skill management passthrough
+    async skillSearch(sessionId: string, query: string, limit?: number) {
+        return await this.rpcGateway.skillSearch(sessionId, query, limit)
+    }
+    async skillInstall(sessionId: string, options: { name: string; repo: string; path?: string }) {
+        return await this.rpcGateway.skillInstall(sessionId, options)
+    }
+    async skillUninstall(sessionId: string, name: string) {
+        return await this.rpcGateway.skillUninstall(sessionId, name)
     }
 
     async listCodexModelsForSession(sessionId: string): Promise<RpcListCodexModelsResponse> {

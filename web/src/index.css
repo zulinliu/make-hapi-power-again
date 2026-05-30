@@ -1,79 +1,81 @@
 @import "tailwindcss";
 @import "katex/dist/katex.min.css";
+@import "./styles/tokens.css";
+@import "./styles/typography.css";
 @config "../tailwind.config.ts";
 
 :root {
     --app-bg: var(--tg-theme-bg-color, #ffffff);
-    --app-fg: var(--tg-theme-text-color, #111827);
+    --app-fg: var(--tg-theme-text-color, #1a1a2e);
     --app-hint: var(--tg-theme-hint-color, #6b7280);
-    --app-link: var(--tg-theme-link-color, #111827);
-    --app-button: var(--tg-theme-button-color, #111827);
+    --app-link: var(--tg-theme-link-color, #1a1a2e);
+    --app-button: var(--tg-theme-button-color, #1a1a2e);
     --app-button-text: var(--tg-theme-button-text-color, #ffffff);
-    --app-banner-bg: var(--tg-theme-button-color, #111827);
+    --app-banner-bg: var(--tg-theme-button-color, #1a1a2e);
     --app-banner-text: var(--tg-theme-button-text-color, #ffffff);
-    --app-secondary-bg: var(--tg-theme-secondary-bg-color, #f3f4f6);
+    --app-secondary-bg: var(--tg-theme-secondary-bg-color, #f4f4f8);
 
     --app-dialog-bg: #ffffff;
-    --app-chat-user-bg: #f2f4f6;
+    --app-chat-user-bg: #f4f4f8;
     --app-chat-user-surface-bg: var(--app-chat-user-bg);
-    --app-chat-user-fg: #24292f;
-    --app-chat-user-chip-bg: #DBEAFE;
-    --app-chat-user-chip-fg: #1447E6;
-    --app-tool-card-bg: #f2f4f6;
+    --app-chat-user-fg: #1a1a2e;
+    --app-chat-user-chip-bg: rgba(34, 197, 94, 0.12);
+    --app-chat-user-chip-fg: #15803d;
+    --app-tool-card-bg: #f4f4f8;
     --app-tool-group-bg: var(--app-tool-card-bg);
-    --app-tool-card-hover-bg: #e9edf2;
-    --app-tool-card-accent: #7b8491;
-    --app-tool-card-muted-action-fg: #aeb4bd;
+    --app-tool-card-hover-bg: rgba(0, 0, 0, 0.04);
+    --app-tool-card-accent: #1a1a2e;
+    --app-tool-card-muted-action-fg: #9ca3af;
     --app-tool-card-subtitle: #6b7280;
-    --app-code-header-bg: #eceff2;
-    --app-code-header-fg: #717784;
-    --app-code-copy-hover-bg: rgba(17, 24, 39, 0.06);
+    --app-code-header-bg: #f4f4f8;
+    --app-code-header-fg: #6b7280;
+    --app-code-copy-hover-bg: rgba(0, 0, 0, 0.04);
     --app-inline-code-border: transparent;
-    --app-inline-code-fg: #2d333b;
-    --app-md-quote-bg: #f1f3f5;
-    --app-md-quote-border: #c9d0d8;
-    --app-md-quote-fg: #525965;
-    --app-md-table-bg: #f5f6f7;
-    --app-md-table-head-bg: #eceff2;
-    --app-reasoning-bg: #f2f4f6;
-    --app-mermaid-node-fill: #f8fbff;
-    --app-mermaid-node-border: #b8cdfd;
-    --app-mermaid-cluster-fill: #eef4ff;
-    --app-mermaid-text: #2d333b;
-    --app-link-muted: rgba(17, 24, 39, 0.18);
-    --app-scrollbar-thumb: rgba(107, 114, 128, 0.34);
-    --app-scrollbar-thumb-hover: rgba(107, 114, 128, 0.5);
+    --app-inline-code-fg: #1a1a2e;
+    --app-md-quote-bg: #f4f4f8;
+    --app-md-quote-border: #d1d5db;
+    --app-md-quote-fg: #6b7280;
+    --app-md-table-bg: #f4f4f8;
+    --app-md-table-head-bg: #e8e8ee;
+    --app-reasoning-bg: #f4f4f8;
+    --app-mermaid-node-fill: #f8f9fb;
+    --app-mermaid-node-border: #c7d2fe;
+    --app-mermaid-cluster-fill: #eef2ff;
+    --app-mermaid-text: #1a1a2e;
+    --app-link-muted: rgba(26, 26, 46, 0.15);
+    --app-scrollbar-thumb: rgba(107, 114, 128, 0.28);
+    --app-scrollbar-thumb-hover: rgba(107, 114, 128, 0.42);
 
     /* Theme-aware colors (light mode defaults) */
-    --app-border: rgba(15, 23, 42, 0.08);
-    --app-divider: rgba(15, 23, 42, 0.08);
-    --app-subtle-bg: rgba(15, 23, 42, 0.04);
-    --app-code-bg: #f5f6f7;
-    --app-inline-code-bg: #ebecef;
+    --app-border: #e2e4e9;
+    --app-divider: #e2e4e9;
+    --app-subtle-bg: rgba(0, 0, 0, 0.03);
+    --app-code-bg: #f4f4f8;
+    --app-inline-code-bg: #e8e8ee;
 
-    /* Diff colors (light) - from hapi-app */
-    --app-diff-added-bg: #e6ffed;
-    --app-diff-added-text: #24292e;
-    --app-diff-removed-bg: #ffeef0;
-    --app-diff-removed-text: #24292e;
+    /* Diff colors (light) */
+    --app-diff-added-bg: rgba(35, 134, 54, 0.1);
+    --app-diff-added-text: #1a1a2e;
+    --app-diff-removed-bg: rgba(218, 54, 51, 0.1);
+    --app-diff-removed-text: #1a1a2e;
 
     /* Git status colors (light) */
-    --app-git-staged-color: #34C759;
-    --app-git-unstaged-color: #FF9500;
-    --app-git-deleted-color: #FF3B30;
+    --app-git-staged-color: #238636;
+    --app-git-unstaged-color: #D29922;
+    --app-git-deleted-color: #DA3633;
     --app-git-renamed-color: #2563eb;
-    --app-git-untracked-color: #8E8E93;
+    --app-git-untracked-color: #8B949E;
 
     /* Badge colors (light) */
-    --app-badge-warning-bg: rgba(245, 158, 11, 0.2);
-    --app-badge-warning-text: #b45309;
-    --app-badge-warning-border: rgba(245, 158, 11, 0.3);
-    --app-badge-success-bg: rgba(34, 197, 94, 0.2);
-    --app-badge-success-text: #15803d;
-    --app-badge-success-border: rgba(34, 197, 94, 0.3);
-    --app-badge-error-bg: rgba(239, 68, 68, 0.18);
-    --app-badge-error-text: #b91c1c;
-    --app-badge-error-border: rgba(239, 68, 68, 0.3);
+    --app-badge-warning-bg: rgba(210, 153, 34, 0.12);
+    --app-badge-warning-text: #9a6c00;
+    --app-badge-warning-border: rgba(210, 153, 34, 0.25);
+    --app-badge-success-bg: rgba(35, 134, 54, 0.12);
+    --app-badge-success-text: #1a7f37;
+    --app-badge-success-border: rgba(35, 134, 54, 0.25);
+    --app-badge-error-bg: rgba(218, 54, 51, 0.12);
+    --app-badge-error-text: #a11d1d;
+    --app-badge-error-border: rgba(218, 54, 51, 0.25);
 
     --app-font-scale: 1;
     --app-chat-font-size: 0.9375rem;
@@ -82,88 +84,106 @@
 }
 
 [data-theme="dark"] {
-    /* Primary colors - override fallbacks for non-Telegram browsers */
-    --app-bg: var(--tg-theme-bg-color, #1c1c1e);
-    --app-fg: var(--tg-theme-text-color, #ffffff);
-    --app-hint: var(--tg-theme-hint-color, #8e8e93);
-    --app-link: var(--tg-theme-link-color, #ffffff);
-    --app-button: var(--tg-theme-button-color, #ffffff);
-    --app-button-text: var(--tg-theme-button-text-color, #111827);
-    --app-banner-bg: var(--tg-theme-button-color, #3A3A3C);
-    --app-banner-text: var(--tg-theme-button-text-color, #ffffff);
-    --app-secondary-bg: var(--tg-theme-secondary-bg-color, #2C2C2E);
+    /* === Background Layers: Canvas → Surface → Elevated === */
+    --app-bg: var(--tg-theme-bg-color, #0A0A0B);
+    --app-secondary-bg: var(--tg-theme-secondary-bg-color, #141416);
+    --app-dialog-bg: #1C1C1F;
 
-    --app-dialog-bg: #202226;
-    --app-chat-user-bg: #2b2f34;
-    --app-chat-user-surface-bg: var(--app-chat-user-bg);
-    --app-chat-user-fg: #f5f7fa;
-    --app-chat-user-chip-bg: rgba(37, 99, 235, 0.22);
-    --app-chat-user-chip-fg: #93c5fd;
-    --app-tool-card-bg: #2b2f34;
-    --app-tool-group-bg: var(--app-tool-card-bg);
-    --app-tool-card-hover-bg: #343a41;
-    --app-tool-card-accent: #b8c0cb;
-    --app-tool-card-muted-action-fg: #7f8792;
-    --app-tool-card-subtitle: #b3bac5;
-    --app-code-header-bg: #353b43;
-    --app-code-header-fg: #c4cbd6;
-    --app-code-copy-hover-bg: rgba(255, 255, 255, 0.08);
-    --app-inline-code-border: transparent;
-    --app-inline-code-fg: #f5f7fa;
-    --app-md-quote-bg: #31363d;
-    --app-md-quote-border: #6b7481;
-    --app-md-quote-fg: #d7dde6;
-    --app-md-table-bg: #2a2f35;
-    --app-md-table-head-bg: #353b43;
-    --app-reasoning-bg: #2b3036;
-    --app-mermaid-node-fill: #323843;
-    --app-mermaid-node-border: #7aa2ff;
-    --app-mermaid-cluster-fill: #2d3440;
-    --app-mermaid-text: #edf1f5;
+    /* === Foreground === */
+    --app-fg: var(--tg-theme-text-color, #E6EDF3);
+    --app-hint: var(--tg-theme-hint-color, #8B949E);
+    --app-link: var(--tg-theme-link-color, #E6EDF3);
+
+    /* === Buttons === */
+    --app-button: var(--tg-theme-button-color, #E6EDF3);
+    --app-button-text: var(--tg-theme-button-text-color, #0A0A0B);
+
+    /* === Banner === */
+    --app-banner-bg: var(--tg-theme-button-color, #1C1C1F);
+    --app-banner-text: var(--tg-theme-button-text-color, #E6EDF3);
+
+    /* === Chat === */
+    --app-chat-user-bg: #141416;
+    --app-chat-user-surface-bg: #1C1C1F;
+    --app-chat-user-fg: #E6EDF3;
+    --app-chat-user-chip-bg: rgba(34, 197, 94, 0.12);
+    --app-chat-user-chip-fg: #4ade80;
+
+    /* === Tool Cards === */
+    --app-tool-card-bg: #141416;
+    --app-tool-group-bg: #141416;
+    --app-tool-card-hover-bg: rgba(255, 255, 255, 0.04);
+    --app-tool-card-accent: #E6EDF3;
+    --app-tool-card-muted-action-fg: #8B949E;
+    --app-tool-card-subtitle: #8B949E;
+
+    /* === Code === */
+    --app-code-header-bg: #1C1C1F;
+    --app-code-header-fg: #8B949E;
+    --app-code-copy-hover-bg: rgba(255, 255, 255, 0.06);
+    --app-code-bg: #141416;
+    --app-inline-code-bg: #1C1C1F;
+    --app-inline-code-border: #30363D;
+    --app-inline-code-fg: #E6EDF3;
+
+    /* === Markdown === */
+    --app-md-quote-bg: #141416;
+    --app-md-quote-border: #30363D;
+    --app-md-quote-fg: #8B949E;
+    --app-md-table-bg: #141416;
+    --app-md-table-head-bg: #1C1C1F;
+    --app-reasoning-bg: #141416;
+
+    /* === Mermaid === */
+    --app-mermaid-node-fill: #1C1C1F;
+    --app-mermaid-node-border: #30363D;
+    --app-mermaid-cluster-fill: #141416;
+    --app-mermaid-text: #E6EDF3;
+
+    /* === Misc === */
     --app-link-muted: rgba(255, 255, 255, 0.2);
-    --app-scrollbar-thumb: rgba(196, 203, 214, 0.28);
-    --app-scrollbar-thumb-hover: rgba(196, 203, 214, 0.42);
+    --app-scrollbar-thumb: rgba(139, 148, 158, 0.25);
+    --app-scrollbar-thumb-hover: rgba(139, 148, 158, 0.4);
 
-    --app-border: rgba(255, 255, 255, 0.08);
-    --app-divider: rgba(255, 255, 255, 0.08);
-    --app-subtle-bg: rgba(255, 255, 255, 0.05);
-    --app-code-bg: #2a2f35;
-    --app-inline-code-bg: #383e47;
+    /* === Semantic surfaces === */
+    --app-border: #30363D;
+    --app-divider: #30363D;
+    --app-subtle-bg: rgba(255, 255, 255, 0.04);
 
-    /* Diff colors (dark) - from hapi-app */
-    --app-diff-added-bg: #0d2e1f;
-    --app-diff-added-text: #c9d1d9;
-    --app-diff-removed-bg: #3f1b23;
-    --app-diff-removed-text: #c9d1d9;
+    /* === Diff colors (dark) === */
+    --app-diff-added-bg: rgba(35, 134, 54, 0.15);
+    --app-diff-added-text: #E6EDF3;
+    --app-diff-removed-bg: rgba(218, 54, 51, 0.15);
+    --app-diff-removed-text: #E6EDF3;
 
-    /* Git status colors (dark) */
-    --app-git-staged-color: #4ade80;
-    --app-git-unstaged-color: #f59e0b;
-    --app-git-deleted-color: #f87171;
-    --app-git-renamed-color: #60a5fa;
-    --app-git-untracked-color: #9ca3af;
+    /* === Git status colors (dark) === */
+    --app-git-staged-color: #238636;
+    --app-git-unstaged-color: #D29922;
+    --app-git-deleted-color: #DA3633;
+    --app-git-renamed-color: #58A6FF;
+    --app-git-untracked-color: #8B949E;
 
-    /* Badge colors (dark) */
-    --app-badge-warning-bg: rgba(251, 191, 36, 0.2);
-    --app-badge-warning-text: #fbbf24;
-    --app-badge-warning-border: rgba(251, 191, 36, 0.3);
-    --app-badge-success-bg: rgba(74, 222, 128, 0.2);
-    --app-badge-success-text: #4ade80;
-    --app-badge-success-border: rgba(74, 222, 128, 0.3);
-    --app-badge-error-bg: rgba(248, 113, 113, 0.2);
-    --app-badge-error-text: #fca5a5;
-    --app-badge-error-border: rgba(248, 113, 113, 0.35);
+    /* === Badge colors (dark) === */
+    --app-badge-warning-bg: rgba(210, 153, 34, 0.15);
+    --app-badge-warning-text: #D29922;
+    --app-badge-warning-border: rgba(210, 153, 34, 0.3);
+    --app-badge-success-bg: rgba(35, 134, 54, 0.15);
+    --app-badge-success-text: #238636;
+    --app-badge-success-border: rgba(35, 134, 54, 0.3);
+    --app-badge-error-bg: rgba(218, 54, 51, 0.15);
+    --app-badge-error-text: #DA3633;
+    --app-badge-error-border: rgba(218, 54, 51, 0.3);
 }
 
 html {
     font-size: calc(100% * var(--app-font-scale, 1));
-    color-scheme: light;
+    color-scheme: dark;
     scrollbar-color: var(--app-scrollbar-thumb) transparent;
     scrollbar-width: thin;
 }
 
-[data-theme="dark"] {
-    color-scheme: dark;
+[data-theme="light"] {
+    color-scheme: light;
 }
 
 * {

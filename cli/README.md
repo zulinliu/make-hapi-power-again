@@ -1,165 +1,144 @@
-# hapi CLI
+# CLI
 
-Run Claude Code, Codex, Cursor Agent, Gemini, or OpenCode sessions from your terminal and control them remotely through the hapi hub.
+Hapi Power 命令行工具 — 封装多种 AI 编码代理，连接到 Hub 实现远程管理和多端协同。
 
-## What it does
+## 功能
 
-- Starts Claude Code sessions and registers them with hapi-hub.
-- Starts Codex mode for OpenAI-based sessions.
-- Starts Cursor Agent mode for Cursor CLI sessions.
-- Starts Gemini mode via ACP (Anthropic Code Plugins).
-- Starts OpenCode mode via ACP and its plugin hook system.
-- Provides an MCP stdio bridge for external tools.
-- Manages a background runner for long-running sessions.
-- Includes diagnostics and auth helpers.
+- 封装 6 种 AI 代理：Claude Code、Codex、Cursor Agent、Gemini、OpenCode、Kimi
+- Socket.IO 客户端连接到 Hub
+- 51 个 RPC 方法供 Hub 远程调用
+- 后台 Runner 守护进程
+- MCP stdio 桥接
+- 诊断和认证工具
 
-## Typical flow
+## 命令
 
-1. Start the hub and set env vars (see ../hub/README.md).
-2. Set the same CLI_API_TOKEN on this machine or run `hapi auth login`.
-3. Run `hapi` to start a session.
-4. Use the web app or Telegram Mini App to monitor and control.
+### 代理会话
 
-## Commands
+| 命令 | 说明 |
+|------|------|
+| `hapi` | 启动 Claude Code 会话 |
+| `hapi codex` | 启动 Codex 模式 |
+| `hapi codex resume <sessionId>` | 恢复 Codex 会话 |
+| `hapi cursor` | 启动 Cursor Agent 模式 |
+| `hapi gemini` | 启动 Gemini 模式（远程模式） |
+| `hapi opencode` | 启动 OpenCode 模式 |
+| `hapi kimi` | 启动 Kimi 模式 |
+| `hapi resume [sessionId]` | 列出/恢复可恢复会话 |
 
-### Session commands
+### 认证
 
-- `hapi` - Start a Claude Code session (passes through Claude CLI flags). See `src/index.ts`.
-- `hapi codex` - Start Codex mode. See `src/codex/runCodex.ts`.
-- `hapi codex resume <sessionId>` - Resume existing Codex session.
-- `hapi cursor` - Start Cursor Agent mode. See `src/cursor/runCursor.ts`.
-  Supports `hapi cursor resume <chatId>`, `hapi cursor --continue`, `--mode plan|ask`, `--yolo`, `--model`.
-  Local and remote modes supported; remote uses `agent -p` with stream-json.
-- `hapi gemini` - Start Gemini mode via ACP. See `src/agent/runners/runAgentSession.ts`.
-  Note: Gemini runs in remote mode only; it waits for messages from the hub UI/Telegram.
-- `hapi opencode` - Start OpenCode mode via ACP. See `src/opencode/runOpencode.ts`.
-  Note: OpenCode supports local and remote modes; local mode streams via OpenCode plugins.
-- `hapi resume [sessionId]` - List resumable sessions for this machine or resume one locally.
+| 命令 | 说明 |
+|------|------|
+| `hapi auth status` | 显示认证配置 |
+| `hapi auth login` | 交互式输入令牌 |
+| `hapi auth logout` | 清除凭据 |
+| `hapi connect` | 连接到 Hub |
 
-### Resume a remote session locally
+### Runner 管理
 
-```bash
-hapi resume
-hapi resume <session-id>
-```
+| 命令 | 说明 |
+|------|------|
+| `hapi runner start` | 启动 Runner 守护进程 |
+| `hapi runner stop` | 停止 Runner |
+| `hapi runner status` | Runner 状态诊断 |
+| `hapi runner list` | 列出活跃会话 |
+| `hapi runner stop-session <id>` | 终止指定会话 |
+| `hapi runner logs` | 日志路径 |
 
-`hapi resume` lists resumable sessions for the current machine. `hapi resume <session-id>` hands off an active remote session and opens the same HAPI session in the local terminal.
+`runner start` 接受 `--workspace-root <path>` 参数（可重复），限定 Web 文件浏览范围。
 
-### Authentication
+### 其他
 
-- `hapi auth status` - Show authentication configuration and token source.
-- `hapi auth login` - Interactively enter and save CLI_API_TOKEN.
-- `hapi auth logout` - Clear saved credentials.
+| 命令 | 说明 |
+|------|------|
+| `hapi hub` | 启动捆绑的 Hub |
+| `hapi server` | `hapi hub` 别名 |
+| `hapi mcp` | MCP stdio 桥接 |
+| `hapi doctor` | 完整诊断信息 |
+| `hapi doctor clean` | 清理残留进程 |
+| `hapi notify` | 发送测试通知 |
+| `hapi hookForwarder` | Hook 事件转发 |
 
-See `src/commands/auth.ts`.
+## 配置
 
-### Runner management
+### 必需
 
-- `hapi runner start` - Start runner as detached process.
-- `hapi runner stop` - Stop runner gracefully.
-- `hapi runner status` - Show runner diagnostics.
-- `hapi runner list` - List active sessions managed by runner.
-- `hapi runner stop-session <sessionId>` - Terminate specific session.
-- `hapi runner logs` - Print path to latest runner log file.
+| 变量 | 说明 |
+|------|------|
+| `CLI_API_TOKEN` | 共享密钥，必须与 Hub 匹配 |
 
-Both `start` and `start-sync` accept repeatable `--workspace-root <path>` (or `--workspace-root=<path>`). When set:
+### 可选
 
-- The web `/browse` page surfaces scoped file trees rooted at those paths.
-- The runner refuses `list-directory` and `spawn-session` requests for paths outside the configured roots.
-- `~` and `~/foo` are expanded.
-
-Omitting the flag keeps the legacy behavior: no scoping, no `/browse` feature.
-
-See `src/runner/run.ts`.
-
-### Diagnostics
-
-- `hapi doctor` - Show full diagnostics (version, runner status, logs, processes).
-- `hapi doctor clean` - Kill runaway HAPI processes.
-
-See `src/ui/doctor.ts`.
-
-### Other
-
-- `hapi mcp` - Start MCP stdio bridge. See `src/codex/happyMcpStdioBridge.ts`.
-- `hapi hub` - Start the bundled hub (single binary workflow).
-- `hapi server` - Alias for `hapi hub`.
-
-## Configuration
-
-See `src/configuration.ts` for all options.
-
-### Required
-
-- `CLI_API_TOKEN` - Shared secret; must match the hub. Can be set via env or `~/.hapi/settings.json` (env wins).
-- `HAPI_API_URL` - Hub base URL (default: http://localhost:3006).
-
-### Optional
-
-- `HAPI_HOME` - Config/data directory (default: ~/.hapi).
-- `HAPI_EXPERIMENTAL` - Enable experimental features (true/1/yes).
-- `HAPI_EXTRA_HEADERS_JSON` - JSON object of extra headers to send on CLI → hub requests, e.g. `{"Cookie":"CF_Authorization=..."}`.
-- `HAPI_CLAUDE_PATH` - Path to a specific `claude` executable.
-- `HAPI_HTTP_MCP_URL` - Default MCP target for `hapi mcp`.
+| 变量 | 说明 | 默认值 |
+|------|------|--------|
+| `HUB_URL` / `HAPI_API_URL` | Hub 地址 | `http://localhost:3000` |
+| `HAPI_HOME` | 配置/数据目录 | `~/.hapi` |
+| `HAPI_CLAUDE_PATH` | 指定 claude 可执行文件路径 | PATH 中的 `claude` |
+| `HAPI_EXTRA_HEADERS_JSON` | 额外 HTTP 头 | - |
+| `HAPI_HTTP_MCP_URL` | 默认 MCP 目标 | - |
+| `ANTHROPIC_API_KEY` | Claude API 密钥 | - |
 
 ### Runner
 
-- `HAPI_RUNNER_HEARTBEAT_INTERVAL` - Heartbeat interval in ms (default: 60000).
-- `HAPI_RUNNER_HTTP_TIMEOUT` - HTTP timeout for runner control in ms (default: 10000).
+| 变量 | 说明 | 默认值 |
+|------|------|--------|
+| `HAPI_RUNNER_HEARTBEAT_INTERVAL` | 心跳间隔（ms） | `60000` |
+| `HAPI_RUNNER_HTTP_TIMEOUT` | HTTP 超时（ms） | `10000` |
 
-### Worktree (set by runner)
+## 典型流程
 
-- `HAPI_WORKTREE_BASE_PATH` - Base repository path.
-- `HAPI_WORKTREE_BRANCH` - Current branch name.
-- `HAPI_WORKTREE_NAME` - Worktree name.
-- `HAPI_WORKTREE_PATH` - Full worktree path.
-- `HAPI_WORKTREE_CREATED_AT` - Creation timestamp (ms).
+1. 启动 Hub：`hapi hub`
+2. 设置 CLI_API_TOKEN（环境变量或 `hapi auth login`）
+3. 启动代理：`hapi`（Claude Code）、`hapi codex` 等
+4. 在 Web 或移动端监控和操控
 
-## Storage
+## 数据存储
 
-Data is stored in `~/.hapi/` (or `$HAPI_HOME`):
+`~/.hapi/` 目录（或 `$HAPI_HOME`）：
 
-- `settings.json` - User settings (machineId, token, onboarding flag). See `src/persistence.ts`.
-- `runner.state.json` - Runner state (pid, port, version, heartbeat).
-- `logs/` - Log files.
+- `settings.json` — 用户设置（machineId、token）
+- `runner.state.json` — Runner 状态（pid、port、heartbeat）
+- `logs/` — 日志文件
 
-## Requirements
+## 依赖
 
-- Claude CLI installed and logged in (`claude` on PATH).
-- Cursor Agent CLI installed (`agent` on PATH) for `hapi cursor`. Install: `curl https://cursor.com/install -fsS | bash` (macOS/Linux), `irm 'https://cursor.com/install?win32=true' | iex` (Windows).
-- OpenCode CLI installed (`opencode` on PATH).
-- Bun for building from source.
+- Claude CLI（`claude` 在 PATH 中）用于 Claude Code 模式
+- Cursor Agent CLI（`agent` 在 PATH 中）用于 Cursor 模式
+- Bun 用于从源码构建
 
-## Build from source
+## 源码结构
 
-From the repo root:
-
-```bash
-bun install
-bun run build:cli
-bun run build:cli:exe
 ```
-
-For an all-in-one binary that also embeds the web app:
-
-```bash
-bun run build:single-exe
+src/
+├── commands/          CLI 子命令
+│   ├── registry.ts    命令注册表
+│   ├── auth.ts        认证命令
+│   ├── claude.ts      Claude 子命令
+│   ├── codex.ts       Codex 子命令
+│   ├── cursor.ts      Cursor 子命令
+│   ├── gemini.ts      Gemini 子命令
+│   ├── kimi.ts        Kimi 子命令
+│   ├── opencode.ts    OpenCode 子命令
+│   ├── runner.ts      Runner 命令
+│   ├── hub.ts         Hub 命令
+│   ├── mcp.ts         MCP 桥接
+│   ├── doctor.ts      诊断命令
+│   └── notify.ts      通知命令
+├── api/               Hub 通信（Socket.IO + REST）
+├── claude/            Claude Code 集成
+├── codex/             Codex 模式集成
+├── cursor/            Cursor Agent 集成
+├── gemini/            Gemini 集成（ACP）
+├── kimi/              Kimi 集成
+├── opencode/          OpenCode 集成
+├── agent/             多代理通用支持
+├── runner/            后台守护进程
+├── modules/           工具实现（ripgrep、difftastic、git）
+├── parsers/           输出解析器
+├── ui/                终端 UI（Ink 组件）
+├── bootstrap.ts       启动入口
+├── configuration.ts   配置加载
+├── persistence.ts     设置持久化
+└── lib.ts             公共工具
 ```
-
-## Source structure
-
-- `src/api/` - Bot communication (Socket.IO + REST).
-- `src/claude/` - Claude Code integration.
-- `src/codex/` - Codex mode integration.
-- `src/cursor/` - Cursor Agent integration.
-- `src/agent/` - Multi-agent support (Gemini via ACP).
-- `src/opencode/` - OpenCode ACP + hook integration.
-- `src/runner/` - Background service.
-- `src/commands/` - CLI command handlers.
-- `src/ui/` - User interface and diagnostics.
-- `src/modules/` - Tool implementations (ripgrep, difftastic, git).
-
-## Related docs
-
-- `../hub/README.md`
-- `../web/README.md`

@@ -13,6 +13,15 @@ export const RPC_METHODS = {
     GitStatus: 'git-status',
     GitDiffNumstat: 'git-diff-numstat',
     GitDiffFile: 'git-diff-file',
+    GitLog: 'git-log',
+    GitBranchList: 'git-branch-list',
+    GitBranchCreate: 'git-branch-create',
+    GitBranchSwitch: 'git-branch-switch',
+    GitBranchMerge: 'git-branch-merge',
+    GitBranchDelete: 'git-branch-delete',
+    GitCommit: 'git-commit',
+    GitAdd: 'git-add',
+    GitAutoCommit: 'git-auto-commit',
     ReadFile: 'readFile',
     ReadGeneratedImage: 'readGeneratedImage',
     WriteFile: 'writeFile',
@@ -28,7 +37,17 @@ export const RPC_METHODS = {
     ListCodexModels: 'listCodexModels',
     ListCursorModels: 'listCursorModels',
     ListOpencodeModels: 'listOpencodeModels',
-    ListOpencodeModelsForCwd: 'listOpencodeModelsForCwd'
+    ListOpencodeModelsForCwd: 'listOpencodeModelsForCwd',
+    PluginList: 'plugin-list',
+    PluginInstall: 'plugin-install',
+    PluginUninstall: 'plugin-uninstall',
+    PluginStorageGet: 'plugin-storage-get',
+    PluginStorageSet: 'plugin-storage-set',
+    PluginStorageDelete: 'plugin-storage-delete',
+    PluginStorageList: 'plugin-storage-list',
+    SkillSearch: 'skill-search',
+    SkillInstall: 'skill-install',
+    SkillUninstall: 'skill-uninstall'
 } as const
 
 export type RpcMethod = typeof RPC_METHODS[keyof typeof RPC_METHODS]

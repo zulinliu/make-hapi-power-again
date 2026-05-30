@@ -1,160 +1,141 @@
-# hapi-web
+# Web
 
-React Mini App / PWA for monitoring and controlling hapi sessions.
+Hapi Power 前端 — React PWA，提供完整的浏览器内 AI 代理开发体验。
 
-## What it does
+## 功能
 
-- Session list with status, pending approvals, todos, and summaries.
-- Chat view with streaming updates and message sending.
-- Permission approval and denial workflows.
-- Permission mode and model selection.
-- Machine list and remote session spawn.
-- File browser and git status/diff views.
-- PWA install prompt and offline banner.
+- 会话列表、聊天界面、消息流式更新
+- Git 状态查看、Diff 对比、分支管理
+- 文件浏览器 + Monaco Editor 代码编辑
+- xterm.js 全功能终端（多会话、分屏）
+- 插件管理、Skill 安装/卸载
+- 变更审查面板（按对话分组、逐文件审批）
+- 操作时间线、会话摘要
+- 撤销变更（会话/步骤/文件粒度）
+- 移动端专用界面 `/m/*`
+- 会话分享
+- PWA 推送通知
+- 图片粘贴/拖拽上传
+- 语音录制转文字
+- 白板绘图工具
+- 编排 Skill 页面
 
-## Runtime behavior
+## 技术栈
 
-- When opened inside Telegram, auth uses Telegram WebApp init data.
-- When opened in a normal browser, you can log in with `CLI_API_TOKEN:<namespace>` (or `CLI_API_TOKEN` for the default namespace).
-- The login screen includes a top-right hub picker; if unset, the app uses the same origin it was loaded from.
-- Live updates come from the hub via SSE.
+React 19 + Vite + TanStack Router + TanStack Query + Tailwind CSS + Monaco Editor + xterm.js + Socket.IO Client + Shiki
 
-## Routes
+## 路由
 
-See `src/router.tsx` for route definitions.
+| 路径 | 说明 | 组件 |
+|------|------|------|
+| `/` | 重定向到 /sessions | - |
+| `/sessions` | 会话列表 | `SessionList` |
+| `/sessions/$sessionId` | 聊天界面 | `SessionChat` |
+| `/sessions/new` | 创建新会话 | `NewSession` |
+| `/sessions/$sessionId/files` | 文件浏览 + Git 状态 | `FilesPage` |
+| `/sessions/$sessionId/file` | 文件查看/编辑 | `FileViewer` |
+| `/sessions/$sessionId/terminal` | 终端 | `TerminalPage` |
+| `/sessions/$sessionId/changes` | 变更审查 | `ChangeReview` |
+| `/sessions/$sessionId/timeline` | 操作时间线 | `TimelinePage` |
+| `/sessions/$sessionId/undo` | 撤销变更 | `UndoPage` |
+| `/settings` | 应用设置 | `SettingsPage` |
+| `/browse` | 工作区浏览 | `BrowsePage` |
+| `/sessions/$sessionId/git` | Git 管理 | `GitPage` |
+| `/sessions/$sessionId/extensions` | 会话扩展 | `ExtensionsPage` |
+| `/orchestration` | 编排 Skill | `OrchestrationPage` |
+| `/s/$shareId` | 分享查看 | `ShareViewPage` |
+| `/m/$sessionId/changes` | 移动端变更审查 | `MobileChangesPage` |
+| `/m/$sessionId/terminal` | 移动端终端 | `MobileTerminalPage` |
 
-- `/` - Redirect to /sessions.
-- `/sessions` - Session list.
-- `/sessions/$sessionId` - Chat interface.
-- `/sessions/new` - Create new session.
-- `/sessions/$sessionId/files` - File browser with git status.
-- `/sessions/$sessionId/file` - File viewer with diff support.
-- `/sessions/$sessionId/terminal` - Terminal interface.
-- `/settings` - Application settings.
+## 认证
 
-## Features
+通过 `useAuth.ts` 和 `useAuthSource.ts` 管理：
 
-### Session list (`src/components/SessionList.tsx`)
+- 浏览器登录：使用 `CLI_API_TOKEN[:namespace]`
+- JWT 令牌，自动刷新
+- 登录页面右上角 Hub 地址选择器
 
-- Active/inactive status indicator.
-- Session title from name, summary, or path.
-- Todo progress display.
-- Pending permission request count.
-- Agent flavor label (claude/codex/gemini).
-- Model mode display.
+## 数据获取
 
-### Chat interface (`src/components/SessionChat.tsx`)
+- **TanStack Query**：`src/hooks/queries/` 查询钩子、`src/hooks/mutations/` 变更钩子
+- **SSE**：`useSSE.ts` 订阅 `/api/events`，自动缓存失效
+- **Socket.IO**：`useTerminalSocket.ts` 终端连接、`useBinaryUpload.ts` 二进制上传
 
-- Message thread with infinite scroll.
-- Composer for sending messages.
-- Permission mode toggle (default/acceptEdits/bypassPermissions/plan).
-- Model selection (default/sonnet/sonnet[1m]/opus/opus[1m]).
-- Session abort and mode switch controls.
-- Context size display.
+## 关键组件
 
-### File browser (`src/routes/sessions/files.tsx`)
+| 组件 | 说明 |
+|------|------|
+| `SessionChat.tsx` | 主聊天界面，集成图片上传、语音、白板 |
+| `SessionList.tsx` | 会话列表，状态、待审批、进度 |
+| `SessionHeader.tsx` | 会话头部，白板入口 |
+| `AssistantChat/HappyComposer.tsx` | 消息编辑器，语音入口 |
+| `ImagePasteDrop.tsx` | 图片粘贴/拖拽上传包装器 |
+| `VoiceRecorder.tsx` | 录音 → Whisper 转文字 |
+| `Whiteboard.tsx` | Canvas 绘图工具 |
+| `DiffView.tsx` | Diff 对比显示 |
+| `Editor/` | Monaco Editor 集成 |
+| `git/` | Git 管理组件 |
 
-- Git status view (staged/unstaged files).
-- File search with ripgrep.
-- Navigate to file viewer.
+## 关键 Hooks
 
-### File viewer (`src/routes/sessions/file.tsx`)
+| Hook | 说明 |
+|------|------|
+| `useAuth.ts` | 认证状态管理 |
+| `useSSE.ts` | SSE 实时订阅 |
+| `useTerminalSocket.ts` | 终端 Socket.IO 连接 |
+| `useBinaryUpload.ts` | 二进制文件上传 |
+| `usePushNotifications.ts` | Web Push 推送 |
+| `useTheme.ts` | 主题管理 |
+| `useFontScale.ts` | 字体缩放 |
+| `useTerminalFontSize.ts` | 终端字号 |
+| `useOnlineStatus.ts` | 在线状态 |
+| `usePWAInstall.ts` | PWA 安装提示 |
 
-- File content display with syntax highlighting.
-- Staged/unstaged diff view.
+## 源码结构
 
-### Terminal (`src/routes/sessions/terminal.tsx`)
-
-- Remote terminal via xterm.js
-- Real-time via Socket.IO
-- Resize handling
-
-### Voice assistant
-
-- ElevenLabs integration (@elevenlabs/react)
-- Real-time voice control
-
-### New session (`src/components/NewSession/`)
-
-Modular session creation:
-
-- Machine selector
-- Directory input with recent paths
-- Agent type selector
-- Model selector
-- Permission mode toggle (YOLO mode)
-
-## Authentication
-
-See `src/hooks/useAuth.ts` and `src/hooks/useAuthSource.ts`.
-
-- Telegram Mini App: Uses initData from WebApp SDK.
-- Browser: Uses CLI_API_TOKEN from login prompt.
-- JWT tokens with auto-refresh.
-
-## Data fetching
-
-See `src/hooks/queries/` for query hooks and `src/hooks/mutations/` for mutations.
-
-- Sessions, messages, machines via TanStack Query.
-- Git status and file operations.
-- Optimistic updates for message sending.
-
-## Real-time updates
-
-See `src/hooks/useSSE.ts`.
-
-- SSE connection to `/api/events`.
-- Session/message/machine update events.
-- Automatic cache invalidation on events.
-
-## Stack
-
-React 19 + Vite + TanStack Router/Query + Tailwind + @assistant-ui/react + xterm.js + @elevenlabs/react + socket.io-client + workbox + shiki.
-
-## Source structure
-
-- `src/router.tsx` - Route definitions.
-- `src/components/` - UI components.
-- `src/hooks/` - Data fetching and state hooks.
-- `src/api/client.ts` - API client.
-- `src/types/api.ts` - Type definitions.
-
-## Development
-
-From the repo root:
-
-```bash
-bun install
-bun run dev:web
+```
+src/
+├── router.tsx           路由定义（19 个路由）
+├── routes/              路由页面组件
+│   ├── sessions/        会话视图
+│   ├── settings/        设置页面
+│   ├── mobile/          移动端路由
+│   ├── orchestration.tsx 编排 Skill
+│   └── share.tsx        分享页面
+├── components/          UI 组件
+│   ├── AssistantChat/   assistant-ui 集成
+│   ├── ChatInput/       聊天输入
+│   ├── NewSession/      新建会话
+│   ├── Editor/          Monaco 编辑器
+│   ├── git/             Git 管理组件
+│   ├── SessionChat.tsx  主聊天界面
+│   ├── SessionList.tsx  会话列表
+│   ├── ImagePasteDrop.tsx 图片上传
+│   ├── VoiceRecorder.tsx 语音录制
+│   ├── Whiteboard.tsx   白板工具
+│   ├── DiffView.tsx     Diff 显示
+│   └── MarkdownRenderer.tsx Markdown 渲染
+├── hooks/
+│   ├── queries/         TanStack Query 查询
+│   ├── mutations/       TanStack Query 变更
+│   ├── useSSE.ts        SSE 订阅
+│   ├── useTerminalSocket.ts 终端连接
+│   ├── useBinaryUpload.ts  二进制上传
+│   └── usePushNotifications.ts 推送
+├── api/
+│   └── client.ts        API 客户端封装
+└── types/
+    └── api.ts           类型定义
 ```
 
-
-If testing in Telegram, set:
-
-- `HAPI_PUBLIC_URL` to the public HTTPS URL of the dev server.
-- `CORS_ORIGINS` to include the dev server origin.
-
-## Build
+## 开发
 
 ```bash
+# 从仓库根目录
+bun run dev:web
+
+# 单独构建
 bun run build:web
 ```
 
-The built assets land in `web/dist` and are served by hapi-hub. The single executable can embed these assets.
-
-## Standalone hosting
-
-You can host `web/dist` on a static host (GitHub Pages, Cloudflare Pages) and point it at any hapi hub:
-
-1. Build the web app. If your static host uses a subpath, set the Vite base:
-
-```bash
-bun run build:web -- --base /<repo>/
-```
-
-2. Deploy `web/dist` to your static host.
-3. Set hub CORS to allow the static origin (`HAPI_PUBLIC_URL` or `CORS_ORIGINS`).
-4. Open the static site, click the top-right Hub button on the login screen, and enter the hapi hub origin.
-
-Clear the hub override in the same dialog to return to same-origin behavior.
+构建产物在 `web/dist/`，由 Hub 服务或嵌入单文件可执行程序。
