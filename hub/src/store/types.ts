@@ -67,3 +67,13 @@ export type VersionedUpdateResult<T> =
     | { result: 'success'; version: number; value: T }
     | { result: 'version-mismatch'; version: number; value: T }
     | { result: 'error' }
+
+export type StoredFileSnapshot = {
+    id: number
+    sessionId: string
+    namespace: string
+    filePath: string
+    contentHash: string
+    snapshotType: string
+    createdAt: number
+}
