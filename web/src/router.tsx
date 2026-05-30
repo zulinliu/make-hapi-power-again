@@ -1,0 +1,736 @@
+import { useCallback, useEffect, useMemo } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import {
+    Navigate,
+    Outlet,
+    createRootRoute,
+    createRoute,
+    createRouter,
+    useLocation,
+    useMatchRoute,
+    useNavigate,
+    useParams,
+} from '@tanstack/react-router'
+import { getScrollRestorationKey } from '@/lib/scrollRestorationKey'
+import { App } from '@/App'
+import { SessionChat } from '@/components/SessionChat'
+import { SessionList } from '@/components/SessionList'
+import { NewSession } from '@/components/NewSession'
+import { WorkspaceBrowser } from '@/components/WorkspaceBrowser'
+import { LoadingState } from '@/components/LoadingState'
+import { useAppContext } from '@/lib/app-context'
+import { useAppGoBack } from '@/hooks/useAppGoBack'
+import { isTelegramApp } from '@/hooks/useTelegram'
+import { useSidebarResize } from '@/hooks/useSidebarResize'
+import { useMessages } from '@/hooks/queries/useMessages'
+import { useMachines } from '@/hooks/queries/useMachines'
+import { useSession } from '@/hooks/queries/useSession'
+import { useSessions } from '@/hooks/queries/useSessions'
+import { useSlashCommands } from '@/hooks/queries/useSlashCommands'
+import { useSkills } from '@/hooks/queries/useSkills'
+import { useSendMessage } from '@/hooks/mutations/useSendMessage'
+import { queryKeys } from '@/lib/query-keys'
+import { useToast } from '@/lib/toast-context'
+import { useTranslation } from '@/lib/use-translation'
+import { fetchLatestMessages, seedMessageWindowFromSession } from '@/lib/message-window-store'
+import { clearDraftsAfterSend } from '@/lib/clearDraftsAfterSend'
+import { markSessionSeen } from '@/lib/sessionLastSeen'
+import type { Machine } from '@/types/api'
+import FilesPage from '@/routes/sessions/files'
+import FilePage from '@/routes/sessions/file'
+import TerminalPage from '@/routes/sessions/terminal'
+import SettingsPage from '@/routes/settings'
+
+function BackIcon(props: { className?: string }) {
+    return (
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className={props.className}
+        >
+            <polyline points="15 18 9 12 15 6" />
+        </svg>
+    )
+}
+
+function PlusIcon(props: { className?: string }) {
+    return (
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className={props.className}
+        >
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+    )
+}
+
+function FolderOpenIcon(props: { className?: string }) {
+    return (
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className={props.className}
+        >
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+        </svg>
+    )
+}
+
+function SettingsIcon(props: { className?: string }) {
+    return (
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className={props.className}
+        >
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+        </svg>
+    )
+}
+
+function getMachineTitle(machine: Machine): string {
+    if (machine.metadata?.displayName) return machine.metadata.displayName
+    if (machine.metadata?.host) return machine.metadata.host
+    return machine.id.slice(0, 8)
+}
+
+function SessionsPage() {
+    const { api } = useAppContext()
+    const navigate = useNavigate()
+    const pathname = useLocation({ select: location => location.pathname })
+    const matchRoute = useMatchRoute()
+    const { t } = useTranslation()
+    const { sessions, isLoading, error, refetch } = useSessions(api)
+    const { machines } = useMachines(api, true)
+
+    const handleRefresh = useCallback(() => {
+        void refetch()
+    }, [refetch])
+
+    const projectCount = useMemo(() => new Set(sessions.map(s =>
+        s.metadata?.worktree?.basePath ?? s.metadata?.path ?? 'Other'
+    )).size, [sessions])
+    const machineLabelsById = useMemo(() => {
+        const labels: Record<string, string> = {}
+        for (const machine of machines) {
+            labels[machine.id] = getMachineTitle(machine)
+        }
+        return labels
+    }, [machines])
+    const sessionMatch = matchRoute({ to: '/sessions/$sessionId', fuzzy: true })
+    const selectedSessionId = sessionMatch && sessionMatch.sessionId !== 'new' ? sessionMatch.sessionId : null
+    const selectedSession = useMemo(
+        () => sessions.find((session) => session.id === selectedSessionId) ?? null,
+        [sessions, selectedSessionId]
+    )
+    useEffect(() => {
+        if (!selectedSessionId || !selectedSession) {
+            return
+        }
+        markSessionSeen(selectedSessionId, selectedSession.updatedAt)
+    }, [selectedSessionId, selectedSession?.updatedAt])
+    const isSessionsIndex = pathname === '/sessions' || pathname === '/sessions/'
+    const sidebar = useSidebarResize()
+    const handleNewSessionInDirectory = useCallback((args: { machineId: string | null; directory: string }) => {
+        navigate({
+            to: '/sessions/new',
+            search: args.machineId
+                ? { directory: args.directory, machineId: args.machineId }
+                : { directory: args.directory }
+        })
+    }, [navigate])
+
+    return (
+        <div className="flex h-full min-h-0">
+            <div
+                className={`${isSessionsIndex ? 'flex' : 'hidden lg:flex'} w-full shrink-0 flex-col bg-[var(--app-bg)]`}
+                style={{ '--sidebar-w': `${sidebar.width}px` } as React.CSSProperties}
+            >
+                <div className="bg-[var(--app-bg)] pt-[env(safe-area-inset-top)]">
+                    <div className="mx-auto w-full max-w-content flex items-center justify-between px-3 py-2">
+                        <div className="text-xs text-[var(--app-hint)]">
+                            {t('sessions.count', { n: sessions.length, m: projectCount })}
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button
+                                type="button"
+                                onClick={() => navigate({ to: '/browse' })}
+                                className="p-1.5 rounded-full text-[var(--app-hint)] hover:text-[var(--app-fg)] hover:bg-[var(--app-subtle-bg)] transition-colors"
+                                title={t('browse.nav')}
+                            >
+                                <FolderOpenIcon className="h-5 w-5" />
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => navigate({ to: '/settings' })}
+                                className="p-1.5 rounded-full text-[var(--app-hint)] hover:text-[var(--app-fg)] hover:bg-[var(--app-subtle-bg)] transition-colors"
+                                title={t('settings.title')}
+                            >
+                                <SettingsIcon className="h-5 w-5" />
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => navigate({ to: '/sessions/new' })}
+                                className="session-list-new-button p-1.5 rounded-full text-[var(--app-link)] transition-colors"
+                                title={t('sessions.new')}
+                            >
+                                <PlusIcon className="h-5 w-5" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="app-scroll-y flex-1 min-h-0 desktop-scrollbar-left">
+                    {error ? (
+                        <div className="mx-auto w-full max-w-content px-3 py-2">
+                            <div className="text-sm text-red-600">{error}</div>
+                        </div>
+                    ) : null}
+                    <SessionList
+                        sessions={sessions}
+                        selectedSessionId={selectedSessionId}
+                        onSelect={(sessionId) => navigate({
+                            to: '/sessions/$sessionId',
+                            params: { sessionId },
+                        })}
+                        onNewSession={() => navigate({ to: '/sessions/new' })}
+                        onNewSessionInDirectory={handleNewSessionInDirectory}
+                        onBrowse={() => navigate({ to: '/browse' })}
+                        onRefresh={handleRefresh}
+                        isLoading={isLoading}
+                        renderHeader={false}
+                        api={api}
+                        machineLabelsById={machineLabelsById}
+                    />
+                </div>
+            </div>
+
+            {/* Resize handle - desktop only */}
+            <div
+                className="sidebar-resize-handle hidden lg:block shrink-0"
+                data-dragging={sidebar.isDragging || undefined}
+                onPointerDown={sidebar.onPointerDown}
+            />
+
+            <div className={`${isSessionsIndex ? 'hidden lg:flex' : 'flex'} min-w-0 flex-1 flex-col bg-[var(--app-bg)]`}>
+                <div className="flex-1 min-h-0">
+                    <Outlet />
+                </div>
+            </div>
+        </div>
+    )
+}
+
+function SessionsIndexPage() {
+    return null
+}
+
+function SessionPage() {
+    const { api } = useAppContext()
+    const { t } = useTranslation()
+    const goBack = useAppGoBack()
+    const navigate = useNavigate()
+    const queryClient = useQueryClient()
+    const { addToast } = useToast()
+    const { sessionId } = useParams({ from: '/sessions/$sessionId' })
+    const {
+        session,
+        error: sessionError,
+        refetch: refetchSession,
+    } = useSession(api, sessionId)
+    const {
+        messages,
+        pendingMessages,
+        warning: messagesWarning,
+        isLoading: messagesLoading,
+        isLoadingMore: messagesLoadingMore,
+        hasMore: messagesHasMore,
+        loadMore: loadMoreMessages,
+        refetch: refetchMessages,
+        pendingCount,
+        messagesVersion,
+        flushPending,
+        setAtBottom,
+    } = useMessages(api, sessionId)
+    const {
+        sendMessage,
+        retryMessage,
+        isSending,
+    } = useSendMessage(api, sessionId, {
+        isSessionThinking: session?.thinking ?? false,
+        onSuccess: (sentSessionId) => {
+            clearDraftsAfterSend(sentSessionId, sessionId)
+        },
+        resolveSessionId: async (currentSessionId) => {
+            if (!api || !session || session.active) {
+                return currentSessionId
+            }
+            try {
+                return await api.resumeSession(currentSessionId, { permissionMode: session.permissionMode ?? undefined })
+            } catch (error) {
+                const message = error instanceof Error ? error.message : t('dialog.error.default')
+                addToast({
+                    title: t('resume.failed.title'),
+                    body: message,
+                    sessionId: currentSessionId,
+                    url: ''
+                })
+                throw error
+            }
+        },
+        onSessionResolved: (resolvedSessionId) => {
+            void (async () => {
+                if (api) {
+                    if (session && resolvedSessionId !== session.id) {
+                        seedMessageWindowFromSession(session.id, resolvedSessionId)
+                        queryClient.setQueryData(queryKeys.session(resolvedSessionId), {
+                            session: { ...session, id: resolvedSessionId, active: true }
+                        })
+                    }
+                    try {
+                        await Promise.all([
+                            queryClient.prefetchQuery({
+                                queryKey: queryKeys.session(resolvedSessionId),
+                                queryFn: () => api.getSession(resolvedSessionId),
+                            }),
+                            fetchLatestMessages(api, resolvedSessionId),
+                        ])
+                    } catch {
+                    }
+                }
+                navigate({
+                    to: '/sessions/$sessionId',
+                    params: { sessionId: resolvedSessionId },
+                    replace: true
+                })
+            })()
+        },
+        onBlocked: (reason) => {
+            if (reason === 'no-api') {
+                addToast({
+                    title: t('send.blocked.title'),
+                    body: t('send.blocked.noConnection'),
+                    sessionId: sessionId ?? '',
+                    url: ''
+                })
+            }
+            // 'no-session' and 'pending' don't need toast - either invalid state or expected behavior
+        }
+    })
+
+    // Get agent type from session metadata for slash commands
+    const agentType = session?.metadata?.flavor ?? 'claude'
+    const {
+        commands: slashCommands,
+        getSuggestions: getSlashSuggestions,
+    } = useSlashCommands(api, sessionId, agentType)
+    const {
+        getSuggestions: getSkillSuggestions,
+    } = useSkills(api, sessionId)
+
+    const getAutocompleteSuggestions = useCallback(async (query: string) => {
+        if (query.startsWith('$')) {
+            return await getSkillSuggestions(query)
+        }
+        return await getSlashSuggestions(query)
+    }, [getSkillSuggestions, getSlashSuggestions])
+
+    const refreshSelectedSession = useCallback(() => {
+        void refetchSession()
+        void refetchMessages()
+    }, [refetchMessages, refetchSession])
+
+    if (!session) {
+        if (sessionError) {
+            return (
+                <div className="flex h-full flex-col items-center justify-center gap-3 p-4 text-center">
+                    <div className="text-sm font-medium text-[var(--app-fg)]">Session unavailable</div>
+                    <div className="max-w-md text-xs text-[var(--app-hint)]">{sessionError}</div>
+                    <div className="flex gap-2">
+                        <button
+                            type="button"
+                            onClick={() => navigate({ to: '/sessions', replace: true })}
+                            className="rounded-md border border-[var(--app-border)] px-3 py-1.5 text-sm text-[var(--app-fg)] hover:bg-[var(--app-secondary-bg)]"
+                        >
+                            Back to sessions
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => { void refetchSession() }}
+                            className="rounded-md bg-[var(--app-link)] px-3 py-1.5 text-sm text-white"
+                        >
+                            Retry
+                        </button>
+                    </div>
+                </div>
+            )
+        }
+        return (
+            <div className="flex-1 flex items-center justify-center p-4">
+                <LoadingState label="Loading session…" className="text-sm" />
+            </div>
+        )
+    }
+
+    return (
+        <SessionChat
+            api={api}
+            session={session}
+            messages={messages}
+            pendingMessages={pendingMessages}
+            messagesWarning={messagesWarning}
+            hasMoreMessages={messagesHasMore}
+            isLoadingMessages={messagesLoading}
+            isLoadingMoreMessages={messagesLoadingMore}
+            isSending={isSending}
+            pendingCount={pendingCount}
+            messagesVersion={messagesVersion}
+            onBack={goBack}
+            onRefresh={refreshSelectedSession}
+            onLoadMore={loadMoreMessages}
+            onSend={sendMessage}
+            onFlushPending={flushPending}
+            onAtBottomChange={setAtBottom}
+            onRetryMessage={retryMessage}
+            autocompleteSuggestions={getAutocompleteSuggestions}
+            availableSlashCommands={slashCommands}
+        />
+    )
+}
+
+function SessionDetailRoute() {
+    const { api } = useAppContext()
+    const pathname = useLocation({ select: location => location.pathname })
+    const { sessionId } = useParams({ from: '/sessions/$sessionId' })
+    const navigate = useNavigate()
+    const { notFound: sessionNotFound } = useSession(api, sessionId)
+    const basePath = `/sessions/${sessionId}`
+    const isChat = pathname === basePath || pathname === `${basePath}/`
+
+    useEffect(() => {
+        if (!sessionNotFound) {
+            return
+        }
+        navigate({ to: '/sessions', replace: true })
+    }, [navigate, sessionNotFound])
+
+    if (sessionNotFound) {
+        return (
+            <div className="flex-1 flex items-center justify-center p-4">
+                <LoadingState label="Session not found. Returning to sessions…" className="text-sm" />
+            </div>
+        )
+    }
+
+    return isChat ? <SessionPage /> : <Outlet />
+}
+
+function NewSessionPage() {
+    const { api } = useAppContext()
+    const navigate = useNavigate()
+    const goBack = useAppGoBack()
+    const queryClient = useQueryClient()
+    const { machines, isLoading: machinesLoading, error: machinesError } = useMachines(api, true)
+    const { t } = useTranslation()
+    const { directory: initialDirectory, machineId: initialMachineId } = newSessionRoute.useSearch()
+
+    const handleCancel = useCallback(() => {
+        navigate({ to: '/sessions' })
+    }, [navigate])
+
+    const handleSuccess = useCallback((sessionId: string) => {
+        void queryClient.invalidateQueries({ queryKey: queryKeys.sessions })
+        // Replace current page with /sessions to clear spawn flow from history
+        navigate({ to: '/sessions', replace: true })
+        // Then navigate to new session
+        requestAnimationFrame(() => {
+            navigate({
+                to: '/sessions/$sessionId',
+                params: { sessionId },
+            })
+        })
+    }, [navigate, queryClient])
+
+    const handleChooseFolder = useCallback((args: { machineId: string | null; directory: string }) => {
+        // Forward the currently-selected machine so /browse opens scoped to
+        // it rather than falling back to `hapi:lastMachineId`, which can
+        // disagree if the user changed machines without yet creating a
+        // session.
+        navigate({
+            to: '/browse',
+            search: args.machineId ? { machineId: args.machineId } : {}
+        })
+    }, [navigate])
+
+    return (
+        <div className="flex h-full min-h-0 flex-col">
+            <div className="flex items-center gap-2 border-b border-[var(--app-border)] bg-[var(--app-bg)] p-3 pt-[calc(0.75rem+env(safe-area-inset-top))]">
+                {!isTelegramApp() && (
+                    <button
+                        type="button"
+                        onClick={goBack}
+                        className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--app-hint)] transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]"
+                    >
+                        <BackIcon />
+                    </button>
+                )}
+                <div className="flex-1 font-semibold">{t('newSession.title')}</div>
+            </div>
+
+            <div
+                className="app-scroll-y flex-1 min-h-0"
+                style={{ paddingBottom: 'calc(var(--app-floating-bottom-offset, 0px) + env(safe-area-inset-bottom))' }}
+            >
+                {machinesError ? (
+                    <div className="p-3 text-sm text-red-600">
+                        {machinesError}
+                    </div>
+                ) : null}
+
+                <NewSession
+                    api={api}
+                    machines={machines}
+                    isLoading={machinesLoading}
+                    onCancel={handleCancel}
+                    onSuccess={handleSuccess}
+                    onChooseFolder={handleChooseFolder}
+                    initialDirectory={initialDirectory}
+                    initialMachineId={initialMachineId}
+                />
+            </div>
+        </div>
+    )
+}
+
+function BrowsePage() {
+    const { api } = useAppContext()
+    const navigate = useNavigate()
+    const goBack = useAppGoBack()
+    const { machines, isLoading: machinesLoading } = useMachines(api, true)
+    const { t } = useTranslation()
+    const { machineId: initialMachineId } = browseRoute.useSearch()
+
+    const handleStartSession = useCallback((machineId: string, directory: string) => {
+        navigate({
+            to: '/sessions/new',
+            search: { directory, machineId }
+        })
+    }, [navigate])
+
+    return (
+        <div className="flex h-full min-h-0 flex-col">
+            <div className="flex items-center gap-2 border-b border-[var(--app-border)] bg-[var(--app-bg)] p-3 pt-[calc(0.75rem+env(safe-area-inset-top))]">
+                {!isTelegramApp() && (
+                    <button
+                        type="button"
+                        onClick={goBack}
+                        className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--app-hint)] transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]"
+                    >
+                        <BackIcon />
+                    </button>
+                )}
+                <div className="flex-1 font-semibold">{t('browse.title')}</div>
+            </div>
+
+            <div className="flex-1 min-h-0">
+                <WorkspaceBrowser
+                    api={api}
+                    machines={machines}
+                    machinesLoading={machinesLoading}
+                    onStartSession={handleStartSession}
+                    initialMachineId={initialMachineId}
+                />
+            </div>
+        </div>
+    )
+}
+
+const rootRoute = createRootRoute({
+    component: App,
+})
+
+const indexRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/',
+    component: () => <Navigate to="/sessions" replace />,
+})
+
+const sessionsRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/sessions',
+    component: SessionsPage,
+})
+
+const sessionsIndexRoute = createRoute({
+    getParentRoute: () => sessionsRoute,
+    path: '/',
+    component: SessionsIndexPage,
+})
+
+const sessionDetailRoute = createRoute({
+    getParentRoute: () => sessionsRoute,
+    path: '$sessionId',
+    component: SessionDetailRoute,
+})
+
+const sessionFilesRoute = createRoute({
+    getParentRoute: () => sessionDetailRoute,
+    path: 'files',
+    validateSearch: (search: Record<string, unknown>): { tab?: 'changes' | 'directories' } => {
+        const tabValue = typeof search.tab === 'string' ? search.tab : undefined
+        const tab = tabValue === 'directories'
+            ? 'directories'
+            : tabValue === 'changes'
+                ? 'changes'
+                : undefined
+
+        return tab ? { tab } : {}
+    },
+    component: FilesPage,
+})
+
+const sessionTerminalRoute = createRoute({
+    getParentRoute: () => sessionDetailRoute,
+    path: 'terminal',
+    component: TerminalPage,
+})
+
+type SessionFileSearch = {
+    path: string
+    staged?: boolean
+    tab?: 'changes' | 'directories'
+}
+
+const sessionFileRoute = createRoute({
+    getParentRoute: () => sessionDetailRoute,
+    path: 'file',
+    validateSearch: (search: Record<string, unknown>): SessionFileSearch => {
+        const path = typeof search.path === 'string' ? search.path : ''
+        const staged = search.staged === true || search.staged === 'true'
+            ? true
+            : search.staged === false || search.staged === 'false'
+                ? false
+                : undefined
+
+        const tabValue = typeof search.tab === 'string' ? search.tab : undefined
+        const tab = tabValue === 'directories'
+            ? 'directories'
+            : tabValue === 'changes'
+                ? 'changes'
+                : undefined
+
+        const result: SessionFileSearch = { path }
+        if (staged !== undefined) {
+            result.staged = staged
+        }
+        if (tab !== undefined) {
+            result.tab = tab
+        }
+        return result
+    },
+    component: FilePage,
+})
+
+type NewSessionSearch = {
+    directory?: string
+    machineId?: string
+}
+
+const newSessionRoute = createRoute({
+    getParentRoute: () => sessionsRoute,
+    path: 'new',
+    validateSearch: (search: Record<string, unknown>): NewSessionSearch => {
+        const result: NewSessionSearch = {}
+        if (typeof search.directory === 'string' && search.directory) {
+            result.directory = search.directory
+        }
+        if (typeof search.machineId === 'string' && search.machineId) {
+            result.machineId = search.machineId
+        }
+        return result
+    },
+    component: NewSessionPage,
+})
+
+const browseRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/browse',
+    validateSearch: (search: Record<string, unknown>): { machineId?: string } => {
+        if (typeof search.machineId === 'string' && search.machineId) {
+            return { machineId: search.machineId }
+        }
+        return {}
+    },
+    component: BrowsePage,
+})
+
+const settingsRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/settings',
+    component: SettingsPage,
+})
+
+export const routeTree = rootRoute.addChildren([
+    indexRoute,
+    sessionsRoute.addChildren([
+        sessionsIndexRoute,
+        newSessionRoute,
+        sessionDetailRoute.addChildren([
+            sessionTerminalRoute,
+            sessionFilesRoute,
+            sessionFileRoute,
+        ]),
+    ]),
+    browseRoute,
+    settingsRoute,
+])
+
+type RouterHistory = Parameters<typeof createRouter>[0]['history']
+
+export function createAppRouter(history?: RouterHistory) {
+    return createRouter({
+        routeTree,
+        history,
+        scrollRestoration: true,
+        getScrollRestorationKey,
+    })
+}
+
+export type AppRouter = ReturnType<typeof createAppRouter>
+
+declare module '@tanstack/react-router' {
+    interface Register {
+        router: AppRouter
+    }
+}
