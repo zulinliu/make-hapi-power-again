@@ -22,6 +22,8 @@ import { createVoiceRoutes } from './routes/voice'
 import { createPluginsRoutes } from './routes/plugins'
 import { createSkillManagementRoutes } from './routes/skillManagement'
 import { createChangeTrackingRoutes } from './routes/changeTracking'
+import { createTimelineRoutes } from './routes/timeline'
+import { createUndoRoutes } from './routes/undo'
 import type { SSEManager } from '../sse/sseManager'
 import type { VisibilityTracker } from '../visibility/visibilityTracker'
 import type { Server as BunServer } from 'bun'
@@ -102,6 +104,8 @@ function createWebApp(options: {
     app.route('/api', createPluginsRoutes(options.getSyncEngine))
     app.route('/api', createSkillManagementRoutes(options.getSyncEngine))
     app.route('/api', createChangeTrackingRoutes(options.getSyncEngine, options.store))
+    app.route('/api', createTimelineRoutes(options.getSyncEngine, options.store))
+    app.route('/api', createUndoRoutes(options.getSyncEngine, options.store))
     app.route('/api', createPushRoutes(options.store, options.vapidPublicKey))
     app.route('/api', createVoiceRoutes())
 

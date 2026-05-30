@@ -672,6 +672,66 @@ export class ApiClient {
         }>(`/api/sessions/${encodeURIComponent(sessionId)}/context`)
     }
 
+    async getTimeline(sessionId: string, type?: string) {
+        const query = type ? `?type=${encodeURIComponent(type)}` : ''
+        return await this.request<{
+            success: boolean
+            entries: Array<{
+                id: string
+                type: 'tool_use' | 'file_change' | 'message' | 'summary' | 'checkpoint' | 'error'
+                timestamp: number
+                seq: number
+                data: Record<string, unknown>
+            }>
+            truncated: boolean
+        }>(`/api/sessions/${encodeURIComponent(sessionId)}/timeline${query}`)
+    }
+
+    async getSummaries(sessionId: string) {
+        return await this.request<{
+            success: boolean
+            summaries: Array<{
+                id: string
+                sessionId: string
+                content: string
+                createdAt: number
+                seq: number
+                isAuto: boolean
+            }>
+        }>(`/api/sessions/${encodeURIComponent(sessionId)}/summaries`)
+    }
+
+    async createCheckpoint(sessionId: string, label?: string) {
+        return await this.request<{
+            success: boolean
+            checkpoint: {
+                id: string
+                sessionId: string
+                label: string
+                fileCount: number
+                createdAt: number
+                snapshotIds: number[]
+            }
+        }>(`/api/sessions/${encodeURIComponent(sessionId)}/checkpoints`, {
+            method: 'POST',
+            body: JSON.stringify({ label })
+        })
+    }
+
+    async getCheckpoints(sessionId: string) {
+        return await this.request<{
+            success: boolean
+            checkpoints: Array<{
+                id: string
+                sessionId: string
+                label: string
+                fileCount: number
+                createdAt: number
+                snapshotIds: number[]
+            }>
+        }>(`/api/sessions/${encodeURIComponent(sessionId)}/checkpoints`)
+    }
+
     async renameSession(sessionId: string, name: string): Promise<void> {
         await this.request(`/api/sessions/${encodeURIComponent(sessionId)}`, {
             method: 'PATCH',
@@ -713,5 +773,56 @@ export class ApiClient {
             method: 'POST',
             body: JSON.stringify(event)
         })
+    }
+
+    async previewUndo(sessionId: string, scope: 'session' | 'step' | 'file', options?: { stepSeq?: number; filePath?: string }) {
+        return await this.request<{
+            success: boolean
+            preview: {
+                scope: 'session' | 'step' | 'file'
+                affectedFiles: Array<{
+                    filePath: string
+                    changeType: 'created' | 'modified' | 'deleted'
+                    canRevert: boolean
+                    reason?: string
+                }>
+                totalSnapshots: number
+                currentMaxSeq: number
+            }
+        }>(`/api/sessions/${encodeURIComponent(sessionId)}/undo/preview`, {
+            method: 'POST',
+            body: JSON.stringify({ scope, ...options })
+        })
+    }
+
+    async executeUndo(sessionId: string, scope: 'session' | 'step' | 'file', options?: { stepSeq?: number; filePath?: string; expectedMaxSeq?: number }) {
+        return await this.request<{
+            success: boolean
+            result: {
+                scope: 'session' | 'step' | 'file'
+                revertedFiles: string[]
+                skippedFiles: string[]
+                revertedAt: number
+                status: 'marked_for_restore'
+                message: string
+            }
+        }>(`/api/sessions/${encodeURIComponent(sessionId)}/undo/execute`, {
+            method: 'POST',
+            body: JSON.stringify({ scope, ...options })
+        })
+    }
+
+    async getSnapshots(sessionId: string, limit?: number) {
+        const query = limit ? `?limit=${encodeURIComponent(limit)}` : ''
+        return await this.request<{
+            success: boolean
+            snapshots: Array<{
+                id: number
+                filePath: string
+                contentHash: string
+                snapshotType: string
+                createdAt: number
+            }>
+        }>(`/api/sessions/${encodeURIComponent(sessionId)}/snapshots${query}`)
     }
 }
