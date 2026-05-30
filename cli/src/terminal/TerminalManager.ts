@@ -12,6 +12,7 @@ type TerminalRuntime = TerminalSession & {
     proc: Bun.Subprocess
     terminal: Bun.Terminal
     idleTimer: ReturnType<typeof setTimeout> | null
+    memoryTimer: ReturnType<typeof setInterval> | null
 }
 
 type TerminalManagerOptions = {
@@ -27,6 +28,21 @@ type TerminalManagerOptions = {
 
 const DEFAULT_IDLE_TIMEOUT_MS = 15 * 60_000
 const DEFAULT_MAX_TERMINALS = 4
+const MEMORY_LIMIT_MB = 512
+const MEMORY_CHECK_INTERVAL_MS = 30_000
+
+function readSubprocessRssMb(pid: number | null): number | null {
+    if (pid == null) return null
+    try {
+        const fs = require('fs') as typeof import('fs')
+        const status = fs.readFileSync(`/proc/${pid}/status`, 'utf-8')
+        const match = status.match(/VmRSS:\s*(\d+)\s*kB/)
+        if (match) return Number(match[1]) / 1024
+    } catch {
+        // /proc not available (non-Linux) or process gone
+    }
+    return null
+}
 const SENSITIVE_ENV_KEYS = new Set([
     'CLI_API_TOKEN',
     'HAPI_API_URL',
@@ -137,6 +153,7 @@ export class TerminalManager {
     private readonly maxTerminals: number
     private readonly terminals: Map<string, TerminalRuntime> = new Map()
     private readonly filteredEnv: NodeJS.ProcessEnv
+    private globalMemoryTimer: ReturnType<typeof setInterval> | null = null
 
     constructor(options: TerminalManagerOptions) {
         this.sessionId = options.sessionId
@@ -228,11 +245,13 @@ export class TerminalManager {
                 rows,
                 proc,
                 terminal,
-                idleTimer: null
+                idleTimer: null,
+                memoryTimer: null
             }
 
             this.terminals.set(terminalId, runtime)
             this.markActivity(runtime)
+            this.ensureGlobalMemoryMonitor()
             this.onReady({ sessionId: this.sessionId, terminalId })
         } catch (error) {
             logger.debug('[TERMINAL] Failed to spawn terminal', { error })
@@ -305,10 +324,17 @@ export class TerminalManager {
         if (runtime.idleTimer) {
             clearTimeout(runtime.idleTimer)
         }
+        // memoryTimer no longer used per-terminal
 
         if (!runtime.proc.killed && runtime.proc.exitCode === null) {
             try {
+                // Try SIGTERM to allow graceful shutdown, then force after 2s
                 runtime.proc.kill()
+                setTimeout(() => {
+                    if (!runtime.proc.killed && runtime.proc.exitCode === null) {
+                        try { runtime.proc.kill('SIGKILL') } catch { /* gone */ }
+                    }
+                }, 2000)
             } catch (error) {
                 logger.debug('[TERMINAL] Failed to kill process', { error })
             }
@@ -319,6 +345,31 @@ export class TerminalManager {
         } catch (error) {
             logger.debug('[TERMINAL] Failed to close terminal', { error })
         }
+    }
+
+    private startMemoryMonitor(runtime: TerminalRuntime): void {
+        // No-op: replaced by global memory monitor
+        void runtime
+    }
+
+    private ensureGlobalMemoryMonitor(): void {
+        if (this.globalMemoryTimer) return
+        this.globalMemoryTimer = setInterval(() => {
+            for (const [terminalId, runtime] of this.terminals) {
+                if (runtime.proc.killed || runtime.proc.exitCode !== null) continue
+                const mb = readSubprocessRssMb(runtime.proc.pid)
+                if (mb !== null && mb > MEMORY_LIMIT_MB) {
+                    logger.debug(`[TERMINAL] Memory limit exceeded (${mb.toFixed(0)}MB > ${MEMORY_LIMIT_MB}MB)`, { terminalId })
+                    this.emitError(terminalId, `Terminal killed: memory limit exceeded (${mb.toFixed(0)}MB).`)
+                    this.cleanup(terminalId)
+                }
+            }
+            // Stop timer if no terminals
+            if (this.terminals.size === 0 && this.globalMemoryTimer) {
+                clearInterval(this.globalMemoryTimer)
+                this.globalMemoryTimer = null
+            }
+        }, MEMORY_CHECK_INTERVAL_MS)
     }
 
     private emitError(terminalId: string, message: string): void {
