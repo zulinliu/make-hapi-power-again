@@ -912,6 +912,34 @@ export class SyncEngine {
         return await this.rpcGateway.createGitCommit(sessionId, options)
     }
 
+    async gitClone(sessionId: string, options: { cwd?: string; url: string; targetDir?: string; branch?: string; cloneId?: string }): Promise<RpcCommandResponse> {
+        return await this.rpcGateway.gitClone(sessionId, options)
+    }
+
+    async getGitRemoteList(sessionId: string, cwd?: string): Promise<RpcCommandResponse> {
+        return await this.rpcGateway.getGitRemoteList(sessionId, cwd)
+    }
+
+    async addGitRemote(sessionId: string, options: { cwd?: string; name: string; url: string }): Promise<RpcCommandResponse> {
+        return await this.rpcGateway.addGitRemote(sessionId, options)
+    }
+
+    async removeGitRemote(sessionId: string, options: { cwd?: string; name: string }): Promise<RpcCommandResponse> {
+        return await this.rpcGateway.removeGitRemote(sessionId, options)
+    }
+
+    async gitPush(sessionId: string, options: { cwd?: string; remote?: string; branch?: string; force?: boolean }): Promise<RpcCommandResponse> {
+        return await this.rpcGateway.gitPush(sessionId, options)
+    }
+
+    async gitPull(sessionId: string, options: { cwd?: string; remote?: string; branch?: string }): Promise<RpcCommandResponse> {
+        return await this.rpcGateway.gitPull(sessionId, options)
+    }
+
+    async gitFetch(sessionId: string, options: { cwd?: string; remote?: string }): Promise<RpcCommandResponse> {
+        return await this.rpcGateway.gitFetch(sessionId, options)
+    }
+
     async readSessionFile(sessionId: string, path: string): Promise<RpcReadFileResponse> {
         return await this.rpcGateway.readSessionFile(sessionId, path)
     }

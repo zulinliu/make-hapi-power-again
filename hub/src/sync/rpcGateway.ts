@@ -218,6 +218,34 @@ export class RpcGateway {
         return await this.sessionRpc(sessionId, RPC_METHODS.GitCommit, options) as RpcCommandResponse
     }
 
+    async gitClone(sessionId: string, options: { cwd?: string; url: string; targetDir?: string; branch?: string; cloneId?: string }): Promise<RpcCommandResponse> {
+        return await this.sessionRpc(sessionId, RPC_METHODS.GitClone, { ...options }, 600_000) as RpcCommandResponse
+    }
+
+    async getGitRemoteList(sessionId: string, cwd?: string): Promise<RpcCommandResponse> {
+        return await this.sessionRpc(sessionId, RPC_METHODS.GitRemoteList, { cwd }) as RpcCommandResponse
+    }
+
+    async addGitRemote(sessionId: string, options: { cwd?: string; name: string; url: string }): Promise<RpcCommandResponse> {
+        return await this.sessionRpc(sessionId, RPC_METHODS.GitRemoteAdd, options) as RpcCommandResponse
+    }
+
+    async removeGitRemote(sessionId: string, options: { cwd?: string; name: string }): Promise<RpcCommandResponse> {
+        return await this.sessionRpc(sessionId, RPC_METHODS.GitRemoteRemove, options) as RpcCommandResponse
+    }
+
+    async gitPush(sessionId: string, options: { cwd?: string; remote?: string; branch?: string; force?: boolean }): Promise<RpcCommandResponse> {
+        return await this.sessionRpc(sessionId, RPC_METHODS.GitPush, options, 120_000) as RpcCommandResponse
+    }
+
+    async gitPull(sessionId: string, options: { cwd?: string; remote?: string; branch?: string }): Promise<RpcCommandResponse> {
+        return await this.sessionRpc(sessionId, RPC_METHODS.GitPull, options, 120_000) as RpcCommandResponse
+    }
+
+    async gitFetch(sessionId: string, options: { cwd?: string; remote?: string }): Promise<RpcCommandResponse> {
+        return await this.sessionRpc(sessionId, RPC_METHODS.GitFetch, options, 120_000) as RpcCommandResponse
+    }
+
     async readSessionFile(sessionId: string, path: string): Promise<RpcReadFileResponse> {
         return await this.sessionRpc(sessionId, RPC_METHODS.ReadFile, { path }) as RpcReadFileResponse
     }

@@ -1,8 +1,10 @@
-import { execFile, type ExecFileOptions } from 'child_process'
+import { execFile, spawn, type ExecFileOptions } from 'child_process'
 import { promisify } from 'util'
+import { randomUUID } from 'crypto'
 import type { CommandResponse } from '@hapipower/protocol/apiTypes'
 import { RPC_METHODS } from '@hapipower/protocol/rpcMethods'
 import type { RpcHandlerManager } from '@/api/rpc/RpcHandlerManager'
+import type { CloneProgressPayload } from '@hapipower/protocol/socket'
 import { validatePath } from '../pathSecurity'
 import { rpcError } from '../rpcResponses'
 
@@ -80,7 +82,163 @@ interface GitAutoCommitRequest {
     timeout?: number
 }
 
+interface GitCloneRequest {
+    cwd?: string
+    url: string
+    targetDir?: string
+    branch?: string
+    cloneId?: string
+    timeout?: number
+}
+
+interface GitRemoteListRequest {
+    cwd?: string
+    timeout?: number
+}
+
+interface GitRemoteAddRequest {
+    cwd?: string
+    name: string
+    url: string
+    timeout?: number
+}
+
+interface GitRemoteRemoveRequest {
+    cwd?: string
+    name: string
+    timeout?: number
+}
+
+interface GitPushRequest {
+    cwd?: string
+    remote?: string
+    branch?: string
+    force?: boolean
+    timeout?: number
+}
+
+interface GitPullRequest {
+    cwd?: string
+    remote?: string
+    branch?: string
+    timeout?: number
+}
+
+interface GitFetchRequest {
+    cwd?: string
+    remote?: string
+    timeout?: number
+}
+
 type GitCommandResponse = CommandResponse
+
+function validateCloneUrl(url: string): string | null {
+    if (!url || typeof url !== 'string') return 'Clone URL required'
+    if (url.startsWith('file://')) return 'file:// protocol is not allowed'
+    if (!url.startsWith('https://') && !url.startsWith('ssh://') && !url.includes('@')) {
+        return 'Only https://, ssh://, and git@ URLs are allowed'
+    }
+    return null
+}
+
+const CLONE_PROGRESS_RE = /(\d+)%\s*\((\d+)\/(\d+)\)/
+const CLONE_PHASE_RE = /^(Receiving objects|Resolving deltas|Counting objects|Compressing objects)/i
+
+function parseClonePhase(line: string): { phase: CloneProgressPayload['phase']; progress?: number; objectsReceived?: number; objectsTotal?: number } | null {
+    if (!line) return null
+    const phaseMatch = CLONE_PHASE_RE.exec(line)
+    if (!phaseMatch) return null
+
+    const phaseText = phaseMatch[1].toLowerCase()
+    let phase: CloneProgressPayload['phase'] = 'writing'
+    if (phaseText.includes('counting')) phase = 'counting'
+    else if (phaseText.includes('compressing')) phase = 'compressing'
+    else if (phaseText.includes('receiving') || phaseText.includes('writing')) phase = 'writing'
+    else if (phaseText.includes('resolving')) phase = 'resolving'
+
+    const progressMatch = CLONE_PROGRESS_RE.exec(line)
+    if (progressMatch) {
+        return {
+            phase,
+            progress: parseInt(progressMatch[1], 10),
+            objectsReceived: parseInt(progressMatch[2], 10),
+            objectsTotal: parseInt(progressMatch[3], 10)
+        }
+    }
+
+    return { phase }
+}
+
+function runGitCloneStreaming(
+    url: string,
+    targetDir: string,
+    branch: string | undefined,
+    cloneId: string,
+    rpcHandlerManager: RpcHandlerManager
+): Promise<GitCommandResponse> {
+    return new Promise((resolve) => {
+        const args = ['clone', '--progress']
+        if (branch) args.push('--branch', branch)
+        args.push(url, targetDir)
+
+        const child = spawn('git', args, {
+            cwd: targetDir,
+            timeout: 600_000
+        })
+
+        let stdout = ''
+        let stderr = ''
+
+        const emitProgress = (payload: Omit<CloneProgressPayload, 'cloneId' | 'sessionId'>) => {
+            rpcHandlerManager.emitCloneProgress({ ...payload, cloneId, sessionId: '' })
+        }
+
+        child.stdout?.on('data', (chunk: Buffer) => {
+            stdout += chunk.toString()
+        })
+
+        child.stderr?.on('data', (chunk: Buffer) => {
+            const text = chunk.toString()
+            stderr += text
+            const parsed = parseClonePhase(text)
+            if (parsed) {
+                emitProgress({ ...parsed, message: text.trim() })
+            }
+        })
+
+        child.on('close', (code) => {
+            if (code === 0) {
+                emitProgress({ phase: 'done', message: 'Clone completed successfully' })
+                resolve({
+                    success: true,
+                    stdout,
+                    stderr,
+                    exitCode: 0
+                })
+            } else {
+                emitProgress({ phase: 'error', message: `Clone failed with exit code ${code}` })
+                resolve({
+                    success: false,
+                    error: `git clone failed (exit code ${code})`,
+                    stdout,
+                    stderr,
+                    exitCode: code ?? 1
+                })
+            }
+        })
+
+        child.on('error', (err) => {
+            emitProgress({ phase: 'error', message: err.message })
+            resolve({
+                success: false,
+                error: err.message,
+                stdout,
+                stderr,
+                exitCode: -1
+            })
+        })
+    })
+}
 
 function resolveCwd(requestedCwd: string | undefined, workingDirectory: string): { cwd: string; error?: string } {
     const cwd = requestedCwd ?? workingDirectory
@@ -285,5 +443,81 @@ export function registerGitHandlers(rpcHandlerManager: RpcHandlerManager, workin
         }
 
         return await runGitCommand(['commit', '-m', data.message], resolved.cwd, data.timeout)
+    })
+
+    // Git Clone — streaming with progress
+    rpcHandlerManager.registerHandler<GitCloneRequest, GitCommandResponse>(RPC_METHODS.GitClone, async (data) => {
+        const resolved = resolveCwd(data.cwd, workingDirectory)
+        if (resolved.error) return rpcError(resolved.error)
+        if (!data.url) return rpcError('Clone URL required')
+
+        const urlError = validateCloneUrl(data.url)
+        if (urlError) return rpcError(urlError)
+
+        const targetDir = data.targetDir
+            ? require('path').resolve(resolved.cwd, data.targetDir)
+            : resolved.cwd
+
+        return await runGitCloneStreaming(
+            data.url,
+            targetDir,
+            data.branch,
+            data.cloneId ?? randomUUID(),
+            rpcHandlerManager
+        )
+    })
+
+    // Git Remote List
+    rpcHandlerManager.registerHandler<GitRemoteListRequest, GitCommandResponse>(RPC_METHODS.GitRemoteList, async (data) => {
+        const resolved = resolveCwd(data.cwd, workingDirectory)
+        if (resolved.error) return rpcError(resolved.error)
+        return await runGitCommand(['remote', '-v'], resolved.cwd, data.timeout)
+    })
+
+    // Git Remote Add
+    rpcHandlerManager.registerHandler<GitRemoteAddRequest, GitCommandResponse>(RPC_METHODS.GitRemoteAdd, async (data) => {
+        const resolved = resolveCwd(data.cwd, workingDirectory)
+        if (resolved.error) return rpcError(resolved.error)
+        if (!data.name || !/^[\w.\-\/]+$/.test(data.name)) return rpcError('Invalid remote name')
+        if (!data.url) return rpcError('Remote URL required')
+        return await runGitCommand(['remote', 'add', data.name, data.url], resolved.cwd, data.timeout)
+    })
+
+    // Git Remote Remove
+    rpcHandlerManager.registerHandler<GitRemoteRemoveRequest, GitCommandResponse>(RPC_METHODS.GitRemoteRemove, async (data) => {
+        const resolved = resolveCwd(data.cwd, workingDirectory)
+        if (resolved.error) return rpcError(resolved.error)
+        if (!data.name || !/^[\w.\-\/]+$/.test(data.name)) return rpcError('Invalid remote name')
+        return await runGitCommand(['remote', 'remove', data.name], resolved.cwd, data.timeout)
+    })
+
+    // Git Push
+    rpcHandlerManager.registerHandler<GitPushRequest, GitCommandResponse>(RPC_METHODS.GitPush, async (data) => {
+        const resolved = resolveCwd(data.cwd, workingDirectory)
+        if (resolved.error) return rpcError(resolved.error)
+        const args = ['push']
+        if (data.remote) args.push(data.remote)
+        if (data.branch) args.push(data.branch)
+        if (data.force) args.push('--force')
+        return await runGitCommand(args, resolved.cwd, data.timeout ?? 120_000)
+    })
+
+    // Git Pull
+    rpcHandlerManager.registerHandler<GitPullRequest, GitCommandResponse>(RPC_METHODS.GitPull, async (data) => {
+        const resolved = resolveCwd(data.cwd, workingDirectory)
+        if (resolved.error) return rpcError(resolved.error)
+        const args = ['pull']
+        if (data.remote) args.push(data.remote)
+        if (data.branch) args.push(data.branch)
+        return await runGitCommand(args, resolved.cwd, data.timeout ?? 120_000)
+    })
+
+    // Git Fetch
+    rpcHandlerManager.registerHandler<GitFetchRequest, GitCommandResponse>(RPC_METHODS.GitFetch, async (data) => {
+        const resolved = resolveCwd(data.cwd, workingDirectory)
+        if (resolved.error) return rpcError(resolved.error)
+        const args = ['fetch']
+        if (data.remote) args.push(data.remote)
+        return await runGitCommand(args, resolved.cwd, data.timeout ?? 120_000)
     })
 }
