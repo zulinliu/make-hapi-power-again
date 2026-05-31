@@ -122,8 +122,31 @@ const QUICK_INPUT_ROWS: QuickInput[][] = [
         { label: '→', sequence: '\u001b[C', description: 'Arrow right' },
         { label: 'PgDn', sequence: '\u001b[6~', description: 'Page down' },
     ],
+    [
+        { label: '\u2303C', sequence: '\x03', description: 'Ctrl+C: Interrupt' },
+        { label: '\u2303D', sequence: '\x04', description: 'Ctrl+D: EOF' },
+        { label: '\u2303L', sequence: '\x0c', description: 'Ctrl+L: Clear' },
+        {
+            label: '~',
+            sequence: '~',
+            description: 'Tilde',
+            popup: { label: '`', sequence: '`', description: 'Backtick' },
+        },
+        {
+            label: '.',
+            sequence: '.',
+            description: 'Dot',
+            popup: { label: '..', sequence: '..', description: 'Double dot' },
+        },
+        {
+            label: '"',
+            sequence: '"',
+            description: 'Double quote',
+            popup: { label: "'", sequence: "'", description: 'Single quote' },
+        },
+        { label: '\u2303Z', sequence: '\x1a', description: 'Ctrl+Z: Suspend' },
+    ],
 ]
-
 function QuickKeyButton(props: {
     input: QuickInput
     disabled: boolean
