@@ -100,7 +100,9 @@ export function getThemeColor(scheme: ColorScheme): string {
 }
 
 function applyTheme(scheme: ColorScheme): void {
-    document.documentElement.setAttribute('data-theme', scheme)
+    const root = document.documentElement
+    root.setAttribute('data-theme', scheme)
+    root.style.colorScheme = scheme
     applyBrowserThemeColor(scheme)
 }
 
