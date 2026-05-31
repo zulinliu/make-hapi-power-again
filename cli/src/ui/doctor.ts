@@ -26,7 +26,7 @@ export function getEnvironmentInfo(): Record<string, any> {
         PWD: process.env.PWD,
         HAPI_POWER_HOME: process.env.HAPI_POWER_HOME,
         HAPI_POWER_API_URL: process.env.HAPI_POWER_API_URL,
-        HAPI_PROJECT_ROOT: process.env.HAPI_PROJECT_ROOT,
+        HAPI_POWER_PROJECT_ROOT: process.env.HAPI_POWER_PROJECT_ROOT,
         CLI_API_TOKEN_SET: Boolean(process.env.CLI_API_TOKEN),
         DANGEROUSLY_LOG_TO_SERVER_FOR_AI_AUTO_DEBUGGING: process.env.DANGEROUSLY_LOG_TO_SERVER_FOR_AI_AUTO_DEBUGGING,
         NODE_ENV: process.env.NODE_ENV,

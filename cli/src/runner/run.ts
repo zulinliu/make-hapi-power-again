@@ -16,6 +16,7 @@ import { isProcessAlive, isWindows, killProcess, killProcessByChildProcess } fro
 import { PERMISSION_MODES } from '@hapipower/protocol/modes';
 import { withRetry } from '@/utils/time';
 import { isRetryableConnectionError } from '@/utils/errorUtils';
+import { getEnvNumber } from '@/utils/envCompat';
 
 import { cleanupRunnerState, getInstalledCliMtimeMs, isRunnerRunningCurrentlyInstalledHappyVersion, stopRunner } from './controlClient';
 import { startRunnerControlServer } from './controlServer';
@@ -135,7 +136,7 @@ export async function startRunner(options: { workspaceRoots?: string[] } = {}): 
     // heavy session restore). Allow advanced users to raise this ceiling
     // so that slow starts no longer leave orphaned child processes which
     // later report back as ghost sessions.
-    const envWebhookTimeout = Number(process.env.HAPI_RUNNER_WEBHOOK_TIMEOUT_MS);
+    const envWebhookTimeout = getEnvNumber('HAPI_POWER_RUNNER_WEBHOOK_TIMEOUT_MS', 0);
     const webhookTimeoutMs =
       Number.isFinite(envWebhookTimeout) && envWebhookTimeout > 0
         ? envWebhookTimeout
@@ -370,11 +371,11 @@ export async function startRunner(options: { workspaceRoots?: string[] } = {}): 
         if (worktreeInfo) {
           extraEnv = {
             ...extraEnv,
-            HAPI_WORKTREE_BASE_PATH: worktreeInfo.basePath,
-            HAPI_WORKTREE_BRANCH: worktreeInfo.branch,
-            HAPI_WORKTREE_NAME: worktreeInfo.name,
-            HAPI_WORKTREE_PATH: worktreeInfo.worktreePath,
-            HAPI_WORKTREE_CREATED_AT: String(worktreeInfo.createdAt)
+            HAPI_POWER_WORKTREE_BASE_PATH: worktreeInfo.basePath,
+            HAPI_POWER_WORKTREE_BRANCH: worktreeInfo.branch,
+            HAPI_POWER_WORKTREE_NAME: worktreeInfo.name,
+            HAPI_POWER_WORKTREE_PATH: worktreeInfo.worktreePath,
+            HAPI_POWER_WORKTREE_CREATED_AT: String(worktreeInfo.createdAt)
           };
         }
 
@@ -516,7 +517,7 @@ export async function startRunner(options: { workspaceRoots?: string[] } = {}): 
 
         const spawnResult = await new Promise<SpawnSessionResult>((resolve) => {
           // Set timeout for webhook. Default is 15s but can be raised via
-          // HAPI_RUNNER_WEBHOOK_TIMEOUT_MS for users on slow models
+          // HAPI_POWER_RUNNER_WEBHOOK_TIMEOUT_MS for users on slow models
           // (e.g. opus[1m] --resume).
           const timeout = setTimeout(() => {
             pidToAwaiter.delete(pid);

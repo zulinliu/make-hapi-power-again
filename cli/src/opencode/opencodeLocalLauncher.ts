@@ -286,8 +286,8 @@ export async function opencodeLocalLauncher(
         startingMode: session.startingMode,
         launch: async (abortSignal) => {
             const env = buildOpencodeEnv();
-            env.HAPI_OPENCODE_HOOK_URL = hookUrl;
-            env.HAPI_OPENCODE_HOOK_TOKEN = opts.hookServer.token;
+            env.HAPI_POWER_OPENCODE_HOOK_URL = hookUrl;
+            env.HAPI_POWER_OPENCODE_HOOK_TOKEN = opts.hookServer.token;
             if (!env.OPENCODE_CONFIG_DIR) {
                 env.OPENCODE_CONFIG_DIR = opencodeConfigDir;
             }
