@@ -76,7 +76,7 @@ describe('resumeCommand', () => {
         existsSyncMock.mockReturnValue(true)
     })
 
-    it('resumes a Codex target by HAPI session id', async () => {
+    it('resumes a Codex target by Hapi Power session id', async () => {
         getLocalResumeTargetMock.mockResolvedValue({
             sessionId: 'hapi-power-session-1',
             flavor: 'codex',

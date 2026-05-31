@@ -1,5 +1,5 @@
 /**
- * Claude Code SDK integration for HAPI CLI
+ * Claude Code SDK integration for Hapi Power CLI
  * Provides clean TypeScript implementation without Bun support
  */
 

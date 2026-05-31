@@ -1,6 +1,6 @@
 /**
- * HAPI MCP server
- * Provides HAPI CLI specific tools including chat session title management
+ * Hapi Power MCP server
+ * Provides Hapi Power CLI specific tools including chat session title management
  */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
@@ -45,7 +45,7 @@ export async function startHappyServer(client: ApiSessionClient, options: StartH
     //
 
     const mcp = new McpServer({
-        name: "HAPI MCP",
+        name: "Hapi Power MCP",
         version: "1.0.0",
     });
 
@@ -92,7 +92,7 @@ export async function startHappyServer(client: ApiSessionClient, options: StartH
 
 
     mcp.registerTool<any, any>('display_image', {
-        description: 'Display a local image file inline in the current HAPI chat session',
+        description: 'Display a local image file inline in the current Hapi Power chat session',
         title: 'Display Image',
         inputSchema: displayImageInputSchema,
     }, async (args: { path: string; title?: string }) => {

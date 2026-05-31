@@ -7,7 +7,7 @@ import {
 } from './codexSlashCommands'
 
 describe('getBuiltinSlashCommands', () => {
-    it('exposes HAPI-supported codex built-ins in remote web mode', () => {
+    it('exposes Hapi Power-supported codex built-ins in remote web mode', () => {
         expect(getBuiltinSlashCommands('codex').map((command) => command.name)).toEqual(expect.arrayContaining([
             'clear',
             'compact',

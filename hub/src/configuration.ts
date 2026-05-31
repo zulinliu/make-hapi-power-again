@@ -19,7 +19,7 @@
  * - HAPI_POWER_RELAY_AUTH: Relay auth key for tunwg (default: hapi-power)
  * - HAPI_POWER_RELAY_FORCE_TCP: Force TCP relay mode when UDP is unavailable (true/1)
  * - VAPID_SUBJECT: Contact email or URL for Web Push (defaults to mailto:admin@YOUR_DOMAIN)
- * - HAPI_POWER_HOME: Data directory (default: ~/.hapi)
+ * - HAPI_POWER_HOME: Data directory (default: ~/.hapi-power)
  * - DB_PATH: SQLite database path (default: {HAPI_POWER_HOME}/hapi-power.db)
  */
 

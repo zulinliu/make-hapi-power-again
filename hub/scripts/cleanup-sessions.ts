@@ -119,7 +119,7 @@ function getDbPath(): string {
     }
     const dataDir = process.env.HAPI_POWER_HOME
         ? process.env.HAPI_POWER_HOME.replace(/^~/, homedir())
-        : join(homedir(), '.hapi')
+        : join(homedir(), '.hapi-power')
     return join(dataDir, 'hapi-power.db')
 }
 

@@ -6,20 +6,20 @@ import { shouldIncludeCoAuthoredBy } from "./claudeSettings";
  */
 const BASE_SYSTEM_PROMPT = (() => trimIdent(`
     ALWAYS when you start a new chat - you must call a tool "mcp__hapi_power__change_title" to set a chat title. When you think chat title is not relevant anymore - call the tool again to change it. When chat name is too generic and you have a change to make it more specific - call the tool again to change it. This title is needed to easily find the chat in the future. Help human.
-    When you create or find a local image file that the user should see, call the tool "mcp__hapi_power__display_image" with the image path so HAPI can show it inline.
+    When you create or find a local image file that the user should see, call the tool "mcp__hapi_power__display_image" with the image path so Hapi Power can show it inline.
 `))();
 
 /**
  * Co-authored-by credits to append when enabled
  */
 const CO_AUTHORED_CREDITS = (() => trimIdent(`
-    When making commit messages, you SHOULD also give credit to HAPI like so:
+    When making commit messages, you SHOULD also give credit to Hapi Power like so:
 
     <main commit message>
 
-    via [HapiPower](https://YOUR_DOMAIN)
+    via [HapiPower](https://github.com/zulinliu/make-hapi-power-again)
 
-    Co-Authored-By: HAPI <noreply@YOUR_DOMAIN>
+    Co-Authored-By: Hapi Power <noreply@hapi-power.dev>
 `))();
 
 /**

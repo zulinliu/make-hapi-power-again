@@ -17,7 +17,7 @@ export function SEO({ title, description, image, url }: SEOProps) {
   const siteUrl = "https://YOUR_DOMAIN";
   const defaultImage = "/images/og-image.png"; // We need to create this or use an existing one
 
-  const metaTitle = title ? `${title} | HAPI` : siteTitle;
+  const metaTitle = title ? `${title} | Hapi Power` : siteTitle;
   const metaDescription = description || defaultDescription;
   const metaImage = image ? `${siteUrl}${image}` : `${siteUrl}${defaultImage}`;
   const metaUrl = url ? `${siteUrl}${url}` : siteUrl;
