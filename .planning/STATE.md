@@ -62,14 +62,31 @@
 - [x] 视觉一致性检查 + 暗/亮模式验证 (Lighthouse A11y 90, BP 96, SEO 91)
 - [x] 构建 + v0.2.0 tag + GitHub Release
 
+## v0.4 运维踩坑记录
+
+### 2026-05-31: http_proxy + 机器注册连环问题
+
+三个连锁问题: 创建会话报错 workspace roots / 机器名显示 UUID / 目录浏览缺失
+
+**根因**:
+1. `http_proxy` 环境变量导致 axios 把 localhost 请求转发到代理，代理返回 502 → **修复: `NO_PROXY=localhost,127.0.0.1`**
+2. 测试时用 curl 预创建了空 metadata 的机器记录，hub 的 `getOrCreateMachine` 是 get-OR-create 不更新已有记录 → **修复: 清理 DB + 重启**
+3. `--workspace-root` 设置过窄（只包含项目目录）→ **修复: 改为 `/home/liuzl`**
+
+**完整记录**: .planning/research/OPS-LESSONS.md
+**启动脚本**: scripts/start-runner.sh
+
 ## 研究文档
 
 | 文件 | 用途 |
 |------|------|
 | .planning/research/IOS-PWA.md | iOS PWA 最佳实践研究 (1457 行) |
+| .planning/research/IOS-PWA-DEEP.md | iOS PWA 深度研究 (1119 行) |
+| .planning/research/IOS-PWA-BUGS.md | iOS PWA 三个真实体验问题分析 |
 | .planning/research/MOBILE-UX.md | 移动端 UX 研究参考 (756 行) |
 | .planning/research/I18N.md | i18n 实现方案研究 |
 | .planning/research/AUDIT.md | 全功能审计方法论 (766 行) |
+| .planning/research/OPS-LESSONS.md | 运维踩坑记录: proxy+机器注册
 
 ## 关键发现
 
@@ -122,4 +139,4 @@
 - [ ] v0.3 tag + GitHub Release
 
 ---
-*状态更新: 2026-05-31 (v0.4 PWA 深度优化规划完成，开始 Phase 19)*
+*状态更新: 2026-05-31 (v0.4 PWA 深度优化完成 + 运维踩坑记录完成，Phase 19~22 已执行)*
