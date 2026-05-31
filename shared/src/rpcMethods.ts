@@ -59,7 +59,8 @@ export const RPC_METHODS = {
     PluginStorageList: 'plugin-storage-list',
     SkillSearch: 'skill-search',
     SkillInstall: 'skill-install',
-    SkillUninstall: 'skill-uninstall'
+    SkillUninstall: 'skill-uninstall',
+    ProviderSwitch: 'provider-switch'
 } as const
 
 export type RpcMethod = typeof RPC_METHODS[keyof typeof RPC_METHODS]

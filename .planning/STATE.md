@@ -255,3 +255,36 @@ TOP 10 缺口：EDIT-01, FILE-01, FILE-02, FILE-05, PTY-02, GIT-04, FILE-12, EDI
 
 ---
 *状态更新: 2026-05-31 (v0.6 Phase 31~33 规划完成，讨论决策已记录)*
+
+## v0.7 规划中 — 自定义模型 API 配置与切换
+
+### 核心用户场景
+用户配置第三方 API 供应商（如中转服务）→ 自动发现可用模型 → 在新建会话时直接选择供应商+模型 → 供应商配置对会话即时生效
+
+### 讨论决策已完成 (2026-05-31)
+
+| 决策 | 选择 |
+|------|------|
+| 协议转换策略 | 分阶段，v0.7 先做配置+发现，v0.8 实现协议转换 |
+| 存储方式 | SQLite + AES-256-GCM 加密 |
+| 供应商模型 | 全局供应商池 |
+| 预设模板 | 无预设，用户自定义 |
+| UI 融合 | ModelSelector 下拉框内完全融合 |
+| 配置下发 | Hub→CLI RPC |
+| 代理范围 | Claude / Codex / Gemini / OpenCode |
+
+### Phase 34~38 已规划
+- [ ] Phase 34: 数据模型与后端 API（providers 表 + 加密存储 + CRUD API）
+- [ ] Phase 35: 模型发现引擎（/v1/models 探测 + 候选 URL 构建）
+- [ ] Phase 36: CLI 集成与配置下发（RPC 扩展 + 运行时环境变量）
+- [ ] Phase 37: 前端 UI 融合（Settings 供应商管理 + ModelSelector 融合）
+- [ ] Phase 38: 集成测试与优化
+
+### 研究基础
+- 深度分析了 cc-switch 及 3 个衍生项目（共 4 个代码库）
+- 研究报告：.planning/research/V07-CC-SWITCH-RESEARCH.md
+- 需求文档：.planning/REQUIREMENTS-v0.7.md
+- 路线图：.planning/ROADMAP-v0.7.md
+
+---
+*状态更新: 2026-05-31 (v0.7 规划完成，待执行)*

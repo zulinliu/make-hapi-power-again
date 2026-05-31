@@ -27,6 +27,7 @@ import { createChangeTrackingRoutes } from './routes/changeTracking'
 import { createTimelineRoutes } from './routes/timeline'
 import { createUndoRoutes } from './routes/undo'
 import { createShareRoutes } from './routes/share'
+import { createProviderRoutes } from './routes/providers'
 import type { SSEManager } from '../sse/sseManager'
 import type { VisibilityTracker } from '../visibility/visibilityTracker'
 import type { Server as BunServer } from 'bun'
@@ -118,6 +119,7 @@ function createWebApp(options: {
     app.route('/api', createVoiceRoutes())
     app.route('/api', createVoiceTranscriptionRoutes())
     app.route('/api', createOrchestrationRoutes())
+    app.route('/api', createProviderRoutes(options.store))
 
     // Skip static serving in relay mode, show helpful message on root
     if (options.relayMode) {

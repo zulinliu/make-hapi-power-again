@@ -182,7 +182,8 @@ export const SpawnSessionRequestSchema = z.object({
     modelReasoningEffort: z.string().optional(),
     yolo: z.boolean().optional(),
     sessionType: z.enum(['simple', 'worktree']).optional(),
-    worktreeName: z.string().optional()
+    worktreeName: z.string().optional(),
+    providerId: z.string().uuid().optional()
 })
 
 export type SpawnSessionRequest = z.infer<typeof SpawnSessionRequestSchema>
