@@ -18,7 +18,7 @@ import { APP_VERSION } from '@hapipower/protocol'
 function getHapiPowerHome(): string {
     return process.env.HAPI_POWER_HOME
         ? process.env.HAPI_POWER_HOME.replace(/^~/, homedir())
-        : join(homedir(), '.hapi')
+        : join(homedir(), '.hapi-power')
 }
 
 function getPlatformDir(): string {
@@ -57,8 +57,8 @@ function getTunwgPath(): string {
 export interface TunnelConfig {
     localPort: number
     enabled: boolean
-    apiDomain?: string | null  // TUNWG_API - default: relay.hapi.run (official relay)
-    authKey?: string | null    // TUNWG_AUTH - default: hapi
+    apiDomain?: string | null  // TUNWG_API - default: YOUR_RELAY_DOMAIN (official relay)
+    authKey?: string | null    // TUNWG_AUTH - default: hapi-power
     useRelay?: boolean         // TUNWG_RELAY
 }
 
@@ -116,7 +116,7 @@ export class TunnelManager {
         if (this.config.apiDomain) {
             env.TUNWG_API = this.config.apiDomain
         }
-        env.TUNWG_AUTH = this.config.authKey ?? 'hapi'
+        env.TUNWG_AUTH = this.config.authKey ?? 'hapi-power'
         if (this.config.useRelay) {
             env.TUNWG_RELAY = 'true'
         }

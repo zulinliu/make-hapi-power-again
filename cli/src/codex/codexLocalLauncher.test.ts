@@ -16,8 +16,8 @@ vi.mock('./codexLocal', () => ({
     }
 }));
 
-vi.mock('./utils/buildHapiMcpBridge', () => ({
-    buildHapiMcpBridge: async () => ({
+vi.mock('./utils/buildHapiPowerMcpBridge', () => ({
+    buildHapiPowerMcpBridge: async () => ({
         server: {
             url: 'http://localhost:0',
             stop: () => {}

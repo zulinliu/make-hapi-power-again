@@ -351,7 +351,7 @@ export async function startRunner(options: { workspaceRoots?: string[] } = {}): 
           if (options.agent === 'codex') {
 
             // Create a temporary directory for Codex
-            const codexHomeDir = await fs.mkdtemp(join(os.tmpdir(), 'hapi-codex-'));
+            const codexHomeDir = await fs.mkdtemp(join(os.tmpdir(), 'hapi-power-codex-'));
 
             // Write the token to the temporary directory
             await fs.writeFile(join(codexHomeDir, 'auth.json'), options.token);

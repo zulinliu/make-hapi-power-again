@@ -809,7 +809,7 @@ describe('session model', () => {
                 content: {
                     type: 'output',
                     data: {
-                        sessionId: 'hapi-session-id-not-claude-uuid'
+                        sessionId: 'hapi-power-session-id-not-claude-uuid'
                     }
                 }
             })

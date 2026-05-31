@@ -172,8 +172,8 @@ export const runnerCommand: CommandDefinition = {
 ${chalk.bold('hapi runner')} - Runner management
 
 ${chalk.bold('Usage:')}
-  hapi runner start              Start the runner (detached)
-  hapi runner stop               Stop the runner (sessions stay alive)
+  hapi-power runner start              Start the runner (detached)
+  hapi-power runner stop               Stop the runner (sessions stay alive)
   hapi runner status             Show runner status
   hapi runner list               List active sessions
 
@@ -185,11 +185,11 @@ ${chalk.bold('Options:')}
                                  Omit to leave browsing off (legacy mode).
 
   If you want to kill all hapi related processes run 
-  ${chalk.cyan('hapi doctor clean')}
+  ${chalk.cyan('hapi-power doctor clean')}
 
 ${chalk.bold('Note:')} The runner runs in the background and manages Claude sessions.
 
-${chalk.bold('To clean up runaway processes:')} Use ${chalk.cyan('hapi doctor clean')}
+${chalk.bold('To clean up runaway processes:')} Use ${chalk.cyan('hapi-power doctor clean')}
 `)
     }
 }

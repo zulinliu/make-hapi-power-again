@@ -243,7 +243,7 @@ async function main(): Promise<void> {
     const args = process.argv.slice(2);
     const target = getArg(args, '--target');
     const outdirArg = getArg(args, '--outdir') ?? 'dist-exe';
-    const name = getArg(args, '--name') ?? 'hapi';
+    const name = getArg(args, '--name') ?? 'hapi-power';
     const buildAll = args.includes('--all');
     const includeWebAssets = args.includes('--with-web-assets');
 

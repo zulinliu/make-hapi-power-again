@@ -28,7 +28,7 @@ describe('appServerConfig', () => {
         expect(params.baseInstructions).toBe(codexSystemPrompt);
         expect(params.developerInstructions).toBe(codexSystemPrompt);
         expect(params.config).toEqual({
-            'mcp_servers.hapi': {
+            'mcp_servers.hapi-power': {
                 command: 'node',
                 args: ['mcp']
             },
@@ -81,7 +81,7 @@ describe('appServerConfig', () => {
         expect(params.baseInstructions).toBe(codexSystemPrompt);
         expect(params.developerInstructions).toBe(`${codexSystemPrompt}\n\nOnly respond in Chinese.`);
         expect(params.config).toEqual({
-            'mcp_servers.hapi': {
+            'mcp_servers.hapi-power': {
                 command: 'node',
                 args: ['mcp']
             },
@@ -97,7 +97,7 @@ describe('appServerConfig', () => {
         });
 
         expect(params.config).toEqual({
-            'mcp_servers.hapi': {
+            'mcp_servers.hapi-power': {
                 command: 'node',
                 args: ['mcp']
             },

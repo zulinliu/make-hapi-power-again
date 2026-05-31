@@ -52,8 +52,8 @@ vi.mock('./utils/opencodeBackend', () => ({
     }))
 }));
 
-vi.mock('@/codex/utils/buildHapiMcpBridge', () => ({
-    buildHapiMcpBridge: async () => ({
+vi.mock('@/codex/utils/buildHapiPowerMcpBridge', () => ({
+    buildHapiPowerMcpBridge: async () => ({
         server: { stop: () => {} },
         mcpServers: {}
     })

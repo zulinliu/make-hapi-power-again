@@ -99,7 +99,7 @@ ${chalk.bold('Usage:')}
   hapi server            Alias for hapi hub
   hapi runner            Manage background service that allows
                             to spawn new sessions away from your computer
-  hapi doctor            System diagnostics & troubleshooting
+  hapi-power doctor            System diagnostics & troubleshooting
 
 ${chalk.bold('Examples:')}
   hapi                    Start session (will prompt for token if not set)
@@ -107,7 +107,7 @@ ${chalk.bold('Examples:')}
   hapi --yolo             Start with bypassing permissions
                             hapi sugar for --dangerously-skip-permissions
   hapi auth status        Show direct-connect status
-  hapi doctor             Run diagnostics
+  hapi-power doctor             Run diagnostics
 
 ${chalk.bold('hapi supports ALL Claude options!')}
   Use any claude flag with hapi as you would with claude. Our favorite:
