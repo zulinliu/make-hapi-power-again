@@ -140,6 +140,22 @@ export default defineConfig({
                         icons: [{ src: 'pwa-192x192.png', sizes: '192x192' }],
                     },
                 ],
+                share_target: {
+                    action: `${base}sessions/new`,
+                    method: 'POST',
+                    enctype: 'multipart/form-data',
+                    params: {
+                        title: 'title',
+                        text: 'text',
+                        url: 'url',
+                        files: [
+                            {
+                                name: 'files',
+                                accept: ['text/*', 'image/*'],
+                            },
+                        ],
+                    },
+                },
             },
             injectManifest: {
                 globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}', 'offline.html'],
