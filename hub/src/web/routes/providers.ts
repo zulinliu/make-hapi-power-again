@@ -33,7 +33,7 @@ export function createProviderRoutes(store: Store): Hono<WebAppEnv> {
 
     app.get('/providers', (c) => {
         const providers = store.providers.getAllWithAssignments()
-        return c.json({ providers })
+        return c.json({ providers: providers.map(({ apiKeyEncrypted, ...rest }) => rest) })
     })
 
     app.get('/providers/:id', (c) => {
@@ -42,8 +42,9 @@ export function createProviderRoutes(store: Store): Hono<WebAppEnv> {
         if (!provider) {
             return c.json({ error: 'Provider not found' }, 404)
         }
+        const { apiKeyEncrypted, ...safe } = provider
         const assignments = store.providers.getAssignments(id)
-        return c.json({ provider: { ...provider, assignments } })
+        return c.json({ provider: { ...safe, assignments } })
     })
 
     app.post('/providers', async (c) => {
@@ -74,7 +75,8 @@ export function createProviderRoutes(store: Store): Hono<WebAppEnv> {
         })
 
         const provider = store.providers.getById(id)
-        return c.json({ provider: { ...provider!, assignments: [] } }, 201)
+        const { apiKeyEncrypted, ...safe } = provider!
+        return c.json({ provider: { ...safe, assignments: [] } }, 201)
     })
 
     app.put('/providers/:id', async (c) => {
@@ -110,8 +112,9 @@ export function createProviderRoutes(store: Store): Hono<WebAppEnv> {
         }, Date.now())
 
         const provider = store.providers.getById(id)
+        const { apiKeyEncrypted, ...safe } = provider!
         const assignments = store.providers.getAssignments(id)
-        return c.json({ provider: { ...provider!, assignments } })
+        return c.json({ provider: { ...safe, assignments } })
     })
 
     app.delete('/providers/:id', (c) => {
@@ -154,7 +157,7 @@ export function createProviderRoutes(store: Store): Hono<WebAppEnv> {
         if (!provider) {
             return c.json({ error: 'Provider not found' }, 404)
         }
-        const result = await discoveryService.discoverModels(provider.baseUrl, provider.apiKeyEncrypted)
+        const result = await discoveryService.discoverModels(id, provider.baseUrl, provider.apiKeyEncrypted)
         return c.json(result)
     })
 

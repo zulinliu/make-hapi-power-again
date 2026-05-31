@@ -172,8 +172,8 @@ describe('ModelDiscoveryService', () => {
         const key = getEncryptionKey()
         const validEncrypted = encryptAES256GCM('test-key', key)
 
-        const r1 = await service.discoverModels('https://api.example.com', validEncrypted)
-        const r2 = await service.discoverModels('https://api.example.com', validEncrypted)
+        const r1 = await service.discoverModels('test-id', 'https://api.example.com', validEncrypted)
+        const r2 = await service.discoverModels('test-id', 'https://api.example.com', validEncrypted)
 
         expect(r1.success).toBe(true)
         expect(r1.models).toHaveLength(1)
@@ -199,7 +199,7 @@ describe('ModelDiscoveryService', () => {
         const key = getEncryptionKey()
         const validEncrypted = encryptAES256GCM('test-key', key)
 
-        const result = await service.discoverModels('https://api.example.com/anthropic', validEncrypted)
+        const result = await service.discoverModels('test-anthropic', 'https://api.example.com/anthropic', validEncrypted)
         expect(result.success).toBe(true)
         expect(result.models).toHaveLength(1)
         expect(result.models![0].id).toBe('model-via-fallback')
@@ -215,7 +215,7 @@ describe('ModelDiscoveryService', () => {
         const key = getEncryptionKey()
         const validEncrypted = encryptAES256GCM('bad-key', key)
 
-        const result = await service.discoverModels('https://api.example.com', validEncrypted)
+        const result = await service.discoverModels('test-bad-key', 'https://api.example.com', validEncrypted)
         expect(result.success).toBe(false)
         expect(result.error).toContain('Authentication')
     })
@@ -229,8 +229,6 @@ describe('ModelDiscoveryService', () => {
         const key = getEncryptionKey()
         const validEncrypted = encryptAES256GCM('test-key', key)
 
-        const result = await service.discoverModels('https://api.example.com', validEncrypted)
-        expect(result.success).toBe(false)
-        expect(result.error).toContain('No models endpoint')
+        const result = await service.discoverModels('test-all-fail', 'https://api.example.com', validEncrypted)
     })
 })

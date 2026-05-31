@@ -24,10 +24,11 @@ export class ModelDiscoveryService {
     private cache = new Map<string, CacheEntry>()
 
     async discoverModels(
+        providerId: string,
         baseUrl: string,
         apiKeyEncrypted: string
     ): Promise<DiscoverModelsResponse> {
-        const cacheKey = `${baseUrl}:${apiKeyEncrypted.slice(0, 8)}`
+        const cacheKey = providerId
         const cached = this.cache.get(cacheKey)
         if (cached && cached.expiresAt > Date.now()) {
             return { success: true, models: cached.models }
