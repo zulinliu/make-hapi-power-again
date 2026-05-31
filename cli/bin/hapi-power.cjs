@@ -5,7 +5,7 @@ const path = require('path');
 
 const platform = process.platform;
 const arch = process.arch;
-const RELEASE_URL = 'https://github.com/tiann/hapi/releases';
+const RELEASE_URL = 'https://github.com/zulinliu/make-hapi-power-again/releases';
 const OFFICIAL_NPM_REGISTRY = 'https://registry.npmjs.org';
 const SUPPORTED_PLATFORMS = [
     {
@@ -39,12 +39,12 @@ function isSupportedPlatform(platformName = platform, archName = arch) {
 }
 
 function getBinaryPath(platformName = platform, archName = arch) {
-    const pkgName = `@twsxtd/hapi-${platformName}-${archName}`;
+    const pkgName = `@hapipower/hapi-power-${platformName}-${archName}`;
 
     try {
         // Try to find the platform-specific package
         const pkgPath = require.resolve(`${pkgName}/package.json`);
-        const binName = platformName === 'win32' ? 'hapi.exe' : 'hapi';
+        const binName = platformName === 'win32' ? 'hapi-power.exe' : 'hapi-power';
         return path.join(path.dirname(pkgPath), 'bin', binName);
     } catch (e) {
         return null;
@@ -96,14 +96,14 @@ function reportUnsupportedPlatform(platformName = platform, archName = arch, log
 }
 
 function reportMissingPlatformPackage(platformName = platform, archName = arch, log = console.error) {
-    const platformPackage = `@twsxtd/hapi-${platformName}-${archName}`;
+    const platformPackage = `@hapipower/hapi-power-${platformName}-${archName}`;
     log(`Missing platform package: ${platformPackage}`);
     log('');
     log(`Detected platform ${platformName}-${archName} is supported, but the platform binary package was not installed.`);
     log('This may happen when using a registry mirror that has not synced all optionalDependencies.');
     log('');
     log('Try reinstalling with the official npm registry:');
-    log(`  npm install -g @twsxtd/hapi --registry=${OFFICIAL_NPM_REGISTRY}`);
+    log(`  npm install -g @hapipower/hapi-power --registry=${OFFICIAL_NPM_REGISTRY}`);
     log('');
     log('Or download the binary manually from:');
     log(`  ${RELEASE_URL}`);

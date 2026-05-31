@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { ResumableSession } from '@hapi/protocol'
+import type { ResumableSession } from '@hapipower/protocol'
 import {
     filterResumeSessions,
     formatResumeSessionRelativeTime,

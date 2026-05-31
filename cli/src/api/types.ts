@@ -4,7 +4,7 @@ import {
     MachineMetadataSchema,
     MetadataSchema,
     RunnerStateSchema
-} from '@hapi/protocol/schemas'
+} from '@hapipower/protocol/schemas'
 import {
     CliMessagesResponseSchema,
     CreateMachineResponseSchema,
@@ -17,8 +17,8 @@ import {
     type CreateMachineResponse,
     type CreateSessionResponse,
     type GetSessionResponse
-} from '@hapi/protocol'
-import type { CodexCollaborationMode, Machine, MachineMetadata, PermissionMode, RunnerState } from '@hapi/protocol/types'
+} from '@hapipower/protocol'
+import type { CodexCollaborationMode, Machine, MachineMetadata, PermissionMode, RunnerState } from '@hapipower/protocol/types'
 import { z } from 'zod'
 import { UsageSchema } from '@/claude/types'
 
@@ -35,7 +35,7 @@ export type {
     Metadata,
     RunnerState,
     Session
-} from '@hapi/protocol/types'
+} from '@hapipower/protocol/types'
 export type SessionPermissionMode = PermissionMode
 export type SessionCollaborationMode = CodexCollaborationMode
 export type SessionModel = string | null

@@ -3,8 +3,8 @@ import {
     getPermissionModeLabel,
     getPermissionModeTone,
     isPermissionModeAllowedForFlavor
-} from '@hapi/protocol'
-import type { PermissionModeTone } from '@hapi/protocol'
+} from '@hapipower/protocol'
+import type { PermissionModeTone } from '@hapipower/protocol'
 import { useMemo } from 'react'
 import type { AgentState, CodexCollaborationMode, PermissionMode } from '@/types/api'
 import type { ConversationStatus } from '@/realtime/types'

@@ -158,7 +158,7 @@ describe('AppServerEventConverter', () => {
             item: {
                 id: 'call-1',
                 type: 'mcpToolCall',
-                server: 'hapi',
+                server: 'hapi-power',
                 tool: 'change_title',
                 arguments: { title: 'MCP Title' }
             }
@@ -166,10 +166,10 @@ describe('AppServerEventConverter', () => {
         expect(started).toEqual([{
             type: 'mcp_tool_call_begin',
             call_id: 'call-1',
-            server: 'hapi',
+            server: 'hapi-power',
             tool: 'change_title',
             invocation: {
-                server: 'hapi',
+                server: 'hapi-power',
                 tool: 'change_title',
                 arguments: { title: 'MCP Title' }
             }
@@ -179,7 +179,7 @@ describe('AppServerEventConverter', () => {
             item: {
                 id: 'call-1',
                 type: 'mcpToolCall',
-                server: 'hapi',
+                server: 'hapi-power',
                 tool: 'change_title',
                 result: {
                     content: [{ type: 'text', text: 'done' }]
@@ -190,7 +190,7 @@ describe('AppServerEventConverter', () => {
         expect(completed).toEqual([{
             type: 'mcp_tool_call_end',
             call_id: 'call-1',
-            server: 'hapi',
+            server: 'hapi-power',
             tool: 'change_title',
             result: {
                 content: [{ type: 'text', text: 'done' }]
@@ -205,7 +205,7 @@ describe('AppServerEventConverter', () => {
             item: {
                 id: 'call-1',
                 type: 'mcpToolCall',
-                server: 'hapi',
+                server: 'hapi-power',
                 tool: 'change_title',
                 error: 'boom'
             }
@@ -214,7 +214,7 @@ describe('AppServerEventConverter', () => {
         expect(completed).toEqual([{
             type: 'mcp_tool_call_end',
             call_id: 'call-1',
-            server: 'hapi',
+            server: 'hapi-power',
             tool: 'change_title',
             result: { Err: 'boom' }
         }]);

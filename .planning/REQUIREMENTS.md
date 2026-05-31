@@ -123,24 +123,62 @@
 - [x] **A11Y-02**: ARIA 属性基础覆盖（上下文菜单、标签栏、列表分组）
 - [x] **A11Y-03**: 键盘导航支持（Tab 序列、快捷键）
 
-## v0.2 Requirements（延后）
+## v0.2 Requirements — 体验优化版
+
+> **v0.2 主题**: 全功能审计调优 + iOS PWA 深度优化 + 移动端体验 + i18n 中英双语
+
+### iOS PWA 优化（PWA）
+
+- **PWA-01**: iOS Safari manifest 完整配置（display: standalone、apple-mobile-web-app-capable、icons 全尺寸）
+- **PWA-02**: 安全区域适配（viewport-fit=cover + env(safe-area-inset-*) + Tailwind 工具类）
+- **PWA-03**: iOS 启动画面（apple-touch-startup-image 覆盖 iPhone SE/14/14 Pro/16 Pro/16 Pro Max，含暗/亮变体）
+- **PWA-04**: 状态栏融合（black-translucent 沉浸式 + theme-color 动态切换暗/亮模式）
+- **PWA-05**: iOS 推送通知集成（iOS 16.4+ Web Push API + Badge API + standalone 模式检测）
+- **PWA-06**: 离线回退页面（Service Worker offline fallback page）
+- **PWA-07**: Home Indicator 底部避让 + overscroll-behavior 控制
+
+### 移动端 UX 增强（MOB）
+
+- **MOB-01**: 终端触摸优化（虚拟键盘工具栏 + Ctrl/Esc/Tab 方向键 + 修饰键锁定）
+- **MOB-02**: 分享密码保护（加密安全 token + 密码哈希 bcrypt）
+- **MOB-03**: 分享访问次数限制（可配置上限 + 计数器 + 过期自动清理）
+- **MOB-04**: 移动端 AI 聊天布局优化（语音输入按钮、消息气泡适配、快速操作栏）
+- **MOB-05**: 移动端变更审查手势（swipe approve/reject + 紧凑 diff 视图）
+- **MOB-06**: 响应式断点全面验证（320px / 375px / 768px / 1024px 四档覆盖所有模块）
+
+### 国际化（I18N）
+
+- **I18N-01**: 统一 i18n 架构（自研轻量方案提升到 shared/src/i18n/，废弃 website/ 的 react-i18next）
+- **I18N-02**: 中文翻译完善（web/ 所有页面 100% 中文覆盖，补充遗漏的 key）
+- **I18N-03**: 英文翻译（web/ 所有页面英文翻译，翻译完整性测试）
+- **I18N-04**: 语言动态切换（运行时切换 + localStorage 持久化 + 浏览器语言检测）
+- **I18N-05**: 日期/数字本地化（Intl API 格式化 + 相对时间 + 文件大小显示）
+
+### 全功能审计调优（AUDIT）
+
+- **AUDIT-01**: 全模块功能审计（9 模块 117+ 测试用例，启动 dev server 实际操作测试）
+- **AUDIT-02**: 性能审计（Lighthouse LCP < 2.5s / INP < 200ms / CLS < 0.1 + Bundle 分析）
+- **AUDIT-03**: 可访问性审计（axe-core 扫描 + 键盘导航 + 焦点管理 + 对比度检查）
+- **AUDIT-04**: 移动端专项审计（触摸目标 ≥ 44px / 虚拟键盘适配 / 手势冲突检测）
+- **AUDIT-05**: 安全审计（OWASP Top 10 检查 + 路径遍历测试 + XSS 测试矩阵）
+
+### 设计打磨（DS2）
+
+- **DS2-01**: 全页面视觉一致性检查（设计系统 token 遵从度 + 组件间距统一）
+- **DS2-02**: 动画流畅度优化（transition 时效统一 + reduced-motion 支持 + compositor-only 属性）
+- **DS2-03**: 暗/亮模式一致性验证（所有页面双模式视觉走查）
+
+## v0.3 Requirements（延后）
 
 ### Isolation（隔离增强）
 
 - **ISO-01**: 插件 iframe sandbox 隔离方案
 - **ISO-02**: 插件 Web Worker 隔离评估
 
-### Mobile（移动端增强）
-
-- **MOB-01**: 终端触摸优化（专用工具栏、手势系统）
-- **MOB-02**: 分享密码保护
-- **MOB-03**: 分享访问次数限制
-
 ### Scalability（扩展性）
 
 - **SCAL-01**: PTY 会话跨 Hub 重启持久化
 - **SCAL-02**: Git 操作委托独立 Worker 服务
-- **SCAL-03**: i18n 完整实现（当前仅架构预留）
 
 ## Out of Scope
 
@@ -153,6 +191,7 @@
 | 离线模式 | 需要实时通信，离线无意义 |
 | 多语言服务端 | TypeScript monorepo 统一 |
 | 代码补全/IntelliSense | 代理负责代码生成，IDE 级补全非核心 |
+| 完全可交互移动终端 | v0.2 仅优化只读终端体验，交互式终端延后 |
 
 ## Traceability
 
@@ -174,10 +213,10 @@
 | CTX-01~03 | Phase 6 | Done |
 
 **Coverage:**
-- v0.1 requirements: 60 total
-- Mapped to phases: 60
-- Unmapped: 0 ✓
+- v0.1 requirements: 60 total → 60 Done ✓
+- v0.2 requirements: 26 total (PWA:7 + MOB:6 + I18N:5 + AUDIT:5 + DS2:3)
+- v0.3 deferred: ISO-01~02 + SCAL-01~02
 
 ---
 *Requirements defined: 2026-05-30*
-*Last updated: 2026-05-30 after v0.1 release*
+*Last updated: 2026-05-30 — v0.2 requirements added*

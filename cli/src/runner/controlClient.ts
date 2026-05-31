@@ -175,7 +175,7 @@ export async function isRunnerRunningCurrentlyInstalledHappyVersion(): Promise<b
   }
 
   const settings = await readSettings();
-  const currentApiUrl = process.env.HAPI_API_URL
+  const currentApiUrl = process.env.HAPI_POWER_API_URL
     || settings.apiUrl
     || settings.serverUrl
     || configuration.apiUrl;

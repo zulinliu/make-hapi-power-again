@@ -2,11 +2,11 @@ import { logger } from '@/ui/logger'
 import { mkdir, mkdtemp, rm, writeFile } from 'fs/promises'
 import { join, resolve, sep } from 'path'
 import { rmSync } from 'node:fs'
-import type { DeleteUploadResponse, UploadFileResponse } from '@hapi/protocol/apiTypes'
-import { RPC_METHODS } from '@hapi/protocol/rpcMethods'
+import type { DeleteUploadResponse, UploadFileResponse } from '@hapipower/protocol/apiTypes'
+import { RPC_METHODS } from '@hapipower/protocol/rpcMethods'
 import type { RpcHandlerManager } from '@/api/rpc/RpcHandlerManager'
 import { getErrorMessage, rpcError } from '../rpcResponses'
-import { getHapiBlobsDir } from '@/constants/uploadPaths'
+import { getHapiPowerBlobsDir } from '@/constants/uploadPaths'
 
 interface UploadFileRequest {
     sessionId?: string
@@ -65,7 +65,7 @@ async function getOrCreateUploadDir(sessionId?: string): Promise<string> {
     const safeKey = sanitizeFilename(sessionKey)
     const creation = (async () => {
         try {
-            const blobsDir = getHapiBlobsDir()
+            const blobsDir = getHapiPowerBlobsDir()
             await mkdir(blobsDir, { recursive: true })
             const dir = await mkdtemp(join(blobsDir, `${safeKey}-`))
             if (uploadDirCleanupRequested.has(sessionKey)) {
@@ -144,7 +144,7 @@ function isPathWithinUploadDir(path: string, sessionId?: string): boolean {
     }
 
     const safeKey = sanitizeFilename(sessionKey)
-    const resolvedPrefix = resolve(getHapiBlobsDir(), `${safeKey}-`)
+    const resolvedPrefix = resolve(getHapiPowerBlobsDir(), `${safeKey}-`)
     return resolvedPath.startsWith(resolvedPrefix)
 }
 

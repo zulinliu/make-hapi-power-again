@@ -120,7 +120,7 @@ bun run build:single-exe   # 构建全功能单文件可执行程序
 | `VAPID_PUBLIC_KEY` | Web Push 公钥 | - |
 | `VAPID_PRIVATE_KEY` | Web Push 私钥 | - |
 | `ALLOWED_ORIGINS` | CORS 允许的来源 | - |
-| `DATA_DIR` | 数据存储目录 | `~/.hapi` |
+| `DATA_DIR` | 数据存储目录 | `~/.hapi-power` |
 
 ### CLI
 

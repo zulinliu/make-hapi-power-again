@@ -4,10 +4,10 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 // Stub out `@/configuration` so the helper considers our tmpdir HAPI-managed.
-// Tests that exercise the non-managed branch override happyHomeDir explicitly.
+// Tests that exercise the non-managed branch override hapiPowerHomeDir explicitly.
 vi.mock('@/configuration', () => ({
     configuration: {
-        get happyHomeDir(): string {
+        get hapiPowerHomeDir(): string {
             return (globalThis as { __hapiHomeStub?: string }).__hapiHomeStub ?? tmpdir();
         }
     }

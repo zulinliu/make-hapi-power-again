@@ -34,7 +34,7 @@ function renderA(props: React.ComponentPropsWithoutRef<'a'>) {
     )
 }
 
-const STORAGE_KEY = 'hapi-allowed-schemes'
+const STORAGE_KEY = 'hapi-power-allowed-schemes'
 
 beforeEach(() => {
     localStorage.clear()

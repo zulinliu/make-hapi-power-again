@@ -13,7 +13,7 @@ describe('listSlashCommands', () => {
     let projectDir: string
 
     beforeEach(async () => {
-        sandboxDir = await mkdtemp(join(tmpdir(), 'hapi-slash-commands-'))
+        sandboxDir = await mkdtemp(join(tmpdir(), 'hapi-power-slash-commands-'))
         claudeConfigDir = join(sandboxDir, 'global-claude')
         codexHome = join(sandboxDir, 'global-codex')
         projectDir = join(sandboxDir, 'project')

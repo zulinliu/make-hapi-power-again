@@ -120,7 +120,7 @@ describe('runCodex', () => {
 
     it('uses the requested collaboration mode when resuming locally', async () => {
         const options = {
-            existingSessionId: 'hapi-session-1',
+            existingSessionId: 'hapi-power-session-1',
             workingDirectory: '/tmp/project',
             resumeSessionId: 'codex-thread-1',
             collaborationMode: 'plan'
@@ -129,7 +129,7 @@ describe('runCodex', () => {
         await runCodexImpl(options)
 
         expect(harness.bootstrapArgs[0]).toEqual(expect.objectContaining({
-            sessionId: 'hapi-session-1',
+            sessionId: 'hapi-power-session-1',
             workingDirectory: '/tmp/project'
         }))
         expect(harness.loopArgs[0]).toEqual(expect.objectContaining({

@@ -5,7 +5,7 @@ import {
     ELEVENLABS_API_BASE,
     VOICE_AGENT_NAME,
     buildVoiceAgentConfig
-} from '@hapi/protocol/voice'
+} from '@hapipower/protocol/voice'
 
 const tokenRequestSchema = z.object({
     customAgentId: z.string().optional(),
@@ -47,9 +47,9 @@ function parseVoiceAgentMap(): Record<string, string> {
 }
 
 /**
- * Find an existing "Hapi Voice Assistant" agent
+ * Find an existing "Hapi Power Voice Assistant" agent
  */
-async function findHapiAgent(apiKey: string, agentName: string = VOICE_AGENT_NAME): Promise<string | null> {
+async function findHapiPowerAgent(apiKey: string, agentName: string = VOICE_AGENT_NAME): Promise<string | null> {
     try {
         const response = await fetch(`${ELEVENLABS_API_BASE}/convai/agents`, {
             method: 'GET',
@@ -65,22 +65,22 @@ async function findHapiAgent(apiKey: string, agentName: string = VOICE_AGENT_NAM
 
         const data = await response.json() as { agents?: ElevenLabsAgent[] }
         const agents: ElevenLabsAgent[] = data.agents || []
-        const hapiAgent = agents.find(agent => agent.name === agentName)
+        const hapiPowerAgent = agents.find(agent => agent.name === agentName)
 
-        return hapiAgent?.agent_id || null
+        return hapiPowerAgent?.agent_id || null
     } catch {
         return null
     }
 }
 
 /**
- * Create a new "Hapi Voice Assistant" agent
+ * Create a new "Hapi Power Voice Assistant" agent
  */
-async function createHapiAgent(apiKey: string): Promise<string | null> {
-    return createNamedHapiAgent(apiKey, VOICE_AGENT_NAME)
+async function createHapiPowerAgent(apiKey: string): Promise<string | null> {
+    return createNamedHapiPowerAgent(apiKey, VOICE_AGENT_NAME)
 }
 
-async function createNamedHapiAgent(apiKey: string, agentName: string, voiceId?: string): Promise<string | null> {
+async function createNamedHapiPowerAgent(apiKey: string, agentName: string, voiceId?: string): Promise<string | null> {
     try {
         const config = buildVoiceAgentConfig()
         config.name = agentName
@@ -116,7 +116,7 @@ async function createNamedHapiAgent(apiKey: string, agentName: string, voiceId?:
 }
 
 /**
- * Get or create agent ID - finds existing or creates new "Hapi Voice Assistant" agent
+ * Get or create agent ID - finds existing or creates new "Hapi Power Voice Assistant" agent
  */
 async function getOrCreateAgentId(apiKey: string): Promise<string | null> {
     return getOrCreateAgentIdForVoice(apiKey)
@@ -142,14 +142,14 @@ async function getOrCreateAgentIdForVoice(apiKey: string, voiceId?: string): Pro
         voiceId,
         agentName
     })
-    let agentId = await findHapiAgent(apiKey, agentName)
+    let agentId = await findHapiPowerAgent(apiKey, agentName)
 
     if (agentId) {
         console.log('[Voice] Found existing agent:', agentId)
     } else {
         // Create new agent
         console.log('[Voice] No existing agent found, creating new one...')
-        agentId = await createNamedHapiAgent(apiKey, agentName, voiceId)
+        agentId = await createNamedHapiPowerAgent(apiKey, agentName, voiceId)
         if (agentId) {
             console.log('[Voice] Created new agent:', agentId)
         }

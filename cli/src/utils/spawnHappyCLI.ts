@@ -32,7 +32,7 @@ import { isBunCompiled, projectPath } from '@/projectPath';
 import { logger } from '@/ui/logger';
 import { existsSync } from 'node:fs';
 
-const HAPI_CLI_EXECUTABLE_ENV = 'HAPI_CLI_EXECUTABLE';
+const HAPI_POWER_CLI_EXECUTABLE_ENV = 'HAPI_POWER_CLI_EXECUTABLE';
 
 /**
  * Resolve the TypeScript entrypoint for development mode.
@@ -74,7 +74,7 @@ function resolveInvokedCwd(cwd: SpawnOptions['cwd']): string {
 }
 
 export function resolveHappyCliExecutable(): string {
-  const override = process.env[HAPI_CLI_EXECUTABLE_ENV]?.trim();
+  const override = process.env[HAPI_POWER_CLI_EXECUTABLE_ENV]?.trim();
   if (override && isCrossPlatformAbsolutePath(override) && existsSync(override)) {
     return override;
   }
@@ -132,8 +132,8 @@ export function spawnHappyCLI(args: string[], options: SpawnOptions = {}): Child
     directory = process.cwd()
   }
   // Note: We're executing the current runtime with the calculated entrypoint path below,
-  // bypassing the 'hapi' wrapper that would normally be found in the shell's PATH.
-  // However, we log it as 'hapi' here because other engineers are typically looking
+  // bypassing the 'hapi-power' wrapper that would normally be found in the shell's PATH.
+  // However, we log it as 'hapi-power' here because other engineers are typically looking
   // for when "hapi" was started and don't care about the underlying node process
   // details and flags we use to achieve the same result.
   const fullCommand = `hapi ${args.join(' ')}`;
@@ -158,7 +158,7 @@ export function spawnHappyCLI(args: string[], options: SpawnOptions = {}): Child
   const finalEnv = { ...process.env, ...options.env };
   let shouldSetEnv = false;
   if (compiledMode) {
-    finalEnv[HAPI_CLI_EXECUTABLE_ENV] = spawnCommand;
+    finalEnv[HAPI_POWER_CLI_EXECUTABLE_ENV] = spawnCommand;
     shouldSetEnv = true;
   } else {
     const invokedCwd = finalEnv.HAPI_INVOKED_CWD?.trim();

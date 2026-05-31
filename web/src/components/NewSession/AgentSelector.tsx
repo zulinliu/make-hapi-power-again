@@ -1,4 +1,4 @@
-import { AGENT_FLAVORS } from '@hapi/protocol'
+import { AGENT_FLAVORS } from '@hapipower/protocol'
 import type { AgentType } from './types'
 import { useTranslation } from '@/lib/use-translation'
 

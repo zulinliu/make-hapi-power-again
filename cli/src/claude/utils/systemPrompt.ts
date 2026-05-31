@@ -5,8 +5,8 @@ import { shouldIncludeCoAuthoredBy } from "./claudeSettings";
  * Base system prompt shared across all configurations
  */
 const BASE_SYSTEM_PROMPT = (() => trimIdent(`
-    ALWAYS when you start a new chat - you must call a tool "mcp__hapi__change_title" to set a chat title. When you think chat title is not relevant anymore - call the tool again to change it. When chat name is too generic and you have a change to make it more specific - call the tool again to change it. This title is needed to easily find the chat in the future. Help human.
-    When you create or find a local image file that the user should see, call the tool "mcp__hapi__display_image" with the image path so HAPI can show it inline.
+    ALWAYS when you start a new chat - you must call a tool "mcp__hapi_power__change_title" to set a chat title. When you think chat title is not relevant anymore - call the tool again to change it. When chat name is too generic and you have a change to make it more specific - call the tool again to change it. This title is needed to easily find the chat in the future. Help human.
+    When you create or find a local image file that the user should see, call the tool "mcp__hapi_power__display_image" with the image path so HAPI can show it inline.
 `))();
 
 /**
@@ -17,9 +17,9 @@ const CO_AUTHORED_CREDITS = (() => trimIdent(`
 
     <main commit message>
 
-    via [HAPI](https://hapi.run)
+    via [HapiPower](https://YOUR_DOMAIN)
 
-    Co-Authored-By: HAPI <noreply@hapi.run>
+    Co-Authored-By: HAPI <noreply@YOUR_DOMAIN>
 `))();
 
 /**

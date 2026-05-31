@@ -1,6 +1,6 @@
 import type { AgentState } from "@/api/types";
-import type { PermissionMode } from "@hapi/protocol/types";
-import { RPC_METHODS } from '@hapi/protocol/rpcMethods';
+import type { PermissionMode } from "@hapipower/protocol/types";
+import { RPC_METHODS } from '@hapipower/protocol/rpcMethods';
 
 type RpcHandlerManagerLike = {
     registerHandler<TRequest = unknown, TResponse = unknown>(
@@ -20,7 +20,7 @@ export type AutoApprovalRuleSet = {
 const AUTO_APPROVE_TOOL_NAME_HINTS = [
     'change_title',
     'happy__change_title',
-    'hapi_change_title',  // OpenCode MCP tool pattern
+    'hapi_power_change_title',  // OpenCode MCP tool pattern
     'geminireasoning',
     'codexreasoning',
     'think',

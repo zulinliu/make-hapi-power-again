@@ -3,7 +3,7 @@ import type { AgentState, SessionPermissionMode } from '@/api/types';
 import type { ApiSessionClient } from '@/api/apiSession';
 import { logger } from '@/ui/logger';
 import { deriveToolName } from '@/agent/utils';
-import { RPC_METHODS } from '@hapi/protocol/rpcMethods';
+import { RPC_METHODS } from '@hapipower/protocol/rpcMethods';
 import {
     resolveToolAutoApprovalDecision,
     type AutoApprovalDecision

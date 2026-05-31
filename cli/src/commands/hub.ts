@@ -28,12 +28,12 @@ export const hubCommand: CommandDefinition = {
             const { host, port } = parseHubArgs(context.commandArgs)
 
             if (host) {
-                process.env.HAPI_LISTEN_HOST = host
+                process.env.HAPI_POWER_LISTEN_HOST = host
             }
             if (port) {
-                process.env.HAPI_LISTEN_PORT = port
+                process.env.HAPI_POWER_LISTEN_PORT = port
             }
-            const { startHub } = await import('hapi-hub/startHub')
+            const { startHub } = await import('hapi-power-hub/startHub')
             const hub = await startHub({ args: context.commandArgs })
             let shuttingDown = false
             const shutdown = async () => {

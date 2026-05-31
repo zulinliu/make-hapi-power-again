@@ -1,8 +1,8 @@
 {
-    "name": "hapi-hub",
+    "name": "hapi-power-hub",
     "private": true,
-    "version": "0.1.0",
-    "description": "Telegram Bot client for HAPI - control Claude Code sessions",
+    "version": "0.3.0",
+    "description": "Hapi Power Hub - AI Coding Agent Platform",
     "author": "weishu",
     "license": "AGPL-3.0-only",
     "type": "module",
@@ -21,7 +21,7 @@
         "generate:embedded-web-assets": "bun run scripts/generate-embedded-web-assets.ts"
     },
     "dependencies": {
-        "@hapi/protocol": "workspace:*",
+        "@hapipower/protocol": "workspace:*",
         "@socket.io/bun-engine": "^0.1.0",
         "grammy": "^1.38.4",
         "hono": "^4.11.2",

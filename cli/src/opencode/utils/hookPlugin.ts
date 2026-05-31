@@ -125,13 +125,13 @@ function resolvePluginDir(rootPath: string): string {
 
 /**
  * `rootPath` is a HAPI-managed directory only when it lives under
- * `configuration.happyHomeDir` (the default `OPENCODE_CONFIG_DIR` we
+ * `configuration.hapiPowerHomeDir` (the default `OPENCODE_CONFIG_DIR` we
  * synthesize per-session). If a user has exported `OPENCODE_CONFIG_DIR`
  * pointing at e.g. their own `~/.config/opencode`, we must not pollute it
  * with a placeholder `package.json`.
  */
 function isHapiManagedDir(rootPath: string): boolean {
-    const home = configuration.happyHomeDir;
+    const home = configuration.hapiPowerHomeDir;
     if (!home) {
         return false;
     }
@@ -179,7 +179,7 @@ function buildMinimalPackageJson(): string {
  *
  * Guards against three failure modes:
  *   - **Non-managed dir**: when the caller pointed OPENCODE_CONFIG_DIR at a
- *     directory outside `happyHomeDir` (e.g. the user's global opencode
+ *     directory outside `hapiPowerHomeDir` (e.g. the user's global opencode
  *     config) we leave it alone — that filesystem is not ours to mutate.
  *   - **Existing package.json missing our dep**: parse it and only short-
  *     circuit when `@opencode-ai/plugin` is already declared. Otherwise

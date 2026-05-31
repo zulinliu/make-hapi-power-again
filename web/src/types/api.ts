@@ -6,7 +6,7 @@ import type {
     SessionSummary,
     SyncEvent as ProtocolSyncEvent,
     WorktreeMetadata
-} from '@hapi/protocol/types'
+} from '@hapipower/protocol/types'
 
 export type {
     CodexModelsResponse,
@@ -34,7 +34,7 @@ export type {
     SessionsResponse,
     SpawnResponse,
     UploadFileResponse
-} from '@hapi/protocol/apiTypes'
+} from '@hapipower/protocol/apiTypes'
 
 export type {
     AgentState,
@@ -55,7 +55,7 @@ export type {
     ThreadGoalStatus,
     TodoItem,
     WorktreeMetadata
-} from '@hapi/protocol/types'
+} from '@hapipower/protocol/types'
 
 export type SessionMetadataSummary = {
     path: string

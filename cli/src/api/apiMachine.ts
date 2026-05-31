@@ -1,5 +1,5 @@
 /**
- * WebSocket client for machine/runner communication with hapi-hub
+ * WebSocket client for machine/runner communication with hapi-power-hub
  */
 
 import { io, type Socket } from 'socket.io-client'
@@ -8,9 +8,9 @@ import { realpathSync } from 'node:fs'
 import { basename, dirname, isAbsolute, join, relative, resolve as resolvePath } from 'node:path'
 import { logger } from '@/ui/logger'
 import { configuration } from '@/configuration'
-import type { ClientToServerEvents, ServerToClientEvents, Update, UpdateMachineBody } from '@hapi/protocol'
-import type { MachineDirectoryEntry, MachineListDirectoryResponse, PathExistsResponse } from '@hapi/protocol/apiTypes'
-import { RPC_METHODS } from '@hapi/protocol/rpcMethods'
+import type { ClientToServerEvents, ServerToClientEvents, Update, UpdateMachineBody } from '@hapipower/protocol'
+import type { MachineDirectoryEntry, MachineListDirectoryResponse, PathExistsResponse } from '@hapipower/protocol/apiTypes'
+import { RPC_METHODS } from '@hapipower/protocol/rpcMethods'
 import type { RunnerState, Machine, MachineMetadata } from './types'
 import { RunnerStateSchema, MachineMetadataSchema } from './types'
 import { backoff } from '@/utils/time'
@@ -405,9 +405,9 @@ export class ApiMachineClient {
             const desiredWorkspaceRoots = this.workspaceRoots
             if (!workspaceRootsEqual(desiredWorkspaceRoots, hubWorkspaceRoots)) {
                 if (desiredWorkspaceRoots?.length) {
-                    console.log(`[HAPI] Syncing workspace roots to hub: ${formatWorkspaceRoots(desiredWorkspaceRoots)} (current hub value: ${formatWorkspaceRoots(hubWorkspaceRoots)})`)
+                    console.log(`[HapiPower] Syncing workspace roots to hub: ${formatWorkspaceRoots(desiredWorkspaceRoots)} (current hub value: ${formatWorkspaceRoots(hubWorkspaceRoots)})`)
                 } else {
-                    console.log(`[HAPI] Clearing workspace roots on hub (was: ${formatWorkspaceRoots(hubWorkspaceRoots)})`)
+                    console.log(`[HapiPower] Clearing workspace roots on hub (was: ${formatWorkspaceRoots(hubWorkspaceRoots)})`)
                 }
                 this.updateMachineMetadata((current) => {
                     const base = current ?? this.machine.metadata
@@ -420,12 +420,12 @@ export class ApiMachineClient {
                     const { workspaceRoots: _workspaceRoots, ...rest } = base
                     return rest as MachineMetadata
                 }).then(() => {
-                    console.log(`[HAPI] Workspace roots synced: ${formatWorkspaceRoots(this.machine.metadata?.workspaceRoots)}`)
+                    console.log(`[HapiPower] Workspace roots synced: ${formatWorkspaceRoots(this.machine.metadata?.workspaceRoots)}`)
                 }).catch((error) => {
-                    console.error('[HAPI] Failed to sync workspace roots:', error instanceof Error ? error.message : error)
+                    console.error('[HapiPower] Failed to sync workspace roots:', error instanceof Error ? error.message : error)
                 })
             } else if (desiredWorkspaceRoots?.length) {
-                console.log(`[HAPI] Workspace roots already up to date on hub: ${formatWorkspaceRoots(desiredWorkspaceRoots)}`)
+                console.log(`[HapiPower] Workspace roots already up to date on hub: ${formatWorkspaceRoots(desiredWorkspaceRoots)}`)
             }
 
             this.startKeepAlive()

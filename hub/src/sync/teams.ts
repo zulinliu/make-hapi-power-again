@@ -1,7 +1,7 @@
-import { AGENT_MESSAGE_PAYLOAD_TYPE } from "@hapi/protocol"
-import { isObject } from '@hapi/protocol'
-import { unwrapRoleWrappedRecordEnvelope } from '@hapi/protocol/messages'
-import type { TeamState } from '@hapi/protocol/types'
+import { AGENT_MESSAGE_PAYLOAD_TYPE } from "@hapipower/protocol"
+import { isObject } from '@hapipower/protocol'
+import { unwrapRoleWrappedRecordEnvelope } from '@hapipower/protocol/messages'
+import type { TeamState } from '@hapipower/protocol/types'
 
 type TeamStateDelta = Partial<TeamState> & { _action?: 'create' | 'delete' | 'update' }
 

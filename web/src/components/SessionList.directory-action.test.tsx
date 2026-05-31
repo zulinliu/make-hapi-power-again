@@ -125,7 +125,7 @@ describe('SessionList collapse behavior', () => {
     }
 
     function getProjectPanel(): Element {
-        const header = screen.getByTitle('/work/hapi')
+        const header = screen.getByTitle('/work/hapi-power')
         const panel = header.nextElementSibling
         if (!panel) {
             throw new Error('Expected project collapse panel')
@@ -141,19 +141,19 @@ describe('SessionList collapse behavior', () => {
                 thinking: true,
                 pendingRequestsCount: 1,
                 updatedAt: 100,
-                metadata: { path: '/work/hapi', name: 'Running task', flavor: 'codex' },
+                metadata: { path: '/work/hapi-power', name: 'Running task', flavor: 'codex' },
             }),
             makeSession({
                 id: 'session-old',
                 updatedAt: 50,
-                metadata: { path: '/work/hapi', name: 'Older task', flavor: 'codex' },
+                metadata: { path: '/work/hapi-power', name: 'Older task', flavor: 'codex' },
             })
         ]
         const { rerender } = render(renderSessionList(baseSessions))
 
         expect(getProjectPanel().getAttribute('data-open')).toBe('true')
 
-        fireEvent.click(screen.getByTitle('/work/hapi'))
+        fireEvent.click(screen.getByTitle('/work/hapi-power'))
         expect(getProjectPanel().getAttribute('data-open')).toBeNull()
 
         rerender(renderSessionList([
@@ -177,17 +177,17 @@ describe('SessionList collapse behavior', () => {
                 active: true,
                 thinking: true,
                 updatedAt: 100,
-                metadata: { path: '/work/hapi', name: 'Running task', flavor: 'codex' },
+                metadata: { path: '/work/hapi-power', name: 'Running task', flavor: 'codex' },
             }),
             makeSession({
                 id: 'session-next',
                 updatedAt: 90,
-                metadata: { path: '/work/hapi', name: 'Next task', flavor: 'codex' },
+                metadata: { path: '/work/hapi-power', name: 'Next task', flavor: 'codex' },
             })
         ]
         const { rerender } = render(renderSessionList(sessions))
 
-        fireEvent.click(screen.getByTitle('/work/hapi'))
+        fireEvent.click(screen.getByTitle('/work/hapi-power'))
         expect(getProjectPanel().getAttribute('data-open')).toBeNull()
 
         rerender(renderSessionList(sessions, 'session-next'))

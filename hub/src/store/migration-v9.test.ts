@@ -236,7 +236,7 @@ describe('Store V9: scheduled_at store operations', () => {
         expect(results.map(m => m.id)).toEqual([msg1.id, msg2.id])
     })
 
-    it('getImmediateQueuedLocalMessages: returns only immediate queued, excludes mature AND future scheduled (HAPI Bot R4)', () => {
+    it('getImmediateQueuedLocalMessages: returns only immediate queued, excludes mature AND future scheduled (HapiPower Bot R4)', () => {
         const store = new Store(':memory:')
         const session = store.sessions.getOrCreateSession('test', { path: '/tmp' }, null, 'default')
         const now = Date.now()

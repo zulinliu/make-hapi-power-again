@@ -39,7 +39,7 @@ describe('HappyBot.start', () => {
         await sleep(10)
 
         expect(errorSpy).toHaveBeenCalledWith(
-            '[HAPIBot] Telegram bot polling failed:',
+            '[HapiPowerBot] Telegram bot polling failed:',
             'Network failure'
         )
 

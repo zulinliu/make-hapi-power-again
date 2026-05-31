@@ -1,26 +1,26 @@
 /**
- * Configuration for hapi-hub (Direct Connect)
+ * Configuration for hapi-power-hub (Direct Connect)
  *
  * Configuration is loaded with priority: environment variable > settings.json > default
  * When values are read from environment variables and not present in settings.json,
  * they are automatically saved for future use
  *
  * Optional environment variables:
- * - CLI_API_TOKEN: Shared secret for hapi CLI authentication (auto-generated if not set)
+ * - CLI_API_TOKEN: Shared secret for HapiPower CLI authentication (auto-generated if not set)
  * - TELEGRAM_BOT_TOKEN: Telegram Bot API token from @BotFather
  * - TELEGRAM_NOTIFICATION: Enable/disable Telegram notifications (default: true)
  * - SERVERCHAN_SENDKEY: Server酱 SendKey/AppKey for push notifications
  * - SERVERCHAN_NOTIFICATION: Enable/disable Server酱 notifications (default: true)
- * - HAPI_LISTEN_HOST: Host/IP to bind the HTTP service (default: 127.0.0.1)
- * - HAPI_LISTEN_PORT: Port for HTTP service (default: 3006)
- * - HAPI_PUBLIC_URL: Public URL for external access (e.g., Telegram Mini App)
+ * - HAPI_POWER_LISTEN_HOST: Host/IP to bind the HTTP service (default: 127.0.0.1)
+ * - HAPI_POWER_LISTEN_PORT: Port for HTTP service (default: 3006)
+ * - HAPI_POWER_PUBLIC_URL: Public URL for external access (e.g., Telegram Mini App)
  * - CORS_ORIGINS: Comma-separated CORS origins
- * - HAPI_RELAY_API: Relay API domain for tunwg (default: relay.hapi.run)
- * - HAPI_RELAY_AUTH: Relay auth key for tunwg (default: hapi)
- * - HAPI_RELAY_FORCE_TCP: Force TCP relay mode when UDP is unavailable (true/1)
- * - VAPID_SUBJECT: Contact email or URL for Web Push (defaults to mailto:admin@hapi.run)
- * - HAPI_HOME: Data directory (default: ~/.hapi)
- * - DB_PATH: SQLite database path (default: {HAPI_HOME}/hapi.db)
+ * - HAPI_POWER_RELAY_API: Relay API domain for tunwg (default: YOUR_RELAY_DOMAIN)
+ * - HAPI_POWER_RELAY_AUTH: Relay auth key for tunwg (default: hapi-power)
+ * - HAPI_POWER_RELAY_FORCE_TCP: Force TCP relay mode when UDP is unavailable (true/1)
+ * - VAPID_SUBJECT: Contact email or URL for Web Push (defaults to mailto:admin@YOUR_DOMAIN)
+ * - HAPI_POWER_HOME: Data directory (default: ~/.hapi)
+ * - DB_PATH: SQLite database path (default: {HAPI_POWER_HOME}/hapi-power.db)
  */
 
 import { existsSync, mkdirSync } from 'node:fs'
@@ -134,9 +134,9 @@ class Configuration {
     /** Create configuration asynchronously */
     static async create(): Promise<Configuration> {
         // 1. Determine data directory (env only - not persisted)
-        const dataDir = process.env.HAPI_HOME
-            ? process.env.HAPI_HOME.replace(/^~/, homedir())
-            : join(homedir(), '.hapi')
+        const dataDir = process.env.HAPI_POWER_HOME
+            ? process.env.HAPI_POWER_HOME.replace(/^~/, homedir())
+            : join(homedir(), '.hapi-power')
 
         // Ensure data directory exists before loading settings
         if (!existsSync(dataDir)) {
@@ -146,7 +146,7 @@ class Configuration {
         // 2. Determine DB path (env only - not persisted)
         const dbPath = process.env.DB_PATH
             ? process.env.DB_PATH.replace(/^~/, homedir())
-            : join(dataDir, 'hapi.db')
+            : join(dataDir, 'hapi-power.db')
 
         // 3. Load hub settings (with persistence)
         const settingsResult = await loadServerSettings(dataDir)

@@ -48,7 +48,7 @@ export function useRecentPaths() {
 
     const getLastUsedMachineId = useCallback((): string | null => {
         try {
-            return localStorage.getItem('hapi:lastMachineId')
+            return localStorage.getItem('hapi-power:lastMachineId')
         } catch {
             return null
         }
@@ -56,7 +56,7 @@ export function useRecentPaths() {
 
     const setLastUsedMachineId = useCallback((machineId: string): void => {
         try {
-            localStorage.setItem('hapi:lastMachineId', machineId)
+            localStorage.setItem('hapi-power:lastMachineId', machineId)
         } catch {
             // Ignore storage errors
         }
