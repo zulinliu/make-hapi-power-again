@@ -90,6 +90,8 @@ export function SessionHeader(props: {
     onBack: () => void
     onViewFiles?: () => void
     onOpenOutline?: () => void
+    onViewGit?: () => void
+    onViewExtensions?: () => void
     onViewTimeline?: () => void
     onViewUndo?: () => void
     onViewChanges?: () => void
@@ -189,6 +191,32 @@ export function SessionHeader(props: {
                             title={t('session.title')}
                         >
                             <FilesIcon />
+                        </button>
+                    ) : null}
+
+                    {props.onViewGit ? (
+                        <button
+                            type="button"
+                            onClick={props.onViewGit}
+                            className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--app-hint)] transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]"
+                            title="Git"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <circle cx="18" cy="18" r="3" /><circle cx="6" cy="6" r="3" /><path d="M13 6h3a2 2 0 0 1 2 2v7" /><path d="M6 9v12" />
+                            </svg>
+                        </button>
+                    ) : null}
+
+                    {props.onViewExtensions ? (
+                        <button
+                            type="button"
+                            onClick={props.onViewExtensions}
+                            className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--app-hint)] transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]"
+                            title={t('session.extensions') ?? 'Extensions'}
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                            </svg>
                         </button>
                     ) : null}
 

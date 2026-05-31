@@ -435,6 +435,7 @@ export default {
   'browse.refresh': 'Refresh',
   'browse.startSession': 'Start Session',
   'browse.nav': 'Browse',
+  'orchestration.nav': 'Skill Orchestration',
   'browse.noRootTitle': 'Workspace browsing is off',
   'browse.noRootHint': 'Browsing is opt-in. Restart the runner with one or more workspace roots to enable file-tree navigation and scoped session spawning.',
   'browse.noRootFooter': 'You can still create sessions from the “New Session” page.',

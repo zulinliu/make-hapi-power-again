@@ -510,6 +510,20 @@ export function SessionChat(props: {
         })
     }, [navigate, props.session.id])
 
+    const handleViewGit = useCallback(() => {
+        navigate({
+            to: '/sessions/$sessionId/git',
+            params: { sessionId: props.session.id }
+        })
+    }, [navigate, props.session.id])
+
+    const handleViewExtensions = useCallback(() => {
+        navigate({
+            to: '/sessions/$sessionId/extensions',
+            params: { sessionId: props.session.id }
+        })
+    }, [navigate, props.session.id])
+
     // Scheduled message state — lifted here so useHappyRuntime can read the ref.
     //
     // pendingSchedule holds what the user selected (preset or absolute ms).
@@ -575,6 +589,8 @@ export function SessionChat(props: {
                 onBack={props.onBack}
                 onViewFiles={props.session.metadata?.path ? handleViewFiles : undefined}
                 onOpenOutline={() => setOutlineOpen(true)}
+                onViewGit={handleViewGit}
+                onViewExtensions={handleViewExtensions}
                 onViewChanges={handleViewChanges}
                 onViewTimeline={handleViewTimeline}
                 onViewUndo={handleViewUndo}
