@@ -36,7 +36,7 @@ export const claudeCommand: CommandDefinition = {
             if (arg === '-h' || arg === '--help') {
                 showHelp = true
                 unknownArgs.push(arg)
-            } else if (arg === '--hapi-starting-mode') {
+            } else if (arg === '--hapi-power-starting-mode') {
                 options.startingMode = z.enum(['local', 'remote']).parse(args[++i])
             } else if (arg === '--permission-mode') {
                 const mode = args[++i]
@@ -84,29 +84,29 @@ export const claudeCommand: CommandDefinition = {
 ${chalk.bold('hapi')} - Claude Code On the Go
 
 ${chalk.bold('Usage:')}
-  hapi [options]         Start Claude with Telegram control (direct-connect)
-  hapi auth              Manage authentication
-  hapi codex             Start Codex mode
-  hapi cursor            Start Cursor Agent mode
-  hapi gemini            Start Gemini ACP mode
-  hapi opencode          Start OpenCode ACP mode
-  hapi resume [id]       Resume an existing HAPI session locally
-  hapi mcp               Start MCP stdio bridge
-  hapi connect           (not available in direct-connect mode)
-  hapi notify            (not available in direct-connect mode)
-  hapi hub               Start the API + web hub
-  hapi hub --relay       Start with public relay
-  hapi server            Alias for hapi hub
-  hapi runner            Manage background service that allows
+  hapi-power [options]         Start Claude with Telegram control (direct-connect)
+  hapi-power auth              Manage authentication
+  hapi-power codex             Start Codex mode
+  hapi-power cursor            Start Cursor Agent mode
+  hapi-power gemini            Start Gemini ACP mode
+  hapi-power opencode          Start OpenCode ACP mode
+  hapi-power resume [id]       Resume an existing HapiPower session locally
+  hapi-power mcp               Start MCP stdio bridge
+  hapi-power connect           (not available in direct-connect mode)
+  hapi-power notify            (not available in direct-connect mode)
+  hapi-power hub               Start the API + web hub
+  hapi-power hub --relay       Start with public relay
+  hapi-power server            Alias for hapi hub
+  hapi-power runner            Manage background service that allows
                             to spawn new sessions away from your computer
   hapi-power doctor            System diagnostics & troubleshooting
 
 ${chalk.bold('Examples:')}
   hapi                    Start session (will prompt for token if not set)
-  hapi auth login         Configure CLI_API_TOKEN interactively
+  hapi-power auth login         Configure CLI_API_TOKEN interactively
   hapi --yolo             Start with bypassing permissions
                             hapi sugar for --dangerously-skip-permissions
-  hapi auth status        Show direct-connect status
+  hapi-power auth status        Show direct-connect status
   hapi-power doctor             Run diagnostics
 
 ${chalk.bold('hapi supports ALL Claude options!')}

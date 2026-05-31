@@ -926,7 +926,7 @@ export function buildCliArgs(
       args.push('--resume', options.resumeSessionId);
     }
   }
-  args.push('--hapi-starting-mode', 'remote', '--started-by', 'runner');
+  args.push('--hapi-power-starting-mode', 'remote', '--started-by', 'runner');
   if (options.model) {
     args.push('--model', options.model);
   }

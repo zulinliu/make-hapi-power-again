@@ -150,9 +150,9 @@ function buildAcceptedElicitationContent(params: unknown): Record<string, unknow
     return content;
 }
 
-function isHapiBridgeElicitation(params: unknown): boolean {
+function isHapiPowerBridgeElicitation(params: unknown): boolean {
     const record = asRecord(params);
-    return record?.serverName === 'hapi';
+    return record?.serverName === 'hapi-power';
 }
 
 export function registerAppServerPermissionHandlers(args: {
@@ -261,7 +261,7 @@ export function registerAppServerPermissionHandlers(args: {
         const record = asRecord(params) ?? {};
 
         const currentPermissionMode = getPermissionMode?.();
-        const shouldAccept = isHapiBridgeElicitation(params) || currentPermissionMode === 'yolo';
+        const shouldAccept = isHapiPowerBridgeElicitation(params) || currentPermissionMode === 'yolo';
 
         if (!shouldAccept) {
             logger.debug('[CodexAppServer] Cancelling unsupported MCP elicitation request', {

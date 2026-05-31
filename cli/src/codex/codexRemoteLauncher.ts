@@ -401,7 +401,7 @@ class CodexRemoteLauncher extends RemoteLauncherBase {
             return `mcp__${serverName}__${toolName}`;
         };
 
-        const isHapiChangeTitleToolName = (toolName: string | null): boolean => {
+        const isHapiPowerChangeTitleToolName = (toolName: string | null): boolean => {
             return toolName === 'mcp__hapi_power__change_title';
         };
 
@@ -1607,7 +1607,7 @@ class CodexRemoteLauncher extends RemoteLauncherBase {
                     const input = invocation.arguments ?? invocation.input ?? msg.arguments ?? msg.input ?? {};
                     const inputRecord = asRecord(input);
                     const requestedTitle = inputRecord ? asString(inputRecord.title) : null;
-                    if (isHapiChangeTitleToolName(name) && requestedTitle) {
+                    if (isHapiPowerChangeTitleToolName(name) && requestedTitle) {
                         runtime.pendingTitleByCallId.set(callId, requestedTitle);
                     }
                     emitAgentRunTraceMessage(agentId, {
@@ -2365,7 +2365,7 @@ class CodexRemoteLauncher extends RemoteLauncherBase {
                     const input = invocation.arguments ?? invocation.input ?? msg.arguments ?? msg.input ?? {};
                     const inputRecord = asRecord(input);
                     const requestedTitle = inputRecord ? asString(inputRecord.title) : null;
-                    if (isHapiChangeTitleToolName(name) && requestedTitle) {
+                    if (isHapiPowerChangeTitleToolName(name) && requestedTitle) {
                         mcpTitleByCallId.set(callId, requestedTitle);
                     }
                     session.sendAgentMessage({
@@ -2537,7 +2537,7 @@ class CodexRemoteLauncher extends RemoteLauncherBase {
         const { server: happyServer, mcpServers } = await buildHapiPowerMcpBridge(session.client, {
             // In app-server/collab mode, child agents share this MCP bridge.
             // If the MCP handler writes the title directly, child title calls
-            // leak into the parent HAPI session. Defer the side effect until
+            // leak into the parent HapiPower session. Defer the side effect until
             // parent-thread mcp_tool_call_end reaches this launcher; child
             // events are filtered above by thread id.
             emitTitleSummary: false

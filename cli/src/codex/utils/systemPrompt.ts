@@ -8,7 +8,7 @@
 import { trimIdent } from '@/utils/trimIdent';
 
 /**
- * Title instruction for Codex to call the hapi MCP tool.
+ * Title instruction for Codex to call the hapi-power MCP tool.
  * Note: Codex exposes MCP tools under the `functions.` namespace,
  * so the tool is called as `functions.hapi_power__change_title`.
  */

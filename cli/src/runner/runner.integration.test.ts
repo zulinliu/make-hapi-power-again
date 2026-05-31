@@ -195,7 +195,7 @@ describe.skipIf(!await isServerHealthy())('Runner Integration Tests', { timeout:
   it('should track both runner-spawned and terminal sessions', async () => {
     // Spawn a real hapi process that looks like it was started from terminal
     const terminalHappyProcess = spawnHappyCLI([
-      '--hapi-starting-mode', 'remote',
+      '--hapi-power-starting-mode', 'remote',
       '--started-by', 'terminal'
     ], {
       cwd: '/tmp',
