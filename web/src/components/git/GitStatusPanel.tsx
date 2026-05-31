@@ -73,8 +73,8 @@ export function GitStatusPanel({ sessionId }: { sessionId: string }) {
         <p className="text-sm" style={{ color: 'var(--hp-text-tertiary)' }}>Working tree clean</p>
       ) : (
         <div className="space-y-1">
-          {status.files.map((file, i) => (
-            <div key={i} className="flex items-center gap-2 text-sm py-1 px-2 rounded" style={{ background: 'var(--hp-surface-1)' }}>
+          {status.files.map((file) => (
+            <div key={file.path} className="flex items-center gap-2 text-sm py-1 px-2 rounded" style={{ background: 'var(--hp-surface-1)' }}>
               <GitStatusBadge status={file.status} />
               <span className="font-mono text-xs truncate flex-1" style={{ color: 'var(--hp-text-primary)' }}>
                 {file.path}
