@@ -46,7 +46,7 @@ describe('API extra headers integration', () => {
     const now = 1_710_000_000_000
 
     beforeEach(() => {
-        configuration._setApiUrl('https://hapi.example.com')
+        configuration._setApiUrl('https://hapi-power.example.com')
         configuration._setExtraHeaders({})
         axiosPostMock.mockReset()
         ioMock.mockReset()

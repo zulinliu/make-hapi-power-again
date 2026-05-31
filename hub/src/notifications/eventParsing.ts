@@ -1,4 +1,4 @@
-import { isObject } from '@hapi/protocol'
+import { isObject } from '@hapipower/protocol'
 import type { SyncEvent } from '../sync/syncEngine'
 
 type EventEnvelope = {

@@ -13,6 +13,8 @@ interface ShareRecord {
     namespace: string
     scope: 'full' | 'changes' | 'terminal' | 'readonly'
     snapshot: string
+    password: string | null
+    maxViews: number | null
     expiresAt: number | null
     createdAt: number
     createdBy: number
@@ -29,6 +31,8 @@ class ShareStore {
                 namespace TEXT NOT NULL,
                 scope TEXT NOT NULL DEFAULT 'readonly',
                 snapshot TEXT NOT NULL DEFAULT '{}',
+                password TEXT,
+                max_views INTEGER,
                 expires_at INTEGER,
                 created_at INTEGER NOT NULL,
                 created_by INTEGER NOT NULL,
@@ -36,17 +40,21 @@ class ShareStore {
                 last_accessed_at INTEGER
             )
         `)
+        // Migrate: add password and max_views columns if missing
+        try { this.db.exec('ALTER TABLE session_shares ADD COLUMN password TEXT') } catch {}
+        try { this.db.exec('ALTER TABLE session_shares ADD COLUMN max_views INTEGER') } catch {}
         this.db.exec(`CREATE INDEX IF NOT EXISTS idx_shares_session ON session_shares(session_id)`)
     }
 
-    createShare(sessionId: string, namespace: string, scope: string, snapshot: string, expiresIn: number | null, createdBy: number): ShareRecord {
+    createShare(sessionId: string, namespace: string, scope: string, snapshot: string, password: string | null, maxViews: number | null, expiresIn: number | null, createdBy: number): ShareRecord {
         const id = randomBytes(32).toString('hex')
         const now = Date.now()
         const expiresAt = expiresIn ? now + expiresIn : null
+        const hashedPassword = password ? Bun.password.hashSync(password) : null
         this.db.prepare(`
-            INSERT INTO session_shares (id, session_id, namespace, scope, snapshot, expires_at, created_at, created_by)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        `).run(id, sessionId, namespace, scope, snapshot, expiresAt, now, createdBy)
+            INSERT INTO session_shares (id, session_id, namespace, scope, snapshot, password, max_views, expires_at, created_at, created_by)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(id, sessionId, namespace, scope, snapshot, hashedPassword, maxViews, expiresAt, now, createdBy)
 
         return this.getShare(id)!
     }
@@ -85,6 +93,8 @@ type DbShareRow = {
     namespace: string
     scope: string
     snapshot: string
+    password: string | null
+    max_views: number | null
     expires_at: number | null
     created_at: number
     created_by: number
@@ -99,6 +109,8 @@ function toShareRecord(row: DbShareRow): ShareRecord {
         namespace: row.namespace,
         scope: row.scope as ShareRecord['scope'],
         snapshot: row.snapshot,
+        password: row.password,
+        maxViews: row.max_views,
         expiresAt: row.expires_at,
         createdAt: row.created_at,
         createdBy: row.created_by,
@@ -111,6 +123,8 @@ const shareScopeSchema = z.enum(['full', 'changes', 'terminal', 'readonly'])
 const createShareSchema = z.object({
     scope: shareScopeSchema,
     expiresIn: z.number().int().min(60000).max(86400000 * 30).nullable().optional(),
+    password: z.string().min(4).max(64).nullable().optional(),
+    maxViews: z.number().int().min(1).max(10000).nullable().optional(),
 })
 
 function isRecord(v: unknown): v is Record<string, unknown> {
@@ -142,7 +156,7 @@ export function createShareRoutes(
             return c.json({ error: 'Invalid request', details: parsed.error.flatten() }, 400)
         }
 
-        const { scope, expiresIn } = parsed.data
+        const { scope, expiresIn, password, maxViews } = parsed.data
         const namespace = c.get('namespace')
         const userId = c.get('userId')
 
@@ -182,6 +196,8 @@ export function createShareRoutes(
             namespace,
             scope,
             JSON.stringify(snapshot),
+            password ?? null,
+            maxViews ?? null,
             expiresIn ?? null,
             userId
         )
@@ -219,7 +235,7 @@ export function createShareRoutes(
     const publicRoutes = new Hono()
 
     // Access shared session
-    publicRoutes.get('/s/:shareId', async (c) => {
+    publicRoutes.post('/s/:shareId/access', async (c) => {
         const shareId = c.req.param('shareId')
         const share = shareStore.getShare(shareId)
 
@@ -230,6 +246,19 @@ export function createShareRoutes(
         if (share.expiresAt && share.expiresAt < Date.now()) {
             shareStore.deleteShare(shareId)
             return c.json({ error: 'Share link has expired' }, 410)
+        }
+
+        if (share.maxViews !== null && share.accessCount >= share.maxViews) {
+            return c.json({ error: 'Share link has reached its view limit' }, 410)
+        }
+
+        // Password check
+        if (share.password) {
+            const body = await c.req.json<{ password?: string }>().catch(() => ({}))
+            const providedPassword = typeof body.password === 'string' ? body.password : ''
+            if (!Bun.password.verifySync(providedPassword, share.password)) {
+                return c.json({ error: 'Incorrect password', requiresPassword: true }, 401)
+            }
         }
 
         shareStore.recordAccess(shareId)
@@ -245,6 +274,53 @@ export function createShareRoutes(
                 expiresAt: share.expiresAt,
             },
             snapshot,
+        })
+    })
+
+    // Check if share requires password (GET, no auth)
+    publicRoutes.get('/s/:shareId', async (c) => {
+        const shareId = c.req.param('shareId')
+        const share = shareStore.getShare(shareId)
+
+        if (!share) {
+            return c.json({ error: 'Share link not found' }, 404)
+        }
+
+        if (share.expiresAt && share.expiresAt < Date.now()) {
+            shareStore.deleteShare(shareId)
+            return c.json({ error: 'Share link has expired' }, 410)
+        }
+
+        if (share.maxViews !== null && share.accessCount >= share.maxViews) {
+            return c.json({ error: 'Share link has reached its view limit' }, 410)
+        }
+
+        // If no password, allow direct GET access (backward compatible)
+        if (!share.password) {
+            shareStore.recordAccess(shareId)
+            const snapshot = JSON.parse(share.snapshot) as Record<string, unknown>
+            return c.json({
+                success: true,
+                share: {
+                    id: share.id,
+                    scope: share.scope,
+                    createdAt: share.createdAt,
+                    expiresAt: share.expiresAt,
+                },
+                snapshot,
+            })
+        }
+
+        // Password-protected: return metadata only
+        return c.json({
+            success: false,
+            requiresPassword: true,
+            share: {
+                id: share.id,
+                scope: share.scope,
+                createdAt: share.createdAt,
+                expiresAt: share.expiresAt,
+            },
         })
     })
 

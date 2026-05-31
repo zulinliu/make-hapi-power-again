@@ -78,7 +78,7 @@ describe('resumeCommand', () => {
 
     it('resumes a Codex target by HAPI session id', async () => {
         getLocalResumeTargetMock.mockResolvedValue({
-            sessionId: 'hapi-session-1',
+            sessionId: 'hapi-power-session-1',
             flavor: 'codex',
             directory: '/tmp/project',
             machineId: 'machine-1',
@@ -92,12 +92,12 @@ describe('resumeCommand', () => {
             collaborationMode: 'default'
         })
 
-        await resumeCommand.run(createContext(['hapi-session-1']))
+        await resumeCommand.run(createContext(['hapi-power-session-1']))
 
-        expect(handoffSessionToLocalMock).toHaveBeenCalledWith('hapi-session-1')
+        expect(handoffSessionToLocalMock).toHaveBeenCalledWith('hapi-power-session-1')
         expect(assertCodexLocalSupportedMock).toHaveBeenCalledOnce()
         expect(runCodexMock).toHaveBeenCalledWith({
-            existingSessionId: 'hapi-session-1',
+            existingSessionId: 'hapi-power-session-1',
             workingDirectory: '/tmp/project',
             resumeSessionId: 'codex-thread-1',
             startedBy: 'terminal',
@@ -260,7 +260,7 @@ describe('resumeCommand', () => {
         })
         listResumableSessionsMock.mockResolvedValue([
             {
-                sessionId: 'hapi-session-1',
+                sessionId: 'hapi-power-session-1',
                 flavor: 'claude',
                 directory: '/tmp/project',
                 machineId: 'machine-1',
@@ -275,7 +275,7 @@ describe('resumeCommand', () => {
         try {
             await expect(resumeCommand.run(createContext([]))).rejects.toThrow('process.exit:1')
             expect(renderMock).not.toHaveBeenCalled()
-            expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('hapi-session-1'))
+            expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('hapi-power-session-1'))
             expect(consoleErrorSpy).toHaveBeenCalledWith(expect.any(String), 'Run: hapi resume <session-id>')
         } finally {
             Object.defineProperty(process.stdin, 'isTTY', {

@@ -1,5 +1,5 @@
-import type { AgentFlavor, CodexCollaborationMode, PermissionMode } from '@hapi/protocol/types'
-import { RPC_METHODS } from '@hapi/protocol/rpcMethods'
+import type { AgentFlavor, CodexCollaborationMode, PermissionMode } from '@hapipower/protocol/types'
+import { RPC_METHODS } from '@hapipower/protocol/rpcMethods'
 import type {
     CodexModelSummary,
     CodexModelsResponse,
@@ -16,7 +16,7 @@ import type {
     PathExistsResponse,
     SlashCommandsResponse,
     UploadFileResponse
-} from '@hapi/protocol/apiTypes'
+} from '@hapipower/protocol/apiTypes'
 import type { Server } from 'socket.io'
 import type { RpcRegistry } from '../socket/rpcRegistry'
 

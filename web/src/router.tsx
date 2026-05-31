@@ -493,7 +493,7 @@ function NewSessionPage() {
 
     const handleChooseFolder = useCallback((args: { machineId: string | null; directory: string }) => {
         // Forward the currently-selected machine so /browse opens scoped to
-        // it rather than falling back to `hapi:lastMachineId`, which can
+        // it rather than falling back to `hapi-power:lastMachineId`, which can
         // disagree if the user changed machines without yet creating a
         // session.
         navigate({

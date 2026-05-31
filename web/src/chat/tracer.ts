@@ -1,5 +1,5 @@
 import type { NormalizedMessage } from '@/chat/types'
-import { isObject } from '@hapi/protocol'
+import { isObject } from '@hapipower/protocol'
 import { isSubagentToolName } from '@/chat/subagentTool'
 
 export type TracedMessage = NormalizedMessage & {

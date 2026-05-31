@@ -46,7 +46,7 @@ export interface HapiMcpBridgeOptions {
  * This is the single source of truth for MCP bridge setup,
  * used by both local and remote launchers.
  */
-export async function buildHapiMcpBridge(
+export async function buildHapiPowerMcpBridge(
     client: ApiSessionClient,
     options: HapiMcpBridgeOptions = {}
 ): Promise<HapiMcpBridge> {
@@ -61,7 +61,7 @@ export async function buildHapiMcpBridge(
             stop: happyServer.stop
         },
         mcpServers: {
-            hapi: {
+            hapi-power: {
                 command: bridgeCommand.command,
                 args: bridgeCommand.args
             }

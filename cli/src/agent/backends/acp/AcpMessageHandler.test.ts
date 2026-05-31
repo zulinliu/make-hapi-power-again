@@ -384,7 +384,7 @@ describe('AcpMessageHandler', () => {
         handler.handleUpdate({
             sessionUpdate: ACP_SESSION_UPDATE_TYPES.toolCall,
             toolCallId: 'tool-4',
-            title: 'hapi_change_title',
+            title: 'hapi_power_change_title',
             rawInput: { title: 'A' },
             status: 'in_progress'
         });
@@ -401,8 +401,8 @@ describe('AcpMessageHandler', () => {
             message.type === 'tool_call'
         );
         expect(calls).toHaveLength(2);
-        expect(calls[0].name).toBe('hapi_change_title');
-        expect(calls[1].name).toBe('hapi_change_title');
+        expect(calls[0].name).toBe('hapi_power_change_title');
+        expect(calls[1].name).toBe('hapi_power_change_title');
     });
 
     it('falls back to kind+title derivation when rawInput is explicitly null', () => {

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { RPC_METHODS } from '@hapi/protocol/rpcMethods'
+import { RPC_METHODS } from '@hapipower/protocol/rpcMethods'
 import {
     registerSessionConfigRpc,
     resolveNullableSessionModel,

@@ -16,7 +16,7 @@ function createMachine(overrides?: Partial<Machine>): Machine {
         metadata: {
             host: 'localhost',
             platform: 'darwin',
-            happyCliVersion: '1.0.0'
+            hapiPowerCliVersion: '1.0.0'
         },
         metadataVersion: 1,
         runnerState: null,

@@ -13,12 +13,12 @@ import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { platform, arch, homedir } from 'node:os'
 import { isBunCompiled } from '../utils/bunCompiled'
-import { APP_VERSION } from '@hapi/protocol'
+import { APP_VERSION } from '@hapipower/protocol'
 
-function getHapiHome(): string {
-    return process.env.HAPI_HOME
-        ? process.env.HAPI_HOME.replace(/^~/, homedir())
-        : join(homedir(), '.hapi')
+function getHapiPowerHome(): string {
+    return process.env.HAPI_POWER_HOME
+        ? process.env.HAPI_POWER_HOME.replace(/^~/, homedir())
+        : join(homedir(), '.hapi-power')
 }
 
 function getPlatformDir(): string {
@@ -43,7 +43,7 @@ function getTunwgPath(): string {
     const tunwgBinary = isWin ? 'tunwg.exe' : 'tunwg'
 
     if (isBunCompiled()) {
-        const hapiHome = getHapiHome()
+        const hapiHome = getHapiPowerHome()
         const runtimePath = join(hapiHome, 'runtime', APP_VERSION)
         return join(runtimePath, 'tools', 'tunwg', tunwgBinary)
     }
@@ -57,8 +57,8 @@ function getTunwgPath(): string {
 export interface TunnelConfig {
     localPort: number
     enabled: boolean
-    apiDomain?: string | null  // TUNWG_API - default: relay.hapi.run (official relay)
-    authKey?: string | null    // TUNWG_AUTH - default: hapi
+    apiDomain?: string | null  // TUNWG_API - default: YOUR_RELAY_DOMAIN (official relay)
+    authKey?: string | null    // TUNWG_AUTH - default: hapi-power
     useRelay?: boolean         // TUNWG_RELAY
 }
 
@@ -110,13 +110,13 @@ export class TunnelManager {
         const env: Record<string, string> = { ...process.env as Record<string, string> }
 
         if (!env.TUNWG_PATH) {
-            env.TUNWG_PATH = join(getHapiHome(), 'tunwg')
+            env.TUNWG_PATH = join(getHapiPowerHome(), 'tunwg')
         }
 
         if (this.config.apiDomain) {
             env.TUNWG_API = this.config.apiDomain
         }
-        env.TUNWG_AUTH = this.config.authKey ?? 'hapi'
+        env.TUNWG_AUTH = this.config.authKey ?? 'hapi-power'
         if (this.config.useRelay) {
             env.TUNWG_RELAY = 'true'
         }

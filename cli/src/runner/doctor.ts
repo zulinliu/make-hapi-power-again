@@ -21,7 +21,7 @@ export async function findAllHappyProcesses(): Promise<Array<{ pid: number, comm
       const name = proc.name || '';
       
       // Check if it's a HAPI process
-      const isHappyBinary = name === 'hapi' || name === 'hapi.exe' || /\bhapi(\.exe)?\b/.test(cmd);
+      const isHappyBinary = name === 'hapi-power' || name === 'hapi.exe' || /\bhapi(\.exe)?\b/.test(cmd);
       // Dev mode: running via bun/node with src/index.ts (production uses compiled binary)
       const isDevMode = cmd.includes('src/index.ts');
       const isHappy = name.includes('happy') ||

@@ -93,7 +93,7 @@ describe('permission mode persistence', () => {
 
         const machine = engine.getOrCreateMachine(
             'machine-1',
-            { host: 'localhost', platform: 'linux', happyCliVersion: '0.1.0' },
+            { host: 'localhost', platform: 'linux', hapiPowerCliVersion: '0.1.0' },
             null,
             'default'
         )

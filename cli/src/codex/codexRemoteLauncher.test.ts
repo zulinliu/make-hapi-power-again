@@ -269,7 +269,7 @@ vi.mock('./codexAppServerClient', () => {
                         item: {
                             id: 'title-parent',
                             type: 'mcpToolCall',
-                            server: 'hapi',
+                            server: 'hapi-power',
                             tool: 'change_title',
                             arguments: { title: 'Parent Title' }
                         },
@@ -283,7 +283,7 @@ vi.mock('./codexAppServerClient', () => {
                         item: {
                             id: 'title-parent',
                             type: 'mcpToolCall',
-                            server: 'hapi',
+                            server: 'hapi-power',
                             tool: 'change_title',
                             result: {
                                 content: [
@@ -303,7 +303,7 @@ vi.mock('./codexAppServerClient', () => {
                         id: 'cmd-1',
                         type: 'commandExecution',
                         command: 'echo ok',
-                        cwd: '/tmp/hapi-update'
+                        cwd: '/tmp/hapi-power-update'
                     }
                 };
                 harness.notifications.push({ method: 'item/started', params: commandStart });
@@ -576,7 +576,7 @@ vi.mock('./codexAppServerClient', () => {
                     item: {
                         id: 'title-child',
                         type: 'mcpToolCall',
-                        server: 'hapi',
+                        server: 'hapi-power',
                         tool: 'change_title',
                         arguments: { title: 'Child Title' }
                     },
@@ -590,7 +590,7 @@ vi.mock('./codexAppServerClient', () => {
                     item: {
                         id: 'title-child',
                         type: 'mcpToolCall',
-                        server: 'hapi',
+                        server: 'hapi-power',
                         tool: 'change_title',
                         result: {
                             content: [
@@ -791,8 +791,8 @@ vi.mock('./codexAppServerClient', () => {
     return { CodexAppServerClient: MockCodexAppServerClient };
 });
 
-vi.mock('./utils/buildHapiMcpBridge', () => ({
-    buildHapiMcpBridge: async (_client: unknown, options?: unknown) => {
+vi.mock('./utils/buildHapiPowerMcpBridge', () => ({
+    buildHapiPowerMcpBridge: async (_client: unknown, options?: unknown) => {
         harness.bridgeOptions.push(options);
         return {
         server: {
@@ -867,8 +867,8 @@ function createSessionStub(messages = ['hello from launcher test'], mode = creat
     };
 
     const session = {
-        path: '/tmp/hapi-update',
-        logPath: '/tmp/hapi-update/test.log',
+        path: '/tmp/hapi-power-update',
+        logPath: '/tmp/hapi-power-update/test.log',
         client,
         queue,
         codexArgs: undefined,
@@ -1006,7 +1006,7 @@ describe('codexRemoteLauncher', () => {
         expect(getModel()).toBe('gpt-5.4');
         expect(harness.initializeCalls).toEqual([{
             clientInfo: {
-                name: 'hapi-codex-client',
+                name: 'hapi-power-codex-client',
                 version: '1.0.0'
             },
             capabilities: {
@@ -1516,7 +1516,7 @@ describe('codexRemoteLauncher', () => {
             callId: 'cmd-1',
             output: expect.objectContaining({
                 command: 'echo ok',
-                cwd: '/tmp/hapi-update',
+                cwd: '/tmp/hapi-power-update',
                 stdout: 'ok\n',
                 exit_code: 0
             })
@@ -2091,7 +2091,7 @@ describe('codexRemoteLauncher', () => {
         }));
         expect(codexMessages).toContainEqual(expect.objectContaining({
             type: 'tool-call',
-            name: 'mcp__hapi__change_title',
+            name: 'mcp__hapi_power__change_title',
             callId: 'title-parent',
             input: { title: 'Parent Title' }
         }));

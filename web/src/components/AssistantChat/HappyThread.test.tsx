@@ -195,7 +195,7 @@ describe('outline target loading', () => {
         })
 
         const findTarget = vi.fn((anchorId: string) => {
-            if (anchorId !== 'hapi-message-user-text:target') {
+            if (anchorId !== 'hapi-power-message-user-text:target') {
                 return null
             }
             return loadCount >= 2 ? document.createElement('div') : null
@@ -210,7 +210,7 @@ describe('outline target loading', () => {
 
         expect(target).toBeInstanceOf(HTMLElement)
         expect(loadOlderPreservingScroll).toHaveBeenCalledTimes(2)
-        expect(findTarget).toHaveBeenCalledWith('hapi-message-user-text:target')
+        expect(findTarget).toHaveBeenCalledWith('hapi-power-message-user-text:target')
     })
 
     it('stops when history is exhausted before the target is loaded', async () => {

@@ -42,10 +42,10 @@ export function buildMachineMetadata(options?: { workspaceRoots?: string[] }): M
     return {
         host: process.env.HAPI_HOSTNAME || os.hostname(),
         platform: os.platform(),
-        happyCliVersion: packageJson.version,
+        hapiPowerCliVersion: packageJson.version,
         homeDir: os.homedir(),
-        happyHomeDir: configuration.happyHomeDir,
-        happyLibDir: runtimePath(),
+        hapiPowerHomeDir: configuration.hapiPowerHomeDir,
+        hapiPowerLibDir: runtimePath(),
         workspaceRoots: options?.workspaceRoots
     }
 }
@@ -58,7 +58,7 @@ export function buildSessionMetadata(options: {
     now?: number
     metadataOverrides?: Partial<Metadata>
 }): Metadata {
-    const happyLibDir = runtimePath()
+    const hapiPowerLibDir = runtimePath()
     const worktreeInfo = readWorktreeEnv()
     const now = options.now ?? Date.now()
 
@@ -69,9 +69,9 @@ export function buildSessionMetadata(options: {
         os: os.platform(),
         machineId: options.machineId,
         homeDir: os.homedir(),
-        happyHomeDir: configuration.happyHomeDir,
-        happyLibDir,
-        happyToolsDir: resolve(happyLibDir, 'tools', 'unpacked'),
+        hapiPowerHomeDir: configuration.hapiPowerHomeDir,
+        hapiPowerLibDir,
+        happyToolsDir: resolve(hapiPowerLibDir, 'tools', 'unpacked'),
         startedFromRunner: options.startedBy === 'runner',
         hostPid: process.pid,
         startedBy: options.startedBy,

@@ -10,7 +10,7 @@ export default {
   'loading.machines': 'Loading machines…',
 
   // Login / Auth
-  'login.title': 'HAPI',
+  'login.title': 'Hapi Power',
   'login.subtitle': 'Vibe Coding Anytime, Anywhere',
   'login.bind.title': 'Bind Telegram',
   'login.submit': 'Sign In',
@@ -430,7 +430,7 @@ export default {
   'browse.noRootTitle': 'Workspace browsing is off',
   'browse.noRootHint': 'Browsing is opt-in. Restart the runner with one or more workspace roots to enable file-tree navigation and scoped session spawning.',
   'browse.noRootFooter': 'You can still create sessions from the “New Session” page.',
-  'browse.noMachinesConnected': 'No CLI connected. Run `hapi runner start --workspace-root /path/a --workspace-root /path/b` on a machine to get started.',
+  'browse.noMachinesConnected': 'No CLI connected. Run `hapi-power runner start --workspace-root /path/a --workspace-root /path/b` on a machine to get started.',
 
   // Misc
   'misc.noMachines': 'No machines available',
@@ -450,4 +450,22 @@ export default {
   'misc.permissionRequired': 'permission required',
   'misc.percentLeft': '{percent}% left',
   'misc.online': 'online',
+  'share.loading': 'Loading...',
+  'share.passwordRequired': 'Password required',
+  'share.passwordHint': 'This share link is password protected',
+  'share.enterPassword': 'Enter password',
+  'share.confirm': 'Confirm',
+  'share.wrongPassword': 'Incorrect password',
+  'share.requestFailed': 'Request failed, please retry',
+  'share.unavailable': 'Link unavailable',
+  'share.notFound': 'Share link does not exist or has expired',
+  'share.snapshot': 'Shared snapshot',
+  'share.createdAt': 'Created',
+  'share.validUntil': 'Valid until',
+  'share.truncated': 'Large dataset — snapshot only includes changes from the last 200 messages',
+  'share.truncatedSuffix': '... (truncated)',
+  'share.noChanges': 'No file changes recorded',
+  'share.created': 'Created',
+  'share.modified': 'Modified',
+  'share.deleted': 'Deleted',
 } as const

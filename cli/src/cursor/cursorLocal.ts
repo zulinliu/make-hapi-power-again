@@ -2,7 +2,7 @@ import { logger } from '@/ui/logger';
 import { spawnWithTerminalGuard } from '@/utils/spawnWithTerminalGuard';
 
 /**
- * Filter out 'resume' subcommand which is managed internally by hapi.
+ * Filter out 'resume' subcommand which is managed internally by hapi-power-power.
  * Cursor CLI format: `agent resume` or `agent resume <chatId>`
  */
 export function filterResumeSubcommand(args: string[]): string[] {
@@ -11,11 +11,11 @@ export function filterResumeSubcommand(args: string[]): string[] {
     }
 
     if (args.length > 1 && !args[1].startsWith('-')) {
-        logger.debug(`[CursorLocal] Filtered 'resume ${args[1]}' - session managed by hapi`);
+        logger.debug(`[CursorLocal] Filtered 'resume ${args[1]}' - session managed by hapi-power-power`);
         return args.slice(2);
     }
 
-    logger.debug(`[CursorLocal] Filtered 'resume' - session managed by hapi`);
+    logger.debug(`[CursorLocal] Filtered 'resume' - session managed by hapi-power-power`);
     return args.slice(1);
 }
 
