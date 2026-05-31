@@ -62,7 +62,7 @@ export default defineConfig({
     },
     server: {
         host: true,
-        allowedHosts: ['hapidev.weishu.me'],
+        allowedHosts: ['hapidev.weishu.me', 'test.liuzl.asia'],
         proxy: {
             '/api': {
                 target: hubTarget,
