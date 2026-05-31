@@ -170,8 +170,8 @@ export async function loadServerSettings(dataDir: string): Promise<ServerSetting
 
     // listenHost: env > file > default
     let listenHost = '127.0.0.1'
-    if (process.env.HAPI_LISTEN_HOST) {
-        listenHost = process.env.HAPI_LISTEN_HOST
+    if (process.env.HAPI_POWER_LISTEN_HOST) {
+        listenHost = process.env.HAPI_POWER_LISTEN_HOST
         sources.listenHost = 'env'
         if (settings.listenHost === undefined) {
             settings.listenHost = listenHost
@@ -184,10 +184,10 @@ export async function loadServerSettings(dataDir: string): Promise<ServerSetting
 
     // listenPort: env > file > default
     let listenPort = 3006
-    if (process.env.HAPI_LISTEN_PORT) {
-        const parsed = parseInt(process.env.HAPI_LISTEN_PORT, 10)
+    if (process.env.HAPI_POWER_LISTEN_PORT) {
+        const parsed = parseInt(process.env.HAPI_POWER_LISTEN_PORT, 10)
         if (!Number.isFinite(parsed) || parsed <= 0) {
-            throw new Error('HAPI_LISTEN_PORT must be a valid port number')
+            throw new Error('HAPI_POWER_LISTEN_PORT must be a valid port number')
         }
         listenPort = parsed
         sources.listenPort = 'env'
@@ -202,8 +202,8 @@ export async function loadServerSettings(dataDir: string): Promise<ServerSetting
 
     // publicUrl: env > file > default
     let publicUrl = `http://localhost:${listenPort}`
-    if (process.env.HAPI_PUBLIC_URL) {
-        publicUrl = process.env.HAPI_PUBLIC_URL
+    if (process.env.HAPI_POWER_PUBLIC_URL) {
+        publicUrl = process.env.HAPI_POWER_PUBLIC_URL
         sources.publicUrl = 'env'
         if (settings.publicUrl === undefined) {
             settings.publicUrl = publicUrl

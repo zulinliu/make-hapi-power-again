@@ -5,7 +5,7 @@ import { join } from 'node:path'
 import { loadServerSettings } from './serverSettings'
 
 function makeTempDir(): string {
-    return mkdtempSync(join(tmpdir(), 'hapi-server-settings-test-'))
+    return mkdtempSync(join(tmpdir(), 'hapi-power-server-settings-test-'))
 }
 
 describe('loadServerSettings', () => {

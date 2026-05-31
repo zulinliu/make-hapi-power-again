@@ -5,12 +5,12 @@ import { ensureOpencodeHookPlugin } from './utils/hookPlugin';
 import { buildOpencodeEnv } from './utils/config';
 import { ensureOpencodeConfig } from './utils/opencodeConfig';
 import { TITLE_INSTRUCTION } from './utils/systemPrompt';
-import { buildHapiMcpBridge } from '@/codex/utils/buildHapiMcpBridge';
+import { buildHapiPowerMcpBridge } from '@/codex/utils/buildHapiPowerMcpBridge';
 import type { OpencodeHookEvent } from './types';
 import type { OpencodeHookServer } from './utils/startOpencodeHookServer';
 import { createOpencodeStorageScanner, type OpencodeStorageScannerHandle } from './utils/opencodeStorageScanner';
 import { randomUUID } from 'node:crypto';
-import { isObject } from '@hapi/protocol';
+import { isObject } from '@hapipower/protocol';
 import { join } from 'node:path';
 import { configuration } from '@/configuration';
 import type { PermissionCompletion } from '@/modules/common/permission/BasePermissionHandler';
@@ -250,7 +250,7 @@ function resolveOpencodeConfigDir(session: OpencodeSession): string {
     if (process.env.OPENCODE_CONFIG_DIR) {
         return process.env.OPENCODE_CONFIG_DIR;
     }
-    return join(configuration.happyHomeDir, 'tmp', 'opencode', session.client.sessionId, '.opencode');
+    return join(configuration.hapiPowerHomeDir, 'tmp', 'opencode', session.client.sessionId, '.opencode');
 }
 
 export async function opencodeLocalLauncher(
@@ -266,12 +266,12 @@ export async function opencodeLocalLauncher(
     let happyServer: { url: string; stop: () => void } | null = null;
     let opencodeConfigPath: string | null = null;
     try {
-        const bridge = await buildHapiMcpBridge(session.client);
+        const bridge = await buildHapiPowerMcpBridge(session.client);
         happyServer = bridge.server;
         logger.debug(`[opencode-local]: Started hapi MCP server at ${happyServer.url}`);
 
         // Generate opencode.json config with MCP server and instructions
-        const { configPath } = ensureOpencodeConfig(opencodeConfigDir, bridge.mcpServers.hapi, TITLE_INSTRUCTION);
+        const { configPath } = ensureOpencodeConfig(opencodeConfigDir, bridge.mcpServers.hapi-power, TITLE_INSTRUCTION);
         opencodeConfigPath = configPath;
     } catch (error) {
         logger.debug('[opencode-local]: Failed to start hapi MCP server (change_title will be unavailable)', error);

@@ -1,8 +1,8 @@
-import { AGENT_FLAVORS } from '@hapi/protocol'
+import { AGENT_FLAVORS } from '@hapipower/protocol'
 import type { AgentType } from './types'
 
-const AGENT_STORAGE_KEY = 'hapi:newSession:agent'
-const YOLO_STORAGE_KEY = 'hapi:newSession:yolo'
+const AGENT_STORAGE_KEY = 'hapi-power:newSession:agent'
+const YOLO_STORAGE_KEY = 'hapi-power:newSession:yolo'
 
 const VALID_AGENTS = AGENT_FLAVORS
 

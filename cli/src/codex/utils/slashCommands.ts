@@ -1,5 +1,5 @@
-import { CODEX_PERMISSION_MODES } from '@hapi/protocol/modes';
-import type { CodexPermissionMode } from '@hapi/protocol/types';
+import { CODEX_PERMISSION_MODES } from '@hapipower/protocol/modes';
+import type { CodexPermissionMode } from '@hapipower/protocol/types';
 import type { ReasoningEffort } from '../appServerTypes';
 import type { EnhancedMode } from '../loop';
 import type { SlashCommand } from '@/modules/common/slashCommands';
@@ -235,7 +235,7 @@ export function resolveCodexSlashCommand(
     if (UNSUPPORTED_CODEX_BUILTIN_COMMANDS.has(command)) {
         return {
             kind: 'handled',
-            message: `/${command} is a Codex CLI command that is not supported in HAPI sessions yet.`
+            message: `/${command} is a Codex CLI command that is not supported in HapiPower sessions yet.`
         };
     }
 

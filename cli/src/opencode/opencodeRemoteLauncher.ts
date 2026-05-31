@@ -1,13 +1,13 @@
 import React from 'react';
 import { logger } from '@/ui/logger';
-import { buildHapiMcpBridge } from '@/codex/utils/buildHapiMcpBridge';
+import { buildHapiPowerMcpBridge } from '@/codex/utils/buildHapiPowerMcpBridge';
 import { convertAgentMessage } from '@/agent/messageConverter';
 import type { AgentMessage, McpServerStdio, PromptContent } from '@/agent/types';
 import { RemoteLauncherBase, type RemoteLauncherDisplayContext, type RemoteLauncherExitReason } from '@/modules/common/remote/RemoteLauncherBase';
 import { OpencodeDisplay } from '@/ui/ink/OpencodeDisplay';
 import type { OpencodeSession } from './session';
 import type { OpencodeMode, PermissionMode } from './types';
-import { RPC_METHODS } from '@hapi/protocol/rpcMethods';
+import { RPC_METHODS } from '@hapipower/protocol/rpcMethods';
 import { createOpencodeBackend } from './utils/opencodeBackend';
 import { OpencodePermissionHandler } from './utils/permissionHandler';
 import { PLAN_MODE_INSTRUCTION, TITLE_INSTRUCTION } from './utils/systemPrompt';
@@ -53,7 +53,7 @@ class OpencodeRemoteLauncher extends RemoteLauncherBase {
         const session = this.session;
         const messageBuffer = this.messageBuffer;
 
-        const { server: happyServer, mcpServers } = await buildHapiMcpBridge(session.client);
+        const { server: happyServer, mcpServers } = await buildHapiPowerMcpBridge(session.client);
         this.happyServer = happyServer;
 
         const backend = createOpencodeBackend({

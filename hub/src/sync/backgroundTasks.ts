@@ -1,5 +1,5 @@
-import { isObject } from '@hapi/protocol'
-import { unwrapRoleWrappedRecordEnvelope } from '@hapi/protocol/messages'
+import { isObject } from '@hapipower/protocol'
+import { unwrapRoleWrappedRecordEnvelope } from '@hapipower/protocol/messages'
 
 /**
  * Extract background task start/completion signals from a message.

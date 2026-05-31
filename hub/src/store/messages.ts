@@ -217,7 +217,7 @@ export function getMatureScheduledMessages(
  *  ack does.  If the session-end sweep stamped a mature scheduled row as
  *  invoked, a subsequent CLI re-attach would never see the row in the
  *  mature-scan results (it filters on invoked_at IS NULL), and the user's
- *  scheduled prompt would be silently dropped.  See HAPI Bot R4 finding. */
+ *  scheduled prompt would be silently dropped.  See HapiPower Bot R4 finding. */
 export function getImmediateQueuedLocalMessages(
     db: Database,
     sessionId: string

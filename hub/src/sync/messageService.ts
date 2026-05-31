@@ -1,5 +1,5 @@
-import type { AttachmentMetadata, DecryptedMessage } from '@hapi/protocol/types'
-import { isRedundantGoalStatusEventContent } from '@hapi/protocol/messages'
+import type { AttachmentMetadata, DecryptedMessage } from '@hapipower/protocol/types'
+import { isRedundantGoalStatusEventContent } from '@hapipower/protocol/messages'
 import type { Server } from 'socket.io'
 import { randomUUID } from 'node:crypto'
 import type { Store, CancelQueuedMessageResult } from '../store'
@@ -454,7 +454,7 @@ export class MessageService {
      * for scheduled rows and relies on the CLI ack to write invoked_at; if this
      * sweep stamped a mature scheduled row, a subsequent re-attach would never
      * see the row in the next mature-scan tick and the user's prompt would be
-     * silently dropped.  See HAPI Bot R4 finding.
+     * silently dropped.  See HapiPower Bot R4 finding.
      *
      * Returns the list of localIds that were stamped and the invokedAt timestamp,
      * or null if no messages needed sweeping.

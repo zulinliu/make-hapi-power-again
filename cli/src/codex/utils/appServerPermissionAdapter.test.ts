@@ -161,7 +161,7 @@ describe('registerAppServerPermissionHandlers', () => {
         await expect(handler?.({
             threadId: 'thread-1',
             turnId: 'turn-1',
-            serverName: 'hapi',
+            serverName: 'hapi-power',
             mode: 'form',
             message: 'Approve MCP tool call?',
             _meta: null,
@@ -189,7 +189,7 @@ describe('registerAppServerPermissionHandlers', () => {
         });
     });
 
-    it('accepts non-HAPI MCP elicitation requests when live permission mode is yolo', async () => {
+    it('accepts non-HapiPower MCP elicitation requests when live permission mode is yolo', async () => {
         const { client, handlers } = createClient();
         let permissionMode: 'default' | 'read-only' | 'safe-yolo' | 'yolo' = 'default';
         const permissionHandler = {
@@ -247,7 +247,7 @@ describe('registerAppServerPermissionHandlers', () => {
         });
     });
 
-    it('does not auto-accept non-HAPI MCP elicitation requests in safe-yolo mode', async () => {
+    it('does not auto-accept non-HapiPower MCP elicitation requests in safe-yolo mode', async () => {
         const { client, handlers } = createClient();
         const permissionHandler = {
             handleToolCall: vi.fn()
@@ -280,7 +280,7 @@ describe('registerAppServerPermissionHandlers', () => {
         });
     });
 
-    it('cancels non-HAPI MCP elicitation requests', async () => {
+    it('cancels non-HapiPower MCP elicitation requests', async () => {
         const { client, handlers } = createClient();
         const permissionHandler = {
             handleToolCall: vi.fn()

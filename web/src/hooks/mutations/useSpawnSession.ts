@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import type { AgentFlavor } from '@hapi/protocol'
+import type { AgentFlavor } from '@hapipower/protocol'
 import type { ApiClient } from '@/api/client'
 import type { SpawnResponse } from '@/types/api'
 import { queryKeys } from '@/lib/query-keys'

@@ -114,8 +114,8 @@ export function buildSessionStartHookConfigArgs(port: number, token: string): st
  * Build -c arguments for MCP server configuration.
  *
  * Generates arguments like:
- *   -c 'mcp_servers.hapi.command="hapi"'
- *   -c 'mcp_servers.hapi.args=['mcp', '--url', 'http://...']'
+ *   -c 'mcp_servers.hapi-power.command="hapi"'
+ *   -c 'mcp_servers.hapi-power.args=['mcp', '--url', 'http://...']'
  *
  * @param mcpServers - Map of server name to server config
  * @returns Array of CLI arguments to pass to codex

@@ -1,4 +1,4 @@
-import { CLAUDE_MODEL_PRESETS, getClaudeModelLabel } from '@hapi/protocol'
+import { CLAUDE_MODEL_PRESETS, getClaudeModelLabel } from '@hapipower/protocol'
 import { describe, expect, it } from 'vitest'
 import { CLAUDE_EFFORT_OPTIONS, MODEL_OPTIONS } from './types'
 

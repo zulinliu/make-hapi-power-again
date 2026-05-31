@@ -27,9 +27,9 @@ import type {
     MachinePathsExistsResponse,
     OpencodeModelsResponse,
     UploadFileResponse
-} from '@hapi/protocol/apiTypes'
-import type { AgentFlavor } from '@hapi/protocol'
-import type { CancelMessageResponse } from '@hapi/protocol/schemas'
+} from '@hapipower/protocol/apiTypes'
+import type { AgentFlavor } from '@hapipower/protocol'
+import type { CancelMessageResponse } from '@hapipower/protocol/schemas'
 
 type ApiClientOptions = {
     baseUrl?: string

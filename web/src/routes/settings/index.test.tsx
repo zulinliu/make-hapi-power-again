@@ -2,10 +2,10 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, waitFor, act, cleanup } from '@testing-library/react'
 import { I18nContext, I18nProvider } from '@/lib/i18n-context'
 import { en } from '@/lib/locales'
-import { PROTOCOL_VERSION } from '@hapi/protocol'
+import { PROTOCOL_VERSION } from '@hapipower/protocol'
 import SettingsPage from './index'
 
-vi.mock('@hapi/protocol', () => ({
+vi.mock('@hapipower/protocol', () => ({
     PROTOCOL_VERSION: 1,
 }))
 
@@ -196,7 +196,7 @@ describe('SettingsPage', () => {
         const links = screen.getAllByRole('link', { name: 'hapi.run' })
         expect(links.length).toBeGreaterThanOrEqual(1)
         const link = links[0]
-        expect(link).toHaveAttribute('href', 'https://hapi.run')
+        expect(link).toHaveAttribute('href', 'YOUR_DOMAIN')
         expect(link).toHaveAttribute('target', '_blank')
         expect(link).toHaveAttribute('rel', 'noopener noreferrer')
     })
@@ -416,6 +416,6 @@ describe('SettingsPage', () => {
 
         const alice = await screen.findByText('Alice')
         fireEvent.click(alice)
-        expect(window.localStorage.setItem).toHaveBeenCalledWith('hapi-voice-id', 'dyn1')
+        expect(window.localStorage.setItem).toHaveBeenCalledWith('hapi-power-voice-id', 'dyn1')
     })
 })

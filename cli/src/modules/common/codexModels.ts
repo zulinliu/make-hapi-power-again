@@ -1,4 +1,4 @@
-import type { CodexModelsResponse, CodexModelSummary } from '@hapi/protocol/apiTypes';
+import type { CodexModelsResponse, CodexModelSummary } from '@hapipower/protocol/apiTypes';
 import { CodexAppServerClient } from '@/codex/codexAppServerClient';
 import { getErrorMessage } from './rpcResponses';
 
@@ -57,7 +57,7 @@ export async function listCodexModels(includeHidden: boolean = false): Promise<C
         await client.connect();
         await client.initialize({
             clientInfo: {
-                name: 'hapi-codex-models',
+                name: 'hapi-power-codex-models',
                 version: '1.0.0'
             },
             capabilities: {

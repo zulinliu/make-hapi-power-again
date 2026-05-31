@@ -1,4 +1,4 @@
-import type { AgentFlavor } from '@hapi/protocol';
+import type { AgentFlavor } from '@hapipower/protocol';
 
 export type McpEnvVar = {
     name: string;

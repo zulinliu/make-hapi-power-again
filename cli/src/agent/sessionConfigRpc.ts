@@ -1,7 +1,7 @@
-import { isPermissionModeAllowedForFlavor, type AgentFlavor } from '@hapi/protocol'
-import { RPC_METHODS } from '@hapi/protocol/rpcMethods'
-import { PermissionModeSchema } from '@hapi/protocol/schemas'
-import type { PermissionMode } from '@hapi/protocol/types'
+import { isPermissionModeAllowedForFlavor, type AgentFlavor } from '@hapipower/protocol'
+import { RPC_METHODS } from '@hapipower/protocol/rpcMethods'
+import { PermissionModeSchema } from '@hapipower/protocol/schemas'
+import type { PermissionMode } from '@hapipower/protocol/types'
 import type { RpcHandlerManager } from '@/api/rpc/RpcHandlerManager'
 
 type SessionConfigState<TPermissionMode extends PermissionMode = PermissionMode> = {

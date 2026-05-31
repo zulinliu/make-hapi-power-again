@@ -1,22 +1,22 @@
 {
-  "name": "@twsxtd/hapi",
-  "version": "0.18.4",
-  "description": "App for agentic coding - access coding agent anywhere",
-  "author": "Kirill Dubovitskiy & weishu",
+  "name": "@hapipower/hapi-power",
+  "version": "0.3.0",
+  "description": "Hapi Power - AI Coding Agent Platform",
+  "author": "Hapi Power Team",
   "license": "AGPL-3.0-only",
   "type": "module",
-  "homepage": "https://github.com/tiann/hapi",
-  "bugs": "https://github.com/tiann/hapi/issues",
+  "homepage": "https://github.com/zulinliu/make-hapi-power-again",
+  "bugs": "https://github.com/zulinliu/make-hapi-power-again/issues",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tiann/hapi.git",
+    "url": "git+https://github.com/zulinliu/make-hapi-power-again.git",
     "directory": "cli"
   },
   "bin": {
-    "hapi": "bin/hapi.cjs"
+    "hapi-power": "bin/hapi-power.cjs"
   },
   "files": [
-    "bin/hapi.cjs",
+    "bin/hapi-power.cjs",
     "NOTICE"
   ],
   "imports": {
@@ -26,14 +26,14 @@
     }
   },
   "optionalDependencies": {
-    "@twsxtd/hapi-darwin-arm64": "0.18.4",
-    "@twsxtd/hapi-darwin-x64": "0.18.4",
-    "@twsxtd/hapi-linux-arm64": "0.18.4",
-    "@twsxtd/hapi-linux-x64": "0.18.4",
-    "@twsxtd/hapi-win32-x64": "0.18.4"
+    "@hapipower/hapi-power-darwin-arm64": "0.3.0",
+    "@hapipower/hapi-power-darwin-x64": "0.3.0",
+    "@hapipower/hapi-power-linux-arm64": "0.3.0",
+    "@hapipower/hapi-power-linux-x64": "0.3.0",
+    "@hapipower/hapi-power-win32-x64": "0.3.0"
   },
   "scripts": {
-    "postinstall": "node -e \"try{require('fs').chmodSync(require('path').join(__dirname,'bin','hapi.cjs'),0o755)}catch(e){}\"",
+    "postinstall": "node -e \"try{require('fs').chmodSync(require('path').join(__dirname,'bin','hapi-power.cjs'),0o755)}catch(e){}\"",
     "typecheck": "tsc --noEmit",
     "build:exe": "bun run scripts/build-executable.ts",
     "build:exe:all": "bun run scripts/build-executable.ts --all",
@@ -51,8 +51,8 @@
     "release-all": "bun run scripts/release-all.ts"
   },
   "dependencies": {
-    "@hapi/protocol": "workspace:*",
-    "hapi-hub": "workspace:*",
+    "@hapipower/protocol": "workspace:*",
+    "hapi-power-hub": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.25.1",
     "@types/cross-spawn": "^6.0.6",
     "@types/ps-list": "^6.2.1",

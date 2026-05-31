@@ -14,7 +14,7 @@ import {
     ELEVENLABS_API_BASE,
     VOICE_AGENT_NAME,
     buildVoiceAgentConfig
-} from '@hapi/protocol/voice'
+} from '@hapipower/protocol/voice'
 
 export interface VoiceTokenResponse {
     allowed: boolean
@@ -86,9 +86,9 @@ export interface CreateAgentResult {
 }
 
 /**
- * Find an existing "Hapi Voice Assistant" agent using the provided API key.
+ * Find an existing "Hapi Power Voice Assistant" agent using the provided API key.
  */
-export async function findHapiAgent(apiKey: string): Promise<FindAgentResult> {
+export async function findHapiPowerAgent(apiKey: string): Promise<FindAgentResult> {
     try {
         const response = await fetch(`${ELEVENLABS_API_BASE}/convai/agents`, {
             method: 'GET',
@@ -109,10 +109,10 @@ export async function findHapiAgent(apiKey: string): Promise<FindAgentResult> {
         const data = await response.json() as { agents?: ElevenLabsAgent[] }
         const agents: ElevenLabsAgent[] = data.agents || []
 
-        const hapiAgent = agents.find(agent => agent.name === VOICE_AGENT_NAME)
+        const hapiPowerAgent = agents.find(agent => agent.name === VOICE_AGENT_NAME)
 
-        if (hapiAgent) {
-            return { success: true, agentId: hapiAgent.agent_id }
+        if (hapiPowerAgent) {
+            return { success: true, agentId: hapiPowerAgent.agent_id }
         } else {
             return { success: false, error: `No agent named "${VOICE_AGENT_NAME}" found` }
         }
@@ -122,11 +122,11 @@ export async function findHapiAgent(apiKey: string): Promise<FindAgentResult> {
 }
 
 /**
- * Create or update the "Hapi Voice Assistant" agent with our default configuration.
+ * Create or update the "Hapi Power Voice Assistant" agent with our default configuration.
  */
-export async function createOrUpdateHapiAgent(apiKey: string): Promise<CreateAgentResult> {
+export async function createOrUpdateHapiPowerAgent(apiKey: string): Promise<CreateAgentResult> {
     try {
-        const findResult = await findHapiAgent(apiKey)
+        const findResult = await findHapiPowerAgent(apiKey)
         const existingAgentId = findResult.success ? findResult.agentId : null
 
         const agentConfig = buildVoiceAgentConfig()

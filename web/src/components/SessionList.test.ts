@@ -90,7 +90,7 @@ describe('session list search helpers', () => {
         const session = makeSession({
             id: 'session-1',
             metadata: {
-                path: '/work/hapi',
+                path: '/work/hapi-power',
                 name: 'Fix Bot Review',
                 flavor: 'codex',
                 machineId: 'machine-1'
@@ -109,7 +109,7 @@ describe('getVisibleSessionPreview', () => {
         const sessions = Array.from({ length: 6 }, (_, index) => makeSession({
             id: `s-${index + 1}`,
             pendingRequestsCount: index === 4 ? 1 : 0,
-            metadata: { path: '/work/hapi' },
+            metadata: { path: '/work/hapi-power' },
             updatedAt: 100 - index
         }))
 
@@ -125,7 +125,7 @@ describe('getVisibleSessionPreview', () => {
         const sessions = Array.from({ length: 6 }, (_, index) => makeSession({
             id: `s-${index + 1}`,
             active: true,
-            metadata: { path: '/work/hapi' },
+            metadata: { path: '/work/hapi-power' },
             updatedAt: 100 - index
         }))
 
@@ -137,7 +137,7 @@ describe('getVisibleSessionPreview', () => {
     it('does not move an already-visible selected session to the top', () => {
         const sessions = Array.from({ length: 6 }, (_, index) => makeSession({
             id: `s-${index + 1}`,
-            metadata: { path: '/work/hapi' },
+            metadata: { path: '/work/hapi-power' },
             updatedAt: 100 - index
         }))
 
@@ -152,7 +152,7 @@ describe('getVisibleSessionPreview', () => {
     it('returns all sessions when expanded', () => {
         const sessions = Array.from({ length: 4 }, (_, index) => makeSession({
             id: `s-${index + 1}`,
-            metadata: { path: '/work/hapi' }
+            metadata: { path: '/work/hapi-power' }
         }))
 
         expect(getVisibleSessionPreview(sessions, { expanded: true, limit: 2 })).toHaveLength(4)
@@ -163,18 +163,18 @@ describe('getVisibleSessionPreview', () => {
 describe('expandSelectedSessionCollapseOverrides', () => {
     it('expands collapsed project and machine, but preserves session preview folding', () => {
         const overrides = new Map<string, boolean>([
-            ['machine-1::/work/hapi', true],
-            ['sessions::machine-1::/work/hapi', true],
+            ['machine-1::/work/hapi-power', true],
+            ['sessions::machine-1::/work/hapi-power', true],
             ['machine::machine-1', true]
         ])
 
         const result = expandSelectedSessionCollapseOverrides(overrides, {
-            key: 'machine-1::/work/hapi',
+            key: 'machine-1::/work/hapi-power',
             machineId: 'machine-1'
         })
 
-        expect(result.has('machine-1::/work/hapi')).toBe(false)
-        expect(result.get('sessions::machine-1::/work/hapi')).toBe(true)
+        expect(result.has('machine-1::/work/hapi-power')).toBe(false)
+        expect(result.get('sessions::machine-1::/work/hapi-power')).toBe(true)
         expect(result.has('machine::machine-1')).toBe(false)
     })
 
@@ -182,10 +182,10 @@ describe('expandSelectedSessionCollapseOverrides', () => {
         const overrides = new Map<string, boolean>()
 
         const result = expandSelectedSessionCollapseOverrides(overrides, {
-            key: 'machine-1::/work/hapi',
+            key: 'machine-1::/work/hapi-power',
             machineId: 'machine-1'
         })
 
-        expect(result.has('sessions::machine-1::/work/hapi')).toBe(false)
+        expect(result.has('sessions::machine-1::/work/hapi-power')).toBe(false)
     })
 })

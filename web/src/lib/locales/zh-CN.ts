@@ -10,7 +10,7 @@ export default {
   'loading.machines': '加载机器…',
 
   // Login / Auth
-  'login.title': 'HAPI',
+  'login.title': 'Hapi Power',
   'login.subtitle': '随时随地，Vibe Coding',
   'login.bind.title': '绑定 Telegram',
   'login.submit': '登录',
@@ -432,7 +432,7 @@ export default {
   'browse.noRootTitle': '未启用 workspace 浏览',
   'browse.noRootHint': '浏览功能是可选的。带一个或多个 --workspace-root 参数重启 runner，即可启用文件树浏览和受限的会话启动。',
   'browse.noRootFooter': '你仍然可以在「新建会话」页面直接创建会话。',
-  'browse.noMachinesConnected': '没有已连接的 CLI。在某台机器上运行 `hapi runner start --workspace-root /path/a --workspace-root /path/b` 来开始。',
+  'browse.noMachinesConnected': '没有已连接的 CLI。在某台机器上运行 `hapi-power runner start --workspace-root /path/a --workspace-root /path/b` 来开始。',
 
   // Misc
   'misc.noMachines': '无可用机器',
@@ -452,4 +452,22 @@ export default {
   'misc.permissionRequired': '需要权限',
   'misc.percentLeft': '剩余 {percent}%',
   'misc.online': '在线',
+  'share.loading': '加载中...',
+  'share.passwordRequired': '需要密码',
+  'share.passwordHint': '此分享链接已设置密码保护',
+  'share.enterPassword': '输入密码',
+  'share.confirm': '确认',
+  'share.wrongPassword': '密码错误',
+  'share.requestFailed': '请求失败，请重试',
+  'share.unavailable': '链接不可用',
+  'share.notFound': '分享链接不存在或已过期',
+  'share.snapshot': '共享快照',
+  'share.createdAt': '创建于',
+  'share.validUntil': '有效期至',
+  'share.truncated': '数据较多，快照仅包含最近 200 条消息中的变更',
+  'share.truncatedSuffix': '... (已截断)',
+  'share.noChanges': '无文件变更记录',
+  'share.created': '新建',
+  'share.modified': '修改',
+  'share.deleted': '删除',
 } as const

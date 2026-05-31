@@ -5,8 +5,8 @@ import {
     CLAUDE_MODEL_PRESETS,
     GEMINI_MODEL_LABELS,
     GEMINI_MODEL_PRESETS
-} from '@hapi/protocol'
-import type { AgentFlavor, ClaudeEffortLevel } from '@hapi/protocol'
+} from '@hapipower/protocol'
+import type { AgentFlavor, ClaudeEffortLevel } from '@hapipower/protocol'
 
 export type AgentType = AgentFlavor
 export type SessionType = 'simple' | 'worktree'

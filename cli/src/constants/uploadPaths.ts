@@ -1,8 +1,8 @@
 import { join } from 'path'
 import { tmpdir } from 'os'
 
-export const HAPI_BLOBS_DIR_NAME = 'hapi-blobs'
+export const HAPI_POWER_BLOBS_DIR_NAME = 'hapi-power-blobs'
 
-export function getHapiBlobsDir(): string {
-    return join(tmpdir(), HAPI_BLOBS_DIR_NAME)
+export function getHapiPowerBlobsDir(): string {
+    return join(tmpdir(), HAPI_POWER_BLOBS_DIR_NAME)
 }

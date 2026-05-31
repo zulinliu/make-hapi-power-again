@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import type { SessionMetadataSummary } from '@/types/api'
-import { isObject } from '@hapi/protocol'
+import { isObject } from '@hapipower/protocol'
 import { BulbIcon, ClipboardIcon, EyeIcon, FileDiffIcon, GlobeIcon, MessageSquareIcon, PuzzleIcon, QuestionIcon, RocketIcon, SearchIcon, TerminalIcon, UsersIcon, WrenchIcon } from '@/components/ToolCard/icons'
 import type { ChecklistItem } from '@/components/ToolCard/checklist'
 import { extractTodoChecklist, extractUpdatePlanChecklist } from '@/components/ToolCard/checklist'
@@ -17,7 +17,7 @@ import {
 } from '@/components/ToolCard/codexAgents'
 
 const DEFAULT_ICON_CLASS = 'h-3.5 w-3.5'
-// Tool presentation registry for `hapi/web` (aligned with `hapi-app`).
+// Tool presentation registry for `hapi-power/web` (aligned with `hapi-power-app`).
 
 export type ToolPresentation = {
     icon: ReactNode
