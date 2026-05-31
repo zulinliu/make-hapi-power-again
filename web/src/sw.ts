@@ -21,6 +21,17 @@ type PushPayload = {
     }
 }
 
+// Ensure new SW activates immediately without waiting for old tabs to close
+self.addEventListener('install', () => self.skipWaiting())
+self.addEventListener('activate', () => self.clients.claim())
+
+// Allow client to trigger skipWaiting via postMessage
+self.addEventListener('message', (event) => {
+    if (event.data?.type === 'SKIP_WAITING') {
+        self.skipWaiting()
+    }
+})
+
 precacheAndRoute(self.__WB_MANIFEST)
 
 // Navigation fallback: serve index.html for SPA routes, offline.html when offline
@@ -117,19 +128,35 @@ self.addEventListener('push', (event) => {
     const data = payload.data
     const tag = payload.tag
 
+    // Determine notification actions based on type
+    const actions: Array<{ action: string; title: string }> = []
+    if (data?.url) {
+        actions.push({ action: 'open', title: 'Open' })
+    }
+    actions.push({ action: 'dismiss', title: 'Dismiss' })
+
+    const options: NotificationOptions = {
+        body,
+        icon,
+        data,
+        tag,
+    }
+    // actions is not in NotificationOptions type but is supported in browsers
+    ;(options as Record<string, unknown>).actions = actions
+    ;(options as Record<string, unknown>).badge = badge
+
     event.waitUntil(
-        self.registration.showNotification(title, {
-            body,
-            icon,
-            badge,
-            data,
-            tag
-        })
+        self.registration.showNotification(title, options)
     )
 })
 
 self.addEventListener('notificationclick', (event) => {
     event.notification.close()
+
+    if (event.action === 'dismiss') {
+        return
+    }
+
     const data = event.notification.data as { url?: string } | undefined
     const url = data?.url ?? '/'
     event.waitUntil(self.clients.openWindow(url))
