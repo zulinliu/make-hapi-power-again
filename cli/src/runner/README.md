@@ -23,7 +23,7 @@ Control Flow:
    - HTTP server: starts Fastify on random port for local CLI control (list, stop, spawn)
    - WebSocket: establishes persistent connection to backend via `ApiMachineClient`
    - RPC registration: exposes `spawn-happy-session`, `stop-session`, `stop-runner` handlers
-   - Heartbeat loop: every 60s (or `HAPI_RUNNER_HEARTBEAT_INTERVAL`) checks for version updates, prunes dead sessions, verifies PID ownership
+   - Heartbeat loop: every 60s (or `HAPI_POWER_RUNNER_HEARTBEAT_INTERVAL`) checks for version updates, prunes dead sessions, verifies PID ownership
 5. Awaits shutdown promise which resolves when:
    - OS signal received (SIGINT/SIGTERM) - source: `os-signal`
    - HTTP `/stop` endpoint called - source: `hapi-cli`
@@ -53,7 +53,7 @@ The runner detects when CLI binary changes (e.g., after `npm upgrade hapi`):
 
 ### Heartbeat System
 
-Every 60 seconds (configurable via `HAPI_RUNNER_HEARTBEAT_INTERVAL`):
+Every 60 seconds (configurable via `HAPI_POWER_RUNNER_HEARTBEAT_INTERVAL`):
 1. **Guard**: Skips if previous heartbeat still running (prevents concurrent heartbeats)
 2. **Session Pruning**: Checks each tracked PID with `isProcessAlive(pid)`, removes dead sessions
 3. **Version Check**: Compares CLI binary mtime, triggers self-restart if changed
