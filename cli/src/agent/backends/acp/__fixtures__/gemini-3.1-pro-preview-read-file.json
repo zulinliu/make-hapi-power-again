@@ -67,14 +67,14 @@
       "sessionUpdate": "agent_message_chunk",
       "content": {
         "type": "text",
-        "text": ":\n\n```markdown\n# HAPI\n\nRun official Claude Code / Codex / Gemini / OpenCode sessions locally and control"
+        "text": ":\n\n```markdown\n# Hapi Power\n\nRun official Claude Code / Codex / Gemini / OpenCode sessions locally and control"
       }
     },
     {
       "sessionUpdate": "agent_message_chunk",
       "content": {
         "type": "text",
-        "text": " them remotely through a Web / PWA / Telegram Mini App.\n\n> **Why HAPI?** HAPI is"
+        "text": " them remotely through a Web / PWA / Telegram Mini App.\n\n> **Why Hapi Power?** Hapi Power is"
       }
     },
     {
@@ -95,7 +95,7 @@
       "sessionUpdate": "agent_message_chunk",
       "content": {
         "type": "text",
-        "text": " when needed, switch back anytime. No context loss, no session restart.\n- **Native First** - HAPI"
+        "text": " when needed, switch back anytime. No context loss, no session restart.\n- **Native First** - Hapi Power"
       }
     },
     {
@@ -116,7 +116,7 @@
       "sessionUpdate": "agent_message_chunk",
       "content": {
         "type": "text",
-        "text": " AI, Your Choice** - Claude Code, Codex, Cursor Agent, Gemini, OpenCode—different models, one unified"
+        "text": " AI, Your Choice** - Claude Code, Codex, Cursor Agent, Gemini, OpenCode\u2014different models, one unified"
       }
     },
     {
@@ -221,7 +221,7 @@
       "sessionUpdate": "agent_message_chunk",
       "content": {
         "type": "text",
-        "text": ".md)\n- [Why HAPI](docs/guide/why-hapi.md)\n- [FAQ]("
+        "text": ".md)\n- [Why Hapi Power](docs/guide/why-hapi.md)\n- [FAQ]("
       }
     },
     {
@@ -235,7 +235,7 @@
       "sessionUpdate": "agent_message_chunk",
       "content": {
         "type": "text",
-        "text": "single-exe\n```\n\n## Credits\n\nHAPI means \"哈皮\" a Chinese transliteration of [Happy]("
+        "text": "single-exe\n```\n\n## Credits\n\nHAPI means \"\u54c8\u76ae\" a Chinese transliteration of [Happy]("
       }
     },
     {

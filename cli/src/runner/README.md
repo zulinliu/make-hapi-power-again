@@ -1,6 +1,6 @@
-# HAPI CLI Runner: Control Flow and Lifecycle
+# Hapi Power CLI Runner: Control Flow and Lifecycle
 
-The runner is a persistent background process that manages HAPI sessions, enables remote control from the mobile app, and handles auto-updates when the CLI version changes.
+The runner is a persistent background process that manages Hapi Power sessions, enables remote control from the mobile app, and handles auto-updates when the CLI version changes.
 
 ## 1. Runner Lifecycle
 
@@ -104,10 +104,10 @@ Initiated by mobile app via backend RPC:
 3. `spawnSession()`:
    - Validates/creates directory (with approval flow)
    - Configures agent-specific token environment
-   - Spawns detached HAPI process with `--hapi-starting-mode remote --started-by runner`
+   - Spawns detached Hapi Power process with `--hapi-starting-mode remote --started-by runner`
    - Adds to `pidToTrackedSession` map
    - Sets up 15-second awaiter for session webhook
-4. New HAPI process:
+4. New Hapi Power process:
    - Creates session with backend, receives `happySessionId`
    - Calls `notifyRunnerSessionStarted()` to POST to runner's `/session-started`
 5. Runner updates tracking with `happySessionId`, resolves awaiter
@@ -117,7 +117,7 @@ Initiated by mobile app via backend RPC:
 
 User runs `hapi` directly:
 1. CLI auto-starts runner if configured
-2. HAPI process calls `notifyRunnerSessionStarted()`
+2. Hapi Power process calls `notifyRunnerSessionStarted()`
 3. Runner receives webhook, creates `TrackedSession` with `startedBy: 'hapi directly - likely by user from terminal'`
 4. Session tracked for health monitoring
 
@@ -264,7 +264,7 @@ All data is plain JSON over TLS; authentication is `CLI_API_TOKEN` (no end-to-en
 
 ### Doctor Command
 
-`hapi doctor` uses `ps aux | grep` to find all HAPI processes:
+`hapi doctor` uses `ps aux | grep` to find all Hapi Power processes:
 - Production: matches `hapi` binary, `happy-coder`
 - Development: matches `src/index.ts` (run via `bun`)
 - Categorizes by command args: runner, runner-spawned, user-session, doctor
@@ -282,7 +282,7 @@ All data is plain JSON over TLS; authentication is `CLI_API_TOKEN` (no end-to-en
 
 ### Test Environment
 - Requires `.env.integration-test`
-- Uses local hapi-hub (http://localhost:3006)
+- Uses local hapi-power-hub (http://localhost:3006)
 - Separate `~/.hapi-dev-test` home directory
 
 ### Key Test Scenarios
@@ -298,7 +298,7 @@ All data is plain JSON over TLS; authentication is `CLI_API_TOKEN` (no end-to-en
 
 # Machine Sync Architecture - Separated Metadata & Runner State
 
-> Direct-connect note: the "hub" is `hapi-hub`, payloads are plain JSON (no base64/encryption),
+> Direct-connect note: the "hub" is `hapi-power-hub`, payloads are plain JSON (no base64/encryption),
 > and authentication uses `CLI_API_TOKEN` (REST `Authorization: Bearer ...` + Socket.IO `handshake.auth.token`).
 
 ## Data Structure (Similar to Session's metadata + agentState)
@@ -446,10 +446,10 @@ socket.emit('machine-update-metadata', {
 }, callback)
 ```
 
-## 5. Mini App RPC Calls (via hapi-hub)
+## 5. Mini App RPC Calls (via hapi-power-hub)
 
-The Telegram Mini App calls REST endpoints on `hapi-hub` (for example `POST /api/machines/:id/spawn`).
-`hapi-hub` then relays those requests to the runner via Socket.IO `rpc-request` on the `/cli` namespace.
+The Telegram Mini App calls REST endpoints on `hapi-power-hub` (for example `POST /api/machines/:id/spawn`).
+`hapi-power-hub` then relays those requests to the runner via Socket.IO `rpc-request` on the `/cli` namespace.
 
 RPC method naming (machine-scoped) uses a `${machineId}:` prefix, for example:
 - `${machineId}:spawn-happy-session`

@@ -27,7 +27,7 @@ export default {
   'login.server.default': '(默认)',
   'login.server.custom': '(自定义)',
   'login.server.title': '服务器地址',
-  'login.server.description': '设置 HAPI 服务器地址以使用 API 和实时更新。',
+  'login.server.description': '设置 Hapi Power 服务器地址以使用 API 和实时更新。',
   'login.server.current': '当前：',
   'login.server.origin': '服务器地址',
   'login.server.placeholder': 'https://hapi.example.com',
@@ -331,7 +331,7 @@ export default {
   'queuedMessages.scheduledFor': '定时发送: {time}',
   'queuedMessages.editAlreadyInvoked': '消息已发送，无法编辑',
   'composer.codexSlashUnsupported.title': '无法执行 Codex 命令',
-  'composer.codexSlashUnsupported.body': 'HAPI 远程模式暂不支持 {command} 这类 Codex 内建 slash command，请改用自然语言，或在本地 Codex TUI 中执行。',
+  'composer.codexSlashUnsupported.body': 'Hapi Power 远程模式暂不支持 {command} 这类 Codex 内建 slash command，请改用自然语言，或在本地 Codex TUI 中执行。',
 
   // Voice assistant
   'voice.connecting': '连接中...',

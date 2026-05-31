@@ -48,7 +48,7 @@ export default function VsHappy() {
               </CardContent>
             </Card>
 
-            {/* HAPI Card */}
+            {/* Hapi Power Card */}
             <Card className="border-2 border-primary shadow-hard-lg bg-card relative overflow-hidden transform md:-translate-y-4">
               <div className="absolute top-0 left-0 w-full h-2 bg-primary"></div>
               <CardHeader className="pb-2">

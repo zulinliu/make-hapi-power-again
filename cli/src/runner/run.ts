@@ -161,7 +161,7 @@ export async function startRunner(options: { workspaceRoots?: string[] } = {}): 
     // Helper functions
     const getCurrentChildren = () => Array.from(pidToTrackedSession.values());
 
-    // Handle webhook from HAPI session reporting itself
+    // Handle webhook from Hapi Power session reporting itself
     const onHappySessionWebhook = (sessionId: string, sessionMetadata: Metadata) => {
       logger.debugLargeJson(`[RUNNER RUN] Session reported`, sessionMetadata);
 
@@ -426,7 +426,7 @@ export async function startRunner(options: { workspaceRoots?: string[] } = {}): 
           if (spawnErrorBeforePidCheck) {
             details.push(formatSpawnError(spawnErrorBeforePidCheck));
           }
-          const errorMessage = `Failed to spawn HAPI process - no PID returned (${details.join('; ')})`;
+          const errorMessage = `Failed to spawn Hapi Power process - no PID returned (${details.join('; ')})`;
           logger.debug('[RUNNER RUN] Failed to spawn process - no PID returned', spawnErrorBeforePidCheck ?? null);
           reportSpawnOutcomeToHub?.({
             type: 'error',

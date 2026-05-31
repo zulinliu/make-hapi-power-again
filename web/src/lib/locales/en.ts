@@ -27,10 +27,10 @@ export default {
   'login.server.default': '(Default)',
   'login.server.custom': '(Custom)',
   'login.server.title': 'Hub URL',
-  'login.server.description': 'Set hapi hub origin for API and live updates.',
+  'login.server.description': 'Set Hapi Power hub origin for API and live updates.',
   'login.server.current': 'Current:',
   'login.server.origin': 'Hub origin',
-  'login.server.placeholder': 'https://hapi.example.com',
+  'login.server.placeholder': 'https://hapi-power.example.com',
   'login.server.hint': 'Use http(s) only. Any path is ignored.',
   'login.server.required': 'Hub URL required. Please set it before signing in.',
   'login.server.useSameOrigin': 'Use same origin',
@@ -329,7 +329,7 @@ export default {
   'queuedMessages.scheduledFor': 'Scheduled for {time}',
   'queuedMessages.editAlreadyInvoked': "Message already sent — it can't be edited",
   'composer.codexSlashUnsupported.title': 'Codex command unavailable',
-  'composer.codexSlashUnsupported.body': 'HAPI remote mode does not yet run built-in Codex slash commands like {command}. Use natural language instead, or run it in the local Codex TUI.',
+  'composer.codexSlashUnsupported.body': 'Hapi Power remote mode does not yet run built-in Codex slash commands like {command}. Use natural language instead, or run it in the local Codex TUI.',
 
   // Voice assistant
   'voice.connecting': 'Connecting...',
