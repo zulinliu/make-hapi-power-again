@@ -108,7 +108,8 @@ export const SessionCollaborationModeRequestSchema = z.object({
 export type SessionCollaborationModeRequest = z.infer<typeof SessionCollaborationModeRequestSchema>
 
 export const SessionModelRequestSchema = z.object({
-    model: z.string().trim().min(1).nullable()
+    model: z.string().trim().min(1).nullable(),
+    providerId: z.string().uuid().optional(),
 })
 
 export type SessionModelRequest = z.infer<typeof SessionModelRequestSchema>

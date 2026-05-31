@@ -16,8 +16,10 @@ import {
 import type { SlashCommand } from '@hapipower/protocol/apiTypes'
 import { Hono } from 'hono'
 import type { SyncEngine, Session } from '../../sync/syncEngine'
+import type { Store } from '../../store'
 import type { WebAppEnv } from '../middleware/auth'
 import { requireSessionFromParam, requireSyncEngine } from './guards'
+import { decryptAES256GCM, getEncryptionKey } from '../../utils/crypto'
 
 const MAX_UPLOAD_BYTES = 50 * 1024 * 1024
 
@@ -52,7 +54,7 @@ function estimateBase64Bytes(base64: string): number {
     return Math.floor((len * 3) / 4) - padding
 }
 
-export function createSessionsRoutes(getSyncEngine: () => SyncEngine | null): Hono<WebAppEnv> {
+export function createSessionsRoutes(getSyncEngine: () => SyncEngine | null, store: Store): Hono<WebAppEnv> {
     const app = new Hono<WebAppEnv>()
 
     app.get('/sessions', (c) => {
@@ -359,7 +361,20 @@ export function createSessionsRoutes(getSyncEngine: () => SyncEngine | null): Ho
         }
 
         try {
-            await engine.applySessionConfig(sessionResult.sessionId, { model: parsed.data.model })
+            const config: Record<string, unknown> = { model: parsed.data.model }
+
+            if (parsed.data.providerId) {
+                const provider = store.providers.getById(parsed.data.providerId)
+                if (!provider) {
+                    return c.json({ error: 'Provider not found' }, 400)
+                }
+                const key = getEncryptionKey()
+                const apiKey = decryptAES256GCM(provider.apiKeyEncrypted, key)
+                config.providerBaseUrl = provider.baseUrl
+                config.providerApiKey = apiKey
+            }
+
+            await engine.applySessionConfig(sessionResult.sessionId, config)
             return c.json({ ok: true })
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Failed to apply model'

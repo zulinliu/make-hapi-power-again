@@ -164,7 +164,7 @@ describe('ModelDiscoveryService', () => {
                 }),
                 { headers: { 'content-type': 'application/json' } }
             )
-        }) as typeof fetch
+        }) as unknown as typeof fetch
 
         const encryptedKey = 'dGVzdC1hcGkta2V5'  // base64 of something
         // We need a valid encrypted payload — use the real encrypt function
@@ -193,7 +193,7 @@ describe('ModelDiscoveryService', () => {
                 JSON.stringify({ data: [{ id: 'model-via-fallback' }] }),
                 { status: 200, headers: { 'content-type': 'application/json' } }
             )
-        }) as typeof fetch
+        }) as unknown as typeof fetch
 
         const { encryptAES256GCM, getEncryptionKey } = await import('../utils/crypto')
         const key = getEncryptionKey()
@@ -209,7 +209,7 @@ describe('ModelDiscoveryService', () => {
     test('returns error on auth failure', async () => {
         globalThis.fetch = mock(async () => {
             return new Response('Unauthorized', { status: 401 })
-        }) as typeof fetch
+        }) as unknown as typeof fetch
 
         const { encryptAES256GCM, getEncryptionKey } = await import('../utils/crypto')
         const key = getEncryptionKey()
@@ -223,7 +223,7 @@ describe('ModelDiscoveryService', () => {
     test('returns error when all candidates fail', async () => {
         globalThis.fetch = mock(async () => {
             return new Response('Not Found', { status: 404 })
-        }) as typeof fetch
+        }) as unknown as typeof fetch
 
         const { encryptAES256GCM, getEncryptionKey } = await import('../utils/crypto')
         const key = getEncryptionKey()

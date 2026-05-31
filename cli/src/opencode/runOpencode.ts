@@ -151,6 +151,12 @@ export async function runOpencode(opts: {
             if (config.modelReasoningEffort !== undefined) {
                 sessionModelReasoningEffort = config.modelReasoningEffort;
             }
+            if (config.providerBaseUrl !== undefined) {
+                process.env.OPENAI_BASE_URL = config.providerBaseUrl;
+            }
+            if (config.providerApiKey !== undefined) {
+                process.env.OPENAI_API_KEY = config.providerApiKey;
+            }
         },
         onAfterApply: syncSessionMode
     });

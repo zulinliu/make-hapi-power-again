@@ -8,6 +8,8 @@ type SessionConfigState<TPermissionMode extends PermissionMode = PermissionMode>
     permissionMode?: TPermissionMode
     model?: string | null
     modelReasoningEffort?: string | null
+    providerBaseUrl?: string
+    providerApiKey?: string
 }
 
 type RegisterSessionConfigRpcOptions<TPermissionMode extends PermissionMode = PermissionMode> = {
@@ -55,7 +57,7 @@ export function registerSessionConfigRpc<TPermissionMode extends PermissionMode>
             throw new Error('Invalid session config payload')
         }
 
-        const config = payload as { permissionMode?: unknown; model?: unknown; modelReasoningEffort?: unknown }
+        const config = payload as { permissionMode?: unknown; model?: unknown; modelReasoningEffort?: unknown; providerBaseUrl?: unknown; providerApiKey?: unknown }
         const applied: Record<string, unknown> = {}
         const next: SessionConfigState<TPermissionMode> = {}
 
@@ -82,6 +84,20 @@ export function registerSessionConfigRpc<TPermissionMode extends PermissionMode>
             if (modelReasoningEffortMode === 'nullable') {
                 next.modelReasoningEffort = resolveNullableSessionModel(config.modelReasoningEffort)
                 applied.modelReasoningEffort = next.modelReasoningEffort
+            }
+        }
+
+        if (config.providerBaseUrl !== undefined) {
+            if (typeof config.providerBaseUrl === 'string') {
+                next.providerBaseUrl = config.providerBaseUrl
+                applied.providerBaseUrl = config.providerBaseUrl
+            }
+        }
+
+        if (config.providerApiKey !== undefined) {
+            if (typeof config.providerApiKey === 'string') {
+                next.providerApiKey = config.providerApiKey
+                applied.providerApiKey = 'applied'
             }
         }
 

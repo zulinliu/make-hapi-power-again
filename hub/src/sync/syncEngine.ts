@@ -434,6 +434,8 @@ export class SyncEngine {
             modelReasoningEffort?: string | null
             effort?: string | null
             collaborationMode?: CodexCollaborationMode
+            providerBaseUrl?: string
+            providerApiKey?: string
         }
     ): Promise<void> {
         const session = this.sessionCache.getSession(sessionId)
