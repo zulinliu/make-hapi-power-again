@@ -23,7 +23,7 @@ const generatedImageSchema = z.object({
 
 const branchActionSchema = z.object({
     name: z.string().min(1).regex(/^[\w.\-\/]+$/, 'Invalid branch name'),
-    action: z.enum(['switch', 'delete']).optional()
+    action: z.enum(['switch', 'delete', 'merge']).optional()
 })
 
 const commitSchema = z.object({
@@ -212,6 +212,11 @@ export function createGitRoutes(getSyncEngine: () => SyncEngine | null): Hono<We
 
         if (action === 'delete') {
             const result = await runRpc(() => engine.deleteGitBranch(sessionResult.sessionId, { cwd: sessionPath, name }))
+            return c.json(result)
+        }
+
+        if (action === 'merge') {
+            const result = await runRpc(() => engine.mergeGitBranch(sessionResult.sessionId, { cwd: sessionPath, name }))
             return c.json(result)
         }
 

@@ -26,7 +26,7 @@ function parseRemotes(stdout: string): RemoteEntry[] {
     return Array.from(map.values())
 }
 
-export function GitRemoteManager({ sessionId }: GitRemoteManagerProps) {
+export function GitRemoteManager({ sessionId, onRemotesLoaded }: { sessionId: string; onRemotesLoaded?: (remotes: RemoteEntry[]) => void }) {
     const { api } = useAppContext()
     const [remotes, setRemotes] = useState<RemoteEntry[]>([])
     const [loading, setLoading] = useState(false)
@@ -39,12 +39,14 @@ export function GitRemoteManager({ sessionId }: GitRemoteManagerProps) {
         try {
             const result = await api.getGitRemotes(sessionId)
             if (result.success) {
-                setRemotes(parseRemotes(result.stdout ?? ''))
+                const parsed = parseRemotes(result.stdout ?? '')
+                setRemotes(parsed)
+                onRemotesLoaded?.(parsed)
             }
         } finally {
             setLoading(false)
         }
-    }, [api, sessionId])
+    }, [api, sessionId, onRemotesLoaded])
 
     useEffect(() => {
         fetchRemotes()

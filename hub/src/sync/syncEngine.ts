@@ -908,6 +908,10 @@ export class SyncEngine {
         return await this.rpcGateway.deleteGitBranch(sessionId, options)
     }
 
+    async mergeGitBranch(sessionId: string, options: { cwd?: string; name: string }): Promise<RpcCommandResponse> {
+        return await this.rpcGateway.mergeGitBranch(sessionId, options)
+    }
+
     async createGitCommit(sessionId: string, options: { cwd?: string; message: string; paths?: string[] }): Promise<RpcCommandResponse> {
         return await this.rpcGateway.createGitCommit(sessionId, options)
     }

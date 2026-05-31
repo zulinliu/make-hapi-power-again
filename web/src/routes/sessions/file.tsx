@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useEffect, useMemo, useState, lazy, Suspense } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useParams, useSearch } from '@tanstack/react-router'
 import type { GitCommandResponse } from '@/types/api'
 import { FileIcon } from '@/components/FileIcon'
@@ -9,25 +9,24 @@ import { useAppGoBack } from '@/hooks/useAppGoBack'
 import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
 import { formatDiffError, formatReadFileError } from '@/lib/files-i18n'
 import { queryKeys } from '@/lib/query-keys'
-import { langAlias, useShikiHighlighter } from '@/lib/shiki'
 import { useTranslation } from '@/lib/use-translation'
 import { decodeBase64 } from '@/lib/utils'
 import { ImagePreview } from '@/components/ImagePreview'
+import { LoadingState } from '@/components/LoadingState'
+
+const CodeEditor = lazy(() =>
+    import('@/components/Editor/CodeEditor').then(m => ({ default: m.CodeEditor }))
+)
+const DiffView = lazy(() =>
+    import('@/components/Editor/DiffView').then(m => ({ default: m.DiffView }))
+)
 
 const MAX_COPYABLE_FILE_BYTES = 1_000_000
 const IMAGE_MIME_BY_EXTENSION: Record<string, string> = {
-    apng: 'image/apng',
-    avif: 'image/avif',
-    bmp: 'image/bmp',
-    gif: 'image/gif',
-    ico: 'image/x-icon',
-    jpeg: 'image/jpeg',
-    jpg: 'image/jpeg',
-    png: 'image/png',
-    svg: 'image/svg+xml',
-    tif: 'image/tiff',
-    tiff: 'image/tiff',
-    webp: 'image/webp'
+    apng: 'image/apng', avif: 'image/avif', bmp: 'image/bmp',
+    gif: 'image/gif', ico: 'image/x-icon', jpeg: 'image/jpeg',
+    jpg: 'image/jpeg', png: 'image/png', svg: 'image/svg+xml',
+    tif: 'image/tiff', tiff: 'image/tiff', webp: 'image/webp'
 }
 
 function decodePath(value: string): string {
@@ -38,85 +37,20 @@ function decodePath(value: string): string {
 
 function BackIcon(props: { className?: string }) {
     return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className={props.className}
-        >
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+            className={props.className}>
             <polyline points="15 18 9 12 15 6" />
         </svg>
     )
 }
 
-function DiffDisplay(props: { diffContent: string }) {
-    const lines = props.diffContent.split('\n')
-
-    return (
-        <div className="overflow-hidden rounded-md border border-[var(--app-border)] bg-[var(--app-bg)]">
-            {lines.map((line, index) => {
-                const isAdd = line.startsWith('+') && !line.startsWith('+++')
-                const isRemove = line.startsWith('-') && !line.startsWith('---')
-                const isHunk = line.startsWith('@@')
-                const isHeader = line.startsWith('+++') || line.startsWith('---')
-
-                const className = [
-                    'whitespace-pre-wrap px-3 py-0.5 text-xs font-mono',
-                    isAdd ? 'bg-[var(--app-diff-added-bg)] text-[var(--app-diff-added-text)]' : '',
-                    isRemove ? 'bg-[var(--app-diff-removed-bg)] text-[var(--app-diff-removed-text)]' : '',
-                    isHunk ? 'bg-[var(--app-subtle-bg)] text-[var(--app-hint)] font-semibold' : '',
-                    isHeader ? 'text-[var(--app-hint)] font-semibold' : ''
-                ].filter(Boolean).join(' ')
-
-                const style = isAdd
-                    ? { borderLeft: '2px solid var(--app-git-staged-color)' }
-                    : isRemove
-                        ? { borderLeft: '2px solid var(--app-git-deleted-color)' }
-                        : undefined
-
-                return (
-                    <div key={`${index}-${line}`} className={className} style={style}>
-                        {line || ' '}
-                    </div>
-                )
-            })}
-        </div>
-    )
-}
-
 function FileContentSkeleton(props: { label: string }) {
-    const widths = ['w-full', 'w-11/12', 'w-5/6', 'w-3/4', 'w-2/3', 'w-4/5']
-
-    return (
-        <div role="status" aria-live="polite">
-            <span className="sr-only">{props.label}</span>
-            <div className="animate-pulse space-y-2 rounded-md border border-[var(--app-border)] bg-[var(--app-code-bg)] p-3">
-                {Array.from({ length: 12 }).map((_, index) => (
-                    <div key={`file-skeleton-${index}`} className={`h-3 ${widths[index % widths.length]} rounded bg-[var(--app-subtle-bg)]`} />
-                ))}
-            </div>
-        </div>
-    )
-}
-
-function resolveLanguage(path: string): string | undefined {
-    const parts = path.split('.')
-    if (parts.length <= 1) return undefined
-    const ext = parts[parts.length - 1]?.toLowerCase()
-    if (!ext) return undefined
-    return langAlias[ext] ?? ext
+    return <LoadingState label={props.label} />
 }
 
 function resolveImageMimeType(path: string): string | null {
-    const parts = path.split('.')
-    if (parts.length <= 1) return null
-    const ext = parts[parts.length - 1]?.toLowerCase()
+    const ext = path.split('.').pop()?.toLowerCase()
     if (!ext) return null
     return IMAGE_MIME_BY_EXTENSION[ext] ?? null
 }
@@ -147,6 +81,7 @@ export default function FilePage() {
     const { copied: pathCopied, copy: copyPath } = useCopyToClipboard()
     const { copied: contentCopied, copy: copyContent } = useCopyToClipboard()
     const goBack = useAppGoBack()
+    const queryClient = useQueryClient()
     const { sessionId } = useParams({ from: '/sessions/$sessionId/file' })
     const search = useSearch({ from: '/sessions/$sessionId/file' })
     const encodedPath = typeof search.path === 'string' ? search.path : ''
@@ -159,9 +94,7 @@ export default function FilePage() {
     const diffQuery = useQuery({
         queryKey: queryKeys.gitFileDiff(sessionId, filePath, staged),
         queryFn: async () => {
-            if (!api || !sessionId || !filePath) {
-                throw new Error('Missing session or path')
-            }
+            if (!api || !sessionId || !filePath) throw new Error('Missing session or path')
             return await api.getGitDiffFile(sessionId, filePath, staged)
         },
         enabled: Boolean(api && sessionId && filePath)
@@ -170,9 +103,7 @@ export default function FilePage() {
     const fileQuery = useQuery({
         queryKey: queryKeys.sessionFile(sessionId, filePath),
         queryFn: async () => {
-            if (!api || !sessionId || !filePath) {
-                throw new Error('Missing session or path')
-            }
+            if (!api || !sessionId || !filePath) throw new Error('Missing session or path')
             return await api.readSessionFile(sessionId, filePath)
         },
         enabled: Boolean(api && sessionId && filePath)
@@ -195,8 +126,6 @@ export default function FilePage() {
         ? `data:${imageMimeType};base64,${fileContentResult.content}`
         : null
 
-    const language = useMemo(() => imageMimeType ? undefined : resolveLanguage(filePath), [filePath, imageMimeType])
-    const highlighted = useShikiHighlighter(imageMimeType ? '' : decodedContent, language)
     const contentSizeBytes = useMemo(
         () => (decodedContent ? getUtf8ByteLength(decodedContent) : 0),
         [decodedContent]
@@ -207,20 +136,27 @@ export default function FilePage() {
         && contentSizeBytes <= MAX_COPYABLE_FILE_BYTES
 
     const [displayMode, setDisplayMode] = useState<'diff' | 'file'>('diff')
+    const [localContent, setLocalContent] = useState('')
 
     useEffect(() => {
-        if (imageMimeType) {
-            setDisplayMode('file')
-            return
+        if (decodedContent && localContent !== decodedContent) {
+            setLocalContent(decodedContent)
         }
-        if (diffSuccess && !diffContent) {
-            setDisplayMode('file')
-            return
-        }
-        if (diffFailed) {
-            setDisplayMode('file')
-        }
+    }, [decodedContent])
+
+    useEffect(() => {
+        if (imageMimeType) { setDisplayMode('file'); return }
+        if (diffSuccess && !diffContent) { setDisplayMode('file'); return }
+        if (diffFailed) setDisplayMode('file')
     }, [diffSuccess, diffFailed, diffContent, imageMimeType])
+
+    async function handleSave(newValue: string) {
+        if (!api || !sessionId || !filePath || !fileContentResult?.success) return
+        const encoded = btoa(unescape(encodeURIComponent(newValue)))
+        await api.writeSessionFile(sessionId, filePath, encoded)
+        queryClient.invalidateQueries({ queryKey: queryKeys.sessionFile(sessionId, filePath) })
+        queryClient.invalidateQueries({ queryKey: queryKeys.gitFileDiff(sessionId, filePath, staged) })
+    }
 
     const loading = diffQuery.isLoading || fileQuery.isLoading
     const fileError = fileContentResult && !fileContentResult.success
@@ -234,11 +170,8 @@ export default function FilePage() {
         <div className="flex h-full min-h-0 flex-col">
             <div className="bg-[var(--app-bg)] pt-[env(safe-area-inset-top)]">
                 <div className="mx-auto w-full max-w-content flex items-center gap-2 p-3 border-b border-[var(--app-border)]">
-                    <button
-                        type="button"
-                        onClick={goBack}
-                        className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--app-hint)] transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]"
-                    >
+                    <button type="button" onClick={goBack}
+                        className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--app-hint)] transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]">
                         <BackIcon />
                     </button>
                     <div className="min-w-0 flex-1">
@@ -252,12 +185,9 @@ export default function FilePage() {
                 <div className="mx-auto w-full max-w-content px-3 py-2 flex items-center gap-2 border-b border-[var(--app-divider)]">
                     <FileIcon fileName={fileName} size={20} />
                     <span className="min-w-0 flex-1 truncate text-xs text-[var(--app-hint)]">{filePath || t('file.page.unknownPath')}</span>
-                    <button
-                        type="button"
-                        onClick={() => copyPath(filePath)}
+                    <button type="button" onClick={() => copyPath(filePath)}
                         className="shrink-0 rounded p-1 text-[var(--app-hint)] hover:bg-[var(--app-subtle-bg)] hover:text-[var(--app-fg)] transition-colors"
-                        title={t('file.page.copyPath')}
-                    >
+                        title={t('file.page.copyPath')}>
                         {pathCopied ? <CheckIcon className="h-3.5 w-3.5" /> : <CopyIcon className="h-3.5 w-3.5" />}
                     </button>
                 </div>
@@ -266,77 +196,69 @@ export default function FilePage() {
             {diffContent ? (
                 <div className="bg-[var(--app-bg)]">
                     <div className="mx-auto w-full max-w-content px-3 py-2 flex items-center gap-2 border-b border-[var(--app-divider)]">
-                        <button
-                            type="button"
-                            onClick={() => setDisplayMode('diff')}
-                            className={`rounded px-3 py-1 text-xs font-semibold ${displayMode === 'diff' ? 'bg-[var(--app-button)] text-[var(--app-button-text)] opacity-80' : 'bg-[var(--app-subtle-bg)] text-[var(--app-hint)]'}`}
-                        >
+                        <button type="button" onClick={() => setDisplayMode('diff')}
+                            className={`rounded px-3 py-1 text-xs font-semibold ${displayMode === 'diff' ? 'bg-[var(--app-button)] text-[var(--app-button-text)] opacity-80' : 'bg-[var(--app-subtle-bg)] text-[var(--app-hint)]'}`}>
                             {t('file.page.tab.diff')}
                         </button>
-                        <button
-                            type="button"
-                            onClick={() => setDisplayMode('file')}
-                            className={`rounded px-3 py-1 text-xs font-semibold ${displayMode === 'file' ? 'bg-[var(--app-button)] text-[var(--app-button-text)] opacity-80' : 'bg-[var(--app-subtle-bg)] text-[var(--app-hint)]'}`}
-                        >
+                        <button type="button" onClick={() => setDisplayMode('file')}
+                            className={`rounded px-3 py-1 text-xs font-semibold ${displayMode === 'file' ? 'bg-[var(--app-button)] text-[var(--app-button-text)] opacity-80' : 'bg-[var(--app-subtle-bg)] text-[var(--app-hint)]'}`}>
                             {t('file.page.tab.file')}
                         </button>
                     </div>
                 </div>
             ) : null}
 
-            <div className="app-scroll-y flex-1 min-h-0">
-                <div className="mx-auto w-full max-w-content p-4">
-                    {diffErrorMessage ? (
-                        <div className="mb-3 rounded-md bg-amber-500/10 p-2 text-xs text-[var(--app-hint)]">
-                            {diffErrorMessage}
+            <div className="flex-1 min-h-0">
+                {diffErrorMessage ? (
+                    <div className="p-4"><div className="mb-3 rounded-md bg-amber-500/10 p-2 text-xs text-[var(--app-hint)]">{diffErrorMessage}</div></div>
+                ) : missingPath ? (
+                    <div className="p-4 text-sm text-[var(--app-hint)]">{t('file.page.missingPath')}</div>
+                ) : loading ? (
+                    <FileContentSkeleton label={t('loading.file')} />
+                ) : fileErrorMessage ? (
+                    <div className="p-4 text-sm text-[var(--app-hint)]">{fileErrorMessage}</div>
+                ) : displayMode === 'diff' && diffContent && decodedContent ? (
+                    <Suspense fallback={<FileContentSkeleton label="Loading diff..." />}>
+                        <DiffView
+                            original={decodedContent.replace(
+                                // strip diff additions to get original
+                                new RegExp(`^\\+.*$`, 'gm'), ''
+                            ).replace(new RegExp(`^-`, 'gm'), '')}
+                            modified={decodedContent}
+                            filePath={filePath}
+                        />
+                    </Suspense>
+                ) : displayMode === 'file' ? (
+                    imagePreviewUrl ? (
+                        <div className="app-scroll-y h-full p-4">
+                            <ImagePreview src={imagePreviewUrl} fileName={fileName}
+                                label={t('file.page.imagePreviewAlt', { name: fileName })} />
                         </div>
-                    ) : null}
-                    {missingPath ? (
-                        <div className="text-sm text-[var(--app-hint)]">{t('file.page.missingPath')}</div>
-                    ) : loading ? (
-                        <FileContentSkeleton label={t('loading.file')} />
-                    ) : fileErrorMessage ? (
-                        <div className="text-sm text-[var(--app-hint)]">{fileErrorMessage}</div>
-                    ) : displayMode === 'diff' && diffContent ? (
-                        <DiffDisplay diffContent={diffContent} />
-                    ) : displayMode === 'diff' && diffError ? (
-                        <div className="text-sm text-[var(--app-hint)]">{diffErrorMessage}</div>
-                    ) : displayMode === 'file' ? (
-                        imagePreviewUrl ? (
-                            <ImagePreview
-                                src={imagePreviewUrl}
-                                fileName={fileName}
-                                label={t('file.page.imagePreviewAlt', { name: fileName })}
-                            />
-                        ) : binaryFile ? (
-                            <div className="text-sm text-[var(--app-hint)]">
-                                {t('file.page.binary')}
-                            </div>
-                        ) : (
-                            decodedContent ? (
-                                <div className="relative">
-                                    {canCopyContent ? (
-                                        <button
-                                            type="button"
-                                            onClick={() => copyContent(decodedContent)}
-                                            className="absolute right-2 top-2 z-10 rounded p-1 text-[var(--app-hint)] hover:bg-[var(--app-subtle-bg)] hover:text-[var(--app-fg)] transition-colors"
-                                            title={t('file.page.copyContent')}
-                                        >
-                                            {contentCopied ? <CheckIcon className="h-3.5 w-3.5" /> : <CopyIcon className="h-3.5 w-3.5" />}
-                                        </button>
-                                    ) : null}
-                                    <pre className="shiki overflow-auto rounded-md bg-[var(--app-code-bg)] p-3 pr-8 text-xs font-mono">
-                                        <code>{highlighted ?? decodedContent}</code>
-                                    </pre>
-                                </div>
-                            ) : (
-                                <div className="text-sm text-[var(--app-hint)]">{t('file.page.empty')}</div>
-                            )
-                        )
+                    ) : binaryFile ? (
+                        <div className="p-4 text-sm text-[var(--app-hint)]">{t('file.page.binary')}</div>
                     ) : (
-                        <div className="text-sm text-[var(--app-hint)]">{t('file.page.noChanges')}</div>
-                    )}
-                </div>
+                        <Suspense fallback={<FileContentSkeleton label="Loading editor..." />}>
+                            <div className="relative h-full">
+                                {canCopyContent && (
+                                    <button type="button" onClick={() => copyContent(localContent)}
+                                        className="absolute right-2 top-2 z-10 rounded p-1 text-[var(--app-hint)] hover:bg-[var(--app-subtle-bg)] hover:text-[var(--app-fg)] transition-colors"
+                                        title={t('file.page.copyContent')}>
+                                        {contentCopied ? <CheckIcon className="h-3.5 w-3.5" /> : <CopyIcon className="h-3.5 w-3.5" />}
+                                    </button>
+                                )}
+                                <CodeEditor
+                                    value={localContent}
+                                    filePath={filePath}
+                                    readOnly={false}
+                                    onChange={(v) => setLocalContent(v)}
+                                    onSave={handleSave}
+                                />
+                            </div>
+                        </Suspense>
+                    )
+                ) : (
+                    <div className="p-4 text-sm text-[var(--app-hint)]">{t('file.page.noChanges')}</div>
+                )}
             </div>
         </div>
     )
