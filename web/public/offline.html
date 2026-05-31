@@ -25,12 +25,27 @@
         }
         .offline button:active { opacity: 0.8; }
     </style>
+    <script>
+        (function() {
+            var lang = (navigator.language || 'en').toLowerCase();
+            var isZh = lang.startsWith('zh');
+            var title = isZh ? 'Hapi Power — 离线' : 'Hapi Power — Offline';
+            var h1 = isZh ? '当前处于离线状态' : "You're offline";
+            var p = isZh ? '请检查网络连接后重试。' : 'Check your internet connection and try again.';
+            var btn = isZh ? '重试' : 'Retry';
+            document.title = title;
+            document.documentElement.lang = isZh ? 'zh-CN' : 'en';
+            document.getElementById('h1').textContent = h1;
+            document.getElementById('p').textContent = p;
+            document.getElementById('btn').textContent = btn;
+        })();
+    </script>
 </head>
 <body>
     <div class="offline">
-        <h1>You're offline</h1>
-        <p>Check your internet connection and try again.</p>
-        <button onclick="location.reload()">Retry</button>
+        <h1 id="h1"></h1>
+        <p id="p"></p>
+        <button id="btn" onclick="location.reload()"></button>
     </div>
 </body>
 </html>

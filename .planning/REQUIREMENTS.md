@@ -168,6 +168,40 @@
 - **DS2-02**: 动画流畅度优化（transition 时效统一 + reduced-motion 支持 + compositor-only 属性）
 - **DS2-03**: 暗/亮模式一致性验证（所有页面双模式视觉走查）
 
+## v0.4 Requirements — PWA 深度优化版
+
+> **v0.4 主题**: PWA 模式从底层到设计层面的深度优化，解决更新机制、安装引导、通知角标三大核心体验问题
+
+### Service Worker 更新机制（SWU）
+
+- **SWU-01**: 修复 registerType 配置矛盾（'autoUpdate' → 'prompt'，配合自定义更新提示 UI）
+- **SWU-02**: sw.ts 添加 skipWaiting + clients.claim，确保新版本即时激活
+- **SWU-03**: 自定义更新提示 UI（替代原生 confirm()，使用应用内 Toast/横幅组件）
+- **SWU-04**: 更新提示展示版本号（结合 __APP_VERSION__）
+- **SWU-05**: 客户端定期轮询 SW 更新（iOS 补偿：每 30 分钟 registration.update()）
+- **SWU-06**: navigator.storage.persist() 持久化存储调用，防止缓存被系统清理
+
+### PWA 安装引导增强（INST）
+
+- **INST-01**: Safari 安装引导增加"稍后提醒"选项（关闭后 7 天再显示，而非永久关闭）
+- **INST-02**: 安装引导时机优化（延迟到用户有会话后再提示，避免首次访问就弹出）
+- **INST-03**: 安装引导 i18n 完善（iOS 分步引导文本全部使用 t() 翻译键）
+- **INST-04**: Safari 中更醒目的安装提示（考虑顶部横幅替代底部浮动卡片）
+
+### 通知与 Badge API（NTF）
+
+- **NTF-01**: 实现 Badge API（navigator.setAppBadge / clearAppBadge），会话状态变更时更新角标
+- **NTF-02**: 推送通知增加 actions 按钮（Open / Dismiss），提升通知交互性
+- **NTF-03**: 推送通知权限请求时机优化（延迟到用户理解应用价值后再请求）
+- **NTF-04**: iOS standalone 模式推送通知兼容性验证（iOS 16.4+ Web Push）
+
+### Manifest 完善（MNF）
+
+- **MNF-01**: theme-color 初始值与 manifest 一致（#0A0A0B 暗色 / #ffffff 亮色）
+- **MNF-02**: 添加 screenshots 字段（至少 3 张：宽屏 + 窄屏 + 暗色）
+- **MNF-03**: 添加 share_target 字段（支持接收文本/文件分享）
+- **MNF-04**: 离线页面 offline.html i18n 化（根据浏览器语言显示中/英文）
+
 ## v0.3 Requirements（延后）
 
 ### Isolation（隔离增强）
@@ -215,8 +249,9 @@
 **Coverage:**
 - v0.1 requirements: 60 total → 60 Done ✓
 - v0.2 requirements: 26 total (PWA:7 + MOB:6 + I18N:5 + AUDIT:5 + DS2:3)
+- v0.4 requirements: 18 total (SWU:6 + INST:4 + NTF:4 + MNF:4)
 - v0.3 deferred: ISO-01~02 + SCAL-01~02
 
 ---
 *Requirements defined: 2026-05-30*
-*Last updated: 2026-05-30 — v0.2 requirements added*
+*Last updated: 2026-05-31 — v0.4 requirements added*
