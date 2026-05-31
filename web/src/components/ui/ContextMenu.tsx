@@ -24,13 +24,16 @@ export function ContextMenu({ x, y, items, onClose }: ContextMenuProps) {
         const rect = menuRef.current.getBoundingClientRect()
         const vw = window.innerWidth
         const vh = window.innerHeight
+        const safeTop = parseInt(getComputedStyle(document.documentElement).getPropertyValue('env(safe-area-inset-top)') || '0') || 0
+        const safeBottom = parseInt(getComputedStyle(document.documentElement).getPropertyValue('env(safe-area-inset-bottom)') || '0') || 0
+        const pad = 8
 
         let adjustedX = x
         let adjustedY = y
-        if (x + rect.width > vw - 8) adjustedX = vw - rect.width - 8
-        if (y + rect.height > vh - 8) adjustedY = vh - rect.height - 8
-        if (adjustedX < 8) adjustedX = 8
-        if (adjustedY < 8) adjustedY = 8
+        if (x + rect.width > vw - pad) adjustedX = vw - rect.width - pad
+        if (y + rect.height > vh - safeBottom - pad) adjustedY = vh - rect.height - safeBottom - pad
+        if (adjustedX < pad) adjustedX = pad
+        if (adjustedY < safeTop + pad) adjustedY = safeTop + pad
         setPosition({ x: adjustedX, y: adjustedY })
     }, [x, y])
 
@@ -41,13 +44,17 @@ export function ContextMenu({ x, y, items, onClose }: ContextMenuProps) {
     }, [onClose])
 
     useEffect(() => {
-        document.addEventListener('mousedown', handleClickOutside)
-        document.addEventListener('touchstart', handleClickOutside as unknown as EventListener)
+        // Delay binding to avoid immediate dismissal when triggered by touch
+        const timer = setTimeout(() => {
+            document.addEventListener('mousedown', handleClickOutside)
+            document.addEventListener('touchstart', handleClickOutside as unknown as EventListener)
+        }, 100)
         const handleEsc = (e: KeyboardEvent) => {
             if (e.key === 'Escape') onClose()
         }
         document.addEventListener('keydown', handleEsc)
         return () => {
+            clearTimeout(timer)
             document.removeEventListener('mousedown', handleClickOutside)
             document.removeEventListener('touchstart', handleClickOutside as unknown as EventListener)
             document.removeEventListener('keydown', handleEsc)

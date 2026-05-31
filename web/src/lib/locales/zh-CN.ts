@@ -218,6 +218,7 @@ export default {
   // File page
   'file.page.fallbackName': '文件',
   'file.page.unknownPath': '未知路径',
+  'file.page.goBack': '返回',
   'file.page.copyPath': '复制路径',
   'file.page.copyContent': '复制文件内容',
   'file.page.tab.diff': 'Diff',
@@ -592,32 +593,38 @@ export default {
   'file.rename.placeholder': '输入新名称',
   'file.rename.submit': '重命名',
   'file.rename.failed': '重命名失败',
+  'file.rename.success': '重命名成功',
 
   'file.delete.title': '删除',
   'file.delete.confirm': '确定删除 "{path}"？此操作不可撤销。',
   'file.delete.submit': '删除',
   'file.delete.submitting': '删除中…',
   'file.delete.failed': '删除失败',
+  'file.delete.success': '删除成功',
 
   'file.move.title': '移动',
   'file.move.submit': '移动',
   'file.move.failed': '移动失败',
+  'file.move.success': '移动成功',
   'file.move.source': '源路径',
   'file.move.destinationPlaceholder': '输入目标路径',
 
   'file.copy.title': '复制',
   'file.copy.submit': '复制',
   'file.copy.failed': '复制失败',
+  'file.copy.success': '复制成功',
 
   'file.newFile.title': '新建文件',
   'file.newFile.placeholder': '输入文件名',
   'file.newFile.submit': '创建',
   'file.newFile.failed': '创建文件失败',
+  'file.newFile.success': '文件已创建',
 
   'file.newFolder.title': '新建文件夹',
   'file.newFolder.placeholder': '输入文件夹名',
   'file.newFolder.submit': '创建',
   'file.newFolder.failed': '创建文件夹失败',
+  'file.newFolder.success': '文件夹已创建',
 
   // 文件预览
   'file.preview.mode.preview': '预览',

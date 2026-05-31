@@ -114,7 +114,7 @@ export function InstallPrompt() {
                         <p className="text-sm font-medium text-[var(--app-fg)]">
                             {t('install.title')}
                         </p>
-                        <p className="text-xs text-[var(--app-hint)] mt-0.5">
+                        <p className="text-xs text-[var(--app-fg)] opacity-70 mt-0.5">
                             {t('install.description')}
                         </p>
                     </div>
@@ -162,7 +162,7 @@ export function InstallPrompt() {
                     <p className="text-sm font-medium text-[var(--app-fg)]">
                         {t('install.title')}
                     </p>
-                    <p className="text-xs text-[var(--app-hint)] mt-0.5">
+                    <p className="text-xs text-[var(--app-fg)] opacity-70 mt-0.5">
                         {t('install.description')}
                     </p>
                 </div>
