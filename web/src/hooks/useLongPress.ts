@@ -84,9 +84,14 @@ export function useLongPress(options: UseLongPressOptions): UseLongPressHandlers
         handleEnd(!isLongPressRef.current)
     }, [handleEnd])
 
-    const onTouchMove = useCallback<React.TouchEventHandler>(() => {
-        touchMoved.current = true
-        clearTimer()
+    const onTouchMove = useCallback<React.TouchEventHandler>((e) => {
+        const touch = e.touches[0]
+        const dx = touch.clientX - pressPointRef.current.x
+        const dy = touch.clientY - pressPointRef.current.y
+        if (Math.sqrt(dx * dx + dy * dy) > 10) {
+            touchMoved.current = true
+            clearTimer()
+        }
     }, [clearTimer])
 
     const onContextMenu = useCallback<React.MouseEventHandler>((e) => {

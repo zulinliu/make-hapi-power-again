@@ -96,7 +96,7 @@ function FileNode({ filePath, fileName, depth, onOpenFile, onContextMenu }: File
     return (
         <div
             className="flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-[var(--app-subtle-bg)] transition-colors cursor-pointer"
-            style={{ paddingLeft: indent, minHeight: 44 }}
+            style={{ paddingLeft: indent, minHeight: 44, userSelect: 'none', WebkitTouchCallout: 'none' }}
             {...longPress}
         >
             <span className="h-4 w-4" />
@@ -142,7 +142,7 @@ function DirectoryNode(props: {
         <div>
             <div
                 className="flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-[var(--app-subtle-bg)] transition-colors cursor-pointer"
-                style={{ paddingLeft: indent, minHeight: 44 }}
+                style={{ paddingLeft: indent, minHeight: 44, userSelect: 'none', WebkitTouchCallout: 'none' }}
                 {...longPress}
             >
                 <ChevronIcon collapsed={!isExpanded} className="text-[var(--app-hint)]" />

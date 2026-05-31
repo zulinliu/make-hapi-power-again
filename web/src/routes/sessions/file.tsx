@@ -166,7 +166,7 @@ export default function FilePage() {
     async function handleSave(newValue: string) {
         if (!api || !sessionId || !filePath || !fileContentResult?.success) return
         const encoded = btoa(unescape(encodeURIComponent(newValue)))
-        await api.writeSessionFile(sessionId, filePath, encoded, fileContentResult.content ? undefined : undefined, true)
+        await api.writeSessionFile(sessionId, filePath, encoded, undefined, true)
         queryClient.invalidateQueries({ queryKey: queryKeys.sessionFile(sessionId, filePath) })
         queryClient.invalidateQueries({ queryKey: queryKeys.gitFileDiff(sessionId, filePath, staged) })
     }
@@ -183,7 +183,7 @@ export default function FilePage() {
         <div className="flex h-full min-h-0 flex-col">
             <div className="bg-[var(--app-bg)] pt-[env(safe-area-inset-top)]">
                 <div className="mx-auto w-full max-w-content flex items-center gap-2 p-3 border-b border-[var(--app-border)]">
-                    <button type="button" onClick={goBack}
+                    <button type="button" onClick={goBack} aria-label={t('file.page.goBack')}
                         className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--app-hint)] transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]">
                         <BackIcon />
                     </button>

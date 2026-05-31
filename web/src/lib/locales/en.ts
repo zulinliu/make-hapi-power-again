@@ -216,6 +216,7 @@ export default {
   // File page
   'file.page.fallbackName': 'File',
   'file.page.unknownPath': 'Unknown path',
+  'file.page.goBack': 'Go back',
   'file.page.copyPath': 'Copy path',
   'file.page.copyContent': 'Copy file content',
   'file.page.tab.diff': 'Diff',
@@ -590,32 +591,38 @@ export default {
   'file.rename.placeholder': 'Enter new name',
   'file.rename.submit': 'Rename',
   'file.rename.failed': 'Rename failed',
+  'file.rename.success': 'Renamed successfully',
 
   'file.delete.title': 'Delete',
   'file.delete.confirm': 'Delete "{path}"? This cannot be undone.',
   'file.delete.submit': 'Delete',
   'file.delete.submitting': 'Deleting…',
   'file.delete.failed': 'Delete failed',
+  'file.delete.success': 'Deleted successfully',
 
   'file.move.title': 'Move',
   'file.move.submit': 'Move',
   'file.move.failed': 'Move failed',
+  'file.move.success': 'Moved successfully',
   'file.move.source': 'Source',
   'file.move.destinationPlaceholder': 'Enter destination path',
 
   'file.copy.title': 'Copy',
   'file.copy.submit': 'Copy',
   'file.copy.failed': 'Copy failed',
+  'file.copy.success': 'Copied successfully',
 
   'file.newFile.title': 'New File',
   'file.newFile.placeholder': 'Enter file name',
   'file.newFile.submit': 'Create',
   'file.newFile.failed': 'Failed to create file',
+  'file.newFile.success': 'File created',
 
   'file.newFolder.title': 'New Folder',
   'file.newFolder.placeholder': 'Enter folder name',
   'file.newFolder.submit': 'Create',
   'file.newFolder.failed': 'Failed to create folder',
+  'file.newFolder.success': 'Folder created',
 
   // File preview
   'file.preview.mode.preview': 'Preview',

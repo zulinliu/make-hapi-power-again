@@ -22,6 +22,7 @@ import { encodeBase64 } from '@/lib/utils'
 import { queryKeys } from '@/lib/query-keys'
 import { useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from '@/lib/use-translation'
+import { useToast } from '@/lib/toast-context'
 
 function BackIcon(props: { className?: string }) {
     return (
@@ -243,6 +244,7 @@ function FileListSkeleton(props: { label: string; rows?: number }) {
 export default function FilesPage() {
     const { api } = useAppContext()
     const { t } = useTranslation()
+    const { addToast } = useToast()
     const navigate = useNavigate()
     const queryClient = useQueryClient()
     const goBack = useAppGoBack()
@@ -411,6 +413,7 @@ export default function FilesPage() {
                     <button
                         type="button"
                         onClick={goBack}
+                        aria-label={t('file.page.goBack')}
                         className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--app-hint)] transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]"
                     >
                         <BackIcon />
@@ -622,6 +625,7 @@ export default function FilesPage() {
                     const newPath = dir ? `${dir}/${newName}` : newName
                     const res = await api.renameSessionFile(sessionId, renameDialog.path, newPath)
                     if (!res.success) throw new Error(res.error || t('file.rename.failed'))
+                    addToast({ title: t('file.rename.success'), body: newPath })
                     refreshDirectory()
                 }}
             />
@@ -643,6 +647,7 @@ export default function FilesPage() {
                         if (!res.success) {
                             throw new Error(res.error || t('file.delete.failed'))
                         }
+                        addToast({ title: t('file.delete.success'), body: deleteDialog.path })
                         refreshDirectory()
                     } finally {
                         setDeleting(false)
@@ -662,6 +667,7 @@ export default function FilesPage() {
                         ? await api.moveSessionFile(sessionId, moveDialog.path, destPath)
                         : await api.copySessionFile(sessionId, moveDialog.path, destPath)
                     if (!res.success) throw new Error(res.error || t('file.move.failed'))
+                    addToast({ title: moveDialog.mode === 'move' ? t('file.move.success') : t('file.copy.success'), body: destPath })
                     refreshDirectory()
                 }}
             />
@@ -677,6 +683,7 @@ export default function FilesPage() {
                     const fullPath = newFileDialog.basePath ? `${newFileDialog.basePath}/${name}` : name
                     const res = await api.writeSessionFile(sessionId, fullPath, '', undefined, true)
                     if (!res.success) throw new Error(res.error || t('file.newFile.failed'))
+                    addToast({ title: t('file.newFile.success'), body: fullPath })
                     refreshDirectory()
                     handleOpenFile(fullPath)
                 }}
@@ -693,6 +700,7 @@ export default function FilesPage() {
                     const fullPath = newFolderDialog.basePath ? `${newFolderDialog.basePath}/${name}` : name
                     const res = await api.createDirectory(sessionId, fullPath, true)
                     if (!res.success) throw new Error(res.error || t('file.newFolder.failed'))
+                    addToast({ title: t('file.newFolder.success'), body: fullPath })
                     refreshDirectory()
                 }}
             />

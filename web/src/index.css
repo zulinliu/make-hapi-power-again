@@ -228,6 +228,7 @@ body {
     touch-action: pan-x pan-y;
     overscroll-behavior: none;
     -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
 }
 
 html[data-telegram-app="true"],
@@ -254,8 +255,14 @@ body {
 .app-scroll-y {
     overflow-y: auto;
     overscroll-behavior-y: contain;
+    overscroll-behavior-x: contain;
     -webkit-overflow-scrolling: touch;
     touch-action: pan-y;
+}
+.app-scroll-y::after {
+    content: '';
+    display: block;
+    height: env(safe-area-inset-bottom, 0px);
 }
 
 @media (hover: hover) and (pointer: fine) {

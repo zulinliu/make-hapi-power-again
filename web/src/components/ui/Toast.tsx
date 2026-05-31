@@ -34,7 +34,7 @@ export function Toast({ title, body, onClose, className, variant, ...props }: To
             <div className="flex items-start gap-3 p-3">
                 <div className="min-w-0 flex-1">
                     <div className="text-sm font-semibold leading-5">{title}</div>
-                    <div className="mt-1 text-xs text-[var(--app-hint)]">{body}</div>
+                    <div className="mt-1 text-xs text-[var(--app-fg)] opacity-70">{body}</div>
                 </div>
                 {onClose ? (
                     <button
