@@ -11,6 +11,7 @@ import { randomUUID } from 'node:crypto'
 import type { Store } from '../../store'
 import type { WebAppEnv } from '../middleware/auth'
 import { decryptAES256GCM, encryptAES256GCM, getEncryptionKey } from '../../utils/crypto'
+import { ModelDiscoveryService } from '../../services/modelDiscovery'
 
 function isValidBaseUrl(url: string): boolean {
     try {
@@ -28,6 +29,7 @@ function isValidBaseUrl(url: string): boolean {
 
 export function createProviderRoutes(store: Store): Hono<WebAppEnv> {
     const app = new Hono<WebAppEnv>()
+    const discoveryService = new ModelDiscoveryService()
 
     app.get('/providers', (c) => {
         const providers = store.providers.getAllWithAssignments()
@@ -144,6 +146,16 @@ export function createProviderRoutes(store: Store): Hono<WebAppEnv> {
         const flavor = c.req.param('flavor')
         store.providers.unassign(id, flavor)
         return c.json({ ok: true })
+    })
+
+    app.post('/providers/:id/discover-models', async (c) => {
+        const id = c.req.param('id')
+        const provider = store.providers.getById(id)
+        if (!provider) {
+            return c.json({ error: 'Provider not found' }, 404)
+        }
+        const result = await discoveryService.discoverModels(provider.baseUrl, provider.apiKeyEncrypted)
+        return c.json(result)
     })
 
     app.get('/providers/:id/api-key', (c) => {
