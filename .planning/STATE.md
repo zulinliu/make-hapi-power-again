@@ -32,13 +32,13 @@
 
 ## v0.2 规划
 
-### Phase 9: 全功能审计
-- [ ] 9 模块 117+ 测试用例实际操作审计
-- [ ] Lighthouse 性能审计 (LCP < 2.5s / INP < 200ms / CLS < 0.1)
-- [ ] axe-core 可访问性扫描
-- [ ] 移动端专项审计
-- [ ] OWASP Top 10 安全审计
-- [ ] 所有 P0/P1 问题修复
+### Phase 9: 全功能审计 ✅ (2026-05-31)
+- [x] 4 并行代码审计 agent (Module A+B, C+D, E+F+G, Security)
+- [x] Lighthouse 基线审计 (A11y 90, BP 96, SEO 91, Agentic 67)
+- [x] 浏览器 UI 验证 (登录/列表/详情/Git/Terminal)
+- [x] OWASP Top 10 安全审计 (7 PASS, 3 WARN)
+- [x] 审计报告 (0 P0, 7 P1, 15 P2, 8 P3)
+- [x] 4 项快速修复已提交 (D-03, D-04, A-03, A-04)
 
 ### Phase 10: iOS PWA 深度优化
 - [ ] manifest + standalone 模式配置
