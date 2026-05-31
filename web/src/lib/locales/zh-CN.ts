@@ -374,9 +374,14 @@ export default {
   'toast.task.failed': '任务失败',
 
   // Install prompt
-  'install.title': '安装 HAPI',
-  'install.description': '将 HAPI 添加到主屏幕以便快速访问。',
+  'install.title': '安装 Hapi Power',
+  'install.description': '将 Hapi Power 添加到主屏幕以便快速访问。',
   'install.button': '安装',
+  'install.step1': '点击底部的 分享 按钮',
+  'install.step2': '向下滑动，点击「添加到主屏幕」',
+  'install.step3': '点击右上角的「添加」',
+  'install.dont_show': '不再提示',
+  'install.later': '稍后提醒',
 
   // Language switcher
   'language.title': '语言',
