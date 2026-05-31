@@ -5,15 +5,15 @@
 参见: .planning/PROJECT.md (更新于 2026-05-30)
 
 **核心价值:** 让 AI 编码代理拥有完整的开发者环境 -- 代码编辑、终端操作、版本控制、插件扩展，全部在浏览器中完成。
-**当前状态:** v0.1 已发布，v0.2 规划中
+**当前状态:** v0.2 已发布，v0.3 开发中
 
 ## 当前状态
 
-- **版本**: v0.2 已发布 (2026-05-31)
-- **分支**: feat/v2 (from main)
+- **版本**: v0.3 开发中 (品牌独立)
+- **分支**: feat/v3 (from feat/v2)
 - **远程仓库**: https://github.com/zulinliu/make-hapi-power-again.git
-- **v0.2 主题**: 全功能审计调优 + iOS PWA 深度优化 + 移动端体验 + i18n 中英双语
-- **代码库**: v0.2 已发布 (tag v0.2.0)
+- **v0.3 主题**: 品牌独立 — 从 hapi 上游完全独立，建立 Hapi Power 自主品牌
+- **v0.3 需求**: .planning/REQUIREMENTS-v0.3.md
 
 ## v0.1 已完成
 
@@ -88,4 +88,38 @@
 4. **审计工作量**: 9 模块 ~33 小时预估
 
 ---
-*状态更新: 2026-05-31 (v0.2.0 已发布)*
+
+## v0.3 规划 (品牌独立)
+
+### Phase 14: 核心基础设施改名 (待执行)
+- [ ] shared/ 包名 @hapi/protocol → @hapipower/protocol
+- [ ] 所有 import 路径 @hapi/ → @hapipower/
+- [ ] 环境变量全量改名 HAPI_* → HAPI_POWER_*
+- [ ] 数据目录 ~/.hapi → ~/.hapi-power
+
+### Phase 15: CLI + Hub 后端改名 (待执行)
+- [ ] CLI 二进制 hapi → hapi-power
+- [ ] Hub 包名 + 配置属性名更新
+- [ ] 后端字符串引用全量替换
+- [ ] 数据库文件名 hapi.db → hapi-power.db
+
+### Phase 16: 前端 + PWA 品牌升级 (待执行)
+- [ ] PWA manifest name → Hapi Power
+- [ ] HTML title/meta 更新
+- [ ] i18n 翻译键 HAPI → Hapi Power
+- [ ] localStorage keys 迁移
+- [ ] UI 文本品牌展示更新
+
+### Phase 17: Website + 文档 + CI 全量升级 (待执行)
+- [ ] website/ 目录全量品牌升级
+- [ ] README + 文档更新
+- [ ] GitHub Actions 更新
+- [ ] GitHub Issue 模板更新
+
+### Phase 18: 验证 + 发布 (待执行)
+- [ ] 全量构建 + typecheck + 测试
+- [ ] grep 零残留扫描确认
+- [ ] v0.3 tag + GitHub Release
+
+---
+*状态更新: 2026-05-31 (v0.3 规划完成)*
