@@ -13,7 +13,7 @@ interface StatusData {
   files: GitFile[]
 }
 
-export function GitStatusPanel({ sessionId }: { sessionId: string }) {
+export function GitStatusPanel({ sessionId, onStatusLoaded }: { sessionId: string; onStatusLoaded?: (branch: string) => void }) {
   const { api } = useAppContext()
   const [status, setStatus] = useState<StatusData | null>(null)
   const [loading, setLoading] = useState(false)
@@ -26,7 +26,9 @@ export function GitStatusPanel({ sessionId }: { sessionId: string }) {
     try {
       const res = await api.getGitStatus(sessionId)
       if (res.success && res.stdout) {
-        setStatus(parseGitStatus(res.stdout))
+        const parsed = parseGitStatus(res.stdout)
+        setStatus(parsed)
+        onStatusLoaded?.(parsed.branch)
       } else {
         setError(res.error || 'Git status failed')
       }
@@ -35,7 +37,7 @@ export function GitStatusPanel({ sessionId }: { sessionId: string }) {
     } finally {
       setLoading(false)
     }
-  }, [api, sessionId])
+  }, [api, sessionId, onStatusLoaded])
 
   useEffect(() => { refresh() }, [refresh])
 

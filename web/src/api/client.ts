@@ -274,6 +274,14 @@ export class ApiClient {
         })
     }
 
+    async mergeGitBranch(sessionId: string, name: string): Promise<GitCommandResponse> {
+        return await this.request<GitCommandResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/git-branches`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, action: 'merge' })
+        })
+    }
+
     async createGitCommit(sessionId: string, message: string, paths?: string[]): Promise<GitCommandResponse> {
         return await this.request<GitCommandResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/git-commit`, {
             method: 'POST',

@@ -214,6 +214,10 @@ export class RpcGateway {
         return await this.sessionRpc(sessionId, RPC_METHODS.GitBranchDelete, options) as RpcCommandResponse
     }
 
+    async mergeGitBranch(sessionId: string, options: { cwd?: string; name: string }): Promise<RpcCommandResponse> {
+        return await this.sessionRpc(sessionId, RPC_METHODS.GitBranchMerge, options, 120_000) as RpcCommandResponse
+    }
+
     async createGitCommit(sessionId: string, options: { cwd?: string; message: string; paths?: string[] }): Promise<RpcCommandResponse> {
         return await this.sessionRpc(sessionId, RPC_METHODS.GitCommit, options) as RpcCommandResponse
     }

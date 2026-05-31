@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useParams, useNavigate } from '@tanstack/react-router'
 import { useAppContext } from '@/lib/app-context'
 import { GitStatusPanel } from '@/components/git/GitStatusPanel'
@@ -6,6 +6,8 @@ import { GitHistory } from '@/components/git/GitHistory'
 import { GitBranchManager } from '@/components/git/GitBranchManager'
 import { GitCloneDialog } from '@/components/git/GitCloneDialog'
 import { GitRemoteManager } from '@/components/git/GitRemoteManager'
+import { GitPushDialog } from '@/components/git/GitPushDialog'
+import { GitPullDialog } from '@/components/git/GitPullDialog'
 import { LoadingState } from '@/components/LoadingState'
 import { useSession } from '@/hooks/queries/useSession'
 
@@ -18,8 +20,20 @@ export default function GitPage() {
   const { session, isLoading } = useSession(api, sessionId)
   const [activeTab, setActiveTab] = useState<Tab>('status')
   const [cloneOpen, setCloneOpen] = useState(false)
-  const [pushPullLoading, setPushPullLoading] = useState(false)
+  const [pushOpen, setPushOpen] = useState(false)
+  const [pullOpen, setPullOpen] = useState(false)
   const [pushPullError, setPushPullError] = useState('')
+
+  const [currentBranch, setCurrentBranch] = useState('')
+  const [remotes, setRemotes] = useState<{ name: string; url: string }[]>([])
+
+  const handleStatusLoaded = useCallback((branch: string) => {
+    setCurrentBranch(branch)
+  }, [])
+
+  const handleRemotesLoaded = useCallback((remoteList: { name: string; url: string }[]) => {
+    setRemotes(remoteList)
+  }, [])
 
   if (isLoading) return <LoadingState label="Loading..." />
   if (!session) {
@@ -38,36 +52,6 @@ export default function GitPage() {
     { id: 'remotes', label: 'Remotes' },
   ]
 
-  async function handlePull() {
-    setPushPullLoading(true)
-    setPushPullError('')
-    try {
-      const result = await api.gitPull(sessionId, {})
-      if (!result.success) {
-        setPushPullError(result.stderr ?? result.error ?? 'Pull failed')
-      }
-    } catch (err) {
-      setPushPullError(err instanceof Error ? err.message : 'Pull failed')
-    } finally {
-      setPushPullLoading(false)
-    }
-  }
-
-  async function handlePush() {
-    setPushPullLoading(true)
-    setPushPullError('')
-    try {
-      const result = await api.gitPush(sessionId, {})
-      if (!result.success) {
-        setPushPullError(result.stderr ?? result.error ?? 'Push failed')
-      }
-    } catch (err) {
-      setPushPullError(err instanceof Error ? err.message : 'Push failed')
-    } finally {
-      setPushPullLoading(false)
-    }
-  }
-
   return (
     <div className="h-full flex flex-col" style={{ background: 'var(--hp-surface-0)' }}>
       <div className="flex items-center gap-3 px-4 h-12 border-b shrink-0" style={{ borderColor: 'var(--hp-border)' }}>
@@ -78,16 +62,14 @@ export default function GitPage() {
 
         <div className="ml-auto flex items-center gap-1">
           <button
-            onClick={handlePull}
-            disabled={pushPullLoading}
+            onClick={() => { setPushPullError(''); setPullOpen(true) }}
             className="px-2 py-1 text-xs rounded transition-colors hover:bg-[var(--hp-surface-1)]"
             style={{ color: 'var(--hp-text-tertiary)' }}
           >
             Pull
           </button>
           <button
-            onClick={handlePush}
-            disabled={pushPullLoading}
+            onClick={() => { setPushPullError(''); setPushOpen(true) }}
             className="px-2 py-1 text-xs rounded transition-colors hover:bg-[var(--hp-surface-1)]"
             style={{ color: 'var(--hp-text-tertiary)' }}
           >
@@ -127,16 +109,32 @@ export default function GitPage() {
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        {activeTab === 'status' && <GitStatusPanel sessionId={sessionId} />}
+        {activeTab === 'status' && <GitStatusPanel sessionId={sessionId} onStatusLoaded={handleStatusLoaded} />}
         {activeTab === 'history' && <GitHistory sessionId={sessionId} />}
         {activeTab === 'branches' && <GitBranchManager sessionId={sessionId} />}
-        {activeTab === 'remotes' && <GitRemoteManager sessionId={sessionId} />}
+        {activeTab === 'remotes' && <GitRemoteManager sessionId={sessionId} onRemotesLoaded={handleRemotesLoaded} />}
       </div>
 
       <GitCloneDialog
         isOpen={cloneOpen}
         onClose={() => setCloneOpen(false)}
         sessionId={sessionId}
+      />
+      <GitPushDialog
+        isOpen={pushOpen}
+        onClose={() => setPushOpen(false)}
+        sessionId={sessionId}
+        currentBranch={currentBranch}
+        remotes={remotes}
+        onPushComplete={() => setActiveTab('status')}
+      />
+      <GitPullDialog
+        isOpen={pullOpen}
+        onClose={() => setPullOpen(false)}
+        sessionId={sessionId}
+        currentBranch={currentBranch}
+        remotes={remotes}
+        onPullComplete={() => setActiveTab('status')}
       />
     </div>
   )

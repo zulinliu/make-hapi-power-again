@@ -77,6 +77,21 @@ export function GitBranchManager({ sessionId }: { sessionId: string }) {
     }
   }
 
+  const handleMerge = async (name: string) => {
+    if (!api) return
+    setError(null)
+    try {
+      const res = await api.mergeGitBranch(sessionId, name)
+      if (res.success) {
+        loadBranches()
+      } else {
+        setError(res.stderr || res.error || 'Merge failed (possible conflicts)')
+      }
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : String(e))
+    }
+  }
+
   return (
     <div className="p-4 space-y-3">
       <div className="flex gap-2">
@@ -124,6 +139,10 @@ export function GitBranchManager({ sessionId }: { sessionId: string }) {
               </span>
               {!branch.isCurrent && !branch.isRemote && (
                 <>
+                  <button onClick={() => handleMerge(branch.name)} className="text-xs px-2 py-0.5 rounded"
+                    style={{ color: 'var(--hp-text-tertiary)' }} title="Merge into current">
+                    ⊕
+                  </button>
                   <button onClick={() => handleSwitch(branch.name)} className="text-xs px-2 py-0.5 rounded"
                     style={{ color: 'var(--hp-text-tertiary)' }} title="Switch">
                     ⇄
