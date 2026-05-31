@@ -44,7 +44,7 @@ export function GitHistory({ sessionId }: { sessionId: string }) {
   return (
     <div className="divide-y" style={{ borderColor: 'var(--hp-border)' }}>
       {commits.map((commit) => (
-        <div key={commit.hash} className="flex items-start gap-3 px-4 py-2 hover:opacity-80 cursor-pointer">
+        <div key={commit.hash} className="flex items-start gap-3 px-4 py-2">
           <code className="text-xs font-mono shrink-0 mt-0.5" style={{ color: 'var(--hp-primary)' }}>
             {commit.hash.slice(0, 7)}
           </code>
