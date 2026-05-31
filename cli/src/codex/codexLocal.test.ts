@@ -62,8 +62,8 @@ describe('codexLocal', () => {
             path: 'C:\\workspace\\project',
             onSessionFound: vi.fn(),
             mcpServers: {
-                hapi: {
-                    command: 'C:\\Users\\test\\AppData\\Local\\hapi.exe',
+                hapi-power: {
+                    command: 'C:\\Users\\test\\AppData\\Local\\hapi-power.exe',
                     args: ['mcp', '--url', 'http://127.0.0.1:63995/']
                 }
             },
@@ -90,7 +90,7 @@ describe('codexLocal', () => {
         const hookArg = args.find((arg) => arg.startsWith('hooks.SessionStart='));
         expect(hookArg).toBeDefined();
         expect(hookArg).toContain('{ hooks = [{ type = "command", command = "');
-        expect(args).toContain("mcp_servers.hapi.args=['mcp','--url','http://127.0.0.1:63995/']");
+        expect(args).toContain("mcp_servers.hapi-power.args=['mcp','--url','http://127.0.0.1:63995/']");
     });
 
     it('passes reasoning effort through Codex config instead of an unsupported CLI flag', async () => {

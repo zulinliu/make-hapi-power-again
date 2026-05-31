@@ -1,16 +1,16 @@
 /**
  * Shared voice assistant configuration for ElevenLabs ConvAI.
  *
- * This module provides the unified configuration for the Hapi Voice Assistant,
+ * This module provides the unified configuration for the Hapi Power Voice Assistant,
  * ensuring consistency between server-side auto-creation and client-side usage.
  */
 
 export const ELEVENLABS_API_BASE = 'https://api.elevenlabs.io/v1'
-export const VOICE_AGENT_NAME = 'Hapi Voice Assistant'
+export const VOICE_AGENT_NAME = 'Hapi Power Voice Assistant'
 
 export const VOICE_SYSTEM_PROMPT = `# Identity
 
-You are Hapi Voice Assistant. You bridge voice communication between users and their AI coding agents in the Hapi ecosystem.
+You are Hapi Power Voice Assistant. You bridge voice communication between users and their AI coding agents in the Hapi ecosystem.
 
 You are friendly, proactive, and highly intelligent with a world-class engineering background. Your approach is warm, witty, and relaxed, balancing professionalism with an approachable vibe.
 
@@ -217,7 +217,7 @@ export interface VoiceAgentConfig {
 }
 
 /**
- * Build the agent configuration for Hapi Voice Assistant.
+ * Build the agent configuration for Hapi Power Voice Assistant.
  * Used by both server-side auto-creation and client-side configuration.
  */
 export function buildVoiceAgentConfig(): VoiceAgentConfig {

@@ -54,7 +54,7 @@ describe('ApiMachineClient listOpencodeModelsForCwd handler', () => {
     beforeEach(() => {
         ioMock.mockReset()
         listOpencodeModelsForCwdMock.mockReset()
-        workspaceRoot = mkdtempSync(join(tmpdir(), 'hapi-machine-ws-'))
+        workspaceRoot = mkdtempSync(join(tmpdir(), 'hapi-power-machine-ws-'))
     })
 
     afterEach(() => {
@@ -65,7 +65,7 @@ describe('ApiMachineClient listOpencodeModelsForCwd handler', () => {
         const machine = makeMachine('machine-1')
         const client = new ApiMachineClient('cli-token', machine, [workspaceRoot])
 
-        const outsideCwd = mkdtempSync(join(tmpdir(), 'hapi-outside-'))
+        const outsideCwd = mkdtempSync(join(tmpdir(), 'hapi-power-outside-'))
         try {
             const result = await callListOpencodeModels(client, machine.id, outsideCwd)
             expect(result).toEqual({ success: false, error: 'Path is outside workspace roots' })
@@ -119,7 +119,7 @@ describe('ApiMachineClient listOpencodeModelsForCwd handler', () => {
 
     it('accepts cwd inside any configured workspace root', async () => {
         const machine = makeMachine('machine-4')
-        const secondWorkspaceRoot = mkdtempSync(join(tmpdir(), 'hapi-machine-ws-2-'))
+        const secondWorkspaceRoot = mkdtempSync(join(tmpdir(), 'hapi-power-machine-ws-2-'))
         const client = new ApiMachineClient('cli-token', machine, [workspaceRoot, secondWorkspaceRoot])
 
         listOpencodeModelsForCwdMock.mockResolvedValueOnce({

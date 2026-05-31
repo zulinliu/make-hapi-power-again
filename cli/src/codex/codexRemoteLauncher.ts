@@ -8,7 +8,7 @@ import { ReasoningProcessor } from './utils/reasoningProcessor';
 import { DiffProcessor } from './utils/diffProcessor';
 import { logger } from '@/ui/logger';
 import { CodexDisplay } from '@/ui/ink/CodexDisplay';
-import { buildHapiMcpBridge } from './utils/buildHapiMcpBridge';
+import { buildHapiPowerMcpBridge } from './utils/buildHapiPowerMcpBridge';
 import { emitReadyIfIdle } from './utils/emitReadyIfIdle';
 import type { CodexSession } from './session';
 import type { EnhancedMode } from './loop';
@@ -55,7 +55,7 @@ async function registerGeneratedImageFromPath(args: { id: string; path: string; 
     }
 }
 
-type HappyServer = Awaited<ReturnType<typeof buildHapiMcpBridge>>['server'];
+type HappyServer = Awaited<ReturnType<typeof buildHapiPowerMcpBridge>>['server'];
 type QueuedMessage = { message: string; mode: EnhancedMode; isolate: boolean; hash: string };
 type ChildAgentRuntime = {
     reasoningProcessor: ReasoningProcessor;
@@ -401,8 +401,8 @@ class CodexRemoteLauncher extends RemoteLauncherBase {
             return `mcp__${serverName}__${toolName}`;
         };
 
-        const isHapiChangeTitleToolName = (toolName: string | null): boolean => {
-            return toolName === 'mcp__hapi__change_title';
+        const isHapiPowerChangeTitleToolName = (toolName: string | null): boolean => {
+            return toolName === 'mcp__hapi_power__change_title';
         };
 
         const sendTitleSummary = (title: string): void => {
@@ -1607,7 +1607,7 @@ class CodexRemoteLauncher extends RemoteLauncherBase {
                     const input = invocation.arguments ?? invocation.input ?? msg.arguments ?? msg.input ?? {};
                     const inputRecord = asRecord(input);
                     const requestedTitle = inputRecord ? asString(inputRecord.title) : null;
-                    if (isHapiChangeTitleToolName(name) && requestedTitle) {
+                    if (isHapiPowerChangeTitleToolName(name) && requestedTitle) {
                         runtime.pendingTitleByCallId.set(callId, requestedTitle);
                     }
                     emitAgentRunTraceMessage(agentId, {
@@ -2365,7 +2365,7 @@ class CodexRemoteLauncher extends RemoteLauncherBase {
                     const input = invocation.arguments ?? invocation.input ?? msg.arguments ?? msg.input ?? {};
                     const inputRecord = asRecord(input);
                     const requestedTitle = inputRecord ? asString(inputRecord.title) : null;
-                    if (isHapiChangeTitleToolName(name) && requestedTitle) {
+                    if (isHapiPowerChangeTitleToolName(name) && requestedTitle) {
                         mcpTitleByCallId.set(callId, requestedTitle);
                     }
                     session.sendAgentMessage({
@@ -2534,10 +2534,10 @@ class CodexRemoteLauncher extends RemoteLauncherBase {
             failPendingAgentStartsForSpawnArgumentError(spawnAgentError);
         });
 
-        const { server: happyServer, mcpServers } = await buildHapiMcpBridge(session.client, {
+        const { server: happyServer, mcpServers } = await buildHapiPowerMcpBridge(session.client, {
             // In app-server/collab mode, child agents share this MCP bridge.
             // If the MCP handler writes the title directly, child title calls
-            // leak into the parent HAPI session. Defer the side effect until
+            // leak into the parent HapiPower session. Defer the side effect until
             // parent-thread mcp_tool_call_end reaches this launcher; child
             // events are filtered above by thread id.
             emitTitleSummary: false
@@ -2568,7 +2568,7 @@ class CodexRemoteLauncher extends RemoteLauncherBase {
         await appServerClient.connect();
         await appServerClient.initialize({
             clientInfo: {
-                name: 'hapi-codex-client',
+                name: 'hapi-power-codex-client',
                 version: '1.0.0'
             },
             capabilities: {

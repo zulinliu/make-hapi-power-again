@@ -14,7 +14,7 @@ import { join } from 'node:path'
 import { MessageService } from './messageService'
 import { Store } from '../store'
 import type { Server } from 'socket.io'
-import type { SyncEvent } from '@hapi/protocol/types'
+import type { SyncEvent } from '@hapipower/protocol/types'
 
 // ---------------------------------------------------------------------------
 // Test helpers
@@ -966,7 +966,7 @@ describe('MessageService.releaseMatureScheduledMessages', () => {
     // #10: true cold-start restart simulation — new Store + new MessageService
     // share the same SQLite file, replicating what hub restart actually does.
     it('#10 hub cold-start restart: mature message is re-emitted by new Store+Service (true restart sim)', () => {
-        const dir = mkdtempSync(join(tmpdir(), 'hapi-restart-test-'))
+        const dir = mkdtempSync(join(tmpdir(), 'hapi-power-restart-test-'))
         const dbPath = join(dir, 'test.db')
         let store1: Store | undefined
         let store2: Store | undefined
@@ -1018,7 +1018,7 @@ describe('MessageService.releaseMatureScheduledMessages', () => {
 })
 
 // ---------------------------------------------------------------------------
-// HAPI Bot R4: session-end sweep must not stamp mature scheduled rows
+// HapiPower Bot R4: session-end sweep must not stamp mature scheduled rows
 // ---------------------------------------------------------------------------
 
 describe('MessageService.sweepImmediateQueuedOnSessionEnd — scheduled rows are preserved', () => {

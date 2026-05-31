@@ -1,6 +1,6 @@
 import axios from 'axios'
 import type { AgentState, CreateMachineResponse, CreateSessionResponse, RunnerState, Machine, MachineMetadata, Metadata, Session } from '@/api/types'
-import type { LocalResumeTarget, ResumableSession } from '@hapi/protocol'
+import type { LocalResumeTarget, ResumableSession } from '@hapipower/protocol'
 import {
     AgentStateSchema,
     CreateMachineResponseSchema,

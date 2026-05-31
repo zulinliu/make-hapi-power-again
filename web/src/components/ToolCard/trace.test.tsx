@@ -32,9 +32,9 @@ vi.mock('@/components/CodeBlock', () => ({
     CodeBlock: ({ code }: { code: string }) => <pre data-testid="code-block">{code}</pre>,
 }))
 
-// safeStringify from @hapi/protocol
-vi.mock('@hapi/protocol', async (importOriginal) => {
-    const actual = await importOriginal<typeof import('@hapi/protocol')>()
+// safeStringify from @hapipower/protocol
+vi.mock('@hapipower/protocol', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('@hapipower/protocol')>()
     return {
         ...actual,
         safeStringify: (v: unknown) => JSON.stringify(v),

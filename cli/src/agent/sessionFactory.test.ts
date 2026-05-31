@@ -35,8 +35,8 @@ vi.mock('@/persistence', () => ({
 
 vi.mock('@/configuration', () => ({
     configuration: {
-        happyHomeDir: '/tmp/.hapi',
-        logsDir: '/tmp/.hapi/logs',
+        hapiPowerHomeDir: '/tmp/.hapi',
+        logsDir: '/tmp/.hapi-power/logs',
         isRunnerProcess: false
     }
 }))
@@ -51,7 +51,7 @@ import { bootstrapExistingSession, buildSessionMetadata } from './sessionFactory
 
 function createSession(): Session {
     return {
-        id: 'hapi-session-1',
+        id: 'hapi-power-session-1',
         namespace: 'default',
         seq: 1,
         createdAt: 1,
@@ -99,17 +99,17 @@ describe('bootstrapExistingSession', () => {
         readSettingsMock.mockResolvedValue({ machineId: 'machine-1' })
 
         const result = await bootstrapExistingSession({
-            sessionId: 'hapi-session-1',
+            sessionId: 'hapi-power-session-1',
             flavor: 'codex',
             workingDirectory: '/tmp/project'
         })
 
-        expect(result.sessionInfo.id).toBe('hapi-session-1')
+        expect(result.sessionInfo.id).toBe('hapi-power-session-1')
         expect(result.workingDirectory).toBe('/tmp/project')
         expect(sessionSyncClientMock).toHaveBeenCalledWith(session)
         expect(sessionClient.updateMetadata).toHaveBeenCalledOnce()
         expect(notifyRunnerSessionStartedMock).toHaveBeenCalledWith(
-            'hapi-session-1',
+            'hapi-power-session-1',
             expect.objectContaining({
                 path: '/tmp/project',
                 flavor: 'codex',
@@ -148,7 +148,7 @@ describe('bootstrapExistingSession', () => {
         readSettingsMock.mockResolvedValue({ machineId: 'machine-1' })
 
         const result = await bootstrapExistingSession({
-            sessionId: 'hapi-session-1',
+            sessionId: 'hapi-power-session-1',
             flavor: 'codex',
             workingDirectory: '/tmp/project'
         })
@@ -172,7 +172,7 @@ describe('bootstrapExistingSession', () => {
             codexSessionId: 'codex-thread-1'
         }))
         expect(notifyRunnerSessionStartedMock).toHaveBeenCalledWith(
-            'hapi-session-1',
+            'hapi-power-session-1',
             expect.objectContaining({
                 codexSessionId: 'codex-thread-1'
             })

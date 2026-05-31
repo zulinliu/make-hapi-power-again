@@ -50,7 +50,7 @@ describe('AcpSdkBackend', () => {
             sessionId: 'session-1',
             toolCall: {
                 toolCallId: 'tool-approve',
-                title: 'hapi_change_title',
+                title: 'hapi_power_change_title',
                 rawInput: { title: 'Rename chat' }
             },
             options: [

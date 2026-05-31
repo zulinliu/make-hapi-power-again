@@ -73,7 +73,7 @@ export function generateHookSettingsFile(
     token: string,
     options: HookSettingsOptions
 ): string {
-    const hooksDir = join(configuration.happyHomeDir, 'tmp', 'hooks');
+    const hooksDir = join(configuration.hapiPowerHomeDir, 'tmp', 'hooks');
     mkdirSync(hooksDir, { recursive: true });
 
     const filename = `${options.filenamePrefix}-${process.pid}.json`;

@@ -10,7 +10,7 @@ describe('useTheme', () => {
     })
 
     it('applies the stored dark appearance to the document and browser theme color', () => {
-        localStorage.setItem('hapi-appearance', 'dark')
+        localStorage.setItem('hapi-power-appearance', 'dark')
 
         initializeTheme()
 

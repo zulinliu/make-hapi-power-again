@@ -2,7 +2,7 @@ import chalk from 'chalk'
 import React from 'react'
 import { render } from 'ink'
 import { existsSync } from 'node:fs'
-import type { LocalResumeTarget, ResumableSession } from '@hapi/protocol'
+import type { LocalResumeTarget, ResumableSession } from '@hapipower/protocol'
 import type {
     ClaudePermissionMode,
     CodexPermissionMode,
@@ -10,7 +10,7 @@ import type {
     GeminiPermissionMode,
     KimiPermissionMode,
     OpencodePermissionMode
-} from '@hapi/protocol/types'
+} from '@hapipower/protocol/types'
 import { ApiClient } from '@/api/api'
 import type { ReasoningEffort } from '@/codex/appServerTypes'
 import { authAndSetupMachineIfNeeded } from '@/ui/auth'

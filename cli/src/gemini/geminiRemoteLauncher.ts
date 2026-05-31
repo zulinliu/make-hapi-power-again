@@ -1,6 +1,6 @@
 import React from 'react';
 import { logger } from '@/ui/logger';
-import { buildHapiMcpBridge } from '@/codex/utils/buildHapiMcpBridge';
+import { buildHapiPowerMcpBridge } from '@/codex/utils/buildHapiPowerMcpBridge';
 import { convertAgentMessage } from '@/agent/messageConverter';
 import type { AgentMessage, McpServerStdio, PromptContent } from '@/agent/types';
 import { RemoteLauncherBase, type RemoteLauncherDisplayContext, type RemoteLauncherExitReason } from '@/modules/common/remote/RemoteLauncherBase';
@@ -46,7 +46,7 @@ class GeminiRemoteLauncher extends RemoteLauncherBase {
         const session = this.session;
         const messageBuffer = this.messageBuffer;
 
-        const { server: happyServer, mcpServers } = await buildHapiMcpBridge(session.client);
+        const { server: happyServer, mcpServers } = await buildHapiPowerMcpBridge(session.client);
         this.happyServer = happyServer;
 
         const runtimeConfig = resolveGeminiRuntimeConfig({ model: this.model });

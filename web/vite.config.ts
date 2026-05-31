@@ -78,14 +78,22 @@ export default defineConfig({
         react(),
         VitePWA({
             registerType: 'autoUpdate',
-            includeAssets: ['favicon.ico', 'apple-touch-icon-180x180.png', 'mask-icon.svg'],
+            includeAssets: [
+                'favicon.ico',
+                'apple-touch-icon-120x120.png',
+                'apple-touch-icon-152x152.png',
+                'apple-touch-icon-167x167.png',
+                'apple-touch-icon-180x180.png',
+                'mask-icon.svg',
+            ],
             strategies: 'injectManifest',
             srcDir: 'src',
             filename: 'sw.ts',
             manifest: {
-                name: 'HAPI',
-                short_name: 'HAPI',
+                name: 'Hapi Power',
+                short_name: 'Hapi Power',
                 description: 'AI-powered development assistant',
+                categories: ['developer tools', 'productivity'],
                 theme_color: '#0A0A0B',
                 background_color: '#0A0A0B',
                 display: 'standalone',
@@ -97,25 +105,45 @@ export default defineConfig({
                         src: 'pwa-64x64.png',
                         sizes: '64x64',
                         type: 'image/png',
-                        purpose: 'any'
+                        purpose: 'any',
                     },
                     {
                         src: 'pwa-192x192.png',
                         sizes: '192x192',
                         type: 'image/png',
-                        purpose: 'any'
+                        purpose: 'any',
+                    },
+                    {
+                        src: 'pwa-maskable-192x192.png',
+                        sizes: '192x192',
+                        type: 'image/png',
+                        purpose: 'maskable',
                     },
                     {
                         src: 'pwa-512x512.png',
                         sizes: '512x512',
                         type: 'image/png',
-                        purpose: 'any'
-                    }
-                ]
+                        purpose: 'any',
+                    },
+                    {
+                        src: 'pwa-maskable-512x512.png',
+                        sizes: '512x512',
+                        type: 'image/png',
+                        purpose: 'maskable',
+                    },
+                ],
+                shortcuts: [
+                    {
+                        name: 'Sessions',
+                        short_name: 'Sessions',
+                        url: `${base}sessions`,
+                        icons: [{ src: 'pwa-192x192.png', sizes: '192x192' }],
+                    },
+                ],
             },
             injectManifest: {
-                globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
-                maximumFileSizeToCacheInBytes: 4 * 1024 * 1024
+                globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}', 'offline.html'],
+                maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
             },
             devOptions: {
                 enabled: true,

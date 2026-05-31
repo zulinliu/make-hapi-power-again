@@ -168,7 +168,7 @@ export function LoginPrompt(props: LoginPromptProps) {
                 {/* Help links */}
                 {!isBindMode && (
                     <div className="flex items-center justify-between text-xs text-[var(--app-hint)]">
-                        <a href="https://hapi.run/docs" target="_blank" rel="noopener noreferrer" className="underline hover:text-[var(--app-fg)]">
+                        <a href="https://YOUR_DOMAIN/docs" target="_blank" rel="noopener noreferrer" className="underline hover:text-[var(--app-fg)]">
                             {t('login.help')}
                         </a>
                         <Dialog open={isServerDialogOpen} onOpenChange={handleServerDialogOpenChange}>

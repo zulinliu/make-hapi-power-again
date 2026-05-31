@@ -62,7 +62,7 @@ export default function ExtensionsPage() {
     const [installing, setInstalling] = useState<string | null>(null)
     const [error, setError] = useState<string | null>(null)
 
-    const { session } = useSession(api, sessionId)
+    useSession(api, sessionId)
 
     // Plugin list
     const { data: pluginData, isLoading: pluginsLoading } = useQuery({
@@ -120,6 +120,7 @@ export default function ExtensionsPage() {
         } catch (e) {
             setError(e instanceof Error ? e.message : 'Uninstall failed')
         }
+        setInstalling(null)
     }, [api, sessionId, queryClient])
 
     const plugins = (pluginData as { success: boolean; plugins?: PluginInfo[] } | null)?.plugins ?? []

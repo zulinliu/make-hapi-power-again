@@ -1,4 +1,4 @@
-import { TerminalOpenPayloadSchema } from '@hapi/protocol'
+import { TerminalOpenPayloadSchema } from '@hapipower/protocol'
 import { z } from 'zod'
 import type { TerminalRegistry, TerminalRegistryEntry } from '../terminalRegistry'
 import type { SocketServer, SocketWithData } from '../socketTypes'

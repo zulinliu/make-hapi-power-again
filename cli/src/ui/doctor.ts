@@ -24,8 +24,8 @@ import packageJson from '../../package.json'
 export function getEnvironmentInfo(): Record<string, any> {
     return {
         PWD: process.env.PWD,
-        HAPI_HOME: process.env.HAPI_HOME,
-        HAPI_API_URL: process.env.HAPI_API_URL,
+        HAPI_POWER_HOME: process.env.HAPI_POWER_HOME,
+        HAPI_POWER_API_URL: process.env.HAPI_POWER_API_URL,
         HAPI_PROJECT_ROOT: process.env.HAPI_PROJECT_ROOT,
         CLI_API_TOKEN_SET: Boolean(process.env.CLI_API_TOKEN),
         DANGEROUSLY_LOG_TO_SERVER_FOR_AI_AUTO_DEBUGGING: process.env.DANGEROUSLY_LOG_TO_SERVER_FOR_AI_AUTO_DEBUGGING,
@@ -33,7 +33,7 @@ export function getEnvironmentInfo(): Record<string, any> {
         DEBUG: process.env.DEBUG,
         workingDirectory: getInvokedCwd(),
         processArgv: process.argv,
-        happyDir: configuration?.happyHomeDir,
+        happyDir: configuration?.hapiPowerHomeDir,
         apiUrl: configuration?.apiUrl,
         logsDir: configuration?.logsDir,
         processPid: process.pid,
@@ -107,15 +107,15 @@ export async function runDoctorCommand(filter?: 'all' | 'runner'): Promise<void>
 
         // Configuration
         console.log(chalk.bold('⚙️  Configuration'));
-        console.log(`hapi Home: ${chalk.blue(configuration.happyHomeDir)}`);
+        console.log(`hapi Home: ${chalk.blue(configuration.hapiPowerHomeDir)}`);
         console.log(`Bot URL: ${chalk.blue(configuration.apiUrl)}`);
         console.log(`Logs Dir: ${chalk.blue(configuration.logsDir)}`);
 
         // Environment
         console.log(chalk.bold('\n🌍 Environment Variables'));
         const env = getEnvironmentInfo();
-        console.log(`HAPI_HOME: ${env.HAPI_HOME ? chalk.green(env.HAPI_HOME) : chalk.gray('not set')}`);
-        console.log(`HAPI_API_URL: ${env.HAPI_API_URL ? chalk.green(env.HAPI_API_URL) : chalk.gray('not set')}`);
+        console.log(`HAPI_POWER_HOME: ${env.HAPI_POWER_HOME ? chalk.green(env.HAPI_POWER_HOME) : chalk.gray('not set')}`);
+        console.log(`HAPI_POWER_API_URL: ${env.HAPI_POWER_API_URL ? chalk.green(env.HAPI_POWER_API_URL) : chalk.gray('not set')}`);
         console.log(`CLI_API_TOKEN: ${env.CLI_API_TOKEN_SET ? chalk.green('set') : chalk.gray('not set')}`);
         console.log(`DANGEROUSLY_LOG_TO_SERVER: ${env.DANGEROUSLY_LOG_TO_SERVER_FOR_AI_AUTO_DEBUGGING ? chalk.yellow('ENABLED') : chalk.gray('not set')}`);
         console.log(`DEBUG: ${env.DEBUG ? chalk.green(env.DEBUG) : chalk.gray('not set')}`);
@@ -220,7 +220,7 @@ export async function runDoctorCommand(filter?: 'all' | 'runner'): Promise<void>
 
         if (filter === 'all' && allProcesses.length > 1) { // More than just current process
             console.log(chalk.bold('\n💡 Process Management'));
-            console.log(chalk.gray('To clean up runaway processes: hapi doctor clean'));
+            console.log(chalk.gray('To clean up runaway processes: hapi-power doctor clean'));
         }
     } catch (error) {
         console.log(chalk.red('❌ Error checking runner status'));

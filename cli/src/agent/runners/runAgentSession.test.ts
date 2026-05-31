@@ -68,7 +68,7 @@ vi.mock('@/claude/utils/startHappyServer', () => ({
 }))
 
 vi.mock('@/utils/spawnHappyCLI', () => ({
-    getHappyCliCommand: vi.fn(() => ({ command: 'hapi', args: [], env: [] }))
+    getHappyCliCommand: vi.fn(() => ({ command: 'hapi-power', args: [], env: [] }))
 }))
 
 vi.mock('@/claude/registerKillSessionHandler', () => ({

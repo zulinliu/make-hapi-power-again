@@ -1,7 +1,7 @@
 import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
 import { logger } from '@/ui/logger';
 import { killProcessByChildProcess } from '@/utils/process';
-import { GEMINI_MODEL_PRESETS } from '@hapi/protocol';
+import { GEMINI_MODEL_PRESETS } from '@hapipower/protocol';
 
 interface JsonRpcRequest {
     jsonrpc: '2.0';

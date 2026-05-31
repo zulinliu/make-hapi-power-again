@@ -1,4 +1,4 @@
-import type { CodexPermissionMode } from '@hapi/protocol/types';
+import type { CodexPermissionMode } from '@hapipower/protocol/types';
 import type { ApprovalPolicy, SandboxMode, SandboxPolicy } from '../appServerTypes';
 
 export type CodexPermissionModeConfig = {
@@ -11,7 +11,7 @@ export function resolveCodexPermissionModeConfig(mode: CodexPermissionMode): Cod
     switch (mode) {
         case 'default':
             return {
-                // Remote Codex sessions rely on HAPI's approval UI for sandbox escalation.
+                // Remote Codex sessions rely on HapiPower's approval UI for sandbox escalation.
                 // `on-request` keeps workspace-write sandboxing while still surfacing a
                 // user-approvable elevation request when the model needs it.
                 approvalPolicy: 'on-request',

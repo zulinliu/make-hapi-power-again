@@ -1,5 +1,5 @@
 import { Hono } from 'hono'
-import { MessagesQuerySchema, SendMessageRequestSchema } from '@hapi/protocol'
+import { MessagesQuerySchema, SendMessageRequestSchema } from '@hapipower/protocol'
 import type { SyncEngine } from '../../sync/syncEngine'
 import type { WebAppEnv } from '../middleware/auth'
 import { requireSessionFromParam, requireSyncEngine } from './guards'
