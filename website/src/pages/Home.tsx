@@ -50,7 +50,7 @@ export default function Home() {
                     {t('hero.startBtn')} <ArrowRight className="ml-2 h-5 w-5" />
                   </a>
                 </Button>
-                <Button variant="outline" size="lg" className="text-lg px-8 py-6 rounded-xl shadow-hard hover:translate-y-1 hover:shadow-none transition-all border-2 border-border bg-background" onClick={() => window.open('https://github.com/tiann/hapi', '_blank')}>
+                <Button variant="outline" size="lg" className="text-lg px-8 py-6 rounded-xl shadow-hard hover:translate-y-1 hover:shadow-none transition-all border-2 border-border bg-background" onClick={() => window.open('https://github.com/zulinliu/make-hapi-power-again', '_blank')}>
                   {t('hero.githubBtn')}
                 </Button>
               </div>
@@ -274,8 +274,8 @@ export default function Home() {
                   <h3 className="font-bold">{t('installation.npm.step1')}</h3>
                 </div>
                 <div className="bg-slate-950 text-slate-50 p-4 rounded-xl font-mono text-sm flex justify-between items-center border-2 border-slate-800">
-                  <code>npx @twsxtd/hapi hub --relay</code>
-                  <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white hover:bg-slate-800" onClick={() => copyToClipboard("npx @twsxtd/hapi hub --relay", "hub")}>
+                  <code>npx @hapipower/hapi-power hub --relay</code>
+                  <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white hover:bg-slate-800" onClick={() => copyToClipboard("npx @hapipower/hapi-power hub --relay", "hub")}>
                     {copied === "hub" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                   </Button>
                 </div>
@@ -287,7 +287,7 @@ export default function Home() {
                 </div>
                 <div className="bg-slate-950 text-slate-50 p-4 rounded-xl font-mono text-sm flex justify-between items-center border-2 border-slate-800">
                   <code>npx @twsxtd/hapi</code>
-                  <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white hover:bg-slate-800" onClick={() => copyToClipboard("npx @twsxtd/hapi", "session")}>
+                  <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white hover:bg-slate-800" onClick={() => copyToClipboard("npx @hapipower/hapi-power", "session")}>
                     {copied === "session" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                   </Button>
                 </div>
