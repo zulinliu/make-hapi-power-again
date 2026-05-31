@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
-import { precacheAndRoute } from 'workbox-precaching'
-import { registerRoute } from 'workbox-routing'
+import { precacheAndRoute, createHandlerBoundToURL } from 'workbox-precaching'
+import { registerRoute, NavigationRoute } from 'workbox-routing'
 import { CacheFirst, NetworkFirst } from 'workbox-strategies'
 import { ExpirationPlugin } from 'workbox-expiration'
 
@@ -22,6 +22,19 @@ type PushPayload = {
 }
 
 precacheAndRoute(self.__WB_MANIFEST)
+
+// Navigation fallback: serve index.html for SPA routes, offline.html when offline
+const navigationHandler = createHandlerBoundToURL('/index.html')
+const navigationRoute = new NavigationRoute(async (params) => {
+    try {
+        return await navigationHandler(params)
+    } catch {
+        return caches.match('/offline.html') as Promise<Response>
+    }
+}, {
+    denylist: [/^\/api\//, /^\/socket\.io/],
+})
+registerRoute(navigationRoute)
 
 registerRoute(
     ({ url }) => url.pathname === '/api/sessions',
