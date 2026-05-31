@@ -6,7 +6,7 @@ describe('parseRemoteAgentCommandOptions', () => {
     it('parses common remote agent flags', () => {
         expect(parseRemoteAgentCommandOptions([
             '--started-by', 'runner',
-            '--hapi-starting-mode', 'remote',
+            '--hapi-power-starting-mode', 'remote',
             '--permission-mode', 'yolo',
             '--resume', 'session-1',
             '--model', 'model-a'
@@ -46,9 +46,9 @@ describe('parseRemoteAgentCommandOptions', () => {
 
     it('rejects invalid constrained values', () => {
         expect(() => parseRemoteAgentCommandOptions([
-            '--hapi-starting-mode',
+            '--hapi-power-starting-mode',
             'sideways'
-        ], GEMINI_PERMISSION_MODES)).toThrow('Invalid --hapi-starting-mode')
+        ], GEMINI_PERMISSION_MODES)).toThrow('Invalid --hapi-power-starting-mode')
 
         expect(() => parseRemoteAgentCommandOptions([
             '--permission-mode',

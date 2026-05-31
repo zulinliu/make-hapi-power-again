@@ -132,8 +132,8 @@ export function spawnHappyCLI(args: string[], options: SpawnOptions = {}): Child
     directory = process.cwd()
   }
   // Note: We're executing the current runtime with the calculated entrypoint path below,
-  // bypassing the 'hapi' wrapper that would normally be found in the shell's PATH.
-  // However, we log it as 'hapi' here because other engineers are typically looking
+  // bypassing the 'hapi-power' wrapper that would normally be found in the shell's PATH.
+  // However, we log it as 'hapi-power' here because other engineers are typically looking
   // for when "hapi" was started and don't care about the underlying node process
   // details and flags we use to achieve the same result.
   const fullCommand = `hapi ${args.join(' ')}`;

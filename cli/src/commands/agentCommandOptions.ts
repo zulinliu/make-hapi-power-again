@@ -20,12 +20,12 @@ export function parseRemoteAgentCommandOptions<TPermissionMode extends Permissio
         const arg = args[i]
         if (arg === '--started-by') {
             options.startedBy = args[++i] as 'runner' | 'terminal'
-        } else if (arg === '--hapi-starting-mode') {
+        } else if (arg === '--hapi-power-starting-mode') {
             const value = args[++i]
             if (value === 'local' || value === 'remote') {
                 options.startingMode = value
             } else {
-                throw new Error('Invalid --hapi-starting-mode (expected local or remote)')
+                throw new Error('Invalid --hapi-power-starting-mode (expected local or remote)')
             }
         } else if (arg === '--permission-mode') {
             const mode = args[++i]
