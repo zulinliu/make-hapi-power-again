@@ -12,6 +12,7 @@ import { useSyncingState } from '@/hooks/useSyncingState'
 import { usePushNotifications } from '@/hooks/usePushNotifications'
 import { useViewportHeight } from '@/hooks/useViewportHeight'
 import { useVisibilityReporter } from '@/hooks/useVisibilityReporter'
+import { useAppBadge } from '@/hooks/useAppBadge'
 import { queryKeys } from '@/lib/query-keys'
 import { AppContextProvider } from '@/lib/app-context'
 import { clearMessageWindow, fetchLatestMessages } from '@/lib/message-window-store'
@@ -131,6 +132,7 @@ function AppInner() {
     const baseUrlRef = useRef(baseUrl)
     const pushPromptedRef = useRef(false)
     const { isSupported: isPushSupported, permission: pushPermission, requestPermission, subscribe } = usePushNotifications(api)
+    const { setBadge } = useAppBadge()
 
     useEffect(() => {
         if (baseUrlRef.current === baseUrl) {
@@ -295,7 +297,9 @@ function AppInner() {
             sessionId: event.data.sessionId,
             url: event.data.url
         })
-    }, [addToast, translateIncomingToast])
+        // Update app badge when notification arrives while app is in background
+        setBadge(1)
+    }, [addToast, translateIncomingToast, setBadge])
 
     const globalEventSubscription = useMemo(() => getAppGlobalSseSubscription(), [])
     const sessionEventSubscription = useMemo(
