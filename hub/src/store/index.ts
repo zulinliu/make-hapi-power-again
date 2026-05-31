@@ -5,6 +5,7 @@ import { dirname } from 'node:path'
 import { FileSnapshotStore } from './fileSnapshotStore'
 import { MachineStore } from './machineStore'
 import { MessageStore } from './messageStore'
+import { ProviderStore } from './providerStore'
 import { PushStore } from './pushStore'
 import { SessionStore } from './sessionStore'
 import { UserStore } from './userStore'
@@ -22,11 +23,12 @@ export type { CancelQueuedMessageResult, LookupQueuedMessageResult } from './mes
 export { FileSnapshotStore } from './fileSnapshotStore'
 export { MachineStore } from './machineStore'
 export { MessageStore } from './messageStore'
+export { ProviderStore } from './providerStore'
 export { PushStore } from './pushStore'
 export { SessionStore } from './sessionStore'
 export { UserStore } from './userStore'
 
-const SCHEMA_VERSION: number = 10
+const SCHEMA_VERSION: number = 11
 const REQUIRED_TABLES = [
     'sessions',
     'machines',
@@ -35,6 +37,8 @@ const REQUIRED_TABLES = [
     'push_subscriptions',
     'plugins',
     'file_snapshots',
+    'providers',
+    'provider_assignments',
 ] as const
 
 export class Store {
@@ -48,6 +52,7 @@ export class Store {
     readonly users: UserStore
     readonly push: PushStore
     readonly fileSnapshots: FileSnapshotStore
+    readonly providers: ProviderStore
 
     constructor(dbPath: string) {
         this.dbPath = dbPath
@@ -90,6 +95,7 @@ export class Store {
         this.users = new UserStore(this.db)
         this.push = new PushStore(this.db)
         this.fileSnapshots = new FileSnapshotStore(this.db)
+        this.providers = new ProviderStore(this.db)
     }
 
     close(): void {
@@ -122,6 +128,7 @@ export class Store {
             7: () => this.migrateFromV7ToV8(),
             8: () => this.migrateFromV8ToV9(),
             9: () => this.migrateFromV9ToV10(),
+            10: () => this.migrateFromV10ToV11(),
         })
 
         if (currentVersion === 0) {
@@ -279,6 +286,27 @@ export class Store {
             );
             CREATE INDEX IF NOT EXISTS idx_file_snapshots_session ON file_snapshots(session_id, file_path);
             CREATE INDEX IF NOT EXISTS idx_file_snapshots_hash ON file_snapshots(content_hash);
+
+            CREATE TABLE IF NOT EXISTS providers (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                base_url TEXT NOT NULL,
+                api_key_encrypted TEXT NOT NULL,
+                notes TEXT NOT NULL DEFAULT '',
+                created_at INTEGER NOT NULL,
+                updated_at INTEGER NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS provider_assignments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                provider_id TEXT NOT NULL,
+                agent_flavor TEXT NOT NULL,
+                is_default INTEGER NOT NULL DEFAULT 0,
+                UNIQUE(provider_id, agent_flavor),
+                FOREIGN KEY (provider_id) REFERENCES providers(id) ON DELETE CASCADE
+            );
+            CREATE INDEX IF NOT EXISTS idx_provider_assignments_provider ON provider_assignments(provider_id);
+            CREATE INDEX IF NOT EXISTS idx_provider_assignments_flavor ON provider_assignments(agent_flavor);
         `)
     }
 
@@ -530,6 +558,31 @@ export class Store {
                 'Back up and rebuild the database, or run an offline migration to the expected schema version.'
             )
         }
+    }
+
+    private migrateFromV10ToV11(): void {
+        this.db.exec(`
+            CREATE TABLE IF NOT EXISTS providers (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                base_url TEXT NOT NULL,
+                api_key_encrypted TEXT NOT NULL,
+                notes TEXT NOT NULL DEFAULT '',
+                created_at INTEGER NOT NULL,
+                updated_at INTEGER NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS provider_assignments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                provider_id TEXT NOT NULL,
+                agent_flavor TEXT NOT NULL,
+                is_default INTEGER NOT NULL DEFAULT 0,
+                UNIQUE(provider_id, agent_flavor),
+                FOREIGN KEY (provider_id) REFERENCES providers(id) ON DELETE CASCADE
+            );
+            CREATE INDEX IF NOT EXISTS idx_provider_assignments_provider ON provider_assignments(provider_id);
+            CREATE INDEX IF NOT EXISTS idx_provider_assignments_flavor ON provider_assignments(agent_flavor);
+        `)
     }
 
     private buildSchemaMismatchError(currentVersion: number): Error {
