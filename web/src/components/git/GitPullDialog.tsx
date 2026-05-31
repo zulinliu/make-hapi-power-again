@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { useAppContext } from '@/lib/app-context'
+import { useTranslation } from '@/lib/use-translation'
 
 interface GitPullDialogProps {
     isOpen: boolean
@@ -29,6 +30,7 @@ export function GitPullDialog({
     onPullComplete,
 }: GitPullDialogProps) {
     const { api } = useAppContext()
+    const { t } = useTranslation()
     const [remote, setRemote] = useState('origin')
     const [branch, setBranch] = useState('')
     const [phase, setPhase] = useState<PullPhase>('idle')
@@ -84,16 +86,16 @@ export function GitPullDialog({
         <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle>Pull from Remote</DialogTitle>
+                    <DialogTitle>{t('git.pull.title')}</DialogTitle>
                     <DialogDescription>
-                        Fetch and merge changes from a remote repository
+                        {t('git.pull.description')}
                     </DialogDescription>
                 </DialogHeader>
 
                 <div className="space-y-3">
                     <div>
                         <label className="text-sm font-medium" style={{ color: 'var(--app-text-muted)' }}>
-                            Remote
+                            {t('git.pull.remote')}
                         </label>
                         <select
                             value={remote}
@@ -102,7 +104,7 @@ export function GitPullDialog({
                             className={`mt-1 ${inputClass}`}
                         >
                             {remotes.length === 0 && (
-                                <option value="">No remotes configured</option>
+                                <option value="">{t('git.pull.noRemotes')}</option>
                             )}
                             {remotes.map((r) => (
                                 <option key={r.name} value={r.name}>
@@ -114,12 +116,12 @@ export function GitPullDialog({
 
                     <div>
                         <label className="text-sm font-medium" style={{ color: 'var(--app-text-muted)' }}>
-                            Branch
+                            {t('git.pull.branch')}
                         </label>
                         <input
                             value={branch}
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBranch(e.target.value)}
-                            placeholder={currentBranch || 'current branch'}
+                            placeholder={currentBranch || t('git.pull.branch')}
                             disabled={phase === 'pulling'}
                             className={`mt-1 ${inputClass}`}
                         />
@@ -129,14 +131,14 @@ export function GitPullDialog({
                         <div className="rounded-md p-3 text-sm" style={{ background: 'var(--app-subtle-bg)' }}>
                             <div className="flex items-center gap-2">
                                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--app-accent)] border-t-transparent" />
-                                <span>Pulling...</span>
+                                <span>{t('git.pull.pulling')}</span>
                             </div>
                         </div>
                     )}
 
                     {phase === 'done' && (
                         <div className="rounded-md bg-green-500/10 p-3 text-sm text-green-400">
-                            Pull completed successfully
+                            {t('git.pull.success')}
                             {result && <pre className="mt-1 text-xs opacity-70">{result}</pre>}
                         </div>
                     )}
@@ -149,14 +151,14 @@ export function GitPullDialog({
 
                     <div className="flex justify-end gap-2 pt-2">
                         <Button variant="outline" onClick={handleClose} disabled={phase === 'pulling'}>
-                            {phase === 'done' ? 'Close' : 'Cancel'}
+                            {phase === 'done' ? t('button.close') : t('button.cancel')}
                         </Button>
                         {phase === 'idle' && (
                             <Button
                                 onClick={handlePull}
                                 disabled={remotes.length === 0}
                             >
-                                Pull
+                                {t('git.pull')}
                             </Button>
                         )}
                     </div>

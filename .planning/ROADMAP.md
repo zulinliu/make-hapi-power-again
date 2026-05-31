@@ -432,3 +432,73 @@ Plans:
 
 Plans:
 - [ ] 30-01: 质量门禁 + 构建发布 v0.5
+
+## v0.6 Phases — 核心功能迭代优化
+
+- [ ] **Phase 31: Git 管理优化** — i18n + bug 修复 + commit UI + fetch UI
+- [ ] **Phase 32: 文件管理全栈 CRUD** — 文件操作 + 预览增强 + iOS 适配
+- [ ] **Phase 33: Skill/Plugin 管理增强** — 多平台搜索 + 真实安装 + 市场
+
+### Phase 31: Git 管理优化
+**Goal**: 修复 Git 管理的核心体验问题：i18n 缺失、已知 bug、补齐 commit/fetch UI
+**Depends on**: v0.5 (main)
+**Requirements**: GIT-I18N-01~03, GIT-BUG-01~02, GIT-FEAT-01~02
+**Success Criteria**:
+  1. 7 个 Git 组件 40+ 处英文硬编码全部接入 i18n t() 函数
+  2. GitPushDialog upstream 变量修复，勾选 "Set upstream" 实际生效
+  3. 重复解析器合并（GitStatusPanel 简化版 → gitParsers.ts 统一版）
+  4. Commit UI 双模式：Status 面板嵌入快捷提交 + 详细提交弹窗（选文件+消息+签名选项）
+  5. Fetch 按钮（与 Pull 并列），执行 git fetch 并显示结果
+  6. typecheck + vitest 全部通过
+**Plans**: 4 plans
+
+Plans:
+- [ ] 31-01: Git 组件全面 i18n 国际化（7 组件 40+ 处硬编码 → t()）
+- [ ] 31-02: Git Bug 修复（upstream 无效 + 重复解析器合并）
+- [ ] 31-03: Commit UI（Status 面板嵌入快捷提交 + 详细提交弹窗）
+- [ ] 31-04: Fetch UI + 质量门禁
+
+### Phase 32: 文件管理全栈 CRUD
+**Goal**: 补齐文件管理完整 CRUD 能力，增强预览体验，适配 iOS 端
+**Depends on**: Phase 31
+**Requirements**: FILE-CRUD-01~06, FILE-PREVIEW-01~02, FILE-IOS-01~02
+**Success Criteria**:
+  1. 文件 CRUD 完整：创建文件/文件夹、删除、重命名、移动、复制、复制路径
+  2. 交互入口：右键/长按菜单 + 选中后工具栏（PC + iOS 通用）
+  3. MD 文件默认渲染预览，点击切换编辑模式
+  4. 文件快速预览模式（先预览再编辑，避免每次加载 Monaco）
+  5. WriteFile 缺陷修复（无 hash 时也能覆盖已有文件）
+  6. iOS 端触摸友好交互（长按 500ms 触发菜单，拖放支持触摸）
+  7. typecheck + vitest 全部通过
+**Plans**: 4 plans
+
+Plans:
+- [ ] 32-01: 文件操作后端（RPC + API + CLI handler: 创建/删除/重命名/移动/复制/创建目录）
+- [ ] 32-02: 文件树交互（右键/长按菜单 + 工具栏 + 拖放 + iOS 适配）
+- [ ] 32-03: 文件预览增强（MD 预览/编辑切换 + 快速预览模式）
+- [ ] 32-04: WriteFile 修复 + 质量门禁
+
+### Phase 33: Skill/Plugin 管理增强
+**Goal**: 增强 Skill 多平台搜索安装能力，实现 Plugin 真实安装和市场浏览
+**Depends on**: Phase 32
+**Requirements**: SKILL-01~03, PLUGIN-01~04
+**Success Criteria**:
+  1. Extensions 页面 i18n 修复，所有 t() key 在 en/zh-CN locale 中存在
+  2. Skill 多平台搜索：skills.sh + GitHub Topics 同时查询并聚合结果
+  3. Skill 来源扩展：支持非 GitHub 平台（GitLab、自托管 Git）
+  4. Plugin 真实安装：从 registry/URL 下载实际代码，不再只创建骨架
+  5. Plugin 启用/禁用切换：列表中添加开关，动态加载/卸载
+  6. Plugin 市场浏览：同时支持 Claude 官方市场 + GitHub 开源插件
+  7. typecheck + vitest 全部通过
+**Plans**: 4 plans
+
+Plans:
+- [ ] 33-01: Skill/Plugin 页面 i18n + 多平台搜索（skills.sh + GitHub）
+- [ ] 33-02: Plugin 实质化安装 + 启用/禁用切换
+- [ ] 33-03: Plugin 市场（Claude 官方 + GitHub）
+- [ ] 33-04: 质量门禁
+
+---
+
+*Roadmap created: 2026-05-30*
+*Last updated: 2026-05-31 — v0.6 Phases 31~33 已规划（核心功能迭代优化）*

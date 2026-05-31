@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { useAppContext } from '@/lib/app-context'
+import { useTranslation } from '@/lib/use-translation'
 
 interface GitCloneDialogProps {
     isOpen: boolean
@@ -20,6 +21,7 @@ type ClonePhase = 'idle' | 'cloning' | 'done' | 'error'
 
 export function GitCloneDialog({ isOpen, onClose, sessionId, onCloneComplete }: GitCloneDialogProps) {
     const { api } = useAppContext()
+    const { t } = useTranslation()
     const [url, setUrl] = useState('')
     const [targetDir, setTargetDir] = useState('')
     const [branch, setBranch] = useState('')
@@ -46,7 +48,7 @@ export function GitCloneDialog({ isOpen, onClose, sessionId, onCloneComplete }: 
 
             if (result.success) {
                 setPhase('done')
-                setProgress('Clone completed successfully')
+                setProgress(t('git.clone.success'))
                 onCloneComplete?.()
             } else {
                 setPhase('error')
@@ -75,16 +77,16 @@ export function GitCloneDialog({ isOpen, onClose, sessionId, onCloneComplete }: 
         <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle>Clone Repository</DialogTitle>
+                    <DialogTitle>{t('git.clone.title')}</DialogTitle>
                     <DialogDescription>
-                        Clone a Git repository to the current session directory
+                        {t('git.clone.description')}
                     </DialogDescription>
                 </DialogHeader>
 
                 <div className="space-y-3">
                     <div>
                         <label className="text-sm font-medium" style={{ color: 'var(--app-text-muted)' }}>
-                            Repository URL
+                            {t('git.clone.url')}
                         </label>
                         <input
                             value={url}
@@ -97,12 +99,12 @@ export function GitCloneDialog({ isOpen, onClose, sessionId, onCloneComplete }: 
 
                     <div>
                         <label className="text-sm font-medium" style={{ color: 'var(--app-text-muted)' }}>
-                            Target directory (optional)
+                            {t('git.clone.targetDir')}
                         </label>
                         <input
                             value={targetDir}
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTargetDir(e.target.value)}
-                            placeholder="defaults to current session path"
+                            placeholder={t('git.clone.targetDirHint')}
                             disabled={phase === 'cloning'}
                             className={`mt-1 ${inputClass}`}
                         />
@@ -110,12 +112,12 @@ export function GitCloneDialog({ isOpen, onClose, sessionId, onCloneComplete }: 
 
                     <div>
                         <label className="text-sm font-medium" style={{ color: 'var(--app-text-muted)' }}>
-                            Branch (optional)
+                            {t('git.clone.branch')}
                         </label>
                         <input
                             value={branch}
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBranch(e.target.value)}
-                            placeholder="defaults to default branch"
+                            placeholder={t('git.clone.branchHint')}
                             disabled={phase === 'cloning'}
                             className={`mt-1 ${inputClass}`}
                         />
@@ -132,7 +134,7 @@ export function GitCloneDialog({ isOpen, onClose, sessionId, onCloneComplete }: 
 
                     {phase === 'done' && (
                         <div className="rounded-md bg-green-500/10 p-3 text-sm text-green-400">
-                            Clone completed successfully
+                            {t('git.clone.success')}
                         </div>
                     )}
 
@@ -144,14 +146,14 @@ export function GitCloneDialog({ isOpen, onClose, sessionId, onCloneComplete }: 
 
                     <div className="flex justify-end gap-2 pt-2">
                         <Button variant="outline" onClick={handleClose} disabled={phase === 'cloning'}>
-                            {phase === 'done' ? 'Close' : 'Cancel'}
+                            {phase === 'done' ? t('button.close') : t('button.cancel')}
                         </Button>
                         {phase === 'idle' && (
                             <Button
                                 onClick={handleClone}
                                 disabled={!url || !isValidUrl}
                             >
-                                Clone
+                                {t('git.clone')}
                             </Button>
                         )}
                     </div>

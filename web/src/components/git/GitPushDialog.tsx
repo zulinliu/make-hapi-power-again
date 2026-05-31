@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { useAppContext } from '@/lib/app-context'
+import { useTranslation } from '@/lib/use-translation'
 
 interface GitPushDialogProps {
     isOpen: boolean
@@ -29,6 +30,7 @@ export function GitPushDialog({
     onPushComplete,
 }: GitPushDialogProps) {
     const { api } = useAppContext()
+    const { t } = useTranslation()
     const [remote, setRemote] = useState('origin')
     const [branch, setBranch] = useState('')
     const [forcePush, setForcePush] = useState(false)
@@ -59,6 +61,7 @@ export function GitPushDialog({
             if (remote) args.remote = remote
             if (branch) args.branch = branch
             if (forcePush) args.force = true
+            if (upstream) args.setUpstream = true
 
             const res = await api.gitPush(sessionId, args)
             if (res.success) {
@@ -93,16 +96,16 @@ export function GitPushDialog({
         <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle>Push to Remote</DialogTitle>
+                    <DialogTitle>{t('git.push.title')}</DialogTitle>
                     <DialogDescription>
-                        Push local commits to a remote repository
+                        {t('git.push.description')}
                     </DialogDescription>
                 </DialogHeader>
 
                 <div className="space-y-3">
                     <div>
                         <label className="text-sm font-medium" style={{ color: 'var(--app-text-muted)' }}>
-                            Remote
+                            {t('git.push.remote')}
                         </label>
                         <select
                             value={remote}
@@ -111,7 +114,7 @@ export function GitPushDialog({
                             className={`mt-1 ${inputClass}`}
                         >
                             {remotes.length === 0 && (
-                                <option value="">No remotes configured</option>
+                                <option value="">{t('git.push.noRemotes')}</option>
                             )}
                             {remotes.map((r) => (
                                 <option key={r.name} value={r.name}>
@@ -123,12 +126,12 @@ export function GitPushDialog({
 
                     <div>
                         <label className="text-sm font-medium" style={{ color: 'var(--app-text-muted)' }}>
-                            Branch
+                            {t('git.push.branch')}
                         </label>
                         <input
                             value={branch}
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBranch(e.target.value)}
-                            placeholder={currentBranch || 'current branch'}
+                            placeholder={currentBranch || t('git.push.currentBranch')}
                             disabled={phase === 'pushing'}
                             className={`mt-1 ${inputClass}`}
                         />
@@ -143,7 +146,7 @@ export function GitPushDialog({
                                 disabled={phase === 'pushing'}
                                 className="rounded"
                             />
-                            <span style={{ color: 'var(--app-text-muted)' }}>Set upstream</span>
+                            <span style={{ color: 'var(--app-text-muted)' }}>{t('git.push.setUpstream')}</span>
                         </label>
                         <label className="flex items-center gap-2 text-sm">
                             <input
@@ -156,7 +159,7 @@ export function GitPushDialog({
                                 disabled={phase === 'pushing'}
                                 className="rounded"
                             />
-                            <span style={{ color: 'var(--hp-danger)' }}>Force push</span>
+                            <span style={{ color: 'var(--hp-danger)' }}>{t('git.push.force')}</span>
                         </label>
                     </div>
 
@@ -170,7 +173,7 @@ export function GitPushDialog({
                                     className="rounded"
                                 />
                                 <span className="text-red-400">
-                                    Force push will overwrite remote history. Confirm to proceed.
+                                    {t('git.push.forceConfirm')}
                                 </span>
                             </label>
                         </div>
@@ -180,14 +183,14 @@ export function GitPushDialog({
                         <div className="rounded-md p-3 text-sm" style={{ background: 'var(--app-subtle-bg)' }}>
                             <div className="flex items-center gap-2">
                                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--app-accent)] border-t-transparent" />
-                                <span>Pushing...</span>
+                                <span>{t('git.push.pushing')}</span>
                             </div>
                         </div>
                     )}
 
                     {phase === 'done' && (
                         <div className="rounded-md bg-green-500/10 p-3 text-sm text-green-400">
-                            Push completed successfully
+                            {t('git.push.success')}
                             {result && <pre className="mt-1 text-xs opacity-70">{result}</pre>}
                         </div>
                     )}
@@ -200,14 +203,14 @@ export function GitPushDialog({
 
                     <div className="flex justify-end gap-2 pt-2">
                         <Button variant="outline" onClick={handleClose} disabled={phase === 'pushing'}>
-                            {phase === 'done' ? 'Close' : 'Cancel'}
+                            {phase === 'done' ? t('button.close') : t('button.cancel')}
                         </Button>
                         {phase === 'idle' && (
                             <Button
                                 onClick={handlePush}
                                 disabled={remotes.length === 0 || (forcePush && !confirmForce)}
                             >
-                                Push
+                                {t('git.push')}
                             </Button>
                         )}
                     </div>

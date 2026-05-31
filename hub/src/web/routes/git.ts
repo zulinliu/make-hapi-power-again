@@ -376,6 +376,25 @@ export function createGitRoutes(getSyncEngine: () => SyncEngine | null): Hono<We
         return c.json(result)
     })
 
+    // Git Fetch
+    app.post('/sessions/:id/git-fetch', async (c) => {
+        const engine = requireSyncEngine(c, getSyncEngine)
+        if (engine instanceof Response) return engine
+
+        const sessionResult = requireSessionFromParam(c, engine)
+        if (sessionResult instanceof Response) return sessionResult
+
+        const sessionPath = sessionResult.session.metadata?.path
+        if (!sessionPath) return c.json({ success: false, error: 'Session path not available' })
+
+        const body = await c.req.json()
+        const result = await runRpc(() => engine.gitFetch(sessionResult.sessionId, {
+            cwd: sessionPath,
+            remote: body.remote
+        }))
+        return c.json(result)
+    })
+
     app.get('/sessions/:id/file', async (c) => {
         const engine = requireSyncEngine(c, getSyncEngine)
         if (engine instanceof Response) {

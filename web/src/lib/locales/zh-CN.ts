@@ -479,4 +479,100 @@ export default {
   'share.created': '新建',
   'share.modified': '修改',
   'share.deleted': '删除',
+
+  // Git page
+  'git.title': 'Git',
+  'git.tab.status': '状态',
+  'git.tab.history': '历史',
+  'git.tab.branches': '分支',
+  'git.tab.remotes': '远程',
+  'git.pull': '拉取',
+  'git.push': '推送',
+  'git.clone': '克隆',
+  'git.commit': '提交',
+  'git.fetch': '获取',
+  'git.backToSessions': '返回会话',
+  'git.sessionNotFound': '会话未找到',
+
+  // Git status
+  'git.status.loading': '加载中…',
+  'git.status.clean': '工作区干净',
+  'git.status.failed': 'Git 状态获取失败',
+  'git.status.retry': '重试',
+  'git.status.commitPlaceholder': '提交消息…',
+  'git.status.commitQuick': '全部提交',
+
+  // Git history
+  'git.history.loading': '加载历史…',
+  'git.history.failed': '加载历史失败',
+  'git.history.empty': '暂无提交',
+
+  // Git branches
+  'git.branch.newPlaceholder': '新分支名称…',
+  'git.branch.create': '创建',
+  'git.branch.loading': '加载中…',
+  'git.branch.createFailed': '创建分支失败',
+  'git.branch.switchFailed': '切换分支失败',
+  'git.branch.deleteFailed': '删除分支失败',
+  'git.branch.mergeFailed': '合并失败（可能有冲突）',
+  'git.branch.merge': '合并到当前分支',
+  'git.branch.switch': '切换',
+  'git.branch.delete': '删除',
+
+  // Git clone
+  'git.clone.title': '克隆仓库',
+  'git.clone.description': '将 Git 仓库克隆到当前会话目录',
+  'git.clone.url': '仓库 URL',
+  'git.clone.targetDir': '目标目录（可选）',
+  'git.clone.targetDirHint': '默认为当前会话路径',
+  'git.clone.branch': '分支（可选）',
+  'git.clone.branchHint': '默认为默认分支',
+  'git.clone.success': '克隆成功',
+  'git.clone.cloning': '克隆中…',
+
+  // Git remote
+  'git.remote.loading': '加载远程…',
+  'git.remote.empty': '未配置远程仓库',
+  'git.remote.remove': '移除',
+  'git.remote.addTitle': '添加远程',
+  'git.remote.add': '添加',
+
+  // Git push
+  'git.push.title': '推送到远程',
+  'git.push.description': '将本地提交推送到远程仓库',
+  'git.push.remote': '远程',
+  'git.push.noRemotes': '未配置远程仓库',
+  'git.push.branch': '分支',
+  'git.push.currentBranch': '当前分支',
+  'git.push.setUpstream': '设置上游',
+  'git.push.force': '强制推送',
+  'git.push.forceConfirm': '强制推送将覆盖远程历史。确认继续。',
+  'git.push.pushing': '推送中…',
+  'git.push.success': '推送成功',
+
+  // Git pull
+  'git.pull.title': '从远程拉取',
+  'git.pull.description': '从远程仓库获取并合并变更',
+  'git.pull.remote': '远程',
+  'git.pull.noRemotes': '未配置远程仓库',
+  'git.pull.branch': '分支',
+  'git.pull.pulling': '拉取中…',
+  'git.pull.success': '拉取成功',
+
+  // Git commit dialog
+  'git.commit.title': '提交变更',
+  'git.commit.selectFiles': '选择要提交的文件',
+  'git.commit.message': '提交消息',
+  'git.commit.messagePlaceholder': '输入提交消息…',
+  'git.commit.sign': '签名提交',
+  'git.commit.amend': '修改上次提交',
+  'git.commit.committing': '提交中…',
+  'git.commit.success': '提交成功',
+  'git.commit.noFiles': '未选择文件',
+  'git.commit.noMessage': '提交消息不能为空',
+
+  // Git fetch
+  'git.fetch.fetching': '获取中…',
+  'git.fetch.success': '获取完成',
+  'git.fetch.noChanges': '已是最新',
 } as const

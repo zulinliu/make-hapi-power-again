@@ -477,4 +477,100 @@ export default {
   'share.created': 'Created',
   'share.modified': 'Modified',
   'share.deleted': 'Deleted',
+
+  // Git page
+  'git.title': 'Git',
+  'git.tab.status': 'Status',
+  'git.tab.history': 'History',
+  'git.tab.branches': 'Branches',
+  'git.tab.remotes': 'Remotes',
+  'git.pull': 'Pull',
+  'git.push': 'Push',
+  'git.clone': 'Clone',
+  'git.commit': 'Commit',
+  'git.fetch': 'Fetch',
+  'git.backToSessions': 'Back to sessions',
+  'git.sessionNotFound': 'Session not found',
+
+  // Git status
+  'git.status.loading': 'Loading…',
+  'git.status.clean': 'Working tree clean',
+  'git.status.failed': 'Git status failed',
+  'git.status.retry': 'Retry',
+  'git.status.commitPlaceholder': 'Commit message…',
+  'git.status.commitQuick': 'Commit All',
+
+  // Git history
+  'git.history.loading': 'Loading history…',
+  'git.history.failed': 'Failed to load history',
+  'git.history.empty': 'No commits yet',
+
+  // Git branches
+  'git.branch.newPlaceholder': 'New branch name…',
+  'git.branch.create': 'Create',
+  'git.branch.loading': 'Loading…',
+  'git.branch.createFailed': 'Failed to create branch',
+  'git.branch.switchFailed': 'Failed to switch branch',
+  'git.branch.deleteFailed': 'Failed to delete branch',
+  'git.branch.mergeFailed': 'Merge failed (possible conflicts)',
+  'git.branch.merge': 'Merge into current',
+  'git.branch.switch': 'Switch',
+  'git.branch.delete': 'Delete',
+
+  // Git clone
+  'git.clone.title': 'Clone Repository',
+  'git.clone.description': 'Clone a Git repository to the current session directory',
+  'git.clone.url': 'Repository URL',
+  'git.clone.targetDir': 'Target directory (optional)',
+  'git.clone.targetDirHint': 'defaults to current session path',
+  'git.clone.branch': 'Branch (optional)',
+  'git.clone.branchHint': 'defaults to default branch',
+  'git.clone.success': 'Clone completed successfully',
+  'git.clone.cloning': 'Cloning…',
+
+  // Git remote
+  'git.remote.loading': 'Loading remotes…',
+  'git.remote.empty': 'No remotes configured',
+  'git.remote.remove': 'Remove',
+  'git.remote.addTitle': 'Add Remote',
+  'git.remote.add': 'Add',
+
+  // Git push
+  'git.push.title': 'Push to Remote',
+  'git.push.description': 'Push local commits to a remote repository',
+  'git.push.remote': 'Remote',
+  'git.push.noRemotes': 'No remotes configured',
+  'git.push.branch': 'Branch',
+  'git.push.currentBranch': 'current branch',
+  'git.push.setUpstream': 'Set upstream',
+  'git.push.force': 'Force push',
+  'git.push.forceConfirm': 'Force push will overwrite remote history. Confirm to proceed.',
+  'git.push.pushing': 'Pushing…',
+  'git.push.success': 'Push completed successfully',
+
+  // Git pull
+  'git.pull.title': 'Pull from Remote',
+  'git.pull.description': 'Fetch and merge changes from a remote repository',
+  'git.pull.remote': 'Remote',
+  'git.pull.noRemotes': 'No remotes configured',
+  'git.pull.branch': 'Branch',
+  'git.pull.pulling': 'Pulling…',
+  'git.pull.success': 'Pull completed successfully',
+
+  // Git commit dialog
+  'git.commit.title': 'Commit Changes',
+  'git.commit.selectFiles': 'Select files to commit',
+  'git.commit.message': 'Commit message',
+  'git.commit.messagePlaceholder': 'Enter commit message…',
+  'git.commit.sign': 'Sign commit',
+  'git.commit.amend': 'Amend previous commit',
+  'git.commit.committing': 'Committing…',
+  'git.commit.success': 'Committed successfully',
+  'git.commit.noFiles': 'No files selected',
+  'git.commit.noMessage': 'Commit message is required',
+
+  // Git fetch
+  'git.fetch.fetching': 'Fetching…',
+  'git.fetch.success': 'Fetch completed',
+  'git.fetch.noChanges': 'Already up to date',
 } as const

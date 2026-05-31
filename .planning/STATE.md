@@ -221,3 +221,37 @@ TOP 10 缺口：EDIT-01, FILE-01, FILE-02, FILE-05, PTY-02, GIT-04, FILE-12, EDI
 
 ---
 *状态更新: 2026-05-31 (v0.5 规划完成，待执行)*
+
+## v0.6 规划中 — 核心功能迭代优化
+
+### 核心用户场景
+日常使用中最频繁的操作：Git 管理（提交代码）、文件管理（增删改查）、Skill/Plugin 管理
+
+### 讨论决策已完成 (2026-05-31)
+
+**Phase 31: Git 管理优化**
+- i18n：7 个组件 40+ 处英文硬编码全部接入 t()
+- Bug：upstream 无效修复 + 重复解析器合并
+- Commit UI：Status 面板嵌入快捷提交 + 详细提交弹窗
+- Fetch UI：简单按钮与 Pull 并列
+- 暂不做：stash/tag/rebase/reset/cherry-pick/blame
+
+**Phase 32: 文件管理全栈 CRUD**
+- 完整 CRUD：创建文件/文件夹、删除、重命名、移动、复制、复制路径
+- 交互：右键/长按菜单 + 选中后工具栏（PC + iOS 通用）
+- MD 预览：默认渲染预览，点击切换编辑
+- 快速预览模式（先预览再编辑）
+- iOS 触摸适配（长按 500ms + 拖放触摸支持）
+- WriteFile 缺陷修复
+
+**Phase 33: Skill/Plugin 管理增强**
+- Skill i18n + 多平台搜索（skills.sh + GitHub，逐步扩展）
+- Plugin 真实安装（从 registry/URL 下载实际代码）
+- Plugin 启用/禁用切换
+- Plugin 市场（Claude 官方 + GitHub 开源）
+
+**暂缓**
+- 插件系统底层架构（沙箱加载、扩展点系统）
+
+---
+*状态更新: 2026-05-31 (v0.6 Phase 31~33 规划完成，讨论决策已记录)*
