@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { logger } from '@/ui/logger';
-import type { CodexPermissionMode } from '@hapi/protocol/types';
+import type { CodexPermissionMode } from '@hapipower/protocol/types';
 import type { CodexPermissionHandler } from './permissionHandler';
 import type { CodexAppServerClient } from '../codexAppServerClient';
 

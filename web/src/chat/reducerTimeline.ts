@@ -4,7 +4,7 @@ import { createCliOutputBlock, isCliOutputText, mergeCliOutputBlocks } from '@/c
 import { parseMessageAsEvent } from '@/chat/reducerEvents'
 import { collectTitleChanges, ensureToolBlock, extractTitleFromChangeTitleInput, isChangeTitleToolName, type PermissionEntry } from '@/chat/reducerTools'
 import { isSubagentToolName } from '@/chat/subagentTool'
-import { asString, isObject } from '@hapi/protocol'
+import { asString, isObject } from '@hapipower/protocol'
 
 function getEventString(event: Record<string, unknown>, key: string): string | null {
     return asString(event[key])

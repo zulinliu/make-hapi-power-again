@@ -1,4 +1,4 @@
-import { getClaudeModelLabel } from '@hapi/protocol'
+import { getClaudeModelLabel } from '@hapipower/protocol'
 
 type SessionModelSource = {
     model?: string | null

@@ -26,7 +26,7 @@ import {
     type ChatSurfaceColorPreset,
 } from '@/hooks/useChatSurfaceColors'
 import { useAppearance, getAppearanceOptions, type AppearancePreference } from '@/hooks/useTheme'
-import { PROTOCOL_VERSION } from '@hapi/protocol'
+import { PROTOCOL_VERSION } from '@hapipower/protocol'
 
 const locales: { value: Locale; nativeLabel: string }[] = [
     { value: 'en', nativeLabel: 'English' },

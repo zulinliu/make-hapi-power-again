@@ -1,9 +1,9 @@
 import chalk from 'chalk'
 import { execFileSync } from 'node:child_process'
 import { z } from 'zod'
-import { PROTOCOL_VERSION } from '@hapi/protocol'
+import { PROTOCOL_VERSION } from '@hapipower/protocol'
 import type { StartOptions } from '@/claude/runClaude'
-import { CLAUDE_PERMISSION_MODES } from '@hapi/protocol/modes'
+import { CLAUDE_PERMISSION_MODES } from '@hapipower/protocol/modes'
 import { configuration } from '@/configuration'
 import { isRunnerRunningCurrentlyInstalledHappyVersion } from '@/runner/controlClient'
 import { authAndSetupMachineIfNeeded } from '@/ui/auth'
@@ -172,7 +172,7 @@ ${chalk.bold.cyan('Claude Code Options (from `claude --help`):')}
             } else if (httpStatus === 403 && responseErrorText === 'Machine access denied') {
                 console.error(chalk.red('Machine access denied.'))
                 console.error(chalk.gray('  This machineId is already registered under a different namespace.'))
-                console.error(chalk.gray('  Fix: run `hapi auth logout`, or set a separate HAPI_HOME per namespace.'))
+                console.error(chalk.gray('  Fix: run `hapi auth logout`, or set a separate HAPI_POWER_HOME per namespace.'))
             } else if (httpStatus === 403 && responseErrorText === 'Session access denied') {
                 console.error(chalk.red('Session access denied.'))
                 console.error(chalk.gray('  This session belongs to a different namespace.'))

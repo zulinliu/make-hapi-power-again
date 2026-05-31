@@ -1,4 +1,4 @@
-import { getCodexCollaborationModeOptions, getPermissionModeOptionsForFlavor } from '@hapi/protocol'
+import { getCodexCollaborationModeOptions, getPermissionModeOptionsForFlavor } from '@hapipower/protocol'
 import { ComposerPrimitive, useAssistantApi, useAssistantState } from '@assistant-ui/react'
 import {
     type ChangeEvent as ReactChangeEvent,
@@ -20,7 +20,7 @@ import { useActiveSuggestions } from '@/hooks/useActiveSuggestions'
 import { applySuggestion } from '@/utils/applySuggestion'
 import { usePlatform } from '@/hooks/usePlatform'
 import { usePWAInstall } from '@/hooks/usePWAInstall'
-import { supportsEffort, supportsModelChange } from '@hapi/protocol'
+import { supportsEffort, supportsModelChange } from '@hapipower/protocol'
 import { markSkillUsed } from '@/lib/recent-skills'
 import { useComposerDraft } from '@/hooks/useComposerDraft'
 import { useComposerEnterBehavior } from '@/hooks/useComposerEnterBehavior'

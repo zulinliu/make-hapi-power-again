@@ -1,5 +1,5 @@
 /**
- * WebSocket client for machine/runner communication with hapi-hub
+ * WebSocket client for machine/runner communication with hapi-power-hub
  */
 
 import { io, type Socket } from 'socket.io-client'
@@ -8,9 +8,9 @@ import { realpathSync } from 'node:fs'
 import { basename, dirname, isAbsolute, join, relative, resolve as resolvePath } from 'node:path'
 import { logger } from '@/ui/logger'
 import { configuration } from '@/configuration'
-import type { ClientToServerEvents, ServerToClientEvents, Update, UpdateMachineBody } from '@hapi/protocol'
-import type { MachineDirectoryEntry, MachineListDirectoryResponse, PathExistsResponse } from '@hapi/protocol/apiTypes'
-import { RPC_METHODS } from '@hapi/protocol/rpcMethods'
+import type { ClientToServerEvents, ServerToClientEvents, Update, UpdateMachineBody } from '@hapipower/protocol'
+import type { MachineDirectoryEntry, MachineListDirectoryResponse, PathExistsResponse } from '@hapipower/protocol/apiTypes'
+import { RPC_METHODS } from '@hapipower/protocol/rpcMethods'
 import type { RunnerState, Machine, MachineMetadata } from './types'
 import { RunnerStateSchema, MachineMetadataSchema } from './types'
 import { backoff } from '@/utils/time'

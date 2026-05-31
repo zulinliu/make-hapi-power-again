@@ -5,7 +5,7 @@ import {
     ELEVENLABS_API_BASE,
     VOICE_AGENT_NAME,
     buildVoiceAgentConfig
-} from '@hapi/protocol/voice'
+} from '@hapipower/protocol/voice'
 
 const tokenRequestSchema = z.object({
     customAgentId: z.string().optional(),
@@ -47,7 +47,7 @@ function parseVoiceAgentMap(): Record<string, string> {
 }
 
 /**
- * Find an existing "Hapi Voice Assistant" agent
+ * Find an existing "Hapi Power Voice Assistant" agent
  */
 async function findHapiAgent(apiKey: string, agentName: string = VOICE_AGENT_NAME): Promise<string | null> {
     try {
@@ -74,7 +74,7 @@ async function findHapiAgent(apiKey: string, agentName: string = VOICE_AGENT_NAM
 }
 
 /**
- * Create a new "Hapi Voice Assistant" agent
+ * Create a new "Hapi Power Voice Assistant" agent
  */
 async function createHapiAgent(apiKey: string): Promise<string | null> {
     return createNamedHapiAgent(apiKey, VOICE_AGENT_NAME)
@@ -116,7 +116,7 @@ async function createNamedHapiAgent(apiKey: string, agentName: string, voiceId?:
 }
 
 /**
- * Get or create agent ID - finds existing or creates new "Hapi Voice Assistant" agent
+ * Get or create agent ID - finds existing or creates new "Hapi Power Voice Assistant" agent
  */
 async function getOrCreateAgentId(apiKey: string): Promise<string | null> {
     return getOrCreateAgentIdForVoice(apiKey)

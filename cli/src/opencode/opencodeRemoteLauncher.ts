@@ -7,7 +7,7 @@ import { RemoteLauncherBase, type RemoteLauncherDisplayContext, type RemoteLaunc
 import { OpencodeDisplay } from '@/ui/ink/OpencodeDisplay';
 import type { OpencodeSession } from './session';
 import type { OpencodeMode, PermissionMode } from './types';
-import { RPC_METHODS } from '@hapi/protocol/rpcMethods';
+import { RPC_METHODS } from '@hapipower/protocol/rpcMethods';
 import { createOpencodeBackend } from './utils/opencodeBackend';
 import { OpencodePermissionHandler } from './utils/permissionHandler';
 import { PLAN_MODE_INSTRUCTION, TITLE_INSTRUCTION } from './utils/systemPrompt';

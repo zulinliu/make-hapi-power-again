@@ -5,7 +5,7 @@ import type {
     TerminalExitPayload,
     TerminalOutputPayload,
     TerminalReadyPayload
-} from '@hapi/protocol'
+} from '@hapipower/protocol'
 import type { TerminalSession } from './types'
 
 type TerminalRuntime = TerminalSession & {
@@ -45,7 +45,7 @@ function readSubprocessRssMb(pid: number | null): number | null {
 }
 const SENSITIVE_ENV_KEYS = new Set([
     'CLI_API_TOKEN',
-    'HAPI_API_URL',
+    'HAPI_POWER_API_URL',
     'HAPI_HTTP_MCP_URL',
     'TELEGRAM_BOT_TOKEN',
     'OPENAI_API_KEY',

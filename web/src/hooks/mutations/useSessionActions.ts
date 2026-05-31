@@ -1,10 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { isPermissionModeAllowedForFlavor } from '@hapi/protocol'
+import { isPermissionModeAllowedForFlavor } from '@hapipower/protocol'
 import type { ApiClient } from '@/api/client'
 import type { CodexCollaborationMode, PermissionMode } from '@/types/api'
 import { queryKeys } from '@/lib/query-keys'
 import { clearMessageWindow } from '@/lib/message-window-store'
-import { isKnownFlavor } from '@hapi/protocol'
+import { isKnownFlavor } from '@hapipower/protocol'
 
 export function useSessionActions(
     api: ApiClient | null,

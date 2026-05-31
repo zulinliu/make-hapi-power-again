@@ -108,9 +108,9 @@ export async function startHub(options: StartHubOptions = {}): Promise<HubInstan
     let tunnelManager: TunnelManager | null = null
 
     // Load configuration (async - loads from env/file with persistence)
-    const relayApiDomain = process.env.HAPI_RELAY_API || 'relay.hapi.run'
+    const relayApiDomain = process.env.HAPI_POWER_RELAY_API || 'relay.hapi.run'
     const relayFlag = resolveRelayFlag(options.args ?? process.argv)
-    const officialWebUrl = process.env.HAPI_OFFICIAL_WEB_URL || 'https://app.hapi.run'
+    const officialWebUrl = process.env.HAPI_POWER_OFFICIAL_WEB_URL || 'https://app.hapi.run'
     const config = await createConfiguration()
     const baseCorsOrigins = normalizeOrigins(config.corsOrigins)
     const relayCorsOrigin = normalizeOrigin(officialWebUrl)
@@ -136,9 +136,9 @@ export async function startHub(options: StartHubOptions = {}): Promise<HubInstan
     }
 
     // Display other configuration sources
-    console.log(`[Hub] HAPI_LISTEN_HOST: ${config.listenHost} (${formatSource(config.sources.listenHost)})`)
-    console.log(`[Hub] HAPI_LISTEN_PORT: ${config.listenPort} (${formatSource(config.sources.listenPort)})`)
-    console.log(`[Hub] HAPI_PUBLIC_URL: ${config.publicUrl} (${formatSource(config.sources.publicUrl)})`)
+    console.log(`[Hub] HAPI_POWER_LISTEN_HOST: ${config.listenHost} (${formatSource(config.sources.listenHost)})`)
+    console.log(`[Hub] HAPI_POWER_LISTEN_PORT: ${config.listenPort} (${formatSource(config.sources.listenPort)})`)
+    console.log(`[Hub] HAPI_POWER_PUBLIC_URL: ${config.publicUrl} (${formatSource(config.sources.publicUrl)})`)
 
     if (!config.telegramEnabled) {
         console.log('[Hub] Telegram: disabled (no TELEGRAM_BOT_TOKEN)')
@@ -249,8 +249,8 @@ export async function startHub(options: StartHubOptions = {}): Promise<HubInstan
             localPort: config.listenPort,
             enabled: true,
             apiDomain: relayApiDomain,
-            authKey: process.env.HAPI_RELAY_AUTH || null,
-            useRelay: process.env.HAPI_RELAY_FORCE_TCP === 'true' || process.env.HAPI_RELAY_FORCE_TCP === '1'
+            authKey: process.env.HAPI_POWER_RELAY_AUTH || null,
+            useRelay: process.env.HAPI_POWER_RELAY_FORCE_TCP === 'true' || process.env.HAPI_POWER_RELAY_FORCE_TCP === '1'
         })
 
         try {

@@ -13,11 +13,11 @@ import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { platform, arch, homedir } from 'node:os'
 import { isBunCompiled } from '../utils/bunCompiled'
-import { APP_VERSION } from '@hapi/protocol'
+import { APP_VERSION } from '@hapipower/protocol'
 
-function getHapiHome(): string {
-    return process.env.HAPI_HOME
-        ? process.env.HAPI_HOME.replace(/^~/, homedir())
+function getHapiPowerHome(): string {
+    return process.env.HAPI_POWER_HOME
+        ? process.env.HAPI_POWER_HOME.replace(/^~/, homedir())
         : join(homedir(), '.hapi')
 }
 
@@ -43,7 +43,7 @@ function getTunwgPath(): string {
     const tunwgBinary = isWin ? 'tunwg.exe' : 'tunwg'
 
     if (isBunCompiled()) {
-        const hapiHome = getHapiHome()
+        const hapiHome = getHapiPowerHome()
         const runtimePath = join(hapiHome, 'runtime', APP_VERSION)
         return join(runtimePath, 'tools', 'tunwg', tunwgBinary)
     }
@@ -110,7 +110,7 @@ export class TunnelManager {
         const env: Record<string, string> = { ...process.env as Record<string, string> }
 
         if (!env.TUNWG_PATH) {
-            env.TUNWG_PATH = join(getHapiHome(), 'tunwg')
+            env.TUNWG_PATH = join(getHapiPowerHome(), 'tunwg')
         }
 
         if (this.config.apiDomain) {

@@ -35,8 +35,8 @@ vi.mock('@/persistence', () => ({
 
 vi.mock('@/configuration', () => ({
     configuration: {
-        happyHomeDir: '/tmp/.hapi',
-        logsDir: '/tmp/.hapi/logs',
+        hapiPowerHomeDir: '/tmp/.hapi',
+        logsDir: '/tmp/.hapi-power/logs',
         isRunnerProcess: false
     }
 }))

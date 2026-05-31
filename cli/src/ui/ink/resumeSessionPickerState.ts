@@ -1,4 +1,4 @@
-import type { ResumableSession } from '@hapi/protocol'
+import type { ResumableSession } from '@hapipower/protocol'
 
 export type PickerState = {
     query: string

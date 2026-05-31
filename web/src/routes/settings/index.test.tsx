@@ -2,10 +2,10 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, waitFor, act, cleanup } from '@testing-library/react'
 import { I18nContext, I18nProvider } from '@/lib/i18n-context'
 import { en } from '@/lib/locales'
-import { PROTOCOL_VERSION } from '@hapi/protocol'
+import { PROTOCOL_VERSION } from '@hapipower/protocol'
 import SettingsPage from './index'
 
-vi.mock('@hapi/protocol', () => ({
+vi.mock('@hapipower/protocol', () => ({
     PROTOCOL_VERSION: 1,
 }))
 

@@ -9,15 +9,15 @@ import { apiValidationError } from '@/utils/errorUtils'
 import { AsyncLock } from '@/utils/lock'
 import type { RawJSONLines } from '@/claude/types'
 import { configuration } from '@/configuration'
-import { AGENT_MESSAGE_PAYLOAD_TYPE } from "@hapi/protocol"
-import type { SessionEndReason } from '@hapi/protocol'
-import type { ClientToServerEvents, ServerToClientEvents, Update } from '@hapi/protocol'
+import { AGENT_MESSAGE_PAYLOAD_TYPE } from "@hapipower/protocol"
+import type { SessionEndReason } from '@hapipower/protocol'
+import type { ClientToServerEvents, ServerToClientEvents, Update } from '@hapipower/protocol'
 import {
     TerminalClosePayloadSchema,
     TerminalOpenPayloadSchema,
     TerminalResizePayloadSchema,
     TerminalWritePayloadSchema
-} from '@hapi/protocol'
+} from '@hapipower/protocol'
 import type {
     AgentState,
     MessageContent,

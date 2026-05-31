@@ -1,5 +1,5 @@
-import { asString, isObject } from '@hapi/protocol';
-import type { OpencodeModelsResponse, OpencodeModelSummary } from '@hapi/protocol/apiTypes';
+import { asString, isObject } from '@hapipower/protocol';
+import type { OpencodeModelsResponse, OpencodeModelSummary } from '@hapipower/protocol/apiTypes';
 import { AcpStdioTransport } from '@/agent/backends/acp/AcpStdioTransport';
 import packageJson from '../../../package.json';
 import { getErrorMessage } from './rpcResponses';

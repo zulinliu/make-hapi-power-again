@@ -57,7 +57,7 @@ describe('handleAuthCommand', () => {
                 .map((call) => stripAnsi(String(call[0])))
                 .join('\n')
 
-            expect(output).toContain('HAPI_API_URL: https://hapi.example.com')
+            expect(output).toContain('HAPI_POWER_API_URL: https://hapi.example.com')
             expect(output).toContain('CLI_API_TOKEN: set')
             expect(output).toContain('Machine ID: machine-123')
         } finally {

@@ -2,15 +2,15 @@
  * Sync Engine for HAPI Telegram Bot (Direct Connect)
  *
  * In the direct-connect architecture:
- * - hapi-hub is the hub (Socket.IO + REST)
+ * - hapi-power-hub is the hub (Socket.IO + REST)
  * - hapi CLI connects directly to the hub (no relay)
  * - No E2E encryption; data is stored as JSON in SQLite
  */
 
-import { isKnownFlavor, type LocalResumeTarget, type ResumableSession } from '@hapi/protocol'
-import type { SlashCommandsResponse } from '@hapi/protocol/apiTypes'
-import type { AgentFlavor, CodexCollaborationMode, DecryptedMessage, PermissionMode, Session, SyncEvent } from '@hapi/protocol/types'
-import { unwrapRoleWrappedRecordEnvelope } from '@hapi/protocol/messages'
+import { isKnownFlavor, type LocalResumeTarget, type ResumableSession } from '@hapipower/protocol'
+import type { SlashCommandsResponse } from '@hapipower/protocol/apiTypes'
+import type { AgentFlavor, CodexCollaborationMode, DecryptedMessage, PermissionMode, Session, SyncEvent } from '@hapipower/protocol/types'
+import { unwrapRoleWrappedRecordEnvelope } from '@hapipower/protocol/messages'
 import type { Server } from 'socket.io'
 import type { Store, CancelQueuedMessageResult } from '../store'
 import type { RpcRegistry } from '../socket/rpcRegistry'
@@ -36,7 +36,7 @@ import {
 } from './rpcGateway'
 import { SessionCache } from './sessionCache'
 
-export type { Session, SyncEvent } from '@hapi/protocol/types'
+export type { Session, SyncEvent } from '@hapipower/protocol/types'
 export type { Machine } from './machineCache'
 export type { SyncEventListener } from './eventPublisher'
 export type {

@@ -1,5 +1,5 @@
 import { describe, expect, it, mock } from 'bun:test'
-import type { SessionEndReason } from '@hapi/protocol'
+import type { SessionEndReason } from '@hapipower/protocol'
 import type { Session } from '../sync/syncEngine'
 import { ServerChanChannel } from './channel'
 

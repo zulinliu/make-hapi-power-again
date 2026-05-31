@@ -3,8 +3,8 @@ import { authAndSetupMachineIfNeeded } from '@/ui/auth'
 import { initializeToken } from '@/ui/tokenInit'
 import { maybeAutoStartServer } from '@/utils/autoStartServer'
 import type { CommandDefinition } from './types'
-import { KIMI_PERMISSION_MODES } from '@hapi/protocol/modes'
-import type { KimiPermissionMode } from '@hapi/protocol/types'
+import { KIMI_PERMISSION_MODES } from '@hapipower/protocol/modes'
+import type { KimiPermissionMode } from '@hapipower/protocol/types'
 
 export const kimiCommand: CommandDefinition = {
     name: 'kimi',

@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { logger } from '@/ui/logger';
-import { DEFAULT_GEMINI_MODEL } from '@hapi/protocol';
+import { DEFAULT_GEMINI_MODEL } from '@hapipower/protocol';
 
 export const GEMINI_API_KEY_ENV = 'GEMINI_API_KEY';
 export const GOOGLE_API_KEY_ENV = 'GOOGLE_API_KEY';

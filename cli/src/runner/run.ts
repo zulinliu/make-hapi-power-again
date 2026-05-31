@@ -13,7 +13,7 @@ import { getEnvironmentInfo } from '@/ui/doctor';
 import { spawnHappyCLI } from '@/utils/spawnHappyCLI';
 import { writeRunnerState, RunnerLocallyPersistedState, readRunnerState, acquireRunnerLock, releaseRunnerLock } from '@/persistence';
 import { isProcessAlive, isWindows, killProcess, killProcessByChildProcess } from '@/utils/process';
-import { PERMISSION_MODES } from '@hapi/protocol/modes';
+import { PERMISSION_MODES } from '@hapipower/protocol/modes';
 import { withRetry } from '@/utils/time';
 import { isRetryableConnectionError } from '@/utils/errorUtils';
 
@@ -35,8 +35,8 @@ export async function startRunner(options: { workspaceRoots?: string[] } = {}): 
   //
   // In case the setup malfunctions - our signal handlers will not properly
   // shut down. We will force exit the process with code 1.
-  let requestShutdown: (source: 'hapi-app' | 'hapi-cli' | 'os-signal' | 'exception', errorMessage?: string) => void;
-  let resolvesWhenShutdownRequested = new Promise<({ source: 'hapi-app' | 'hapi-cli' | 'os-signal' | 'exception', errorMessage?: string })>((resolve) => {
+  let requestShutdown: (source: 'hapi-power-app' | 'hapi-power-cli' | 'os-signal' | 'exception', errorMessage?: string) => void;
+  let resolvesWhenShutdownRequested = new Promise<({ source: 'hapi-power-app' | 'hapi-power-cli' | 'os-signal' | 'exception', errorMessage?: string })>((resolve) => {
     requestShutdown = (source, errorMessage) => {
       logger.debug(`[RUNNER RUN] Requesting shutdown (source: ${source}, errorMessage: ${errorMessage})`);
 
@@ -653,7 +653,7 @@ export async function startRunner(options: { workspaceRoots?: string[] } = {}): 
       getChildren: getCurrentChildren,
       stopSession,
       spawnSession,
-      requestShutdown: () => requestShutdown('hapi-cli'),
+      requestShutdown: () => requestShutdown('hapi-power-cli'),
       onHappySessionWebhook
     });
 
@@ -715,7 +715,7 @@ export async function startRunner(options: { workspaceRoots?: string[] } = {}): 
     apiMachine.setRPCHandlers({
       spawnSession,
       stopSession,
-      requestShutdown: () => requestShutdown('hapi-app')
+      requestShutdown: () => requestShutdown('hapi-power-app')
     });
 
     // Connect to server
@@ -775,7 +775,7 @@ export async function startRunner(options: { workspaceRoots?: string[] } = {}): 
     // 2. Check if runner needs update
     // 3. If outdated, restart with latest version
     // 4. Write heartbeat
-    const heartbeatIntervalMs = parseInt(process.env.HAPI_RUNNER_HEARTBEAT_INTERVAL || '60000');
+    const heartbeatIntervalMs = parseInt(process.env.HAPI_POWER_RUNNER_HEARTBEAT_INTERVAL || '60000');
     let heartbeatRunning = false
     const restartOnStaleVersionAndHeartbeat = setInterval(async () => {
       if (heartbeatRunning) {
@@ -860,7 +860,7 @@ export async function startRunner(options: { workspaceRoots?: string[] } = {}): 
     }, heartbeatIntervalMs); // Every 60 seconds in production
 
     // Setup signal handlers
-    const cleanupAndShutdown = async (source: 'hapi-app' | 'hapi-cli' | 'os-signal' | 'exception', errorMessage?: string) => {
+    const cleanupAndShutdown = async (source: 'hapi-power-app' | 'hapi-power-cli' | 'os-signal' | 'exception', errorMessage?: string) => {
       logger.debug(`[RUNNER RUN] Starting proper cleanup (source: ${source}, errorMessage: ${errorMessage})...`);
 
       // Clear health check interval

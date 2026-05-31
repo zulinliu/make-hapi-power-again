@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test'
-import type { SyncEvent } from '@hapi/protocol/types'
+import type { SyncEvent } from '@hapipower/protocol/types'
 import { Store } from '../store'
 import { RpcRegistry } from '../socket/rpcRegistry'
 import type { EventPublisher } from './eventPublisher'
@@ -47,7 +47,7 @@ describe('alive incremental events', () => {
 
         const machine = cache.getOrCreateMachine(
             'machine-alive-test',
-            { host: 'localhost', platform: 'linux', happyCliVersion: '0.1.0' },
+            { host: 'localhost', platform: 'linux', hapiPowerCliVersion: '0.1.0' },
             null,
             'default'
         )
