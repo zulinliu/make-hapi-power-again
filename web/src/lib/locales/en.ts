@@ -350,6 +350,9 @@ export default {
   // Banners
   'offline.title': 'Offline',
   'offline.message': 'You are currently offline. Some features may be limited.',
+  'update.available': 'New version available ({version})',
+  'update.button': 'Update now',
+  'update.applying': 'Updating…',
   'syncing.title': 'Syncing…',
   'syncing.message': 'Your data is being synchronized.',
   'reconnecting.message': 'Reconnecting...',
@@ -369,9 +372,14 @@ export default {
   'toast.task.failed': 'Task failed',
 
   // Install prompt
-  'install.title': 'Install HAPI',
-  'install.description': 'Add HAPI to your home screen for quick access.',
+  'install.title': 'Install Hapi Power',
+  'install.description': 'Add Hapi Power to your home screen for quick access.',
   'install.button': 'Install',
+  'install.step1': 'Tap the Share button in the bottom toolbar',
+  'install.step2': 'Scroll down and tap "Add to Home Screen"',
+  'install.step3': 'Tap "Add" in the top right corner',
+  'install.dont_show': "Don't show again",
+  'install.later': 'Remind me later',
 
   // Language switcher
   'language.title': 'Language',
