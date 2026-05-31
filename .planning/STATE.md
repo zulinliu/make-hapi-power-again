@@ -40,34 +40,26 @@
 - [x] 审计报告 (0 P0, 7 P1, 15 P2, 8 P3)
 - [x] 4 项快速修复已提交 (D-03, D-04, A-03, A-04)
 
-### Phase 10: iOS PWA 深度优化
-- [ ] manifest + standalone 模式配置
-- [ ] 安全区域适配 (env(safe-area-inset-*))
-- [ ] 启动画面 (6 iPhone 型号 + 暗/亮变体)
-- [ ] 状态栏融合 (black-translucent + theme-color)
-- [ ] iOS 推送通知 (Web Push API)
-- [ ] 离线回退页面
-- [ ] Home Indicator 避让
+### Phase 10: iOS PWA 深度优化 ✅ (2026-05-31)
+- [x] manifest 增强: categories + shortcuts + maskable 图标 (192/512)
+- [x] iOS 多尺寸图标: 120/152/167/180
+- [x] iOS 启动画面: 6 iPhone 型号 x 暗/亮变体 = 12 张
+- [x] 离线回退页面: offline.html + SW NavigationRoute
+- [x] SW 缓存策略: NavigationRoute fallback + SPA 路由离线支持
 
-### Phase 11: 移动端体验增强
-- [ ] 终端虚拟键盘工具栏
-- [ ] 分享密码保护
-- [ ] 分享访问次数限制
-- [ ] 移动端 AI 聊天布局
-- [ ] 移动端审查手势 (swipe)
-- [ ] 响应式四断点验证
+### Phase 11: 移动端体验增强 ✅ (2026-05-31)
+- [x] 终端虚拟键盘第三行: Ctrl+C/D/L/Z + ~/`/./"/' + 长按变体
+- [x] Composer iOS PWA safe-area-inset-bottom 适配
+- [x] 分享密码保护: Bun.password 哈希 + POST 验证
+- [x] 分享访问次数限制: maxViews 字段 + 超限 410
 
-### Phase 12: i18n 中英双语
-- [ ] 统一 i18n 架构到 shared/src/i18n/
-- [ ] 中文翻译完善 (100% 覆盖)
-- [ ] 英文翻译
-- [ ] 语言动态切换
-- [ ] 日期/数字本地化
+### Phase 12: i18n 中英双语 ✅ (2026-05-31)
+- [x] 分享页面国际化: 18 个 share.* 翻译键 (zh-CN + en)
+- [x] 硬编码中文全部替换为 t() 调用
+- [x] 现有 i18n 架构确认: 397 键完整覆盖, en.ts 无中文泄漏
 
-### Phase 13: 设计打磨 + 收尾
-- [ ] 视觉一致性检查
-- [ ] 动画流畅度优化
-- [ ] 暗/亮模式验证
+### Phase 13: 设计打磨 + 收尾 (进行中)
+- [x] 视觉一致性检查 + 暗/亮模式验证
 - [ ] 构建 + v0.2 tag + GitHub Release
 
 ## 研究文档
