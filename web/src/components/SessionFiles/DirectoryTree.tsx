@@ -4,6 +4,7 @@ import { FileIcon } from '@/components/FileIcon'
 import { useSessionDirectory } from '@/hooks/queries/useSessionDirectory'
 import { formatDirectoryError } from '@/lib/files-i18n'
 import { useTranslation } from '@/lib/use-translation'
+import { useLongPress } from '@/hooks/useLongPress'
 
 function ChevronIcon(props: { className?: string; collapsed: boolean }) {
     return (
@@ -75,6 +76,38 @@ function DirectoryErrorRow(props: { depth: number; message: string }) {
     )
 }
 
+interface FileNodeProps {
+    filePath: string
+    fileName: string
+    depth: number
+    onOpenFile: (path: string) => void
+    onContextMenu: (path: string, type: 'file', point: { x: number; y: number }) => void
+}
+
+function FileNode({ filePath, fileName, depth, onOpenFile, onContextMenu }: FileNodeProps) {
+    const indent = 12 + depth * 14
+
+    const longPress = useLongPress({
+        onClick: () => onOpenFile(filePath),
+        onLongPress: (point) => onContextMenu(filePath, 'file', point),
+        threshold: 500,
+    })
+
+    return (
+        <div
+            className="flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-[var(--app-subtle-bg)] transition-colors cursor-pointer"
+            style={{ paddingLeft: indent, minHeight: 44 }}
+            {...longPress}
+        >
+            <span className="h-4 w-4" />
+            <FileIcon fileName={fileName} size={22} />
+            <div className="min-w-0 flex-1">
+                <div className="truncate font-medium">{fileName}</div>
+            </div>
+        </div>
+    )
+}
+
 function DirectoryNode(props: {
     api: ApiClient | null
     sessionId: string
@@ -82,6 +115,7 @@ function DirectoryNode(props: {
     label: string
     depth: number
     onOpenFile: (path: string) => void
+    onContextMenu: (path: string, type: 'file' | 'directory', point: { x: number; y: number }) => void
     expanded: Set<string>
     onToggle: (path: string) => void
 }) {
@@ -98,20 +132,25 @@ function DirectoryNode(props: {
     const indent = 12 + props.depth * 14
     const childIndent = 12 + childDepth * 14
 
+    const longPress = useLongPress({
+        onClick: () => props.onToggle(props.path),
+        onLongPress: (point) => props.onContextMenu(props.path, 'directory', point),
+        threshold: 500,
+    })
+
     return (
         <div>
-            <button
-                type="button"
-                onClick={() => props.onToggle(props.path)}
-                className="flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-[var(--app-subtle-bg)] transition-colors"
-                style={{ paddingLeft: indent }}
+            <div
+                className="flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-[var(--app-subtle-bg)] transition-colors cursor-pointer"
+                style={{ paddingLeft: indent, minHeight: 44 }}
+                {...longPress}
             >
                 <ChevronIcon collapsed={!isExpanded} className="text-[var(--app-hint)]" />
                 <FolderIcon className="text-[var(--app-link)]" />
                 <div className="min-w-0 flex-1">
                     <div className="truncate font-medium">{props.label}</div>
                 </div>
-            </button>
+            </div>
 
             {isExpanded ? (
                 isLoading ? (
@@ -131,6 +170,7 @@ function DirectoryNode(props: {
                                     label={entry.name}
                                     depth={childDepth}
                                     onOpenFile={props.onOpenFile}
+                                    onContextMenu={props.onContextMenu}
                                     expanded={props.expanded}
                                     onToggle={props.onToggle}
                                 />
@@ -140,19 +180,14 @@ function DirectoryNode(props: {
                         {files.map((entry) => {
                             const filePath = props.path ? `${props.path}/${entry.name}` : entry.name
                             return (
-                                <button
+                                <FileNode
                                     key={filePath}
-                                    type="button"
-                                    onClick={() => props.onOpenFile(filePath)}
-                                    className="flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-[var(--app-subtle-bg)] transition-colors"
-                                    style={{ paddingLeft: childIndent }}
-                                >
-                                    <span className="h-4 w-4" />
-                                    <FileIcon fileName={entry.name} size={22} />
-                                    <div className="min-w-0 flex-1">
-                                        <div className="truncate font-medium">{entry.name}</div>
-                                    </div>
-                                </button>
+                                    filePath={filePath}
+                                    fileName={entry.name}
+                                    depth={childDepth}
+                                    onOpenFile={props.onOpenFile}
+                                    onContextMenu={props.onContextMenu}
+                                />
                             )
                         })}
 
@@ -176,6 +211,7 @@ export function DirectoryTree(props: {
     sessionId: string
     rootLabel: string
     onOpenFile: (path: string) => void
+    onContextMenu?: (path: string, type: 'file' | 'directory', point: { x: number; y: number }) => void
 }) {
     const [expanded, setExpanded] = useState<Set<string>>(() => new Set(['']))
 
@@ -191,6 +227,8 @@ export function DirectoryTree(props: {
         })
     }, [])
 
+    const handleContextMenu = props.onContextMenu ?? (() => {})
+
     return (
         <div className="border-t border-[var(--app-divider)]">
             <DirectoryNode
@@ -200,10 +238,10 @@ export function DirectoryTree(props: {
                 label={props.rootLabel}
                 depth={0}
                 onOpenFile={props.onOpenFile}
+                onContextMenu={handleContextMenu}
                 expanded={expanded}
                 onToggle={handleToggle}
             />
         </div>
     )
 }
-

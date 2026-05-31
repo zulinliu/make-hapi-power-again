@@ -383,11 +383,51 @@ export class ApiClient {
         return await this.request<FileReadResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/file?${params.toString()}`)
     }
 
-    async writeSessionFile(sessionId: string, path: string, content: string, expectedHash?: string): Promise<{ success: boolean; error?: string }> {
+    async writeSessionFile(sessionId: string, path: string, content: string, expectedHash?: string, forceOverwrite?: boolean): Promise<{ success: boolean; error?: string }> {
         return await this.request<{ success: boolean; error?: string }>(`/api/sessions/${encodeURIComponent(sessionId)}/file`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ path, content, expectedHash })
+            body: JSON.stringify({ path, content, expectedHash, forceOverwrite })
+        })
+    }
+
+    async deleteSessionFile(sessionId: string, path: string, recursive?: boolean): Promise<{ success: boolean; error?: string }> {
+        return await this.request<{ success: boolean; error?: string }>(`/api/sessions/${encodeURIComponent(sessionId)}/file`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path, recursive })
+        })
+    }
+
+    async renameSessionFile(sessionId: string, oldPath: string, newPath: string): Promise<{ success: boolean; error?: string }> {
+        return await this.request<{ success: boolean; error?: string }>(`/api/sessions/${encodeURIComponent(sessionId)}/rename`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ oldPath, newPath })
+        })
+    }
+
+    async copySessionFile(sessionId: string, sourcePath: string, destinationPath: string): Promise<{ success: boolean; error?: string }> {
+        return await this.request<{ success: boolean; error?: string }>(`/api/sessions/${encodeURIComponent(sessionId)}/copy`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sourcePath, destinationPath })
+        })
+    }
+
+    async moveSessionFile(sessionId: string, sourcePath: string, destinationPath: string): Promise<{ success: boolean; error?: string }> {
+        return await this.request<{ success: boolean; error?: string }>(`/api/sessions/${encodeURIComponent(sessionId)}/move`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sourcePath, destinationPath })
+        })
+    }
+
+    async createDirectory(sessionId: string, path: string, recursive?: boolean): Promise<{ success: boolean; error?: string }> {
+        return await this.request<{ success: boolean; error?: string }>(`/api/sessions/${encodeURIComponent(sessionId)}/mkdir`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path, recursive })
         })
     }
 

@@ -573,4 +573,52 @@ export default {
   'git.fetch.fetching': 'Fetching…',
   'git.fetch.success': 'Fetch completed',
   'git.fetch.noChanges': 'Already up to date',
+
+  // File operations
+  'file.context.newFile': 'New File',
+  'file.context.newFolder': 'New Folder',
+  'file.context.rename': 'Rename',
+  'file.context.copyPath': 'Copy Path',
+  'file.context.move': 'Move…',
+  'file.context.copy': 'Copy…',
+  'file.context.delete': 'Delete',
+
+  'file.toolbar.newFile': 'New File',
+  'file.toolbar.newFolder': 'New Folder',
+
+  'file.rename.title': 'Rename',
+  'file.rename.placeholder': 'Enter new name',
+  'file.rename.submit': 'Rename',
+  'file.rename.failed': 'Rename failed',
+
+  'file.delete.title': 'Delete',
+  'file.delete.confirm': 'Delete "{path}"? This cannot be undone.',
+  'file.delete.submit': 'Delete',
+  'file.delete.submitting': 'Deleting…',
+  'file.delete.failed': 'Delete failed',
+
+  'file.move.title': 'Move',
+  'file.move.submit': 'Move',
+  'file.move.failed': 'Move failed',
+  'file.move.source': 'Source',
+  'file.move.destinationPlaceholder': 'Enter destination path',
+
+  'file.copy.title': 'Copy',
+  'file.copy.submit': 'Copy',
+  'file.copy.failed': 'Copy failed',
+
+  'file.newFile.title': 'New File',
+  'file.newFile.placeholder': 'Enter file name',
+  'file.newFile.submit': 'Create',
+  'file.newFile.failed': 'Failed to create file',
+
+  'file.newFolder.title': 'New Folder',
+  'file.newFolder.placeholder': 'Enter folder name',
+  'file.newFolder.submit': 'Create',
+  'file.newFolder.failed': 'Failed to create folder',
+
+  // File preview
+  'file.preview.mode.preview': 'Preview',
+  'file.preview.mode.edit': 'Edit',
+  'file.preview.mode.diff': 'Diff',
 } as const

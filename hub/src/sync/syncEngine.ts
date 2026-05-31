@@ -948,8 +948,28 @@ export class SyncEngine {
         return await this.rpcGateway.readSessionFile(sessionId, path)
     }
 
-    async writeSessionFile(sessionId: string, options: { path: string; content: string; expectedHash?: string }): Promise<RpcCommandResponse> {
+    async writeSessionFile(sessionId: string, options: { path: string; content: string; expectedHash?: string; forceOverwrite?: boolean }): Promise<RpcCommandResponse> {
         return await this.rpcGateway.writeSessionFile(sessionId, options)
+    }
+
+    async deleteSessionFile(sessionId: string, path: string, recursive?: boolean): Promise<{ success: boolean; error?: string }> {
+        return await this.rpcGateway.deleteSessionFile(sessionId, path, recursive)
+    }
+
+    async renameSessionFile(sessionId: string, oldPath: string, newPath: string): Promise<{ success: boolean; error?: string }> {
+        return await this.rpcGateway.renameSessionFile(sessionId, oldPath, newPath)
+    }
+
+    async copySessionFile(sessionId: string, sourcePath: string, destinationPath: string): Promise<{ success: boolean; error?: string }> {
+        return await this.rpcGateway.copySessionFile(sessionId, sourcePath, destinationPath)
+    }
+
+    async moveSessionFile(sessionId: string, sourcePath: string, destinationPath: string): Promise<{ success: boolean; error?: string }> {
+        return await this.rpcGateway.moveSessionFile(sessionId, sourcePath, destinationPath)
+    }
+
+    async createDirectory(sessionId: string, path: string, recursive?: boolean): Promise<{ success: boolean; error?: string }> {
+        return await this.rpcGateway.createDirectory(sessionId, path, recursive)
     }
 
     async readGeneratedImage(sessionId: string, imageId: string): Promise<RpcGeneratedImageResponse> {

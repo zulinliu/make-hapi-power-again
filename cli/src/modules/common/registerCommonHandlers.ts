@@ -6,6 +6,7 @@ import { registerOpencodeModelHandlers } from './handlers/opencodeModels'
 import { registerDirectoryHandlers } from './handlers/directories'
 import { registerDifftasticHandlers } from './handlers/difftastic'
 import { registerFileHandlers } from './handlers/files'
+import { registerFileOperationHandlers } from './handlers/fileOperations'
 import { registerGitHandlers } from './handlers/git'
 import { registerRipgrepHandlers } from './handlers/ripgrep'
 import { registerSlashCommandHandlers } from './handlers/slashCommands'
@@ -20,6 +21,7 @@ export function registerCommonHandlers(rpcHandlerManager: RpcHandlerManager, wor
     registerCursorModelHandlers(rpcHandlerManager)
     registerOpencodeModelHandlers(rpcHandlerManager)
     registerFileHandlers(rpcHandlerManager, workingDirectory)
+    registerFileOperationHandlers(rpcHandlerManager, workingDirectory)
     registerDirectoryHandlers(rpcHandlerManager, workingDirectory)
     registerRipgrepHandlers(rpcHandlerManager, workingDirectory)
     registerDifftasticHandlers(rpcHandlerManager, workingDirectory)
