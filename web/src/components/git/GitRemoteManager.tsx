@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { useAppContext } from '@/lib/app-context'
+import { useTranslation } from '@/lib/use-translation'
 
 interface GitRemoteManagerProps {
     sessionId: string
@@ -28,6 +29,7 @@ function parseRemotes(stdout: string): RemoteEntry[] {
 
 export function GitRemoteManager({ sessionId, onRemotesLoaded }: { sessionId: string; onRemotesLoaded?: (remotes: RemoteEntry[]) => void }) {
     const { api } = useAppContext()
+    const { t } = useTranslation()
     const [remotes, setRemotes] = useState<RemoteEntry[]>([])
     const [loading, setLoading] = useState(false)
     const [newName, setNewName] = useState('')
@@ -87,9 +89,9 @@ export function GitRemoteManager({ sessionId, onRemotesLoaded }: { sessionId: st
             )}
 
             {loading ? (
-                <div className="text-sm" style={{ color: 'var(--app-text-muted)' }}>Loading remotes...</div>
+                <div className="text-sm" style={{ color: 'var(--app-text-muted)' }}>{t('git.remote.loading')}</div>
             ) : remotes.length === 0 ? (
-                <div className="text-sm" style={{ color: 'var(--app-text-muted)' }}>No remotes configured</div>
+                <div className="text-sm" style={{ color: 'var(--app-text-muted)' }}>{t('git.remote.empty')}</div>
             ) : (
                 <div className="space-y-2">
                     {remotes.map((remote) => (
@@ -110,7 +112,7 @@ export function GitRemoteManager({ sessionId, onRemotesLoaded }: { sessionId: st
                                 onClick={() => handleRemove(remote.name)}
                                 className="ml-2 text-red-400 hover:text-red-300"
                             >
-                                Remove
+                                {t('git.remote.remove')}
                             </Button>
                         </div>
                     ))}
@@ -118,7 +120,7 @@ export function GitRemoteManager({ sessionId, onRemotesLoaded }: { sessionId: st
             )}
 
             <div className="border-t pt-4" style={{ borderColor: 'var(--app-border)' }}>
-                <div className="mb-2 text-sm font-medium">Add Remote</div>
+                <div className="mb-2 text-sm font-medium">{t('git.remote.addTitle')}</div>
                 <div className="flex gap-2">
                     <input
                         value={newName}
@@ -137,7 +139,7 @@ export function GitRemoteManager({ sessionId, onRemotesLoaded }: { sessionId: st
                         disabled={!newName || !newUrl}
                         size="sm"
                     >
-                        Add
+                        {t('git.remote.add')}
                     </Button>
                 </div>
             </div>

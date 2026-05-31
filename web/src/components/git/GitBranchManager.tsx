@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAppContext } from '@/lib/app-context'
+import { useTranslation } from '@/lib/use-translation'
 
 interface Branch {
   name: string
@@ -9,6 +10,7 @@ interface Branch {
 
 export function GitBranchManager({ sessionId }: { sessionId: string }) {
   const { api } = useAppContext()
+  const { t } = useTranslation()
   const [branches, setBranches] = useState<Branch[]>([])
   const [loading, setLoading] = useState(false)
   const [newBranchName, setNewBranchName] = useState('')
@@ -42,7 +44,7 @@ export function GitBranchManager({ sessionId }: { sessionId: string }) {
         setNewBranchName('')
         loadBranches()
       } else {
-        setError(res.error || 'Failed to create branch')
+        setError(res.error || t('git.branch.createFailed'))
       }
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : String(e))
@@ -56,7 +58,7 @@ export function GitBranchManager({ sessionId }: { sessionId: string }) {
       if (res.success) {
         loadBranches()
       } else {
-        setError(res.error || 'Failed to switch branch')
+        setError(res.error || t('git.branch.switchFailed'))
       }
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : String(e))
@@ -70,7 +72,7 @@ export function GitBranchManager({ sessionId }: { sessionId: string }) {
       if (res.success) {
         loadBranches()
       } else {
-        setError(res.error || 'Failed to delete branch')
+        setError(res.error || t('git.branch.deleteFailed'))
       }
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : String(e))
@@ -85,7 +87,7 @@ export function GitBranchManager({ sessionId }: { sessionId: string }) {
       if (res.success) {
         loadBranches()
       } else {
-        setError(res.stderr || res.error || 'Merge failed (possible conflicts)')
+        setError(res.stderr || res.error || t('git.branch.mergeFailed'))
       }
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : String(e))
@@ -99,7 +101,7 @@ export function GitBranchManager({ sessionId }: { sessionId: string }) {
           type="text"
           value={newBranchName}
           onChange={(e) => setNewBranchName(e.target.value)}
-          placeholder="New branch name..."
+          placeholder={t('git.branch.newPlaceholder')}
           className="flex-1 text-sm px-3 py-1.5 rounded-md border outline-none"
           style={{
             background: 'var(--hp-surface-1)',
@@ -118,14 +120,14 @@ export function GitBranchManager({ sessionId }: { sessionId: string }) {
             opacity: newBranchName.trim() ? 1 : 0.5,
           }}
         >
-          Create
+          {t('git.branch.create')}
         </button>
       </div>
 
       {error && <p className="text-xs" style={{ color: 'var(--hp-danger)' }}>{error}</p>}
 
       {loading ? (
-        <p className="text-sm" style={{ color: 'var(--hp-text-tertiary)' }}>Loading...</p>
+        <p className="text-sm" style={{ color: 'var(--hp-text-tertiary)' }}>{t('git.branch.loading')}</p>
       ) : (
         <div className="space-y-1">
           {branches.map((branch) => (
@@ -140,15 +142,15 @@ export function GitBranchManager({ sessionId }: { sessionId: string }) {
               {!branch.isCurrent && !branch.isRemote && (
                 <>
                   <button onClick={() => handleMerge(branch.name)} className="text-xs px-2 py-0.5 rounded"
-                    style={{ color: 'var(--hp-text-tertiary)' }} title="Merge into current">
+                    style={{ color: 'var(--hp-text-tertiary)' }} title={t('git.branch.merge')}>
                     ⊕
                   </button>
                   <button onClick={() => handleSwitch(branch.name)} className="text-xs px-2 py-0.5 rounded"
-                    style={{ color: 'var(--hp-text-tertiary)' }} title="Switch">
+                    style={{ color: 'var(--hp-text-tertiary)' }} title={t('git.branch.switch')}>
                     ⇄
                   </button>
                   <button onClick={() => handleDelete(branch.name)} className="text-xs px-2 py-0.5 rounded"
-                    style={{ color: 'var(--hp-text-tertiary)' }} title="Delete">
+                    style={{ color: 'var(--hp-text-tertiary)' }} title={t('git.branch.delete')}>
                     ×
                   </button>
                 </>

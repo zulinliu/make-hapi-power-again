@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAppContext } from '@/lib/app-context'
+import { useTranslation } from '@/lib/use-translation'
 
 interface GitFile {
   status: string
@@ -13,8 +14,13 @@ interface StatusData {
   files: GitFile[]
 }
 
-export function GitStatusPanel({ sessionId, onStatusLoaded }: { sessionId: string; onStatusLoaded?: (branch: string) => void }) {
+export function GitStatusPanel({ sessionId, onStatusLoaded, onFilesChanged }: {
+  sessionId: string
+  onStatusLoaded?: (branch: string) => void
+  onFilesChanged?: (files: { status: string; path: string }[]) => void
+}) {
   const { api } = useAppContext()
+  const { t } = useTranslation()
   const [status, setStatus] = useState<StatusData | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -29,27 +35,28 @@ export function GitStatusPanel({ sessionId, onStatusLoaded }: { sessionId: strin
         const parsed = parseGitStatus(res.stdout)
         setStatus(parsed)
         onStatusLoaded?.(parsed.branch)
+        onFilesChanged?.(parsed.files)
       } else {
-        setError(res.error || 'Git status failed')
+        setError(res.error || t('git.status.failed'))
       }
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : String(e))
     } finally {
       setLoading(false)
     }
-  }, [api, sessionId, onStatusLoaded])
+  }, [api, sessionId, onStatusLoaded, onFilesChanged, t])
 
   useEffect(() => { refresh() }, [refresh])
 
   if (loading && !status) {
-    return <div className="p-4 text-sm" style={{ color: 'var(--hp-text-tertiary)' }}>Loading...</div>
+    return <div className="p-4 text-sm" style={{ color: 'var(--hp-text-tertiary)' }}>{t('git.status.loading')}</div>
   }
 
   if (error) {
     return (
       <div className="p-4">
         <p className="text-sm" style={{ color: 'var(--hp-danger)' }}>{error}</p>
-        <button onClick={refresh} className="text-xs mt-2 underline" style={{ color: 'var(--hp-primary)' }}>Retry</button>
+        <button onClick={refresh} className="text-xs mt-2 underline" style={{ color: 'var(--hp-primary)' }}>{t('git.status.retry')}</button>
       </div>
     )
   }
@@ -72,7 +79,7 @@ export function GitStatusPanel({ sessionId, onStatusLoaded }: { sessionId: strin
       </div>
 
       {status.files.length === 0 ? (
-        <p className="text-sm" style={{ color: 'var(--hp-text-tertiary)' }}>Working tree clean</p>
+        <p className="text-sm" style={{ color: 'var(--hp-text-tertiary)' }}>{t('git.status.clean')}</p>
       ) : (
         <div className="space-y-1">
           {status.files.map((file) => (

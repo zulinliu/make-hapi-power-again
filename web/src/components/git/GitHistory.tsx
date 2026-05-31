@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAppContext } from '@/lib/app-context'
+import { useTranslation } from '@/lib/use-translation'
 
 interface CommitEntry {
   hash: string
@@ -9,6 +10,7 @@ interface CommitEntry {
 
 export function GitHistory({ sessionId }: { sessionId: string }) {
   const { api } = useAppContext()
+  const { t } = useTranslation()
   const [commits, setCommits] = useState<CommitEntry[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -22,23 +24,27 @@ export function GitHistory({ sessionId }: { sessionId: string }) {
       if (res.success && res.stdout) {
         setCommits(parseLog(res.stdout))
       } else {
-        setError(res.error || 'Failed to load history')
+        setError(res.error || t('git.history.failed'))
       }
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : String(e))
     } finally {
       setLoading(false)
     }
-  }, [api, sessionId])
+  }, [api, sessionId, t])
 
   useEffect(() => { loadHistory() }, [loadHistory])
 
   if (loading && commits.length === 0) {
-    return <div className="p-4 text-sm" style={{ color: 'var(--hp-text-tertiary)' }}>Loading history...</div>
+    return <div className="p-4 text-sm" style={{ color: 'var(--hp-text-tertiary)' }}>{t('git.history.loading')}</div>
   }
 
   if (error) {
     return <div className="p-4 text-sm" style={{ color: 'var(--hp-danger)' }}>{error}</div>
+  }
+
+  if (commits.length === 0) {
+    return <div className="p-4 text-sm" style={{ color: 'var(--hp-text-tertiary)' }}>{t('git.history.empty')}</div>
   }
 
   return (
