@@ -1,5 +1,5 @@
 /**
- * Global configuration for HAPI CLI
+ * Global configuration for Hapi Power CLI
  *
  * Centralizes all configuration including environment variables and paths
  * Environment files should be loaded using Node's --env-file flag
@@ -72,7 +72,7 @@ class Configuration {
             const expandedPath = process.env.HAPI_POWER_HOME.replace(/^~/, homedir())
             this.hapiPowerHomeDir = expandedPath
         } else {
-            this.hapiPowerHomeDir = join(homedir(), '.hapi')
+            this.hapiPowerHomeDir = join(homedir(), '.hapi-power')
         }
 
         this.logsDir = join(this.hapiPowerHomeDir, 'logs')

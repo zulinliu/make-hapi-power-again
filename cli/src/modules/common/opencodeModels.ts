@@ -97,7 +97,7 @@ async function runOpencodeProbe(cwd: string): Promise<ListOpencodeModelsForCwdRe
                 terminal: false
             },
             clientInfo: {
-                name: 'hapi-opencode-models',
+                name: 'hapi-power-opencode-models',
                 version: packageJson.version
             }
         }, { timeoutMs: PROBE_TIMEOUT_MS });

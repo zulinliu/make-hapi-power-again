@@ -57,7 +57,7 @@ export async function listCodexModels(includeHidden: boolean = false): Promise<C
         await client.connect();
         await client.initialize({
             clientInfo: {
-                name: 'hapi-codex-models',
+                name: 'hapi-power-codex-models',
                 version: '1.0.0'
             },
             capabilities: {

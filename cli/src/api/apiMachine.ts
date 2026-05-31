@@ -405,9 +405,9 @@ export class ApiMachineClient {
             const desiredWorkspaceRoots = this.workspaceRoots
             if (!workspaceRootsEqual(desiredWorkspaceRoots, hubWorkspaceRoots)) {
                 if (desiredWorkspaceRoots?.length) {
-                    console.log(`[HAPI] Syncing workspace roots to hub: ${formatWorkspaceRoots(desiredWorkspaceRoots)} (current hub value: ${formatWorkspaceRoots(hubWorkspaceRoots)})`)
+                    console.log(`[HapiPower] Syncing workspace roots to hub: ${formatWorkspaceRoots(desiredWorkspaceRoots)} (current hub value: ${formatWorkspaceRoots(hubWorkspaceRoots)})`)
                 } else {
-                    console.log(`[HAPI] Clearing workspace roots on hub (was: ${formatWorkspaceRoots(hubWorkspaceRoots)})`)
+                    console.log(`[HapiPower] Clearing workspace roots on hub (was: ${formatWorkspaceRoots(hubWorkspaceRoots)})`)
                 }
                 this.updateMachineMetadata((current) => {
                     const base = current ?? this.machine.metadata
@@ -420,12 +420,12 @@ export class ApiMachineClient {
                     const { workspaceRoots: _workspaceRoots, ...rest } = base
                     return rest as MachineMetadata
                 }).then(() => {
-                    console.log(`[HAPI] Workspace roots synced: ${formatWorkspaceRoots(this.machine.metadata?.workspaceRoots)}`)
+                    console.log(`[HapiPower] Workspace roots synced: ${formatWorkspaceRoots(this.machine.metadata?.workspaceRoots)}`)
                 }).catch((error) => {
-                    console.error('[HAPI] Failed to sync workspace roots:', error instanceof Error ? error.message : error)
+                    console.error('[HapiPower] Failed to sync workspace roots:', error instanceof Error ? error.message : error)
                 })
             } else if (desiredWorkspaceRoots?.length) {
-                console.log(`[HAPI] Workspace roots already up to date on hub: ${formatWorkspaceRoots(desiredWorkspaceRoots)}`)
+                console.log(`[HapiPower] Workspace roots already up to date on hub: ${formatWorkspaceRoots(desiredWorkspaceRoots)}`)
             }
 
             this.startKeepAlive()

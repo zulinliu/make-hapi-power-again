@@ -26,35 +26,35 @@ const PLATFORMS = [
         os: 'darwin',
         cpu: 'arm64',
         buildTarget: 'bun-darwin-arm64',
-        binName: 'hapi'
+        binName: 'hapi-power'
     },
     {
         name: 'darwin-x64',
         os: 'darwin',
         cpu: 'x64',
         buildTarget: 'bun-darwin-x64',
-        binName: 'hapi'
+        binName: 'hapi-power'
     },
     {
         name: 'linux-arm64',
         os: 'linux',
         cpu: 'arm64',
         buildTarget: 'bun-linux-arm64',
-        binName: 'hapi'
+        binName: 'hapi-power'
     },
     {
         name: 'linux-x64',
         os: 'linux',
         cpu: 'x64',
         buildTarget: 'bun-linux-x64-baseline',
-        binName: 'hapi'
+        binName: 'hapi-power'
     },
     {
         name: 'win32-x64',
         os: 'win32',
         cpu: 'x64',
         buildTarget: 'bun-windows-x64',
-        binName: 'hapi.exe'
+        binName: 'hapi-power.exe'
     }
 ] as const;
 
@@ -86,7 +86,7 @@ function generatePlatformPackageJson(
     mainPkg: MainPackageJson
 ): object {
     return {
-        name: `@twsxtd/hapi-${platform.name}`,
+        name: `@hapipower/hapi-power-${platform.name}`,
         version: mainPkg.version,
         description: `hapi binary for ${platform.os} ${platform.cpu}`,
         os: [platform.os],
@@ -104,7 +104,7 @@ function buildOptionalDependencies(version: string): Record<string, string> {
     const optionalDependencies: Record<string, string> = {};
 
     for (const platform of PLATFORMS) {
-        optionalDependencies[`@twsxtd/hapi-${platform.name}`] = version;
+        optionalDependencies[`@hapipower/hapi-power-${platform.name}`] = version;
     }
 
     return optionalDependencies;

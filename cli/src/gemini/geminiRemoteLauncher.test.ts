@@ -35,8 +35,8 @@ vi.mock('./utils/geminiBackend', () => ({
     }))
 }));
 
-vi.mock('@/codex/utils/buildHapiMcpBridge', () => ({
-    buildHapiMcpBridge: async () => ({
+vi.mock('@/codex/utils/buildHapiPowerMcpBridge', () => ({
+    buildHapiPowerMcpBridge: async () => ({
         server: { stop: () => {} },
         mcpServers: {}
     })
@@ -104,8 +104,8 @@ function createSessionStub(items: Array<{ message: string; mode: GeminiMode }>) 
     };
 
     const session = {
-        path: '/tmp/hapi-gemini-test',
-        logPath: '/tmp/hapi-gemini-test/test.log',
+        path: '/tmp/hapi-power-gemini-test',
+        logPath: '/tmp/hapi-power-gemini-test/test.log',
         client,
         queue,
         sessionId: null as string | null,

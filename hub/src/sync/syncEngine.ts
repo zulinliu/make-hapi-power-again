@@ -1,9 +1,9 @@
 /**
- * Sync Engine for HAPI Telegram Bot (Direct Connect)
+ * Sync Engine for HapiPower Telegram Bot (Direct Connect)
  *
  * In the direct-connect architecture:
  * - hapi-power-hub is the hub (Socket.IO + REST)
- * - hapi CLI connects directly to the hub (no relay)
+ * - HapiPower CLI connects directly to the hub (no relay)
  * - No E2E encryption; data is stored as JSON in SQLite
  */
 

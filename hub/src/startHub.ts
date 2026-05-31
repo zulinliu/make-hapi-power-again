@@ -97,7 +97,7 @@ export interface StartHubOptions {
 }
 
 export async function startHub(options: StartHubOptions = {}): Promise<HubInstance> {
-    console.log('HAPI Hub starting...')
+    console.log('HapiPower Hub starting...')
 
     let syncEngine: SyncEngine | null = null
     let happyBot: HappyBot | null = null
@@ -108,9 +108,9 @@ export async function startHub(options: StartHubOptions = {}): Promise<HubInstan
     let tunnelManager: TunnelManager | null = null
 
     // Load configuration (async - loads from env/file with persistence)
-    const relayApiDomain = process.env.HAPI_POWER_RELAY_API || 'relay.hapi.run'
+    const relayApiDomain = process.env.HAPI_POWER_RELAY_API || 'YOUR_RELAY_DOMAIN'
     const relayFlag = resolveRelayFlag(options.args ?? process.argv)
-    const officialWebUrl = process.env.HAPI_POWER_OFFICIAL_WEB_URL || 'https://app.hapi.run'
+    const officialWebUrl = process.env.HAPI_POWER_OFFICIAL_WEB_URL || 'https://YOUR_DOMAIN'
     const config = await createConfiguration()
     const baseCorsOrigins = normalizeOrigins(config.corsOrigins)
     const relayCorsOrigin = normalizeOrigin(officialWebUrl)
@@ -167,7 +167,7 @@ export async function startHub(options: StartHubOptions = {}): Promise<HubInstan
     const store = new Store(config.dbPath)
     const jwtSecret = await getOrCreateJwtSecret()
     const vapidKeys = await getOrCreateVapidKeys(config.dataDir)
-    const vapidSubject = process.env.VAPID_SUBJECT ?? 'mailto:admin@hapi.run'
+    const vapidSubject = process.env.VAPID_SUBJECT ?? 'mailto:admin@YOUR_DOMAIN'
     const pushService = new PushService(vapidKeys, vapidSubject, store)
 
     visibilityTracker = new VisibilityTracker()
@@ -303,7 +303,7 @@ export async function startHub(options: StartHubOptions = {}): Promise<HubInstan
         void announceTunnelAccess()
     }
     console.log('')
-    console.log('HAPI Hub is ready!')
+    console.log('HapiPower Hub is ready!')
 
     return {
         stop: async () => {

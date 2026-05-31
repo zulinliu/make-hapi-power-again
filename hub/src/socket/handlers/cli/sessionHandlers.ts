@@ -310,7 +310,7 @@ export function registerSessionHandlers(socket: CliSocketWithData, deps: Session
         // session end.  *All* scheduled rows — mature or future — are deliberately
         // preserved in DB so the mature-scan path (releaseMatureScheduledMessages)
         // remains the sole emit channel and the CLI ack remains the sole writer of
-        // invoked_at.  See HAPI Bot R4: stamping a mature scheduled row here would
+        // invoked_at.  See HapiPower Bot R4: stamping a mature scheduled row here would
         // make the next mature-scan tick skip it (filter on invoked_at IS NULL) and
         // silently drop the user's prompt.
         //

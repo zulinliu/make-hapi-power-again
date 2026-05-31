@@ -102,7 +102,7 @@ export function isExternalUserMessage(body: RawJSONLines): body is Extract<RawJS
  * Why id-first: scheduled messages keep the seq assigned at insertion time, so
  * a row scheduled for T+1h (seq=10) can be released after a later immediate
  * message (seq=11) has already advanced the cursor.  A pure seq <= cursor
- * filter would silently drop the mature emit.  See HAPI Bot R3 finding #1.
+ * filter would silently drop the mature emit.  See HapiPower Bot R3 finding #1.
  */
 export class IncomingMessageFilter {
     private readonly seenIds = new Set<string>()

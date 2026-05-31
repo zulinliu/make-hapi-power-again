@@ -121,7 +121,7 @@ function createWebApp(options: {
 
     // Skip static serving in relay mode, show helpful message on root
     if (options.relayMode) {
-        const officialUrl = options.officialWebUrl || 'https://app.hapi.run'
+        const officialUrl = options.officialWebUrl || 'https://YOUR_DOMAIN'
         app.get('/', (c) => {
             return c.html(`<!DOCTYPE html>
 <html>

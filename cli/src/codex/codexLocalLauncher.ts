@@ -5,7 +5,7 @@ import type { ReasoningEffort } from './appServerTypes';
 import { CodexSession } from './session';
 import { createCodexSessionScanner, type CodexSessionScanner } from './utils/codexSessionScanner';
 import { convertCodexEvent } from './utils/codexEventConverter';
-import { buildHapiMcpBridge } from './utils/buildHapiMcpBridge';
+import { buildHapiPowerMcpBridge } from './utils/buildHapiPowerMcpBridge';
 import { stripCodexCliOverrides } from './utils/codexCliOverrides';
 import { buildCodexPermissionModeCliArgs } from './utils/permissionModeConfig';
 import { BaseLocalLauncher } from '@/modules/common/launcher/BaseLocalLauncher';
@@ -29,9 +29,9 @@ export async function codexLocalLauncher(session: CodexSession): Promise<'switch
         ]
         : session.codexArgs;
 
-    // Start hapi hub for MCP bridge (same as remote mode)
-    const { server: happyServer, mcpServers } = await buildHapiMcpBridge(session.client);
-    logger.debug(`[codex-local]: Started hapi MCP bridge server at ${happyServer.url}`);
+    // Start HapiPower hub for MCP bridge (same as remote mode)
+    const { server: happyServer, mcpServers } = await buildHapiPowerMcpBridge(session.client);
+    logger.debug(`[codex-local]: Started HapiPower MCP bridge server at ${happyServer.url}`);
 
     const reportTranscriptSyncFailure = (transcriptPath: string, error: unknown): void => {
         const detail = error instanceof Error ? error.message : String(error);
@@ -213,6 +213,6 @@ export async function codexLocalLauncher(session: CodexSession): Promise<'switch
         if (!hookReady) {
             logger.debug('[codex-local]: SessionStart hook did not provide transcript path before shutdown');
         }
-        logger.debug('[codex-local]: Stopped hapi MCP bridge server');
+        logger.debug('[codex-local]: Stopped HapiPower MCP bridge server');
     }
 }

@@ -6,7 +6,7 @@
  * they are automatically saved for future use
  *
  * Optional environment variables:
- * - CLI_API_TOKEN: Shared secret for hapi CLI authentication (auto-generated if not set)
+ * - CLI_API_TOKEN: Shared secret for HapiPower CLI authentication (auto-generated if not set)
  * - TELEGRAM_BOT_TOKEN: Telegram Bot API token from @BotFather
  * - TELEGRAM_NOTIFICATION: Enable/disable Telegram notifications (default: true)
  * - SERVERCHAN_SENDKEY: Server酱 SendKey/AppKey for push notifications
@@ -15,10 +15,10 @@
  * - HAPI_POWER_LISTEN_PORT: Port for HTTP service (default: 3006)
  * - HAPI_POWER_PUBLIC_URL: Public URL for external access (e.g., Telegram Mini App)
  * - CORS_ORIGINS: Comma-separated CORS origins
- * - HAPI_POWER_RELAY_API: Relay API domain for tunwg (default: relay.hapi.run)
- * - HAPI_POWER_RELAY_AUTH: Relay auth key for tunwg (default: hapi)
+ * - HAPI_POWER_RELAY_API: Relay API domain for tunwg (default: YOUR_RELAY_DOMAIN)
+ * - HAPI_POWER_RELAY_AUTH: Relay auth key for tunwg (default: hapi-power)
  * - HAPI_POWER_RELAY_FORCE_TCP: Force TCP relay mode when UDP is unavailable (true/1)
- * - VAPID_SUBJECT: Contact email or URL for Web Push (defaults to mailto:admin@hapi.run)
+ * - VAPID_SUBJECT: Contact email or URL for Web Push (defaults to mailto:admin@YOUR_DOMAIN)
  * - HAPI_POWER_HOME: Data directory (default: ~/.hapi)
  * - DB_PATH: SQLite database path (default: {HAPI_POWER_HOME}/hapi-power.db)
  */
@@ -136,7 +136,7 @@ class Configuration {
         // 1. Determine data directory (env only - not persisted)
         const dataDir = process.env.HAPI_POWER_HOME
             ? process.env.HAPI_POWER_HOME.replace(/^~/, homedir())
-            : join(homedir(), '.hapi')
+            : join(homedir(), '.hapi-power')
 
         // Ensure data directory exists before loading settings
         if (!existsSync(dataDir)) {
