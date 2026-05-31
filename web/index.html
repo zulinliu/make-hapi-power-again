@@ -14,7 +14,7 @@
         <!-- iOS PWA Meta Tags -->
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="apple-mobile-web-app-title" content="HAPI" />
+        <meta name="apple-mobile-web-app-title" content="Hapi Power" />
         <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
         <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png" />
         <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png" />
@@ -45,7 +45,7 @@
         <script>
             (function () {
                 try {
-                    var raw = localStorage.getItem('hapi-font-scale')
+                    var raw = localStorage.getItem('hapi-power-font-scale')
                     var scale = Number(raw)
                     if (scale === 0.8 || scale === 0.9 || scale === 1 || scale === 1.1 || scale === 1.2) {
                         document.documentElement.style.setProperty('--app-font-scale', String(scale))
@@ -62,7 +62,7 @@
 
                 function getInitialScheme() {
                     try {
-                        var appearance = localStorage.getItem('hapi-appearance')
+                        var appearance = localStorage.getItem('hapi-power-appearance')
                         if (appearance === 'dark' || appearance === 'light') return appearance
                     } catch (error) {
                         // Ignore storage errors.
@@ -85,7 +85,7 @@
             html[data-theme="dark"] { background: #1c1c1e; color-scheme: dark }
         </style>
 
-        <title>HAPI</title>
+        <title>Hapi Power</title>
     </head>
     <body>
         <div id="root"></div>

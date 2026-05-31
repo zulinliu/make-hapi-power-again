@@ -41,9 +41,9 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
         const initialContext = voiceHooks.onVoiceStarted(sessionId)
 
         // Read voice preferences from localStorage
-        const voiceLang = localStorage.getItem('hapi-voice-lang')
+        const voiceLang = localStorage.getItem('hapi-power-voice-lang')
         const elevenLabsLang = getElevenLabsCodeFromPreference(voiceLang)
-        const voiceId = localStorage.getItem('hapi-voice-id') ?? undefined
+        const voiceId = localStorage.getItem('hapi-power-voice-id') ?? undefined
 
         await startRealtimeSession(sessionId, initialContext, elevenLabsLang, voiceId)
     }, [])
