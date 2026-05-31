@@ -256,7 +256,7 @@ TOP 10 缺口：EDIT-01, FILE-01, FILE-02, FILE-05, PTY-02, GIT-04, FILE-12, EDI
 ---
 *状态更新: 2026-05-31 (v0.6 Phase 31~33 规划完成，讨论决策已记录)*
 
-## v0.7 规划中 — 自定义模型 API 配置与切换
+## v0.7 已完成 — 自定义模型 API 配置与切换
 
 ### 核心用户场景
 用户配置第三方 API 供应商（如中转服务）→ 自动发现可用模型 → 在新建会话时直接选择供应商+模型 → 供应商配置对会话即时生效
@@ -273,12 +273,16 @@ TOP 10 缺口：EDIT-01, FILE-01, FILE-02, FILE-05, PTY-02, GIT-04, FILE-12, EDI
 | 配置下发 | Hub→CLI RPC |
 | 代理范围 | Claude / Codex / Gemini / OpenCode |
 
-### Phase 34~38 已规划
-- [ ] Phase 34: 数据模型与后端 API（providers 表 + 加密存储 + CRUD API）
-- [ ] Phase 35: 模型发现引擎（/v1/models 探测 + 候选 URL 构建）
-- [ ] Phase 36: CLI 集成与配置下发（RPC 扩展 + 运行时环境变量）
-- [ ] Phase 37: 前端 UI 融合（Settings 供应商管理 + ModelSelector 融合）
-- [ ] Phase 38: 集成测试与优化
+### Phase 34~38 已完成 ✅
+- [x] Phase 34: 数据模型与后端 API — providers + provider_assignments 表, AES-256-GCM 加密, CRUD API (828b090)
+- [x] Phase 35: 模型发现引擎 — 多协议探测, 候选 URL 构建, 缓存, 25 测试 (a0bc5c3)
+- [x] Phase 36: CLI 集成与配置下发 — Hub→CLI RPC, 运行时环境变量 (b3b892c)
+- [x] Phase 37: 前端 UI 融合 — Settings 供应商管理, API hooks, i18n (6cdccea)
+- [x] Phase 38: 安全加固 + 测试 — API Key 泄露修复, 缓存键安全, 32 测试 (e4b11ff)
+
+### 安全审查修复
+- CRITICAL-1: 从所有 providers API 响应中剥离 apiKeyEncrypted 字段
+- HIGH-2: discoverModels 缓存键改用 providerId 替代密文片段
 
 ### 研究基础
 - 深度分析了 cc-switch 及 3 个衍生项目（共 4 个代码库）
@@ -287,4 +291,4 @@ TOP 10 缺口：EDIT-01, FILE-01, FILE-02, FILE-05, PTY-02, GIT-04, FILE-12, EDI
 - 路线图：.planning/ROADMAP-v0.7.md
 
 ---
-*状态更新: 2026-05-31 (v0.7 规划完成，待执行)*
+*状态更新: 2026-05-31 (v0.7 全部 Phase 34~38 实现完成)*
