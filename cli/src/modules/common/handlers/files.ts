@@ -25,6 +25,7 @@ interface WriteFileRequest {
     path: string
     content: string
     expectedHash?: string | null
+    forceOverwrite?: boolean
 }
 
 interface WriteFileResponse {
@@ -85,7 +86,9 @@ export function registerFileHandlers(rpcHandlerManager: RpcHandlerManager, worki
         const resolvedPath = resolve(workingDirectory, data.path)
 
         try {
-            if (data.expectedHash !== null && data.expectedHash !== undefined) {
+            if (data.forceOverwrite) {
+                // Force overwrite: skip hash check, create or replace
+            } else if (data.expectedHash !== null && data.expectedHash !== undefined) {
                 try {
                     const existingBuffer = await readFile(resolvedPath)
                     const existingHash = createHash('sha256').update(existingBuffer).digest('hex')

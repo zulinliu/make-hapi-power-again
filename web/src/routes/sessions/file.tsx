@@ -4,6 +4,7 @@ import { useParams, useSearch } from '@tanstack/react-router'
 import type { GitCommandResponse } from '@/types/api'
 import { FileIcon } from '@/components/FileIcon'
 import { CopyIcon, CheckIcon } from '@/components/icons'
+import { MarkdownFilePreview } from '@/components/MarkdownFilePreview'
 import { useAppContext } from '@/lib/app-context'
 import { useAppGoBack } from '@/hooks/useAppGoBack'
 import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
@@ -68,6 +69,12 @@ function isBinaryContent(content: string): boolean {
     }).length
     return nonPrintable / content.length > 0.1
 }
+
+function isMarkdownFile(path: string): boolean {
+    return /\.(md|mdx|markdown)$/i.test(path)
+}
+
+type DisplayMode = 'preview' | 'edit' | 'diff'
 
 function extractCommandError(result: GitCommandResponse | undefined): string | null {
     if (!result) return null
@@ -135,8 +142,10 @@ export default function FilePage() {
         && decodedContent.length > 0
         && contentSizeBytes <= MAX_COPYABLE_FILE_BYTES
 
-    const [displayMode, setDisplayMode] = useState<'diff' | 'file'>('diff')
+    const [displayMode, setDisplayMode] = useState<DisplayMode>('diff')
     const [localContent, setLocalContent] = useState('')
+
+    const isMarkdown = useMemo(() => isMarkdownFile(filePath), [filePath])
 
     useEffect(() => {
         if (decodedContent && localContent !== decodedContent) {
@@ -145,15 +154,19 @@ export default function FilePage() {
     }, [decodedContent])
 
     useEffect(() => {
-        if (imageMimeType) { setDisplayMode('file'); return }
-        if (diffSuccess && !diffContent) { setDisplayMode('file'); return }
-        if (diffFailed) setDisplayMode('file')
-    }, [diffSuccess, diffFailed, diffContent, imageMimeType])
+        if (isMarkdown) {
+            setDisplayMode('preview')
+            return
+        }
+        if (imageMimeType) { setDisplayMode('edit'); return }
+        if (diffSuccess && !diffContent) { setDisplayMode('edit'); return }
+        if (diffFailed) setDisplayMode('edit')
+    }, [diffSuccess, diffFailed, diffContent, imageMimeType, isMarkdown])
 
     async function handleSave(newValue: string) {
         if (!api || !sessionId || !filePath || !fileContentResult?.success) return
         const encoded = btoa(unescape(encodeURIComponent(newValue)))
-        await api.writeSessionFile(sessionId, filePath, encoded)
+        await api.writeSessionFile(sessionId, filePath, encoded, fileContentResult.content ? undefined : undefined, true)
         queryClient.invalidateQueries({ queryKey: queryKeys.sessionFile(sessionId, filePath) })
         queryClient.invalidateQueries({ queryKey: queryKeys.gitFileDiff(sessionId, filePath, staged) })
     }
@@ -193,17 +206,25 @@ export default function FilePage() {
                 </div>
             </div>
 
-            {diffContent ? (
+            {(diffContent || isMarkdown) ? (
                 <div className="bg-[var(--app-bg)]">
                     <div className="mx-auto w-full max-w-content px-3 py-2 flex items-center gap-2 border-b border-[var(--app-divider)]">
-                        <button type="button" onClick={() => setDisplayMode('diff')}
-                            className={`rounded px-3 py-1 text-xs font-semibold ${displayMode === 'diff' ? 'bg-[var(--app-button)] text-[var(--app-button-text)] opacity-80' : 'bg-[var(--app-subtle-bg)] text-[var(--app-hint)]'}`}>
-                            {t('file.page.tab.diff')}
+                        {isMarkdown && (
+                            <button type="button" onClick={() => setDisplayMode('preview')}
+                                className={`rounded px-3 py-1 text-xs font-semibold ${displayMode === 'preview' ? 'bg-[var(--app-button)] text-[var(--app-button-text)] opacity-80' : 'bg-[var(--app-subtle-bg)] text-[var(--app-hint)]'}`}>
+                                {t('file.preview.mode.preview')}
+                            </button>
+                        )}
+                        <button type="button" onClick={() => setDisplayMode('edit')}
+                            className={`rounded px-3 py-1 text-xs font-semibold ${displayMode === 'edit' ? 'bg-[var(--app-button)] text-[var(--app-button-text)] opacity-80' : 'bg-[var(--app-subtle-bg)] text-[var(--app-hint)]'}`}>
+                            {t('file.preview.mode.edit')}
                         </button>
-                        <button type="button" onClick={() => setDisplayMode('file')}
-                            className={`rounded px-3 py-1 text-xs font-semibold ${displayMode === 'file' ? 'bg-[var(--app-button)] text-[var(--app-button-text)] opacity-80' : 'bg-[var(--app-subtle-bg)] text-[var(--app-hint)]'}`}>
-                            {t('file.page.tab.file')}
-                        </button>
+                        {diffContent && (
+                            <button type="button" onClick={() => setDisplayMode('diff')}
+                                className={`rounded px-3 py-1 text-xs font-semibold ${displayMode === 'diff' ? 'bg-[var(--app-button)] text-[var(--app-button-text)] opacity-80' : 'bg-[var(--app-subtle-bg)] text-[var(--app-hint)]'}`}>
+                                {t('file.preview.mode.diff')}
+                            </button>
+                        )}
                     </div>
                 </div>
             ) : null}
@@ -217,18 +238,21 @@ export default function FilePage() {
                     <FileContentSkeleton label={t('loading.file')} />
                 ) : fileErrorMessage ? (
                     <div className="p-4 text-sm text-[var(--app-hint)]">{fileErrorMessage}</div>
+                ) : displayMode === 'preview' && isMarkdown && decodedContent ? (
+                    <div className="app-scroll-y h-full p-4">
+                        <MarkdownFilePreview content={decodedContent} />
+                    </div>
                 ) : displayMode === 'diff' && diffContent && decodedContent ? (
                     <Suspense fallback={<FileContentSkeleton label="Loading diff..." />}>
                         <DiffView
                             original={decodedContent.replace(
-                                // strip diff additions to get original
                                 new RegExp(`^\\+.*$`, 'gm'), ''
                             ).replace(new RegExp(`^-`, 'gm'), '')}
                             modified={decodedContent}
                             filePath={filePath}
                         />
                     </Suspense>
-                ) : displayMode === 'file' ? (
+                ) : displayMode === 'edit' ? (
                     imagePreviewUrl ? (
                         <div className="app-scroll-y h-full p-4">
                             <ImagePreview src={imagePreviewUrl} fileName={fileName}

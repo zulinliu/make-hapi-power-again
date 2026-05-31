@@ -575,4 +575,52 @@ export default {
   'git.fetch.fetching': '获取中…',
   'git.fetch.success': '获取完成',
   'git.fetch.noChanges': '已是最新',
+
+  // 文件操作
+  'file.context.newFile': '新建文件',
+  'file.context.newFolder': '新建文件夹',
+  'file.context.rename': '重命名',
+  'file.context.copyPath': '复制路径',
+  'file.context.move': '移动…',
+  'file.context.copy': '复制…',
+  'file.context.delete': '删除',
+
+  'file.toolbar.newFile': '新建文件',
+  'file.toolbar.newFolder': '新建文件夹',
+
+  'file.rename.title': '重命名',
+  'file.rename.placeholder': '输入新名称',
+  'file.rename.submit': '重命名',
+  'file.rename.failed': '重命名失败',
+
+  'file.delete.title': '删除',
+  'file.delete.confirm': '确定删除 "{path}"？此操作不可撤销。',
+  'file.delete.submit': '删除',
+  'file.delete.submitting': '删除中…',
+  'file.delete.failed': '删除失败',
+
+  'file.move.title': '移动',
+  'file.move.submit': '移动',
+  'file.move.failed': '移动失败',
+  'file.move.source': '源路径',
+  'file.move.destinationPlaceholder': '输入目标路径',
+
+  'file.copy.title': '复制',
+  'file.copy.submit': '复制',
+  'file.copy.failed': '复制失败',
+
+  'file.newFile.title': '新建文件',
+  'file.newFile.placeholder': '输入文件名',
+  'file.newFile.submit': '创建',
+  'file.newFile.failed': '创建文件失败',
+
+  'file.newFolder.title': '新建文件夹',
+  'file.newFolder.placeholder': '输入文件夹名',
+  'file.newFolder.submit': '创建',
+  'file.newFolder.failed': '创建文件夹失败',
+
+  // 文件预览
+  'file.preview.mode.preview': '预览',
+  'file.preview.mode.edit': '编辑',
+  'file.preview.mode.diff': '差异',
 } as const

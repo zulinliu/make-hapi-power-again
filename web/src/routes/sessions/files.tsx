@@ -3,6 +3,10 @@ import { useNavigate, useParams, useSearch } from '@tanstack/react-router'
 import type { FileSearchItem, GitFileStatus } from '@/types/api'
 import { FileIcon } from '@/components/FileIcon'
 import { DirectoryTree } from '@/components/SessionFiles/DirectoryTree'
+import { ContextMenu } from '@/components/ui/ContextMenu'
+import type { ContextMenuItem } from '@/components/ui/ContextMenu'
+import { FileInputDialog, FileMoveDialog } from '@/components/ui/FileDialogs'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { useAppContext } from '@/lib/app-context'
 import { useAppGoBack } from '@/hooks/useAppGoBack'
 import { useGitStatusFiles } from '@/hooks/queries/useGitStatusFiles'
@@ -247,6 +251,22 @@ export default function FilesPage() {
     const { session } = useSession(api, sessionId)
     const [searchQuery, setSearchQuery] = useState('')
 
+    // Context menu state
+    const [contextMenu, setContextMenu] = useState<{
+        x: number
+        y: number
+        path: string
+        type: 'file' | 'directory'
+    } | null>(null)
+
+    // Dialog states
+    const [renameDialog, setRenameDialog] = useState<{ isOpen: boolean; path: string }>({ isOpen: false, path: '' })
+    const [deleteDialog, setDeleteDialog] = useState<{ isOpen: boolean; path: string; type: 'file' | 'directory' }>({ isOpen: false, path: '', type: 'file' })
+    const [moveDialog, setMoveDialog] = useState<{ isOpen: boolean; path: string; mode: 'move' | 'copy' }>({ isOpen: false, path: '', mode: 'move' })
+    const [newFileDialog, setNewFileDialog] = useState<{ isOpen: boolean; basePath: string }>({ isOpen: false, basePath: '' })
+    const [newFolderDialog, setNewFolderDialog] = useState<{ isOpen: boolean; basePath: string }>({ isOpen: false, basePath: '' })
+    const [deleting, setDeleting] = useState(false)
+
     const initialTab = search.tab === 'directories' ? 'directories' : 'changes'
     const [activeTab, setActiveTab] = useState<'changes' | 'directories'>(initialTab)
 
@@ -322,6 +342,67 @@ export default function FilesPage() {
             replace: true,
         })
     }, [navigate, sessionId])
+
+    const refreshDirectory = useCallback(() => {
+        void queryClient.invalidateQueries({
+            queryKey: ['session-directory', sessionId]
+        })
+    }, [queryClient, sessionId])
+
+    const handleContextMenu = useCallback((path: string, type: 'file' | 'directory', point: { x: number; y: number }) => {
+        setContextMenu({ ...point, path, type })
+    }, [])
+
+    const contextMenuItems = useMemo((): ContextMenuItem[] => {
+        if (!contextMenu) return []
+        const items: ContextMenuItem[] = []
+        const isDir = contextMenu.type === 'directory'
+        const fileName = contextMenu.path.split('/').pop() || contextMenu.path
+
+        if (isDir) {
+            items.push({
+                label: t('file.context.newFile'),
+                icon: '+',
+                onClick: () => setNewFileDialog({ isOpen: true, basePath: contextMenu.path }),
+            })
+            items.push({
+                label: t('file.context.newFolder'),
+                icon: '+',
+                onClick: () => setNewFolderDialog({ isOpen: true, basePath: contextMenu.path }),
+            })
+        }
+
+        items.push({
+            label: t('file.context.rename', { name: fileName }),
+            icon: '✎',
+            onClick: () => setRenameDialog({ isOpen: true, path: contextMenu.path }),
+        })
+        items.push({
+            label: t('file.context.copyPath'),
+            icon: '📋',
+            onClick: () => {
+                void navigator.clipboard.writeText(contextMenu.path)
+            },
+        })
+        items.push({
+            label: t('file.context.move'),
+            icon: '→',
+            onClick: () => setMoveDialog({ isOpen: true, path: contextMenu.path, mode: 'move' }),
+        })
+        items.push({
+            label: t('file.context.copy'),
+            icon: '⊕',
+            onClick: () => setMoveDialog({ isOpen: true, path: contextMenu.path, mode: 'copy' }),
+        })
+        items.push({
+            label: t('file.context.delete'),
+            icon: '✕',
+            danger: true,
+            onClick: () => setDeleteDialog({ isOpen: true, path: contextMenu.path, type: contextMenu.type }),
+        })
+
+        return items
+    }, [contextMenu, t])
 
     return (
         <div className="flex h-full min-h-0 flex-col">
@@ -440,12 +521,33 @@ export default function FilesPage() {
                             </div>
                         )
                     ) : activeTab === 'directories' ? (
-                        <DirectoryTree
-                            api={api}
-                            sessionId={sessionId}
-                            rootLabel={rootLabel}
-                            onOpenFile={(path) => handleOpenFile(path)}
-                        />
+                        <div>
+                            <div className="flex items-center gap-1 px-3 py-2 border-b border-[var(--app-divider)]">
+                                <button
+                                    type="button"
+                                    onClick={() => setNewFileDialog({ isOpen: true, basePath: '' })}
+                                    className="px-2.5 py-1.5 text-xs rounded transition-colors"
+                                    style={{ color: 'var(--hp-text-secondary)', background: 'var(--hp-surface-1)', minHeight: 32 }}
+                                >
+                                    {t('file.toolbar.newFile')}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setNewFolderDialog({ isOpen: true, basePath: '' })}
+                                    className="px-2.5 py-1.5 text-xs rounded transition-colors"
+                                    style={{ color: 'var(--hp-text-secondary)', background: 'var(--hp-surface-1)', minHeight: 32 }}
+                                >
+                                    {t('file.toolbar.newFolder')}
+                                </button>
+                            </div>
+                            <DirectoryTree
+                                api={api}
+                                sessionId={sessionId}
+                                rootLabel={rootLabel}
+                                onOpenFile={(path) => handleOpenFile(path)}
+                                onContextMenu={handleContextMenu}
+                            />
+                        </div>
                     ) : gitLoading ? (
                         <FileListSkeleton label={t('loading.git')} />
                     ) : (
@@ -497,6 +599,103 @@ export default function FilesPage() {
                     )}
                 </div>
             </div>
+
+            {contextMenu && (
+                <ContextMenu
+                    x={contextMenu.x}
+                    y={contextMenu.y}
+                    items={contextMenuItems}
+                    onClose={() => setContextMenu(null)}
+                />
+            )}
+
+            <FileInputDialog
+                isOpen={renameDialog.isOpen}
+                onClose={() => setRenameDialog({ isOpen: false, path: '' })}
+                title={t('file.rename.title')}
+                placeholder={t('file.rename.placeholder')}
+                initialValue={renameDialog.path.split('/').pop() || ''}
+                submitLabel={t('file.rename.submit')}
+                onSubmit={async (newName) => {
+                    if (!api) return
+                    const dir = renameDialog.path.includes('/') ? renameDialog.path.substring(0, renameDialog.path.lastIndexOf('/')) : ''
+                    const newPath = dir ? `${dir}/${newName}` : newName
+                    const res = await api.renameSessionFile(sessionId, renameDialog.path, newPath)
+                    if (!res.success) throw new Error(res.error || t('file.rename.failed'))
+                    refreshDirectory()
+                }}
+            />
+
+            <ConfirmDialog
+                isOpen={deleteDialog.isOpen}
+                onClose={() => setDeleteDialog({ isOpen: false, path: '', type: 'file' })}
+                title={t('file.delete.title')}
+                description={t('file.delete.confirm', { path: deleteDialog.path })}
+                confirmLabel={t('file.delete.submit')}
+                confirmingLabel={t('file.delete.submitting')}
+                destructive
+                isPending={deleting}
+                onConfirm={async () => {
+                    if (!api) return
+                    setDeleting(true)
+                    try {
+                        const res = await api.deleteSessionFile(sessionId, deleteDialog.path, deleteDialog.type === 'directory')
+                        if (!res.success) {
+                            throw new Error(res.error || t('file.delete.failed'))
+                        }
+                        refreshDirectory()
+                    } finally {
+                        setDeleting(false)
+                    }
+                }}
+            />
+
+            <FileMoveDialog
+                isOpen={moveDialog.isOpen}
+                onClose={() => setMoveDialog({ isOpen: false, path: '', mode: 'move' })}
+                sessionId={sessionId}
+                sourcePath={moveDialog.path}
+                mode={moveDialog.mode}
+                onSubmit={async (destPath) => {
+                    if (!api) return
+                    const res = moveDialog.mode === 'move'
+                        ? await api.moveSessionFile(sessionId, moveDialog.path, destPath)
+                        : await api.copySessionFile(sessionId, moveDialog.path, destPath)
+                    if (!res.success) throw new Error(res.error || t('file.move.failed'))
+                    refreshDirectory()
+                }}
+            />
+
+            <FileInputDialog
+                isOpen={newFileDialog.isOpen}
+                onClose={() => setNewFileDialog({ isOpen: false, basePath: '' })}
+                title={t('file.newFile.title')}
+                placeholder={t('file.newFile.placeholder')}
+                submitLabel={t('file.newFile.submit')}
+                onSubmit={async (name) => {
+                    if (!api) return
+                    const fullPath = newFileDialog.basePath ? `${newFileDialog.basePath}/${name}` : name
+                    const res = await api.writeSessionFile(sessionId, fullPath, '', undefined, true)
+                    if (!res.success) throw new Error(res.error || t('file.newFile.failed'))
+                    refreshDirectory()
+                    handleOpenFile(fullPath)
+                }}
+            />
+
+            <FileInputDialog
+                isOpen={newFolderDialog.isOpen}
+                onClose={() => setNewFolderDialog({ isOpen: false, basePath: '' })}
+                title={t('file.newFolder.title')}
+                placeholder={t('file.newFolder.placeholder')}
+                submitLabel={t('file.newFolder.submit')}
+                onSubmit={async (name) => {
+                    if (!api) return
+                    const fullPath = newFolderDialog.basePath ? `${newFolderDialog.basePath}/${name}` : name
+                    const res = await api.createDirectory(sessionId, fullPath, true)
+                    if (!res.success) throw new Error(res.error || t('file.newFolder.failed'))
+                    refreshDirectory()
+                }}
+            />
         </div>
     )
 }

@@ -254,8 +254,28 @@ export class RpcGateway {
         return await this.sessionRpc(sessionId, RPC_METHODS.ReadFile, { path }) as RpcReadFileResponse
     }
 
-    async writeSessionFile(sessionId: string, options: { path: string; content: string; expectedHash?: string }): Promise<RpcCommandResponse> {
+    async writeSessionFile(sessionId: string, options: { path: string; content: string; expectedHash?: string; forceOverwrite?: boolean }): Promise<RpcCommandResponse> {
         return await this.sessionRpc(sessionId, RPC_METHODS.WriteFile, options) as RpcCommandResponse
+    }
+
+    async deleteSessionFile(sessionId: string, path: string, recursive?: boolean): Promise<{ success: boolean; error?: string }> {
+        return await this.sessionRpc(sessionId, RPC_METHODS.DeleteFile, { path, recursive }) as { success: boolean; error?: string }
+    }
+
+    async renameSessionFile(sessionId: string, oldPath: string, newPath: string): Promise<{ success: boolean; error?: string }> {
+        return await this.sessionRpc(sessionId, RPC_METHODS.RenameFile, { oldPath, newPath }) as { success: boolean; error?: string }
+    }
+
+    async copySessionFile(sessionId: string, sourcePath: string, destinationPath: string): Promise<{ success: boolean; error?: string }> {
+        return await this.sessionRpc(sessionId, RPC_METHODS.CopyFile, { sourcePath, destinationPath }) as { success: boolean; error?: string }
+    }
+
+    async moveSessionFile(sessionId: string, sourcePath: string, destinationPath: string): Promise<{ success: boolean; error?: string }> {
+        return await this.sessionRpc(sessionId, RPC_METHODS.MoveFile, { sourcePath, destinationPath }) as { success: boolean; error?: string }
+    }
+
+    async createDirectory(sessionId: string, path: string, recursive?: boolean): Promise<{ success: boolean; error?: string }> {
+        return await this.sessionRpc(sessionId, RPC_METHODS.CreateDirectory, { path, recursive }) as { success: boolean; error?: string }
     }
 
     async readGeneratedImage(sessionId: string, imageId: string): Promise<RpcGeneratedImageResponse> {

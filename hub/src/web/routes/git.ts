@@ -50,7 +50,8 @@ const remoteRemoveSchema = z.object({
 const writeFileSchema = z.object({
     path: z.string().min(1).regex(/^[^\0]*$/, 'Path contains null bytes'),
     content: z.string().max(5 * 1024 * 1024), // 5MB
-    expectedHash: z.string().optional()
+    expectedHash: z.string().optional(),
+    forceOverwrite: z.boolean().optional()
 })
 
 function parseBooleanParam(value: string | undefined): boolean | undefined {
@@ -549,6 +550,98 @@ export function createGitRoutes(getSyncEngine: () => SyncEngine | null): Hono<We
 
         const path = parsed.data.path ?? ''
         const result = await runRpc(() => engine.listDirectory(sessionResult.sessionId, path))
+        return c.json(result)
+    })
+
+    // --- File CRUD operations ---
+
+    app.delete('/sessions/:id/file', async (c) => {
+        const engine = requireSyncEngine(c, getSyncEngine)
+        if (engine instanceof Response) return engine
+        const sessionResult = requireSessionFromParam(c, engine)
+        if (sessionResult instanceof Response) return sessionResult
+
+        const parsed = z.object({
+            path: z.string().min(1),
+            recursive: z.boolean().optional()
+        }).safeParse(await c.req.json())
+        if (!parsed.success) {
+            return c.json({ error: 'Invalid request', details: parsed.error.flatten() }, 400)
+        }
+
+        const result = await runRpc(() => engine.deleteSessionFile(sessionResult.sessionId, parsed.data.path, parsed.data.recursive))
+        return c.json(result)
+    })
+
+    app.post('/sessions/:id/rename', async (c) => {
+        const engine = requireSyncEngine(c, getSyncEngine)
+        if (engine instanceof Response) return engine
+        const sessionResult = requireSessionFromParam(c, engine)
+        if (sessionResult instanceof Response) return sessionResult
+
+        const parsed = z.object({
+            oldPath: z.string().min(1),
+            newPath: z.string().min(1)
+        }).safeParse(await c.req.json())
+        if (!parsed.success) {
+            return c.json({ error: 'Invalid request', details: parsed.error.flatten() }, 400)
+        }
+
+        const result = await runRpc(() => engine.renameSessionFile(sessionResult.sessionId, parsed.data.oldPath, parsed.data.newPath))
+        return c.json(result)
+    })
+
+    app.post('/sessions/:id/copy', async (c) => {
+        const engine = requireSyncEngine(c, getSyncEngine)
+        if (engine instanceof Response) return engine
+        const sessionResult = requireSessionFromParam(c, engine)
+        if (sessionResult instanceof Response) return sessionResult
+
+        const parsed = z.object({
+            sourcePath: z.string().min(1),
+            destinationPath: z.string().min(1)
+        }).safeParse(await c.req.json())
+        if (!parsed.success) {
+            return c.json({ error: 'Invalid request', details: parsed.error.flatten() }, 400)
+        }
+
+        const result = await runRpc(() => engine.copySessionFile(sessionResult.sessionId, parsed.data.sourcePath, parsed.data.destinationPath))
+        return c.json(result)
+    })
+
+    app.post('/sessions/:id/move', async (c) => {
+        const engine = requireSyncEngine(c, getSyncEngine)
+        if (engine instanceof Response) return engine
+        const sessionResult = requireSessionFromParam(c, engine)
+        if (sessionResult instanceof Response) return sessionResult
+
+        const parsed = z.object({
+            sourcePath: z.string().min(1),
+            destinationPath: z.string().min(1)
+        }).safeParse(await c.req.json())
+        if (!parsed.success) {
+            return c.json({ error: 'Invalid request', details: parsed.error.flatten() }, 400)
+        }
+
+        const result = await runRpc(() => engine.moveSessionFile(sessionResult.sessionId, parsed.data.sourcePath, parsed.data.destinationPath))
+        return c.json(result)
+    })
+
+    app.post('/sessions/:id/mkdir', async (c) => {
+        const engine = requireSyncEngine(c, getSyncEngine)
+        if (engine instanceof Response) return engine
+        const sessionResult = requireSessionFromParam(c, engine)
+        if (sessionResult instanceof Response) return sessionResult
+
+        const parsed = z.object({
+            path: z.string().min(1),
+            recursive: z.boolean().optional()
+        }).safeParse(await c.req.json())
+        if (!parsed.success) {
+            return c.json({ error: 'Invalid request', details: parsed.error.flatten() }, 400)
+        }
+
+        const result = await runRpc(() => engine.createDirectory(sessionResult.sessionId, parsed.data.path, parsed.data.recursive))
         return c.json(result)
     })
 
