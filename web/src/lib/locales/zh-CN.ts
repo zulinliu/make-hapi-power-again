@@ -352,6 +352,9 @@ export default {
   // Banners
   'offline.title': '离线',
   'offline.message': '您当前处于离线状态。某些功能可能受限。',
+  'update.available': '新版本可用 ({version})',
+  'update.button': '立即更新',
+  'update.applying': '正在更新…',
   'syncing.title': '同步中…',
   'syncing.message': '正在同步您的数据。',
   'reconnecting.message': '正在重新连接...',

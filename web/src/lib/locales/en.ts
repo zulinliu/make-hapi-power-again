@@ -350,6 +350,9 @@ export default {
   // Banners
   'offline.title': 'Offline',
   'offline.message': 'You are currently offline. Some features may be limited.',
+  'update.available': 'New version available ({version})',
+  'update.button': 'Update now',
+  'update.applying': 'Updating…',
   'syncing.title': 'Syncing…',
   'syncing.message': 'Your data is being synchronized.',
   'reconnecting.message': 'Reconnecting...',
