@@ -31,6 +31,22 @@ const commitSchema = z.object({
     paths: z.array(z.string().refine(p => !p.startsWith('-'), 'Path must not start with -')).optional()
 })
 
+const cloneSchema = z.object({
+    url: z.string().min(1).regex(/^(https:\/\/|ssh:\/\/|git@)/, 'Only https://, ssh://, and git@ URLs are allowed'),
+    targetDir: z.string().optional(),
+    branch: z.string().optional(),
+    cloneId: z.string().optional()
+})
+
+const remoteAddSchema = z.object({
+    name: z.string().min(1).regex(/^[\w.\-\/]+$/, 'Invalid remote name'),
+    url: z.string().min(1)
+})
+
+const remoteRemoveSchema = z.object({
+    name: z.string().min(1).regex(/^[\w.\-\/]+$/, 'Invalid remote name')
+})
+
 const writeFileSchema = z.object({
     path: z.string().min(1).regex(/^[^\0]*$/, 'Path contains null bytes'),
     content: z.string().max(5 * 1024 * 1024), // 5MB
@@ -228,6 +244,129 @@ export function createGitRoutes(getSyncEngine: () => SyncEngine | null): Hono<We
             cwd: sessionPath,
             message: parsed.data.message,
             paths: parsed.data.paths
+        }))
+        return c.json(result)
+    })
+
+    // Git Clone
+    app.post('/sessions/:id/git-clone', async (c) => {
+        const engine = requireSyncEngine(c, getSyncEngine)
+        if (engine instanceof Response) return engine
+
+        const sessionResult = requireSessionFromParam(c, engine)
+        if (sessionResult instanceof Response) return sessionResult
+
+        const sessionPath = sessionResult.session.metadata?.path
+        if (!sessionPath) return c.json({ success: false, error: 'Session path not available' })
+
+        const parsed = cloneSchema.safeParse(await c.req.json())
+        if (!parsed.success) return c.json({ error: 'Invalid request', details: parsed.error.flatten() }, 400)
+
+        const result = await runRpc(() => engine.gitClone(sessionResult.sessionId, {
+            cwd: sessionPath,
+            url: parsed.data.url,
+            targetDir: parsed.data.targetDir,
+            branch: parsed.data.branch,
+            cloneId: parsed.data.cloneId
+        }))
+        return c.json(result)
+    })
+
+    // Git Remotes — List
+    app.get('/sessions/:id/git-remotes', async (c) => {
+        const engine = requireSyncEngine(c, getSyncEngine)
+        if (engine instanceof Response) return engine
+
+        const sessionResult = requireSessionFromParam(c, engine)
+        if (sessionResult instanceof Response) return sessionResult
+
+        const sessionPath = sessionResult.session.metadata?.path
+        if (!sessionPath) return c.json({ success: false, error: 'Session path not available' })
+
+        const result = await runRpc(() => engine.getGitRemoteList(sessionResult.sessionId, sessionPath))
+        return c.json(result)
+    })
+
+    // Git Remotes — Add
+    app.post('/sessions/:id/git-remotes', async (c) => {
+        const engine = requireSyncEngine(c, getSyncEngine)
+        if (engine instanceof Response) return engine
+
+        const sessionResult = requireSessionFromParam(c, engine)
+        if (sessionResult instanceof Response) return sessionResult
+
+        const sessionPath = sessionResult.session.metadata?.path
+        if (!sessionPath) return c.json({ success: false, error: 'Session path not available' })
+
+        const parsed = remoteAddSchema.safeParse(await c.req.json())
+        if (!parsed.success) return c.json({ error: 'Invalid request', details: parsed.error.flatten() }, 400)
+
+        const result = await runRpc(() => engine.addGitRemote(sessionResult.sessionId, {
+            cwd: sessionPath,
+            name: parsed.data.name,
+            url: parsed.data.url
+        }))
+        return c.json(result)
+    })
+
+    // Git Remotes — Delete
+    app.delete('/sessions/:id/git-remotes/:name', async (c) => {
+        const engine = requireSyncEngine(c, getSyncEngine)
+        if (engine instanceof Response) return engine
+
+        const sessionResult = requireSessionFromParam(c, engine)
+        if (sessionResult instanceof Response) return sessionResult
+
+        const sessionPath = sessionResult.session.metadata?.path
+        if (!sessionPath) return c.json({ success: false, error: 'Session path not available' })
+
+        const parsed = remoteRemoveSchema.safeParse(c.req.param())
+        if (!parsed.success) return c.json({ error: 'Invalid request', details: parsed.error.flatten() }, 400)
+
+        const result = await runRpc(() => engine.removeGitRemote(sessionResult.sessionId, {
+            cwd: sessionPath,
+            name: parsed.data.name
+        }))
+        return c.json(result)
+    })
+
+    // Git Push
+    app.post('/sessions/:id/git-push', async (c) => {
+        const engine = requireSyncEngine(c, getSyncEngine)
+        if (engine instanceof Response) return engine
+
+        const sessionResult = requireSessionFromParam(c, engine)
+        if (sessionResult instanceof Response) return sessionResult
+
+        const sessionPath = sessionResult.session.metadata?.path
+        if (!sessionPath) return c.json({ success: false, error: 'Session path not available' })
+
+        const body = await c.req.json()
+        const result = await runRpc(() => engine.gitPush(sessionResult.sessionId, {
+            cwd: sessionPath,
+            remote: body.remote,
+            branch: body.branch,
+            force: body.force === true
+        }))
+        return c.json(result)
+    })
+
+    // Git Pull
+    app.post('/sessions/:id/git-pull', async (c) => {
+        const engine = requireSyncEngine(c, getSyncEngine)
+        if (engine instanceof Response) return engine
+
+        const sessionResult = requireSessionFromParam(c, engine)
+        if (sessionResult instanceof Response) return sessionResult
+
+        const sessionPath = sessionResult.session.metadata?.path
+        if (!sessionPath) return c.json({ success: false, error: 'Session path not available' })
+
+        const body = await c.req.json()
+        const result = await runRpc(() => engine.gitPull(sessionResult.sessionId, {
+            cwd: sessionPath,
+            remote: body.remote,
+            branch: body.branch
         }))
         return c.json(result)
     })

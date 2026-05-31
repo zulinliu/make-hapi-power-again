@@ -189,6 +189,18 @@ export type MachineUpdateStateAck = {
     runnerState: unknown | null
 }
 
+export type CloneProgressPhase = 'counting' | 'compressing' | 'writing' | 'resolving' | 'done' | 'error'
+
+export interface CloneProgressPayload {
+    cloneId: string
+    sessionId: string
+    phase: CloneProgressPhase
+    progress?: number
+    message?: string
+    objectsReceived?: number
+    objectsTotal?: number
+}
+
 export interface ServerToClientEvents {
     update: (data: Update, ack?: (response: CancelQueuedMessageAck) => void) => void
     'rpc-request': (data: { method: string; params: string }, callback: (response: string) => void) => void
@@ -196,6 +208,7 @@ export interface ServerToClientEvents {
     'terminal:write': (data: TerminalWritePayload) => void
     'terminal:resize': (data: TerminalResizePayload) => void
     'terminal:close': (data: TerminalClosePayload) => void
+    'clone:progress': (data: CloneProgressPayload) => void
     error: (data: { message: string; code?: SocketErrorReason; scope?: 'session' | 'machine'; id?: string }) => void
 }
 
@@ -225,6 +238,7 @@ export interface ClientToServerEvents {
     'terminal:output': (data: TerminalOutputPayload) => void
     'terminal:exit': (data: TerminalExitPayload) => void
     'terminal:error': (data: TerminalErrorPayload) => void
+    'clone:progress': (data: CloneProgressPayload) => void
     ping: (callback: () => void) => void
     'usage-report': (data: unknown) => void
 }

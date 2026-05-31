@@ -6,6 +6,7 @@
 import { logger as defaultLogger } from '@/ui/logger'
 import type { RpcHandler, RpcHandlerConfig, RpcHandlerMap, RpcRequest } from './types'
 import type { Socket } from 'socket.io-client'
+import type { CloneProgressPayload } from '@hapipower/protocol/socket'
 
 function safeJsonParse(value: string): unknown {
     try {
@@ -84,6 +85,12 @@ export class RpcHandlerManager {
     clearHandlers(): void {
         this.handlers.clear()
         this.logger('Cleared all RPC handlers')
+    }
+
+    emitCloneProgress(data: CloneProgressPayload): void {
+        if (this.socket) {
+            this.socket.emit('clone:progress', data)
+        }
     }
 
     private getPrefixedMethod(method: string): string {
