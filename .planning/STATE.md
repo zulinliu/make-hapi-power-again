@@ -9,11 +9,10 @@
 
 ## 当前状态
 
-- **版本**: v0.4 开发中 (PWA 深度优化)
-- **分支**: feat/v4 (from main)
+- **版本**: v0.4 开发中 (品牌清理 + PWA 深度优化)
+- **分支**: main
 - **远程仓库**: https://github.com/zulinliu/make-hapi-power-again.git
-- **v0.4 主题**: PWA 深度优化 — 从底层到设计层面全面优化 PWA 模式体验
-- **v0.4 需求**: 18 项 (SWU:6 + INST:4 + NTF:4 + MNF:4)
+- **v0.4 主题**: PWA 深度优化 + 品牌残留全面清理
 
 ## v0.1 已完成
 
@@ -30,37 +29,107 @@
 - [x] 文档重写 D1~D4
 - [x] 收尾 T1~T4
 
-## v0.2 规划
+## v0.2 已完成
 
 ### Phase 9: 全功能审计 ✅ (2026-05-31)
 - [x] 4 并行代码审计 agent (Module A+B, C+D, E+F+G, Security)
 - [x] Lighthouse 基线审计 (A11y 90, BP 96, SEO 91, Agentic 67)
 - [x] 浏览器 UI 验证 (登录/列表/详情/Git/Terminal)
 - [x] OWASP Top 10 安全审计 (7 PASS, 3 WARN)
-- [x] 审计报告 (0 P0, 7 P1, 15 P2, 8 P3)
-- [x] 4 项快速修复已提交 (D-03, D-04, A-03, A-04)
 
-### Phase 10: iOS PWA 深度优化 ✅ (2026-05-31)
-- [x] manifest 增强: categories + shortcuts + maskable 图标 (192/512)
-- [x] iOS 多尺寸图标: 120/152/167/180
-- [x] iOS 启动画面: 6 iPhone 型号 x 暗/亮变体 = 12 张
-- [x] 离线回退页面: offline.html + SW NavigationRoute
-- [x] SW 缓存策略: NavigationRoute fallback + SPA 路由离线支持
+### Phase 10~13: iOS PWA + 移动端 + i18n + 收尾 ✅ (2026-05-31)
+- [x] iOS PWA 深度优化 (manifest + 图标 + 启动画面 + 离线)
+- [x] 移动端体验增强 (虚拟键盘 + 分享安全)
+- [x] i18n 中英双语 (397 键完整覆盖)
+- [x] 设计打磨 + v0.2.0 发布
 
-### Phase 11: 移动端体验增强 ✅ (2026-05-31)
-- [x] 终端虚拟键盘第三行: Ctrl+C/D/L/Z + ~/`/./"/' + 长按变体
-- [x] Composer iOS PWA safe-area-inset-bottom 适配
-- [x] 分享密码保护: Bun.password 哈希 + POST 验证
-- [x] 分享访问次数限制: maxViews 字段 + 超限 410
+## v0.3 已完成 — 品牌独立
 
-### Phase 12: i18n 中英双语 ✅ (2026-05-31)
-- [x] 分享页面国际化: 18 个 share.* 翻译键 (zh-CN + en)
-- [x] 硬编码中文全部替换为 t() 调用
-- [x] 现有 i18n 架构确认: 397 键完整覆盖, en.ts 无中文泄漏
+### Phase 14: 核心基础设施改名 ✅
+- [x] shared/ 包名 @hapi/protocol → @hapipower/protocol
+- [x] 所有 import 路径 @hapi/ → @hapipower/
+- [x] 数据目录 ~/.hapi → ~/.hapi-power
+- [x] CLI 二进制 hapi → hapi-power
 
-### Phase 13: 设计打磨 + 收尾 ✅ (2026-05-31)
-- [x] 视觉一致性检查 + 暗/亮模式验证 (Lighthouse A11y 90, BP 96, SEO 91)
-- [x] 构建 + v0.2.0 tag + GitHub Release
+### Phase 15: CLI + Hub 后端改名 ✅
+- [x] Hub 包名 + 配置属性名更新
+- [x] 后端字符串引用全量替换
+- [x] 数据库文件名 hapi.db → hapi-power.db
+
+### Phase 16: 前端 + PWA 品牌升级 ✅
+- [x] PWA manifest name → Hapi Power
+- [x] HTML title/meta 更新
+- [x] UI 文本品牌展示更新
+
+### Phase 17: Website + 文档 + CI 全量升级 ✅
+- [x] website/ 目录全量品牌升级
+- [x] README + 文档更新
+- [x] GitHub Actions + Issue 模板更新
+
+### Phase 18: 验证 + 发布 ✅
+- [x] 全量构建 + typecheck + 测试
+- [x] v0.3.0 tag + GitHub Release
+
+**⚠️ v0.3 遗留问题**: 代码标识符改名完成但用户可见文本(~88处)未清理，Phase 23 补充完成。
+
+## v0.4 已完成 — PWA 深度优化 + 品牌清理
+
+### Phase 19~22: PWA 深度优化 ✅ (2026-05-31)
+- [x] Phase 19: SW 更新机制修复 (registerType + skipWaiting + 自定义更新 UI)
+- [x] Phase 20: 安装引导增强 (稍后提醒 + 时机 + i18n + Manifest 完善)
+- [x] Phase 21: 通知与 Badge API (角标 + 推送优化)
+- [x] Phase 22: 质量门禁 + v0.4 发布
+
+### Phase 23: 品牌残留全面清理 ✅ (2026-05-31)
+- [x] 23-01: P0 核心品牌替换 (UI 可见文本 + 版本号 + Hub banner + i18n)
+- [x] 23-02: P1 代码替换 (CLI 提示词 + 注释 + localStorage 迁移 + 测试)
+- [x] 23-03: P2 文档替换 + 质量门禁 (grep 零残留)
+- **Commit**: 0df40a2 (38 文件, +219/-87)
+- **验证**: scripts/brand-check.sh 全量扫描
+
+## 品牌升级经验总结
+
+### 完整历程
+
+品牌升级分两轮完成：
+
+**第一轮 (v0.3, Phase 14~18)**: 代码标识符层改名
+- npm 包名 @hapi → @hapipower
+- 环境变量前缀 HAPI_ → HAPI_POWER_（部分完成）
+- 数据目录 ~/.hapi → ~/.hapi-power
+- CLI 二进制名 hapi → hapi-power
+
+**第二轮 (v0.4, Phase 23)**: 用户可见文本全面清理
+- UI 文本、i18n 翻译、HTML 模板
+- Hub 启动 banner、CLI 系统提示词
+- 注释、文档、测试描述
+- localStorage key 迁移逻辑
+- 共 38 文件 219 处插入 87 处删除
+
+### 遗留待处理
+
+| 类别 | 数量 | 说明 |
+|------|------|------|
+| 环境变量 HAPI_* → HAPI_POWER_* | ~50 处 | 功能性代码，需兼容迁移，规划为 Phase 24 |
+| 脚本中 HAPI_DEV_* | ~20 处 | 开发脚本，同上 |
+
+### 品牌防护规则（必须遵守）
+
+1. **零容忍** — 独立的 `\bHAPI\b` 不允许出现在任何新增文件中（代码标识符如 @hapipower 除外）
+2. **每次 commit 前检查** — 运行 `scripts/brand-check.sh`
+3. **新代码必须使用 Hapi Power 品牌** — 所有 UI 文本、注释、日志、文档
+4. **发现残留立即修复** — 不允许推后到下个版本
+
+### 品牌规范速查
+
+| 上下文 | 正确用法 | 错误用法 |
+|--------|----------|----------|
+| 品牌名 | Hapi Power | HAPI, hapi, HapiPower |
+| 产品全名 | HapiPower Hub | HAPI Hub |
+| npm 包名 | @hapipower/protocol | @hapi/protocol |
+| 环境变量 | HAPI_POWER_* | HAPI_* |
+| 数据目录 | ~/.hapi-power | ~/.hapi |
+| 官方仓库 | github.com/zulinliu/make-hapi-power-again | hapi.run |
 
 ## v0.4 运维踩坑记录
 
@@ -86,7 +155,8 @@
 | .planning/research/MOBILE-UX.md | 移动端 UX 研究参考 (756 行) |
 | .planning/research/I18N.md | i18n 实现方案研究 |
 | .planning/research/AUDIT.md | 全功能审计方法论 (766 行) |
-| .planning/research/OPS-LESSONS.md | 运维踩坑记录: proxy+机器注册
+| .planning/research/OPS-LESSONS.md | 运维踩坑记录: proxy+机器注册 |
+| .planning/research/BRAND-RESIDUE.md | **品牌升级完整报告** (含执行记录+防护规则) |
 
 ## 关键发现
 
@@ -104,39 +174,11 @@
 3. **i18n 双轨**: web/ 自研轻量方案 (54 文件 125 调用点) vs website/ react-i18next (6 文件)
 4. **审计工作量**: 9 模块 ~33 小时预估
 
----
-
-## v0.3 规划 (品牌独立)
-
-### Phase 14: 核心基础设施改名 (待执行)
-- [ ] shared/ 包名 @hapi/protocol → @hapipower/protocol
-- [ ] 所有 import 路径 @hapi/ → @hapipower/
-- [ ] 环境变量全量改名 HAPI_* → HAPI_POWER_*
-- [ ] 数据目录 ~/.hapi → ~/.hapi-power
-
-### Phase 15: CLI + Hub 后端改名 (待执行)
-- [ ] CLI 二进制 hapi → hapi-power
-- [ ] Hub 包名 + 配置属性名更新
-- [ ] 后端字符串引用全量替换
-- [ ] 数据库文件名 hapi.db → hapi-power.db
-
-### Phase 16: 前端 + PWA 品牌升级 (待执行)
-- [ ] PWA manifest name → Hapi Power
-- [ ] HTML title/meta 更新
-- [ ] i18n 翻译键 HAPI → Hapi Power
-- [ ] localStorage keys 迁移
-- [ ] UI 文本品牌展示更新
-
-### Phase 17: Website + 文档 + CI 全量升级 (待执行)
-- [ ] website/ 目录全量品牌升级
-- [ ] README + 文档更新
-- [ ] GitHub Actions 更新
-- [ ] GitHub Issue 模板更新
-
-### Phase 18: 验证 + 发布 (待执行)
-- [ ] 全量构建 + typecheck + 测试
-- [ ] grep 零残留扫描确认
-- [ ] v0.3 tag + GitHub Release
+### v0.3~v0.4 品牌升级教训
+1. **分层替换不够** — 必须覆盖 7 个层次：UI 文本、i18n、HTML、日志、提示词、注释、配置
+2. **grep 验证是唯一可靠标准** — 不能用"我改过了"作为完成标准
+3. **环境变量改名需兼容迁移** — HAPI_* → HAPI_POWER_* 需要运行时回退逻辑
+4. **新增代码也必须用新品牌** — 品牌升级是持续性约束，不是一次性工作
 
 ---
-*状态更新: 2026-05-31 (v0.4 PWA 深度优化完成 + 运维踩坑记录完成，Phase 19~22 已执行)*
+*状态更新: 2026-05-31 (Phase 23 品牌清理完成 + 经验记录 + 品牌检查脚本)*
