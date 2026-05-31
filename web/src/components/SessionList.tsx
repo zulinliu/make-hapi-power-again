@@ -32,32 +32,32 @@ function SessionsEmptyState(props: {
     onBrowse?: () => void
 }) {
     const { t } = useTranslation()
+    const steps = [
+        { icon: '↓', label: 'Clone a project', desc: 'Clone a Git repository to get started' },
+        { icon: '✎', label: 'Edit & Develop', desc: 'Use Monaco Editor + Terminal to code' },
+        { icon: '↑', label: 'Review & Push', desc: 'Compare changes, commit and push' },
+    ]
+
     return (
-        <div className="flex flex-col items-center justify-center gap-3 px-6 py-16 text-center">
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="44"
-                height="44"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="text-[var(--app-hint)] opacity-60"
-            >
-                <rect x="3" y="4" width="18" height="16" rx="2" />
-                <path d="M3 9h18" />
-                <path d="M8 14h8" />
-                <path d="M8 17h5" />
-            </svg>
-            <div className="text-base font-medium text-[var(--app-fg)]">
-                {t('sessions.empty.title')}
+        <div className="flex flex-col items-center justify-center gap-4 px-6 py-12 text-center">
+            <div className="text-xl font-semibold" style={{ color: 'var(--hp-text-primary)' }}>
+                Welcome to Hapi Power
             </div>
-            <div className="max-w-sm text-sm text-[var(--app-hint)]">
-                {t('sessions.empty.hint')}
+            <div className="max-w-md text-sm" style={{ color: 'var(--hp-text-tertiary)' }}>
+                Your AI-powered development workstation. Clone a repo, code with AI, review and push.
             </div>
-            <div className="flex items-center gap-2 mt-2">
+
+            <div className="flex gap-4 mt-4">
+                {steps.map((step, i) => (
+                    <div key={i} className="flex flex-col items-center gap-2 w-36 p-3 rounded-lg" style={{ background: 'var(--hp-surface-1)' }}>
+                        <div className="text-2xl">{step.icon}</div>
+                        <div className="text-sm font-medium" style={{ color: 'var(--hp-text-primary)' }}>{step.label}</div>
+                        <div className="text-xs" style={{ color: 'var(--hp-text-tertiary)' }}>{step.desc}</div>
+                    </div>
+                ))}
+            </div>
+
+            <div className="flex items-center gap-2 mt-4">
                 <button
                     type="button"
                     onClick={props.onNewSession}
