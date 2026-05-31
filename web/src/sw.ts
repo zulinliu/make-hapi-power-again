@@ -21,6 +21,17 @@ type PushPayload = {
     }
 }
 
+// Ensure new SW activates immediately without waiting for old tabs to close
+self.addEventListener('install', () => self.skipWaiting())
+self.addEventListener('activate', () => self.clients.claim())
+
+// Allow client to trigger skipWaiting via postMessage
+self.addEventListener('message', (event) => {
+    if (event.data?.type === 'SKIP_WAITING') {
+        self.skipWaiting()
+    }
+})
+
 precacheAndRoute(self.__WB_MANIFEST)
 
 // Navigation fallback: serve index.html for SPA routes, offline.html when offline

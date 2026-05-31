@@ -23,6 +23,7 @@ import { getAppGlobalSseSubscription, getAppSessionSseSubscription } from '@/lib
 import { LoginPrompt } from '@/components/LoginPrompt'
 import { InstallPrompt } from '@/components/InstallPrompt'
 import { OfflineBanner } from '@/components/OfflineBanner'
+import { UpdateBanner } from '@/components/UpdateBanner'
 import { SyncingBanner } from '@/components/SyncingBanner'
 import { ReconnectingBanner } from '@/components/ReconnectingBanner'
 import { VoiceErrorBanner } from '@/components/VoiceErrorBanner'
@@ -424,6 +425,7 @@ function AppInner() {
                 />
                 <VoiceErrorBanner />
                 <OfflineBanner />
+                <UpdateBanner />
                 <div className="h-full min-h-0 flex flex-col">
                     <Outlet />
                 </div>
