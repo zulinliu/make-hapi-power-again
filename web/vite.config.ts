@@ -90,8 +90,8 @@ export default defineConfig({
             srcDir: 'src',
             filename: 'sw.ts',
             manifest: {
-                name: 'HAPI',
-                short_name: 'HAPI',
+                name: 'Hapi Power',
+                short_name: 'Hapi Power',
                 description: 'AI-powered development assistant',
                 categories: ['developer tools', 'productivity'],
                 theme_color: '#0A0A0B',

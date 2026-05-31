@@ -5,7 +5,7 @@ type ColorScheme = 'light' | 'dark'
 
 export type AppearancePreference = 'system' | 'dark' | 'light'
 
-const APPEARANCE_KEY = 'hapi-appearance'
+const APPEARANCE_KEY = 'hapi-power-appearance'
 const THEME_COLORS: Record<ColorScheme, string> = {
     light: '#ffffff',
     dark: '#0A0A0B',

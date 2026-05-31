@@ -17,7 +17,7 @@ import {
 } from '@/components/ToolCard/codexAgents'
 
 const DEFAULT_ICON_CLASS = 'h-3.5 w-3.5'
-// Tool presentation registry for `hapi/web` (aligned with `hapi-app`).
+// Tool presentation registry for `hapi-power/web` (aligned with `hapi-power-app`).
 
 export type ToolPresentation = {
     icon: ReactNode

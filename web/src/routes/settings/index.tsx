@@ -336,12 +336,12 @@ export default function SettingsPage() {
 
     // Voice language state - read from localStorage
     const [voiceLanguage, setVoiceLanguage] = useState<string | null>(() => {
-        return localStorage.getItem('hapi-voice-lang')
+        return localStorage.getItem('hapi-power-voice-lang')
     })
 
     // Voice ID state - read from localStorage
     const [voiceId, setVoiceId] = useState<string | null>(() => {
-        return localStorage.getItem('hapi-voice-id')
+        return localStorage.getItem('hapi-power-voice-id')
     })
 
     // Dynamic voice list fetched from hub (includes user's cloned voices)
@@ -412,9 +412,9 @@ export default function SettingsPage() {
     const handleVoiceLanguageChange = (language: Language) => {
         setVoiceLanguage(language.code)
         if (language.code === null) {
-            localStorage.removeItem('hapi-voice-lang')
+            localStorage.removeItem('hapi-power-voice-lang')
         } else {
-            localStorage.setItem('hapi-voice-lang', language.code)
+            localStorage.setItem('hapi-power-voice-lang', language.code)
         }
         setIsVoiceOpen(false)
     }
@@ -422,9 +422,9 @@ export default function SettingsPage() {
     const handleVoiceChange = (id: string | null) => {
         setVoiceId(id)
         if (id === null) {
-            localStorage.removeItem('hapi-voice-id')
+            localStorage.removeItem('hapi-power-voice-id')
         } else {
-            localStorage.setItem('hapi-voice-id', id)
+            localStorage.setItem('hapi-power-voice-id', id)
         }
         setIsVoicePickerOpen(false)
     }
@@ -1085,7 +1085,7 @@ export default function SettingsPage() {
                         <div className="flex w-full items-center justify-between px-3 py-3">
                             <span className="text-[var(--app-fg)]">{t('settings.about.website')}</span>
                             <a
-                                href="https://hapi.run"
+                                href="YOUR_DOMAIN"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-[var(--app-link)] hover:underline"

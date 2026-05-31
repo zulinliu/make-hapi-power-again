@@ -174,7 +174,7 @@ export function denyOnlyTransform(url: string): string {
 
 // ── Allowed-schemes state (inlined from useAllowedSchemes.ts) ───────────────
 
-const STORAGE_KEY = 'hapi-allowed-schemes'
+const STORAGE_KEY = 'hapi-power-allowed-schemes'
 
 // Module-level subscriber set for intra-tab cross-provider sync (P7e.1).
 //
