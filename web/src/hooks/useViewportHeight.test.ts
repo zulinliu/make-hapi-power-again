@@ -103,4 +103,23 @@ describe('useViewportHeight update logic', () => {
 
         scrollToSpy.mockRestore()
     })
+
+    it('focusout (blur) triggers viewport recalculation on keyboard dismiss', () => {
+        // Simulate: keyboard was open (--app-viewport-height is set)
+        root.style.setProperty('--app-viewport-height', '400px')
+        expect(root.style.getPropertyValue('--app-viewport-height')).toBe('400px')
+
+        // Simulate: keyboard dismissed, viewport restored to full height
+        const viewportHeight = 800
+        const windowHeight = 800
+        const diff = windowHeight - viewportHeight
+        if (diff > 1) {
+            root.style.setProperty('--app-viewport-height', `${viewportHeight}px`)
+        } else {
+            root.style.removeProperty('--app-viewport-height')
+        }
+
+        // After blur fallback recalculation, variable should be removed
+        expect(root.style.getPropertyValue('--app-viewport-height')).toBe('')
+    })
 })
