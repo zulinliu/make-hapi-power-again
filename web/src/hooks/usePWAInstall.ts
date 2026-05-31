@@ -8,6 +8,8 @@ interface BeforeInstallPromptEvent extends Event {
 type InstallState = 'idle' | 'available' | 'installing' | 'installed'
 
 const INSTALL_DISMISSED_KEY = 'pwa_install_dismissed'
+const DISMISS_LATER_KEY = 'pwa_install_dismiss_later'
+const DISMISS_LATER_DURATION = 7 * 24 * 60 * 60 * 1000 // 7 days
 
 function isIOSSafari(): boolean {
     if (typeof window === 'undefined') return false
@@ -22,7 +24,20 @@ function isIOSSafari(): boolean {
 
 function getInstallDismissed(): boolean {
     try {
-        return localStorage.getItem(INSTALL_DISMISSED_KEY) === 'true'
+        // Check permanent dismiss
+        if (localStorage.getItem(INSTALL_DISMISSED_KEY) === 'true') {
+            return true
+        }
+        // Check temporary "later" dismiss (7-day cooldown)
+        const laterTimestamp = localStorage.getItem(DISMISS_LATER_KEY)
+        if (laterTimestamp) {
+            const elapsed = Date.now() - Number(laterTimestamp)
+            if (elapsed < DISMISS_LATER_DURATION) {
+                return true
+            }
+            localStorage.removeItem(DISMISS_LATER_KEY)
+        }
+        return false
     } catch {
         return false
     }
@@ -36,6 +51,14 @@ function setInstallDismissed(): void {
     }
 }
 
+function setInstallLater(): void {
+    try {
+        localStorage.setItem(DISMISS_LATER_KEY, String(Date.now()))
+    } catch {
+        // Ignore storage errors
+    }
+}
+
 export function usePWAInstall(): {
     installState: InstallState
     canInstall: boolean
@@ -44,6 +67,7 @@ export function usePWAInstall(): {
     isIOS: boolean
     promptInstall: () => Promise<boolean>
     dismissInstall: () => void
+    dismissLater: () => void
 } {
     const [installState, setInstallState] = useState<InstallState>('idle')
     const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
@@ -115,6 +139,11 @@ export function usePWAInstall(): {
         setInstallDismissed()
     }, [])
 
+    const dismissLater = useCallback(() => {
+        setDismissed(true)
+        setInstallLater()
+    }, [])
+
     return {
         installState,
         canInstall: installState === 'available' && !dismissed,
@@ -122,6 +151,7 @@ export function usePWAInstall(): {
         isStandalone,
         isIOS,
         promptInstall,
-        dismissInstall
+        dismissInstall,
+        dismissLater
     }
 }

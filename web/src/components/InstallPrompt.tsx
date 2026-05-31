@@ -6,7 +6,7 @@ import { useTranslation } from '@/lib/use-translation'
 
 export function InstallPrompt() {
     const { t } = useTranslation()
-    const { canInstall, canInstallIOS, promptInstall, dismissInstall, isStandalone } = usePWAInstall()
+    const { canInstall, canInstallIOS, promptInstall, dismissInstall, dismissLater, isStandalone } = usePWAInstall()
     const { isTelegram, haptic } = usePlatform()
     const [showIOSGuide, setShowIOSGuide] = useState(false)
     const showFloatingPrompt = !isTelegram && !isStandalone && ((canInstallIOS && !showIOSGuide) || canInstall)
@@ -56,7 +56,7 @@ export function InstallPrompt() {
                                 </div>
                                 <div className="flex-1 pt-1">
                                     <p className="text-sm text-[var(--app-fg)]">
-                                        Tap the <ShareIcon className="inline w-5 h-5 align-text-bottom" /> Share button in the toolbar
+                                        {t('install.step1')}
                                     </p>
                                 </div>
                             </div>
@@ -67,7 +67,7 @@ export function InstallPrompt() {
                                 </div>
                                 <div className="flex-1 pt-1">
                                     <p className="text-sm text-[var(--app-fg)]">
-                                        Scroll down and tap <PlusCircleIcon className="inline w-5 h-5 align-text-bottom" /> <strong>Add to Home Screen</strong>
+                                        {t('install.step2')}
                                     </p>
                                 </div>
                             </div>
@@ -78,7 +78,7 @@ export function InstallPrompt() {
                                 </div>
                                 <div className="flex-1 pt-1">
                                     <p className="text-sm text-[var(--app-fg)]">
-                                        Tap <strong>Add</strong> in the top right corner
+                                        {t('install.step3')}
                                     </p>
                                 </div>
                             </div>
@@ -91,7 +91,16 @@ export function InstallPrompt() {
                             }}
                             className="w-full py-3 text-sm text-[var(--app-hint)] active:opacity-60"
                         >
-                            {t('button.dismiss')}
+                            {t('install.dont_show')}
+                        </button>
+                        <button
+                            onClick={() => {
+                                setShowIOSGuide(false)
+                                dismissLater()
+                            }}
+                            className="w-full py-2 text-sm text-[var(--app-hint)] active:opacity-60 border-t border-[var(--app-border)]"
+                        >
+                            {t('install.later')}
                         </button>
                     </div>
                 </div>
@@ -121,10 +130,10 @@ export function InstallPrompt() {
                     <button
                         onClick={() => {
                             haptic.impact('light')
-                            dismissInstall()
+                            dismissLater()
                         }}
                         className="shrink-0 p-2 text-[var(--app-hint)] active:opacity-60"
-                        aria-label="Dismiss"
+                        aria-label={t('install.later')}
                     >
                         <CloseIcon className="w-4 h-4" />
                     </button>
@@ -166,10 +175,10 @@ export function InstallPrompt() {
                 <button
                     onClick={() => {
                         haptic.impact('light')
-                        dismissInstall()
+                        dismissLater()
                     }}
                     className="shrink-0 p-2 text-[var(--app-hint)] active:opacity-60"
-                    aria-label="Dismiss"
+                    aria-label={t('install.later')}
                 >
                     <CloseIcon className="w-4 h-4" />
                 </button>

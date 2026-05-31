@@ -54,18 +54,30 @@ async function bootstrap() {
 
     const updateSW = registerSW({
         onNeedRefresh() {
-            if (confirm('New version available! Reload to update?')) {
-                updateSW(true)
-            }
+            window.dispatchEvent(new CustomEvent('sw-update-available', {
+                detail: { updateSW }
+            }))
         },
         onOfflineReady() {
             console.log('App ready for offline use')
         },
         onRegistered(registration) {
             if (registration) {
+                // iOS compensation: poll every 30 min (iOS doesn't guarantee SW update on launch)
                 setInterval(() => {
                     registration.update()
-                }, 60 * 60 * 1000)
+                }, 30 * 60 * 1000)
+
+                // Request persistent storage to prevent cache cleanup
+                if (navigator.storage?.persist) {
+                    navigator.storage.persist().then((granted) => {
+                        if (granted) {
+                            console.log('Persistent storage granted')
+                        }
+                    }).catch(() => {
+                        // Ignore persistence errors
+                    })
+                }
             }
         },
         onRegisterError(error) {
