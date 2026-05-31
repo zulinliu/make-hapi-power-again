@@ -1,5 +1,5 @@
 import type { Session, SyncEngine, SyncEvent } from '../sync/syncEngine'
-import type { SessionEndReason } from '@hapi/protocol'
+import type { SessionEndReason } from '@hapipower/protocol'
 import type { NotificationChannel, NotificationHubOptions, TaskNotification } from './notificationTypes'
 import { extractMessageEventType, extractTaskNotification } from './eventParsing'
 

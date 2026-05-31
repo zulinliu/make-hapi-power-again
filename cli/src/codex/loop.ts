@@ -7,7 +7,7 @@ import { codexRemoteLauncher } from './codexRemoteLauncher';
 import { ApiClient, ApiSessionClient } from '@/lib';
 import type { CodexCliOverrides } from './utils/codexCliOverrides';
 import type { ReasoningEffort } from './appServerTypes';
-import type { CodexCollaborationMode, CodexPermissionMode } from '@hapi/protocol/types';
+import type { CodexCollaborationMode, CodexPermissionMode } from '@hapipower/protocol/types';
 
 export type PermissionMode = CodexPermissionMode;
 

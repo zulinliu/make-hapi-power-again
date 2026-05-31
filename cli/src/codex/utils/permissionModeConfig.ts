@@ -1,4 +1,4 @@
-import type { CodexPermissionMode } from '@hapi/protocol/types';
+import type { CodexPermissionMode } from '@hapipower/protocol/types';
 import type { ApprovalPolicy, SandboxMode, SandboxPolicy } from '../appServerTypes';
 
 export type CodexPermissionModeConfig = {

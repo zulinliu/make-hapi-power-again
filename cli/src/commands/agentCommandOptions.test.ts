@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { GEMINI_PERMISSION_MODES, OPENCODE_PERMISSION_MODES } from '@hapi/protocol/modes'
+import { GEMINI_PERMISSION_MODES, OPENCODE_PERMISSION_MODES } from '@hapipower/protocol/modes'
 import { parseRemoteAgentCommandOptions } from './agentCommandOptions'
 
 describe('parseRemoteAgentCommandOptions', () => {

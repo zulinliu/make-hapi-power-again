@@ -1,8 +1,8 @@
-import type { ClientToServerEvents } from '@hapi/protocol'
+import type { ClientToServerEvents } from '@hapipower/protocol'
 import { z } from 'zod'
 import { randomUUID } from 'node:crypto'
-import type { CodexCollaborationMode, PermissionMode } from '@hapi/protocol/types'
-import { isRedundantGoalStatusEventContent } from '@hapi/protocol/messages'
+import type { CodexCollaborationMode, PermissionMode } from '@hapipower/protocol/types'
+import { isRedundantGoalStatusEventContent } from '@hapipower/protocol/messages'
 import type { Store, StoredSession } from '../../../store'
 import type { SyncEvent } from '../../../sync/syncEngine'
 import { extractTodoWriteTodosFromMessageContent } from '../../../sync/todos'
@@ -10,7 +10,7 @@ import { extractTeamStateFromMessageContent, applyTeamStateDelta } from '../../.
 import { extractBackgroundTaskDelta } from '../../../sync/backgroundTasks'
 import { shouldRecordSessionActivity } from '../../../sync/sessionActivity'
 import type { CliSocketWithData } from '../../socketTypes'
-import type { SessionEndReason } from '@hapi/protocol'
+import type { SessionEndReason } from '@hapipower/protocol'
 import type { AccessErrorReason, AccessResult } from './types'
 
 type SessionAlivePayload = {
@@ -118,7 +118,7 @@ export function registerSessionHandlers(socket: CliSocketWithData, deps: Session
         const teamDelta = extractTeamStateFromMessageContent(content)
         if (teamDelta) {
             const existingSession = store.sessions.getSession(sid)
-            const existingTeamState = existingSession?.teamState as import('@hapi/protocol/types').TeamState | null | undefined
+            const existingTeamState = existingSession?.teamState as import('@hapipower/protocol/types').TeamState | null | undefined
             const newTeamState = applyTeamStateDelta(existingTeamState ?? null, teamDelta)
             const updated = store.sessions.setSessionTeamState(sid, newTeamState, msg.createdAt, session.namespace)
             if (updated) {

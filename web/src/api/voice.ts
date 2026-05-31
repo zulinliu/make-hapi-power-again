@@ -14,7 +14,7 @@ import {
     ELEVENLABS_API_BASE,
     VOICE_AGENT_NAME,
     buildVoiceAgentConfig
-} from '@hapi/protocol/voice'
+} from '@hapipower/protocol/voice'
 
 export interface VoiceTokenResponse {
     allowed: boolean
@@ -86,7 +86,7 @@ export interface CreateAgentResult {
 }
 
 /**
- * Find an existing "Hapi Voice Assistant" agent using the provided API key.
+ * Find an existing "Hapi Power Voice Assistant" agent using the provided API key.
  */
 export async function findHapiAgent(apiKey: string): Promise<FindAgentResult> {
     try {
@@ -122,7 +122,7 @@ export async function findHapiAgent(apiKey: string): Promise<FindAgentResult> {
 }
 
 /**
- * Create or update the "Hapi Voice Assistant" agent with our default configuration.
+ * Create or update the "Hapi Power Voice Assistant" agent with our default configuration.
  */
 export async function createOrUpdateHapiAgent(apiKey: string): Promise<CreateAgentResult> {
     try {

@@ -1,6 +1,6 @@
 import type { AgentEvent, CodexReview, CodexReviewFinding, NormalizedAgentContent, NormalizedMessage, ToolResultPermission } from '@/chat/types'
-import { AGENT_MESSAGE_PAYLOAD_TYPE, asNumber, asString, isObject } from '@hapi/protocol'
-import { isClaudeChatVisibleMessage } from '@hapi/protocol/messages'
+import { AGENT_MESSAGE_PAYLOAD_TYPE, asNumber, asString, isObject } from '@hapipower/protocol'
+import { isClaudeChatVisibleMessage } from '@hapipower/protocol/messages'
 
 function normalizeToolResultPermissions(value: unknown): ToolResultPermission | undefined {
     if (!isObject(value)) return undefined

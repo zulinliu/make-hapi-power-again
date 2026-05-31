@@ -1,4 +1,4 @@
-import type { PermissionMode } from '@hapi/protocol/types'
+import type { PermissionMode } from '@hapipower/protocol/types'
 
 export type RemoteAgentCommandOptions<TPermissionMode extends PermissionMode> = {
     startedBy?: 'runner' | 'terminal'

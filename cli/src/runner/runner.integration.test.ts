@@ -10,8 +10,8 @@
  * and the runner will not work properly!
  * 
  * The integration test environment uses .env.integration-test which sets:
- * - HAPI_HOME=~/.hapi-dev-test (DIFFERENT from dev's ~/.hapi-dev!)
- * - HAPI_API_URL=http://localhost:3006 (local hapi-hub)
+ * - HAPI_POWER_HOME=~/.hapi-dev-test (DIFFERENT from dev's ~/.hapi-dev!)
+ * - HAPI_POWER_API_URL=http://localhost:3006 (local hapi-power-hub)
  * - CLI_API_TOKEN=... (must match the hub)
  */
 
@@ -122,8 +122,8 @@ describe.skipIf(!await isServerHealthy())('Runner Integration Tests', { timeout:
       path: '/test/path',
       host: 'test-host',
       homeDir: '/test/home',
-      happyHomeDir: '/test/happy-home',
-      happyLibDir: '/test/happy-lib',
+      hapiPowerHomeDir: '/test/happy-home',
+      hapiPowerLibDir: '/test/happy-lib',
       happyToolsDir: '/test/happy-tools',
       hostPid: 99999,
       startedBy: 'terminal',
@@ -449,7 +449,7 @@ describe.skipIf(!await isServerHealthy())('Runner Integration Tests', { timeout:
 
       // The runner should automatically detect the version mismatch and restart itself
       // We check once per minute, wait for a little longer than that
-      await new Promise(resolve => setTimeout(resolve, parseInt(process.env.HAPI_RUNNER_HEARTBEAT_INTERVAL || '30000') + 10_000));
+      await new Promise(resolve => setTimeout(resolve, parseInt(process.env.HAPI_POWER_RUNNER_HEARTBEAT_INTERVAL || '30000') + 10_000));
 
       // Check that the runner is running with the new version
       const finalState = await readRunnerState();

@@ -1,6 +1,6 @@
-import type { AgentFlavor } from '@hapi/protocol';
+import type { AgentFlavor } from '@hapipower/protocol';
 import type { AgentBackend, AgentMessage, AgentSessionConfig, PermissionRequest, PermissionResponse, PromptContent } from '@/agent/types';
-import { asString, isObject } from '@hapi/protocol';
+import { asString, isObject } from '@hapipower/protocol';
 import { AcpStdioTransport, type AcpStderrError } from './AcpStdioTransport';
 import { AcpMessageHandler } from './AcpMessageHandler';
 import { ACP_SESSION_UPDATE_TYPES } from './constants';

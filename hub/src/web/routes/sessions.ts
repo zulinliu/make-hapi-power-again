@@ -12,8 +12,8 @@ import {
     supportsModelChange,
     toSessionSummary,
     UploadFileRequestSchema
-} from '@hapi/protocol'
-import type { SlashCommand } from '@hapi/protocol/apiTypes'
+} from '@hapipower/protocol'
+import type { SlashCommand } from '@hapipower/protocol/apiTypes'
 import { Hono } from 'hono'
 import type { SyncEngine, Session } from '../../sync/syncEngine'
 import type { WebAppEnv } from '../middleware/auth'

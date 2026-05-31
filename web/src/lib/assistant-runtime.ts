@@ -4,7 +4,7 @@ import type { AppendMessage, AttachmentAdapter, ThreadMessageLike } from '@assis
 import { useExternalMessageConverter, useExternalStoreRuntime } from '@assistant-ui/react'
 import type { PendingSchedule } from '@/components/AssistantChat/ScheduleTimePicker'
 import { resolvePendingSchedule } from '@/components/AssistantChat/ScheduleTimePicker'
-import { safeStringify } from '@hapi/protocol'
+import { safeStringify } from '@hapipower/protocol'
 import { renderEventLabel } from '@/chat/presentation'
 import type { ChatBlock, CliOutputBlock, CodexReview, UsageData } from '@/chat/types'
 import type { AgentEvent, ToolCallBlock } from '@/chat/types'

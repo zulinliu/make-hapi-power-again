@@ -10,7 +10,7 @@ import type { OpencodeHookEvent } from './types';
 import type { OpencodeHookServer } from './utils/startOpencodeHookServer';
 import { createOpencodeStorageScanner, type OpencodeStorageScannerHandle } from './utils/opencodeStorageScanner';
 import { randomUUID } from 'node:crypto';
-import { isObject } from '@hapi/protocol';
+import { isObject } from '@hapipower/protocol';
 import { join } from 'node:path';
 import { configuration } from '@/configuration';
 import type { PermissionCompletion } from '@/modules/common/permission/BasePermissionHandler';
@@ -250,7 +250,7 @@ function resolveOpencodeConfigDir(session: OpencodeSession): string {
     if (process.env.OPENCODE_CONFIG_DIR) {
         return process.env.OPENCODE_CONFIG_DIR;
     }
-    return join(configuration.happyHomeDir, 'tmp', 'opencode', session.client.sessionId, '.opencode');
+    return join(configuration.hapiPowerHomeDir, 'tmp', 'opencode', session.client.sessionId, '.opencode');
 }
 
 export async function opencodeLocalLauncher(

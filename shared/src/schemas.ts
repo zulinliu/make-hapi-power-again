@@ -42,8 +42,8 @@ export const MetadataSchema = z.object({
     tools: z.array(z.string()).optional(),
     slashCommands: z.array(z.string()).optional(),
     homeDir: z.string().optional(),
-    happyHomeDir: z.string().optional(),
-    happyLibDir: z.string().optional(),
+    hapiPowerHomeDir: z.string().optional(),
+    hapiPowerLibDir: z.string().optional(),
     happyToolsDir: z.string().optional(),
     startedFromRunner: z.boolean().optional(),
     hostPid: z.number().optional(),
@@ -230,11 +230,11 @@ export type SessionPatch = z.infer<typeof SessionPatchSchema>
 export const MachineMetadataSchema = z.object({
     host: z.string(),
     platform: z.string(),
-    happyCliVersion: z.string(),
+    hapiPowerCliVersion: z.string(),
     displayName: z.string().optional(),
     homeDir: z.string().optional(),
-    happyHomeDir: z.string().optional(),
-    happyLibDir: z.string().optional(),
+    hapiPowerHomeDir: z.string().optional(),
+    hapiPowerLibDir: z.string().optional(),
     workspaceRoots: z.array(z.string()).optional()
 })
 

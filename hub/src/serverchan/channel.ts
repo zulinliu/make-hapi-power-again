@@ -1,5 +1,5 @@
 import type { Session } from '../sync/syncEngine'
-import type { SessionEndReason } from '@hapi/protocol'
+import type { SessionEndReason } from '@hapipower/protocol'
 import type { NotificationChannel, TaskNotification } from '../notifications/notificationTypes'
 import { getAgentName, getSessionName } from '../notifications/sessionInfo'
 

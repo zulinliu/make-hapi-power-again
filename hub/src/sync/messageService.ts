@@ -1,5 +1,5 @@
-import type { AttachmentMetadata, DecryptedMessage } from '@hapi/protocol/types'
-import { isRedundantGoalStatusEventContent } from '@hapi/protocol/messages'
+import type { AttachmentMetadata, DecryptedMessage } from '@hapipower/protocol/types'
+import { isRedundantGoalStatusEventContent } from '@hapipower/protocol/messages'
 import type { Server } from 'socket.io'
 import { randomUUID } from 'node:crypto'
 import type { Store, CancelQueuedMessageResult } from '../store'

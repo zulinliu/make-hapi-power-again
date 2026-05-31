@@ -1,4 +1,4 @@
-import type { CodexModelsResponse, CodexModelSummary } from '@hapi/protocol/apiTypes';
+import type { CodexModelsResponse, CodexModelSummary } from '@hapipower/protocol/apiTypes';
 import { CodexAppServerClient } from '@/codex/codexAppServerClient';
 import { getErrorMessage } from './rpcResponses';
 

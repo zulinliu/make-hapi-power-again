@@ -19,7 +19,7 @@ export function parseExtraHeaders(raw: string | undefined, warn: (message: strin
     try {
         const parsed = JSON.parse(raw) as unknown
         if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-            warn('[WARN] HAPI_EXTRA_HEADERS_JSON must be a JSON object. Ignoring value.')
+            warn('[WARN] HAPI_POWER_EXTRA_HEADERS_JSON must be a JSON object. Ignoring value.')
             return {}
         }
 
@@ -29,12 +29,12 @@ export function parseExtraHeaders(raw: string | undefined, warn: (message: strin
         )
 
         if (Object.keys(headers).length !== entries.length) {
-            warn('[WARN] HAPI_EXTRA_HEADERS_JSON only supports string header values. Ignoring non-string entries.')
+            warn('[WARN] HAPI_POWER_EXTRA_HEADERS_JSON only supports string header values. Ignoring non-string entries.')
         }
 
         return headers
     } catch {
-        warn('[WARN] Failed to parse HAPI_EXTRA_HEADERS_JSON. Ignoring value.')
+        warn('[WARN] Failed to parse HAPI_POWER_EXTRA_HEADERS_JSON. Ignoring value.')
         return {}
     }
 }
@@ -46,7 +46,7 @@ class Configuration {
     public readonly isRunnerProcess: boolean
 
     // Directories and paths (from persistence)
-    public readonly happyHomeDir: string
+    public readonly hapiPowerHomeDir: string
     public readonly logsDir: string
     public readonly settingsFile: string
     public readonly privateKeyFile: string
@@ -58,35 +58,35 @@ class Configuration {
 
     constructor() {
         // Server configuration
-        this._apiUrl = process.env.HAPI_API_URL || 'http://localhost:3006'
+        this._apiUrl = process.env.HAPI_POWER_API_URL || 'http://localhost:3006'
         this._cliApiToken = process.env.CLI_API_TOKEN || ''
-        this._extraHeaders = parseExtraHeaders(process.env.HAPI_EXTRA_HEADERS_JSON)
+        this._extraHeaders = parseExtraHeaders(process.env.HAPI_POWER_EXTRA_HEADERS_JSON)
 
         // Check if we're running as runner based on process args
         const args = getCliArgs()
         this.isRunnerProcess = args.length >= 2 && args[0] === 'runner' && (args[1] === 'start-sync')
 
-        // Directory configuration - Priority: HAPI_HOME env > default home dir
-        if (process.env.HAPI_HOME) {
+        // Directory configuration - Priority: HAPI_POWER_HOME env > default home dir
+        if (process.env.HAPI_POWER_HOME) {
             // Expand ~ to home directory if present
-            const expandedPath = process.env.HAPI_HOME.replace(/^~/, homedir())
-            this.happyHomeDir = expandedPath
+            const expandedPath = process.env.HAPI_POWER_HOME.replace(/^~/, homedir())
+            this.hapiPowerHomeDir = expandedPath
         } else {
-            this.happyHomeDir = join(homedir(), '.hapi')
+            this.hapiPowerHomeDir = join(homedir(), '.hapi')
         }
 
-        this.logsDir = join(this.happyHomeDir, 'logs')
-        this.settingsFile = join(this.happyHomeDir, 'settings.json')
-        this.privateKeyFile = join(this.happyHomeDir, 'access.key')
-        this.runnerStateFile = join(this.happyHomeDir, 'runner.state.json')
-        this.runnerLockFile = join(this.happyHomeDir, 'runner.state.json.lock')
+        this.logsDir = join(this.hapiPowerHomeDir, 'logs')
+        this.settingsFile = join(this.hapiPowerHomeDir, 'settings.json')
+        this.privateKeyFile = join(this.hapiPowerHomeDir, 'access.key')
+        this.runnerStateFile = join(this.hapiPowerHomeDir, 'runner.state.json')
+        this.runnerLockFile = join(this.hapiPowerHomeDir, 'runner.state.json.lock')
 
-        this.isExperimentalEnabled = ['true', '1', 'yes'].includes(process.env.HAPI_EXPERIMENTAL?.toLowerCase() || '')
+        this.isExperimentalEnabled = ['true', '1', 'yes'].includes(process.env.HAPI_POWER_EXPERIMENTAL?.toLowerCase() || '')
 
         this.currentCliVersion = packageJson.version
 
-        if (!existsSync(this.happyHomeDir)) {
-            mkdirSync(this.happyHomeDir, { recursive: true })
+        if (!existsSync(this.hapiPowerHomeDir)) {
+            mkdirSync(this.hapiPowerHomeDir, { recursive: true })
         }
         // Ensure directories exist
         if (!existsSync(this.logsDir)) {

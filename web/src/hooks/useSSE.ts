@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { isObject, toSessionSummary } from '@hapi/protocol'
-import { MachinePatchSchema, MachineSchema, SessionPatchSchema, SessionSchema } from '@hapi/protocol/schemas'
+import { isObject, toSessionSummary } from '@hapipower/protocol'
+import { MachinePatchSchema, MachineSchema, SessionPatchSchema, SessionSchema } from '@hapipower/protocol/schemas'
 import type {
     Machine,
     MachinesResponse,

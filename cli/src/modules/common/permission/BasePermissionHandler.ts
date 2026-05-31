@@ -1,6 +1,6 @@
 import type { AgentState } from "@/api/types";
-import type { PermissionMode } from "@hapi/protocol/types";
-import { RPC_METHODS } from '@hapi/protocol/rpcMethods';
+import type { PermissionMode } from "@hapipower/protocol/types";
+import { RPC_METHODS } from '@hapipower/protocol/rpcMethods';
 
 type RpcHandlerManagerLike = {
     registerHandler<TRequest = unknown, TResponse = unknown>(

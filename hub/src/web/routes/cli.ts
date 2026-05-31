@@ -4,7 +4,7 @@ import {
     CreateOrLoadMachineRequestSchema,
     CreateOrLoadSessionRequestSchema,
     PROTOCOL_VERSION
-} from '@hapi/protocol'
+} from '@hapipower/protocol'
 import { getConfiguration } from '../../configuration'
 import { constantTimeEquals } from '../../utils/crypto'
 import { parseAccessToken } from '../../utils/accessToken'

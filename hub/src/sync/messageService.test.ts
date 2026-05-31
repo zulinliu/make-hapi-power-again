@@ -14,7 +14,7 @@ import { join } from 'node:path'
 import { MessageService } from './messageService'
 import { Store } from '../store'
 import type { Server } from 'socket.io'
-import type { SyncEvent } from '@hapi/protocol/types'
+import type { SyncEvent } from '@hapipower/protocol/types'
 
 // ---------------------------------------------------------------------------
 // Test helpers

@@ -1,5 +1,5 @@
 import type { ApiSessionClient } from '@/api/apiSession'
-import type { SessionEndReason } from '@hapi/protocol'
+import type { SessionEndReason } from '@hapipower/protocol'
 import { logger } from '@/ui/logger'
 import { restoreTerminalState } from '@/ui/terminalState'
 

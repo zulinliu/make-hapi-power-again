@@ -1,7 +1,7 @@
 {
-    "name": "hapi-web",
+    "name": "hapi-power-web",
     "private": true,
-    "version": "0.1.0",
+    "version": "0.3.0",
     "license": "AGPL-3.0-only",
     "type": "module",
     "scripts": {
@@ -15,7 +15,7 @@
         "@assistant-ui/react": "^0.11.53",
         "@assistant-ui/react-markdown": "^0.11.9",
         "@elevenlabs/react": "^0.13.0",
-        "@hapi/protocol": "workspace:*",
+        "@hapipower/protocol": "workspace:*",
         "@lobehub/icons": "^5.4.0",
         "@monaco-editor/react": "^4.7.0",
         "@radix-ui/react-dialog": "^1.1.15",

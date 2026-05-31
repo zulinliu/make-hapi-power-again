@@ -1,6 +1,6 @@
 import { RpcHandlerManager } from "@/api/rpc/RpcHandlerManager";
 import { logger } from "@/lib";
-import { RPC_METHODS } from '@hapi/protocol/rpcMethods';
+import { RPC_METHODS } from '@hapipower/protocol/rpcMethods';
 
 interface KillSessionRequest {
     // No parameters needed

@@ -1,5 +1,5 @@
-import { CODEX_PERMISSION_MODES } from '@hapi/protocol/modes';
-import type { CodexPermissionMode } from '@hapi/protocol/types';
+import { CODEX_PERMISSION_MODES } from '@hapipower/protocol/modes';
+import type { CodexPermissionMode } from '@hapipower/protocol/types';
 import type { ReasoningEffort } from '../appServerTypes';
 import type { EnhancedMode } from '../loop';
 import type { SlashCommand } from '@/modules/common/slashCommands';

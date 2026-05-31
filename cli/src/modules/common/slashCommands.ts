@@ -2,10 +2,10 @@ import { access, readdir, readFile } from 'fs/promises';
 import { dirname, join, resolve } from 'path';
 import { homedir } from 'os';
 import { parse as parseYaml } from 'yaml';
-import { getBuiltinSlashCommands, mergeSlashCommands } from '@hapi/protocol/slashCommands';
-import type { SlashCommand, SlashCommandsResponse } from '@hapi/protocol/apiTypes';
+import { getBuiltinSlashCommands, mergeSlashCommands } from '@hapipower/protocol/slashCommands';
+import type { SlashCommand, SlashCommandsResponse } from '@hapipower/protocol/apiTypes';
 
-export type { SlashCommand } from '@hapi/protocol/apiTypes';
+export type { SlashCommand } from '@hapipower/protocol/apiTypes';
 
 export interface ListSlashCommandsRequest {
     agent: string;
