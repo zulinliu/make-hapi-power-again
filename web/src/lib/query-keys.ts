@@ -21,4 +21,6 @@ export const queryKeys = {
     sessionOpencodeModels: (sessionId: string) => ['session-opencode-models', sessionId] as const,
     machineOpencodeModelsForCwd: (machineId: string, cwd: string) => ['machine-opencode-models', machineId, cwd] as const,
     skills: (sessionId: string) => ['skills', sessionId] as const,
+    providers: ['providers'] as const,
+    providerModels: (providerId: string) => ['provider-models', providerId] as const,
 }
