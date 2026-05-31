@@ -282,6 +282,48 @@ export class ApiClient {
         })
     }
 
+    async gitClone(sessionId: string, options: { url: string; targetDir?: string; branch?: string; cloneId?: string }): Promise<GitCommandResponse> {
+        return await this.request<GitCommandResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/git-clone`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(options)
+        })
+    }
+
+    async getGitRemotes(sessionId: string): Promise<GitCommandResponse> {
+        return await this.request<GitCommandResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/git-remotes`)
+    }
+
+    async addGitRemote(sessionId: string, name: string, url: string): Promise<GitCommandResponse> {
+        return await this.request<GitCommandResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/git-remotes`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, url })
+        })
+    }
+
+    async removeGitRemote(sessionId: string, name: string): Promise<GitCommandResponse> {
+        return await this.request<GitCommandResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/git-remotes/${encodeURIComponent(name)}`, {
+            method: 'DELETE'
+        })
+    }
+
+    async gitPush(sessionId: string, options: { remote?: string; branch?: string; force?: boolean }): Promise<GitCommandResponse> {
+        return await this.request<GitCommandResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/git-push`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(options)
+        })
+    }
+
+    async gitPull(sessionId: string, options: { remote?: string; branch?: string }): Promise<GitCommandResponse> {
+        return await this.request<GitCommandResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/git-pull`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(options)
+        })
+    }
+
     async searchSessionFiles(sessionId: string, query: string, limit?: number): Promise<FileSearchResponse> {
         const params = new URLSearchParams()
         if (query) {
