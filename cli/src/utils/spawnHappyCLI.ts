@@ -65,7 +65,7 @@ function resolveInvokedCwd(cwd: SpawnOptions['cwd']): string {
     return isCrossPlatformAbsolutePath(normalizedCwd) ? normalizedCwd : resolve(normalizedCwd);
   }
 
-  const inheritedInvokedCwd = process.env.HAPI_INVOKED_CWD?.trim();
+  const inheritedInvokedCwd = process.env.HAPI_POWER_INVOKED_CWD?.trim();
   if (inheritedInvokedCwd && isCrossPlatformAbsolutePath(inheritedInvokedCwd)) {
     return inheritedInvokedCwd;
   }
@@ -161,9 +161,9 @@ export function spawnHappyCLI(args: string[], options: SpawnOptions = {}): Child
     finalEnv[HAPI_POWER_CLI_EXECUTABLE_ENV] = spawnCommand;
     shouldSetEnv = true;
   } else {
-    const invokedCwd = finalEnv.HAPI_INVOKED_CWD?.trim();
+    const invokedCwd = finalEnv.HAPI_POWER_INVOKED_CWD?.trim();
     const hasExplicitCwd = 'cwd' in options && options.cwd !== undefined;
-    finalEnv.HAPI_INVOKED_CWD = hasExplicitCwd
+    finalEnv.HAPI_POWER_INVOKED_CWD = hasExplicitCwd
       ? resolveInvokedCwd(options.cwd)
       : invokedCwd && isCrossPlatformAbsolutePath(invokedCwd)
         ? invokedCwd

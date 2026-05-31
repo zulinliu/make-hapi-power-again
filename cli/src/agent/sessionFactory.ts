@@ -8,6 +8,7 @@ import type { AgentState, MachineMetadata, Metadata, Session } from '@/api/types
 import { notifyRunnerSessionStarted } from '@/runner/controlClient'
 import { readSettings } from '@/persistence'
 import { configuration } from '@/configuration'
+import { getEnv } from '@/utils/envCompat'
 import { logger } from '@/ui/logger'
 import { runtimePath } from '@/projectPath'
 import { getInvokedCwd } from '@/utils/invokedCwd'
@@ -40,7 +41,7 @@ export type SessionBootstrapResult = {
 
 export function buildMachineMetadata(options?: { workspaceRoots?: string[] }): MachineMetadata {
     return {
-        host: process.env.HAPI_HOSTNAME || os.hostname(),
+        host: getEnv('HAPI_POWER_HOSTNAME') || os.hostname(),
         platform: os.platform(),
         hapiPowerCliVersion: packageJson.version,
         homeDir: os.homedir(),
@@ -64,7 +65,7 @@ export function buildSessionMetadata(options: {
 
     return {
         path: options.workingDirectory,
-        host: process.env.HAPI_HOSTNAME || os.hostname(),
+        host: getEnv('HAPI_POWER_HOSTNAME') || os.hostname(),
         version: packageJson.version,
         os: os.platform(),
         machineId: options.machineId,

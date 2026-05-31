@@ -35,7 +35,7 @@ vi.mock('@/projectPath', () => ({
 }));
 
 const originalPlatformDescriptor = Object.getOwnPropertyDescriptor(process, 'platform');
-const originalInvokedCwd = process.env.HAPI_INVOKED_CWD;
+const originalInvokedCwd = process.env.HAPI_POWER_INVOKED_CWD;
 const originalCliExecutable = process.env.HAPI_POWER_CLI_EXECUTABLE;
 
 function setPlatform(value: string) {
@@ -69,9 +69,9 @@ describe('spawnHappyCLI windowsHide behavior', () => {
     isBunCompiledMock.mockReturnValue(false);
     projectPathMock.mockReturnValue(process.cwd());
     if (originalInvokedCwd === undefined) {
-      delete process.env.HAPI_INVOKED_CWD;
+      delete process.env.HAPI_POWER_INVOKED_CWD;
     } else {
-      process.env.HAPI_INVOKED_CWD = originalInvokedCwd;
+      process.env.HAPI_POWER_INVOKED_CWD = originalInvokedCwd;
     }
     if (originalCliExecutable === undefined) {
       delete process.env.HAPI_POWER_CLI_EXECUTABLE;
@@ -209,10 +209,10 @@ describe('spawnHappyCLI windowsHide behavior', () => {
     });
 
     const options = getSpawnOptionsOrThrow();
-    expect(options.env?.HAPI_INVOKED_CWD).toBe(childCwd);
+    expect(options.env?.HAPI_POWER_INVOKED_CWD).toBe(childCwd);
   });
 
-  it('prefers the explicit child cwd over an inherited HAPI_INVOKED_CWD', async () => {
+  it('prefers the explicit child cwd over an inherited HAPI_POWER_INVOKED_CWD', async () => {
     const { spawnHappyCLI } = await import('./spawnHappyCLI');
     const inheritedInvokedCwd = 'C:\\workspace\\other-project';
     const childCwd = 'C:\\workspace\\project';
@@ -220,27 +220,27 @@ describe('spawnHappyCLI windowsHide behavior', () => {
     spawnHappyCLI(['runner', 'start-sync'], {
       cwd: childCwd,
       env: {
-        HAPI_INVOKED_CWD: inheritedInvokedCwd
+        HAPI_POWER_INVOKED_CWD: inheritedInvokedCwd
       },
       stdio: 'ignore'
     });
 
     const options = getSpawnOptionsOrThrow();
-    expect(options.env?.HAPI_INVOKED_CWD).toBe(childCwd);
+    expect(options.env?.HAPI_POWER_INVOKED_CWD).toBe(childCwd);
   });
 
-  it('keeps an existing absolute HAPI_INVOKED_CWD when no child cwd is provided', async () => {
+  it('keeps an existing absolute HAPI_POWER_INVOKED_CWD when no child cwd is provided', async () => {
     const { spawnHappyCLI } = await import('./spawnHappyCLI');
     const inheritedInvokedCwd = 'C:\\workspace\\other-project';
 
     spawnHappyCLI(['runner', 'start-sync'], {
       env: {
-        HAPI_INVOKED_CWD: inheritedInvokedCwd
+        HAPI_POWER_INVOKED_CWD: inheritedInvokedCwd
       },
       stdio: 'ignore'
     });
 
     const options = getSpawnOptionsOrThrow();
-    expect(options.env?.HAPI_INVOKED_CWD).toBe(inheritedInvokedCwd);
+    expect(options.env?.HAPI_POWER_INVOKED_CWD).toBe(inheritedInvokedCwd);
   });
 });

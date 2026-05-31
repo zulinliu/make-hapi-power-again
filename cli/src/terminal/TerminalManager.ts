@@ -1,5 +1,6 @@
 import { logger } from '@/ui/logger'
 import { getInvokedCwd } from '@/utils/invokedCwd'
+import { getEnv, getEnvNumber } from '@/utils/envCompat'
 import type {
     TerminalErrorPayload,
     TerminalExitPayload,
@@ -46,7 +47,7 @@ function readSubprocessRssMb(pid: number | null): number | null {
 const SENSITIVE_ENV_KEYS = new Set([
     'CLI_API_TOKEN',
     'HAPI_POWER_API_URL',
-    'HAPI_HTTP_MCP_URL',
+    'HAPI_POWER_HTTP_MCP_URL',
     'TELEGRAM_BOT_TOKEN',
     'OPENAI_API_KEY',
     'ANTHROPIC_API_KEY',
@@ -59,7 +60,7 @@ function getOptionalBun(): typeof Bun | null {
 }
 
 function resolveEnvNumber(name: string, fallback: number): number {
-    const raw = process.env[name]
+    const raw = getEnv(name)
     if (!raw) {
         return fallback
     }
@@ -68,7 +69,7 @@ function resolveEnvNumber(name: string, fallback: number): number {
 }
 
 function resolveWindowsShellCommand(): string[] {
-    const configuredShell = process.env.HAPI_TERMINAL_SHELL?.trim()
+    const configuredShell = getEnv('HAPI_POWER_TERMINAL_SHELL')?.trim()
     if (configuredShell) {
         return [configuredShell]
     }
@@ -162,8 +163,8 @@ export class TerminalManager {
         this.onOutput = options.onOutput
         this.onExit = options.onExit
         this.onError = options.onError
-        this.idleTimeoutMs = options.idleTimeoutMs ?? resolveEnvNumber('HAPI_TERMINAL_IDLE_TIMEOUT_MS', DEFAULT_IDLE_TIMEOUT_MS)
-        this.maxTerminals = options.maxTerminals ?? resolveEnvNumber('HAPI_TERMINAL_MAX_TERMINALS', DEFAULT_MAX_TERMINALS)
+        this.idleTimeoutMs = options.idleTimeoutMs ?? resolveEnvNumber('HAPI_POWER_TERMINAL_IDLE_TIMEOUT_MS', DEFAULT_IDLE_TIMEOUT_MS)
+        this.maxTerminals = options.maxTerminals ?? resolveEnvNumber('HAPI_POWER_TERMINAL_MAX_TERMINALS', DEFAULT_MAX_TERMINALS)
         this.filteredEnv = buildFilteredEnv()
     }
 

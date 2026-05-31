@@ -7,6 +7,7 @@ import { existsSync } from 'node:fs'
 import { execSync } from 'node:child_process'
 import { homedir } from 'node:os'
 import { logger } from '@/ui/logger'
+import { getEnv } from '@/utils/envCompat'
 
 /**
  * Find Claude executable path on Windows.
@@ -97,19 +98,20 @@ function findGlobalClaudePath(): string | null {
  * Get default path to Claude Code executable.
  *
  * Environment variables:
- * - HAPI_CLAUDE_PATH: Force a specific path to claude executable
+ * - HAPI_POWER_CLAUDE_PATH: Force a specific path to claude executable
  */
 export function getDefaultClaudeCodePath(): string {
     // Allow explicit override via env var
-    if (process.env.HAPI_CLAUDE_PATH) {
-        logger.debug(`[Claude SDK] Using HAPI_CLAUDE_PATH: ${process.env.HAPI_CLAUDE_PATH}`)
-        return process.env.HAPI_CLAUDE_PATH
+    const claudePath = getEnv('HAPI_POWER_CLAUDE_PATH')
+    if (claudePath) {
+        logger.debug(`[Claude SDK] Using HAPI_POWER_CLAUDE_PATH: ${claudePath}`)
+        return claudePath
     }
 
     // Find global claude
     const globalPath = findGlobalClaudePath()
     if (!globalPath) {
-        throw new Error('Claude Code CLI not found on PATH. Install Claude Code or set HAPI_CLAUDE_PATH.')
+        throw new Error('Claude Code CLI not found on PATH. Install Claude Code or set HAPI_POWER_CLAUDE_PATH.')
     }
     return globalPath
 }
