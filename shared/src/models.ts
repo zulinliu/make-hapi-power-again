@@ -9,6 +9,7 @@ export type ClaudeModelPreset = keyof typeof CLAUDE_MODEL_LABELS
 export const CLAUDE_MODEL_PRESETS = Object.keys(CLAUDE_MODEL_LABELS) as ClaudeModelPreset[]
 
 export const GEMINI_MODEL_LABELS = {
+    'gemini-3.5-flash': 'Gemini 3.5 Flash',
     'gemini-3.1-pro-preview': 'Gemini 3.1 Pro Preview',
     'gemini-3-flash-preview': 'Gemini 3 Flash Preview',
     'gemini-2.5-pro': 'Gemini 2.5 Pro',
