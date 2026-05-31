@@ -202,6 +202,46 @@
 - **MNF-03**: 添加 share_target 字段（支持接收文本/文件分享）
 - **MNF-04**: 离线页面 offline.html i18n 化（根据浏览器语言显示中/英文）
 
+## v0.5 Requirements — 核心开发者工作流
+
+> **v0.5 主题**: 补齐从"新建项目"到"推送代码"的完整开发者工作流，让 Hapi Power 成为真正可用的 AI 开发环境
+
+### 项目初始化（INIT）
+
+- **INIT-01**: Git Clone UI — 输入 URL + 选择目标目录 + 选择机器，通过 CLI RPC 执行 `git clone`
+- **INIT-02**: Clone 进度实时反馈 — 通过 Socket.IO 推送 clone 进度（接收对象计数、网络速度、剩余时间）
+- **INIT-03**: Clone 完成后自动初始化 — clone 成功后自动在目标目录创建会话，用户可立即开始开发
+- **INIT-04**: Git Remote 管理 — 查看/添加/删除远程仓库，配置 remote URL
+- **INIT-05**: 凭证管理 UI — 管理 Git 凭证（GitHub Token、SSH Key），加密存储
+
+### 分支协作（BRANCH）
+
+- **BRANCH-01**: Git Push UI — 推送当前分支到远程，支持 force push 确认、upstream 设置
+- **BRANCH-02**: Git Pull/Fetch — 从远程拉取更新，显示 fetch 结果摘要
+- **BRANCH-03**: 合并/变基 UI — 分支合并（merge）和变基（rebase）操作，冲突提示
+- **BRANCH-04**: PR 创建 — 从推送的分支一键创建 GitHub Pull Request（通过 gh CLI）
+- **BRANCH-05**: 分支对比 — 比较两个分支的差异（文件列表 + 统计）
+
+### 代码评审增强（REVIEW）
+
+- **REVIEW-01**: Side-by-side Diff — 并排对比模式（左旧右新），支持行级同步滚动
+- **REVIEW-02**: 变更评论 — 对单个变更添加行内评论，支持 @提及
+- **REVIEW-03**: Review 状态联动 — 审查结果反馈给 Agent，pending 变更可阻断 Agent 继续写入
+- **REVIEW-04**: 变更统计摘要 — 每次会话的变更统计（新增/修改/删除文件数、代码行数增减）
+
+### 文件编辑增强（EDITOR）
+
+- **EDITOR-01**: Monaco Editor 正式接入文件路由 — 替换当前简单文本编辑器，完整 IDE 体验
+- **EDITOR-02**: 自动保存 — 可配置延迟（默认 2s），保存状态指示器
+- **EDITOR-03**: 多标签编辑 — 同时打开多个文件，标签页管理（关闭/切换/固定）
+- **EDITOR-04**: 文件内搜索替换 — Monaco 内置 Ctrl+H 搜索替换
+
+### 工作流集成（FLOW）
+
+- **FLOW-01**: 一键工作流入口 — 首页引导"克隆项目 → 初始化 → 开始开发"的完整流程
+- **FLOW-02**: 最近项目快捷入口 — 首页显示最近工作的项目目录，一键进入
+- **FLOW-03**: 工作流状态指示 — 显示当前项目状态（未初始化/已克隆/开发中/有未提交变更）
+
 ## v0.3 Requirements（延后）
 
 ### Isolation（隔离增强）
@@ -250,8 +290,9 @@
 - v0.1 requirements: 60 total → 60 Done ✓
 - v0.2 requirements: 26 total (PWA:7 + MOB:6 + I18N:5 + AUDIT:5 + DS2:3)
 - v0.4 requirements: 18 total (SWU:6 + INST:4 + NTF:4 + MNF:4)
+- v0.5 requirements: 17 total (INIT:5 + BRANCH:5 + REVIEW:4 + EDITOR:4 + FLOW:3 — EDITOR-04 合并入 REVIEW)
 - v0.3 deferred: ISO-01~02 + SCAL-01~02
 
 ---
 *Requirements defined: 2026-05-30*
-*Last updated: 2026-05-31 — v0.4 requirements added*
+*Last updated: 2026-05-31 — v0.5 requirements added*
