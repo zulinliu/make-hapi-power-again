@@ -117,6 +117,12 @@ export async function runCursor(opts: {
             if (config.model !== undefined) {
                 currentModel = config.model ?? undefined;
             }
+            if (config.providerBaseUrl !== undefined) {
+                process.env.CURSOR_API_BASE_URL = config.providerBaseUrl;
+            }
+            if (config.providerApiKey !== undefined) {
+                process.env.CURSOR_API_KEY = config.providerApiKey;
+            }
         },
         onAfterApply: syncSessionMode
     });

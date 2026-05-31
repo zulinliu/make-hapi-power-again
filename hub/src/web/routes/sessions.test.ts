@@ -3,6 +3,7 @@ import { Hono } from 'hono'
 import type { Session, SyncEngine } from '../../sync/syncEngine'
 import type { WebAppEnv } from '../middleware/auth'
 import { createSessionsRoutes } from './sessions'
+import type { Store } from '../../store'
 
 function createSession(overrides?: Partial<Session>): Session {
     const baseMetadata = {
@@ -99,7 +100,7 @@ function createApp(session: Session, opts?: {
         c.set('namespace', 'default')
         await next()
     })
-    app.route('/api', createSessionsRoutes(() => engine as SyncEngine))
+    app.route('/api', createSessionsRoutes(() => engine as SyncEngine, { providers: { getById: () => null } } as unknown as Store))
 
     return { app, applySessionConfigCalls }
 }
