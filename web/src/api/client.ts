@@ -530,10 +530,10 @@ export class ApiClient {
         })
     }
 
-    async setModel(sessionId: string, model: string | null): Promise<void> {
+    async setModel(sessionId: string, model: string | null, providerId?: string): Promise<void> {
         await this.request(`/api/sessions/${encodeURIComponent(sessionId)}/model`, {
             method: 'POST',
-            body: JSON.stringify({ model })
+            body: JSON.stringify({ model, providerId })
         })
     }
 
@@ -622,11 +622,12 @@ export class ApiClient {
         yolo?: boolean,
         sessionType?: 'simple' | 'worktree',
         worktreeName?: string,
-        effort?: string
+        effort?: string,
+        providerId?: string
     ): Promise<SpawnResponse> {
         return await this.request<SpawnResponse>(`/api/machines/${encodeURIComponent(machineId)}/spawn`, {
             method: 'POST',
-            body: JSON.stringify({ directory, agent, model, modelReasoningEffort, yolo, sessionType, worktreeName, effort })
+            body: JSON.stringify({ directory, agent, model, modelReasoningEffort, yolo, sessionType, worktreeName, effort, providerId })
         })
     }
 
@@ -1020,6 +1021,10 @@ export class ApiClient {
         return await this.request<DiscoverModelsResponse>(`/api/providers/${encodeURIComponent(providerId)}/discover-models`, {
             method: 'POST'
         })
+    }
+
+    async getFlavorModels(flavor: string): Promise<{ models: Array<{ id: string; name: string; providerId: string; providerName: string }> }> {
+        return await this.request(`/api/providers/flavor/${encodeURIComponent(flavor)}/models`)
     }
 
     async getProviderApiKey(providerId: string): Promise<{ apiKey: string }> {

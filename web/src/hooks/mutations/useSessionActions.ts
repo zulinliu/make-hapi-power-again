@@ -17,7 +17,7 @@ export function useSessionActions(
     switchSession: () => Promise<void>
     setPermissionMode: (mode: PermissionMode) => Promise<void>
     setCollaborationMode: (mode: CodexCollaborationMode) => Promise<void>
-    setModel: (model: string | null) => Promise<void>
+    setModel: (model: string | null, providerId?: string) => Promise<void>
     setModelReasoningEffort: (modelReasoningEffort: string | null) => Promise<void>
     setEffort: (effort: string | null) => Promise<void>
     renameSession: (name: string) => Promise<void>
@@ -92,11 +92,11 @@ export function useSessionActions(
     })
 
     const modelMutation = useMutation({
-        mutationFn: async (model: string | null) => {
+        mutationFn: async (args: { model: string | null; providerId?: string }) => {
             if (!api || !sessionId) {
                 throw new Error('Session unavailable')
             }
-            await api.setModel(sessionId, model)
+            await api.setModel(sessionId, args.model, args.providerId)
         },
         onSuccess: () => void invalidateSession(),
     })
@@ -158,7 +158,7 @@ export function useSessionActions(
         switchSession: switchMutation.mutateAsync,
         setPermissionMode: permissionMutation.mutateAsync,
         setCollaborationMode: collaborationMutation.mutateAsync,
-        setModel: modelMutation.mutateAsync,
+        setModel: (model: string | null, providerId?: string) => modelMutation.mutateAsync({ model, providerId }),
         setModelReasoningEffort: modelReasoningEffortMutation.mutateAsync,
         setEffort: effortMutation.mutateAsync,
         renameSession: renameMutation.mutateAsync,

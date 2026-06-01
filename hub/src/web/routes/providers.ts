@@ -161,6 +161,31 @@ export function createProviderRoutes(store: Store): Hono<WebAppEnv> {
         return c.json(result)
     })
 
+    app.get('/providers/flavor/:flavor/models', async (c) => {
+        const flavor = c.req.param('flavor')
+        const assignments = store.providers.getAssignmentsForFlavor(flavor)
+        const seen = new Set<string>()
+        const models: Array<{ id: string; name: string; providerId: string; providerName: string }> = []
+
+        for (const assignment of assignments) {
+            const provider = store.providers.getById(assignment.providerId)
+            if (!provider) continue
+            try {
+                const result = await discoveryService.discoverModels(provider.id, provider.baseUrl, provider.apiKeyEncrypted)
+                if (!result.success || !result.models) continue
+                for (const m of result.models) {
+                    if (seen.has(m.id)) continue
+                    seen.add(m.id)
+                    models.push({ id: m.id, name: m.name, providerId: provider.id, providerName: provider.name })
+                }
+            } catch {
+                // Skip providers with decryption or discovery failures
+            }
+        }
+
+        return c.json({ models })
+    })
+
     app.get('/providers/:id/api-key', (c) => {
         const id = c.req.param('id')
         const provider = store.providers.getById(id)

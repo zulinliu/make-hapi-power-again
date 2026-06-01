@@ -2,7 +2,7 @@ import { MODEL_OPTIONS } from '@/components/NewSession/types'
 import { getClaudeComposerModelOptions, getNextClaudeComposerModel } from './claudeModelOptions'
 import type { ClaudeComposerModelOption } from './claudeModelOptions'
 
-export type ModelOption = ClaudeComposerModelOption
+export type ModelOption = ClaudeComposerModelOption & { providerId?: string }
 
 function normalizeCurrentModel(model?: string | null): string | null {
     const trimmedModel = model?.trim()
@@ -53,7 +53,8 @@ function getClaudeModelOptions(currentModel?: string | null, customOptions?: Mod
 
         nextOptions.splice(insertIndex, 0, {
             value: normalizedValue,
-            label: option.label
+            label: option.label,
+            providerId: option.providerId,
         })
         insertIndex += 1
     }
