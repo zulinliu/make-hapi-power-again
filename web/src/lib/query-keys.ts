@@ -23,4 +23,5 @@ export const queryKeys = {
     skills: (sessionId: string) => ['skills', sessionId] as const,
     providers: ['providers'] as const,
     providerModels: (providerId: string) => ['provider-models', providerId] as const,
+    flavorModels: (flavor: string) => ['flavor-models', flavor] as const,
 }

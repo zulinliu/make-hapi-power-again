@@ -7,6 +7,7 @@ import { useSpawnSession } from '@/hooks/mutations/useSpawnSession'
 import { useCodexModels } from '@/hooks/queries/useCodexModels'
 import { useCursorModelsForMachine } from '@/hooks/queries/useCursorModelsForMachine'
 import { useOpencodeModelsForCwd } from '@/hooks/queries/useOpencodeModelsForCwd'
+import { useFlavorModels } from '@/hooks/queries/useFlavorModels'
 import { useSessions } from '@/hooks/queries/useSessions'
 import { useActiveSuggestions, type Suggestion } from '@/hooks/useActiveSuggestions'
 import { useDirectorySuggestions } from '@/hooks/useDirectorySuggestions'
@@ -55,6 +56,7 @@ export function NewSession(props: {
     const [isDirectoryFocused, setIsDirectoryFocused] = useState(false)
     const [agent, setAgent] = useState<AgentType>(loadPreferredAgent)
     const [model, setModel] = useState('auto')
+    const [selectedProviderId, setSelectedProviderId] = useState<string | undefined>(undefined)
     const [effort, setEffort] = useState<ClaudeEffort>('auto')
     const [modelReasoningEffort, setModelReasoningEffort] = useState<CodexReasoningEffort>('default')
     const [yoloMode, setYoloMode] = useState(loadPreferredYoloMode)
@@ -74,6 +76,7 @@ export function NewSession(props: {
         setModel('auto')
         setEffort('auto')
         setModelReasoningEffort('default')
+        setSelectedProviderId(undefined)
     }, [agent])
 
     useEffect(() => {
@@ -150,6 +153,21 @@ export function NewSession(props: {
         }
         return options
     }, [cursorModelsState.availableModels, model])
+    const claudeFlavorModels = useFlavorModels(
+        props.api,
+        agent === 'claude' ? 'claude' : null,
+        agent === 'claude'
+    )
+    const claudeModelOptions = useMemo(() => {
+        if (agent !== 'claude' || claudeFlavorModels.models.length === 0) {
+            return undefined
+        }
+        return claudeFlavorModels.models.map((m) => ({
+            value: m.id,
+            label: m.name,
+            providerId: m.providerId,
+        }))
+    }, [agent, claudeFlavorModels.models])
 
     const recentPaths = useMemo(
         () => getRecentPaths(machineId),
@@ -345,6 +363,7 @@ export function NewSession(props: {
             const resolvedModelReasoningEffort = (agent === 'codex' || agent === 'opencode') && modelReasoningEffort !== 'default'
                 ? modelReasoningEffort
                 : undefined
+            const resolvedProviderId = agent === 'claude' && resolvedModel ? selectedProviderId : undefined
             const result = await spawnSession({
                 machineId,
                 directory: trimmedDirectory,
@@ -354,13 +373,23 @@ export function NewSession(props: {
                 modelReasoningEffort: resolvedModelReasoningEffort,
                 yolo: yoloMode,
                 sessionType,
-                worktreeName: sessionType === 'worktree' ? (worktreeName.trim() || undefined) : undefined
+                worktreeName: sessionType === 'worktree' ? (worktreeName.trim() || undefined) : undefined,
+                providerId: resolvedProviderId
             })
 
             if (result.type === 'success') {
                 haptic.notification('success')
                 setLastUsedMachineId(machineId)
                 addRecentPath(machineId, trimmedDirectory)
+
+                if (resolvedProviderId && resolvedModel) {
+                    try {
+                        await props.api.setModel(result.sessionId, resolvedModel, resolvedProviderId)
+                    } catch {
+                        // Non-critical: model already set via spawn, provider config is best-effort
+                    }
+                }
+
                 props.onSuccess(result.sessionId)
                 return
             }
@@ -439,7 +468,9 @@ export function NewSession(props: {
                             ? codexModelOptions
                             : agent === 'cursor'
                                 ? cursorModelOptions
-                                : undefined
+                                : agent === 'claude'
+                                    ? claudeModelOptions
+                                    : undefined
                     }
                     isDisabled={
                         isFormDisabled
@@ -449,13 +480,14 @@ export function NewSession(props: {
                     isLoading={
                         (agent === 'codex' && codexModelsState.isLoading)
                         || (agent === 'cursor' && cursorModelsState.isLoading)
+                        || (agent === 'claude' && claudeFlavorModels.isLoading)
                     }
                     error={agent === 'codex' && codexModelsState.error
                         ? `${t('newSession.model.loadFailed')}: ${codexModelsState.error}`
                         : agent === 'cursor' && cursorModelsState.error
                             ? `${t('newSession.model.loadFailed')}: ${cursorModelsState.error}`
                         : null}
-                    onModelChange={setModel}
+                    onModelChange={(value: string, providerId?: string) => { setModel(value); setSelectedProviderId(providerId) }}
                 />
             )}
             <ClaudeEffortSelector
