@@ -59,6 +59,20 @@ export function useDeleteProvider(api: ApiClient | null) {
     return { deleteProvider: mutation.mutateAsync, isPending: mutation.isPending, error: mutation.error instanceof Error ? mutation.error.message : null }
 }
 
+export function useUnassignProvider(api: ApiClient | null) {
+    const queryClient = useQueryClient()
+    const mutation = useMutation({
+        mutationFn: async ({ providerId, flavor }: { providerId: string; flavor: string }) => {
+            if (!api) throw new Error('API unavailable')
+            await api.unassignProvider(providerId, flavor)
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.providers })
+        },
+    })
+    return { unassignProvider: mutation.mutateAsync, isPending: mutation.isPending }
+}
+
 export function useAssignProvider(api: ApiClient | null) {
     const queryClient = useQueryClient()
     const mutation = useMutation({
