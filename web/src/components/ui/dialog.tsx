@@ -5,42 +5,90 @@ import { cn } from '@/lib/utils'
 export const Dialog = DialogPrimitive.Root
 export const DialogTrigger = DialogPrimitive.Trigger
 
+const CONFLICT_CLASSES = ['top-1/2', '-translate-y-1/2']
+
+function setupMobileAdjust(el: HTMLDivElement) {
+    if (window.innerWidth > 768) return () => {}
+
+    let rafId = 0
+    let cleaned = false
+
+    function adjust() {
+        if (cleaned) return
+        cancelAnimationFrame(rafId)
+        rafId = requestAnimationFrame(() => {
+            if (cleaned) return
+            const el = contentRef
+            const vv = window.visualViewport
+            if (!el || !vv) return
+
+            // Remove CSS classes that conflict with inline positioning
+            CONFLICT_CLASSES.forEach(c => {
+                if (el.className.includes(c)) el.className = el.className.replace(c, '')
+            })
+
+            const offsetTop = vv.offsetTop
+            const visibleHeight = vv.height
+            const dialogHeight = el.offsetHeight
+
+            if (dialogHeight >= visibleHeight) {
+                el.style.top = (offsetTop + 8) + 'px'
+                el.style.transform = 'translateX(-50%)'
+                el.style.maxHeight = (visibleHeight - 16) + 'px'
+                return
+            }
+
+            const centered = offsetTop + (visibleHeight - dialogHeight) / 2
+            const clamped = Math.max(offsetTop + 8, centered)
+            el.style.top = clamped + 'px'
+            el.style.transform = 'translateX(-50%)'
+            el.style.maxHeight = (visibleHeight - 16) + 'px'
+        })
+    }
+
+    const contentRef = el
+
+    // Run immediately
+    adjust()
+
+    const vv = window.visualViewport
+    vv?.addEventListener('resize', adjust)
+    vv?.addEventListener('scroll', adjust)
+    window.addEventListener('focusin', adjust)
+
+    const ro = new ResizeObserver(adjust)
+    ro.observe(el)
+
+    return () => {
+        cleaned = true
+        cancelAnimationFrame(rafId)
+        vv?.removeEventListener('resize', adjust)
+        vv?.removeEventListener('scroll', adjust)
+        window.removeEventListener('focusin', adjust)
+        ro.disconnect()
+    }
+}
+
 export const DialogContent = React.forwardRef<
     HTMLDivElement,
     React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
 >(({ className, ...props }, ref) => {
-    const contentRef = React.useRef<HTMLDivElement | null>(null)
+    const cleanupRef = React.useRef<(() => void) | null>(null)
 
     const setRef = React.useCallback((node: HTMLDivElement | null) => {
-        contentRef.current = node
+        // Cleanup previous
+        cleanupRef.current?.()
+        cleanupRef.current = null
+
+        if (node) {
+            cleanupRef.current = setupMobileAdjust(node)
+        }
+
         if (typeof ref === 'function') ref(node)
         else if (ref) ref.current = node
     }, [ref])
 
-    React.useEffect(() => {
-        function adjust() {
-            const el = contentRef.current
-            const vv = window.visualViewport
-            if (!el || !vv) return
-            if (window.innerWidth > 768) return
-            const offsetTop = vv.offsetTop
-            const visibleHeight = vv.height
-            const dialogHeight = el.scrollHeight
-            const maxTop = offsetTop + visibleHeight - dialogHeight
-            const centered = offsetTop + (visibleHeight - dialogHeight) / 2
-            el.style.top = Math.max(offsetTop + 16, Math.min(centered, maxTop)) + 'px'
-            el.style.transform = 'translateX(-50%)'
-            el.style.maxHeight = (visibleHeight - 32) + 'px'
-        }
-
-        adjust()
-        window.visualViewport?.addEventListener('resize', adjust)
-        window.visualViewport?.addEventListener('scroll', adjust)
-        return () => {
-            window.visualViewport?.removeEventListener('resize', adjust)
-            window.visualViewport?.removeEventListener('scroll', adjust)
-        }
-    }, [])
+    React.useEffect(() => () => { cleanupRef.current?.() }, [])
 
     return (
         <DialogPrimitive.Portal>
