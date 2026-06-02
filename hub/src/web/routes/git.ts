@@ -437,10 +437,7 @@ export function createGitRoutes(getSyncEngine: () => SyncEngine | null): Hono<We
             return c.json({ error: 'Invalid request', details: parsed.error.flatten() }, 400)
         }
 
-        const result = await runRpc(() => engine.writeSessionFile(sessionResult.sessionId, {
-            ...parsed.data,
-            content: Buffer.from(parsed.data.content, 'utf-8').toString('base64')
-        }))
+        const result = await runRpc(() => engine.writeSessionFile(sessionResult.sessionId, parsed.data))
         return c.json(result)
     })
 

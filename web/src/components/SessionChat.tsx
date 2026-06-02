@@ -748,8 +748,8 @@ export function SessionChat(props: {
                         autocompleteSuggestions={props.autocompleteSuggestions}
                         voiceStatus={voice?.status}
                         voiceMicMuted={voice?.micMuted}
-                        onVoiceToggle={voice ? handleVoiceToggle : undefined}
-                        onVoiceMicToggle={voice ? handleVoiceMicToggle : undefined}
+                        onVoiceToggle={undefined}
+                        onVoiceMicToggle={undefined}
                         onVoiceTranscribed={(text: string) => {
                             if (text.trim()) {
                                 props.onSend(text.trim())
