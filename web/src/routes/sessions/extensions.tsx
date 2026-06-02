@@ -61,6 +61,8 @@ export default function ExtensionsPage() {
     const [skillQuery, setSkillQuery] = useState('')
     const [installing, setInstalling] = useState<string | null>(null)
     const [error, setError] = useState<string | null>(null)
+    const [pluginIdInput, setPluginIdInput] = useState('')
+    const [pluginSourceInput, setPluginSourceInput] = useState('')
 
     useSession(api, sessionId)
 
@@ -72,10 +74,18 @@ export default function ExtensionsPage() {
     })
 
     // Skill search (external)
-    const { data: searchData, isLoading: searchLoading } = useQuery({
+    const { data: searchData, isLoading: searchLoading, error: searchError } = useQuery({
         queryKey: ['skill-search', sessionId, skillQuery],
-        queryFn: () => api!.searchSkillsExternal(sessionId, skillQuery),
+        queryFn: async () => {
+            const result = await api!.searchSkillsExternal(sessionId, skillQuery)
+            const typed = result as { success?: boolean; error?: string; results?: SkillSearchResult[] }
+            if (typed.success === false && typed.error) {
+                throw new Error(typed.error)
+            }
+            return result
+        },
         enabled: !!api && activeTab === 'skills' && skillQuery.length >= 2,
+        retry: false,
     })
 
     // Installed skills
@@ -122,6 +132,21 @@ export default function ExtensionsPage() {
         }
         setInstalling(null)
     }, [api, sessionId, queryClient])
+
+    const handleInstallPlugin = useCallback(async () => {
+        if (!api || !pluginIdInput.trim()) return
+        setInstalling(pluginIdInput)
+        setError(null)
+        try {
+            await api.installPlugin(sessionId, pluginIdInput.trim(), pluginSourceInput.trim() || undefined)
+            setPluginIdInput('')
+            setPluginSourceInput('')
+            await queryClient.invalidateQueries({ queryKey: ['plugins', sessionId] })
+        } catch (e) {
+            setError(e instanceof Error ? e.message : 'Install failed')
+        }
+        setInstalling(null)
+    }, [api, sessionId, queryClient, pluginIdInput, pluginSourceInput])
 
     const plugins = (pluginData as { success: boolean; plugins?: PluginInfo[] } | null)?.plugins ?? []
     const searchResults = (searchData as { success: boolean; results?: SkillSearchResult[] } | null)?.results ?? []
@@ -228,6 +253,8 @@ export default function ExtensionsPage() {
                                 </h3>
                                 {searchLoading ? (
                                     <div className="text-sm text-[var(--app-hint)] py-4 text-center">{t('extensions.searching')}</div>
+                                ) : searchError ? (
+                                    <div className="text-sm text-red-500 py-4 text-center">{t('extensions.searchError')}</div>
                                 ) : searchResults.length === 0 ? (
                                     <div className="text-sm text-[var(--app-hint)] py-4 text-center">{t('extensions.noResults')}</div>
                                 ) : (
@@ -271,7 +298,36 @@ export default function ExtensionsPage() {
                 )}
 
                 {activeTab === 'plugins' && (
-                    <div className="p-3 space-y-2">
+                    <div className="p-3 space-y-3">
+                        {/* Install Plugin Form */}
+                        <div className="rounded-lg border border-[var(--app-border)] bg-[var(--app-secondary-bg)] p-3 space-y-2">
+                            <h3 className="text-xs font-semibold text-[var(--app-hint)] uppercase tracking-wider">
+                                {t('extensions.installPlugin')}
+                            </h3>
+                            <input
+                                type="text"
+                                value={pluginIdInput}
+                                onChange={e => setPluginIdInput(e.target.value)}
+                                placeholder={t('extensions.pluginId')}
+                                className="w-full rounded-md border border-[var(--app-border)] bg-[var(--app-bg)] py-1.5 px-3 text-sm text-[var(--app-fg)] placeholder:text-[var(--app-hint)] focus:outline-none focus:ring-1 focus:ring-[var(--app-link)]"
+                            />
+                            <input
+                                type="text"
+                                value={pluginSourceInput}
+                                onChange={e => setPluginSourceInput(e.target.value)}
+                                placeholder={t('extensions.pluginSource')}
+                                className="w-full rounded-md border border-[var(--app-border)] bg-[var(--app-bg)] py-1.5 px-3 text-sm text-[var(--app-fg)] placeholder:text-[var(--app-hint)] focus:outline-none focus:ring-1 focus:ring-[var(--app-link)]"
+                            />
+                            <button
+                                type="button"
+                                onClick={handleInstallPlugin}
+                                disabled={!pluginIdInput.trim() || installing === pluginIdInput}
+                                className="rounded-md bg-[var(--app-link)] px-3 py-1.5 text-sm text-white hover:opacity-90 disabled:opacity-50"
+                            >
+                                {installing === pluginIdInput ? t('extensions.installing') : t('extensions.pluginInstallBtn')}
+                            </button>
+                        </div>
+
                         {pluginsLoading ? (
                             <div className="text-sm text-[var(--app-hint)] py-4 text-center">{t('extensions.loading')}</div>
                         ) : plugins.length === 0 ? (
