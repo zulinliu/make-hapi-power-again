@@ -39,9 +39,10 @@ function BackIcon() {
 }
 
 function ConnectionIndicator(props: { status: 'idle' | 'connecting' | 'connected' | 'error' }) {
+    const { t } = useTranslation()
     const isConnected = props.status === 'connected'
     const isConnecting = props.status === 'connecting'
-    const label = isConnected ? 'Connected' : isConnecting ? 'Connecting' : 'Offline'
+    const label = isConnected ? t('terminal.status.connected') : isConnecting ? t('terminal.status.connecting') : t('terminal.status.offline')
     const colorClass = isConnected
         ? 'bg-emerald-500'
         : isConnecting
@@ -414,7 +415,7 @@ export default function TerminalPage() {
     if (!session) {
         return (
             <div className="flex h-full items-center justify-center">
-                <LoadingState label="Loading session…" className="text-sm" />
+                <LoadingState label={t('loading.session')} className="text-sm" />
             </div>
         )
     }
@@ -424,7 +425,11 @@ export default function TerminalPage() {
     const errorMessage = !terminalSupported
         ? t('terminal.unsupportedWindows')
         : terminalState.status === 'error'
-          ? terminalState.error
+          ? terminalState.error.startsWith('Disconnected')
+              ? t('terminal.disconnected')
+              : terminalState.error.startsWith('CLI')
+                  ? t('terminal.cliDisconnected')
+                  : terminalState.error
           : null
 
     return (
@@ -439,7 +444,7 @@ export default function TerminalPage() {
                         <BackIcon />
                     </button>
                     <div className="min-w-0 flex-1">
-                        <div className="truncate font-semibold">Terminal</div>
+                        <div className="truncate font-semibold">{t('terminal.title')}</div>
                         <div className="truncate text-xs text-[var(--app-hint)]">{subtitle}</div>
                     </div>
                     <ConnectionIndicator status={status} />
@@ -449,7 +454,7 @@ export default function TerminalPage() {
             {session.active ? null : (
                 <div className="px-3 pt-3">
                     <div className="mx-auto w-full max-w-content rounded-md bg-[var(--app-subtle-bg)] p-3 text-sm text-[var(--app-hint)]">
-                        Session is inactive. Terminal is unavailable.
+                        {t('terminal.sessionInactive')}
                     </div>
                 </div>
             )}
@@ -465,8 +470,11 @@ export default function TerminalPage() {
             {exitInfo ? (
                 <div className="mx-auto w-full max-w-content px-3 pt-3">
                     <div className="rounded-md border border-[var(--app-border)] bg-[var(--app-subtle-bg)] p-3 text-xs text-[var(--app-hint)]">
-                        Terminal exited{exitInfo.code !== null ? ` with code ${exitInfo.code}` : ''}
-                        {exitInfo.signal ? ` (${exitInfo.signal})` : ''}.
+                        {exitInfo.code !== null
+                            ? t('terminal.exitedWithCode', { code: exitInfo.code })
+                            : exitInfo.signal
+                                ? t('terminal.exitedWithSignal', { signal: exitInfo.signal })
+                                : t('terminal.exited')}.
                     </div>
                 </div>
             ) : null}

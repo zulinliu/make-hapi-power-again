@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, lazy, Suspense } from 'react'
+import { useEffect, useMemo, useState, useCallback, lazy, Suspense } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useParams, useSearch } from '@tanstack/react-router'
 import type { GitCommandResponse } from '@/types/api'
@@ -87,6 +87,7 @@ export default function FilePage() {
     const { t } = useTranslation()
     const { copied: pathCopied, copy: copyPath } = useCopyToClipboard()
     const { copied: contentCopied, copy: copyContent } = useCopyToClipboard()
+
     const goBack = useAppGoBack()
     const queryClient = useQueryClient()
     const { sessionId } = useParams({ from: '/sessions/$sessionId/file' })
@@ -141,6 +142,22 @@ export default function FilePage() {
         && !binaryFile
         && decodedContent.length > 0
         && contentSizeBytes <= MAX_COPYABLE_FILE_BYTES
+
+    const handleDownload = useCallback(() => {
+        if (!fileContentResult?.success || !fileContentResult.content) return
+        const byteCharacters = atob(fileContentResult.content)
+        const byteNumbers = new Uint8Array(byteCharacters.length)
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i)
+        }
+        const blob = new Blob([byteNumbers])
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = fileName
+        a.click()
+        URL.revokeObjectURL(url)
+    }, [fileContentResult, fileName])
 
     const [displayMode, setDisplayMode] = useState<DisplayMode>('diff')
     const [localContent, setLocalContent] = useState('')
@@ -203,6 +220,15 @@ export default function FilePage() {
                         title={t('file.page.copyPath')}>
                         {pathCopied ? <CheckIcon className="h-3.5 w-3.5" /> : <CopyIcon className="h-3.5 w-3.5" />}
                     </button>
+                    {fileContentResult?.success && fileContentResult.content && (
+                        <button type="button" onClick={handleDownload}
+                            className="shrink-0 rounded p-1 text-[var(--app-hint)] hover:bg-[var(--app-subtle-bg)] hover:text-[var(--app-fg)] transition-colors"
+                            title={t('file.page.download')}>
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" x2="12" y1="15" y2="3" />
+                            </svg>
+                        </button>
+                    )}
                 </div>
             </div>
 

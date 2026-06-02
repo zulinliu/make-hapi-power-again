@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams, useSearch } from '@tanstack/react-router'
 import type { FileSearchItem, GitFileStatus } from '@/types/api'
 import { FileIcon } from '@/components/FileIcon'
@@ -268,6 +268,7 @@ export default function FilesPage() {
     const [newFileDialog, setNewFileDialog] = useState<{ isOpen: boolean; basePath: string }>({ isOpen: false, basePath: '' })
     const [newFolderDialog, setNewFolderDialog] = useState<{ isOpen: boolean; basePath: string }>({ isOpen: false, basePath: '' })
     const [deleting, setDeleting] = useState(false)
+    const uploadRef = useRef<HTMLInputElement>(null)
 
     const initialTab = search.tab === 'directories' ? 'directories' : 'changes'
     const [activeTab, setActiveTab] = useState<'changes' | 'directories'>(initialTab)
@@ -351,6 +352,34 @@ export default function FilesPage() {
         })
     }, [queryClient, sessionId])
 
+    const handleUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file || !api || !sessionId) return
+        if (file.size > 5 * 1024 * 1024) {
+            addToast({ title: t('file.upload.tooLarge'), body: '' })
+            e.target.value = ''
+            return
+        }
+        try {
+            const reader = new FileReader()
+            const content = await new Promise<string>((resolve, reject) => {
+                reader.onload = () => resolve(reader.result as string)
+                reader.onerror = reject
+                reader.readAsDataURL(file)
+            })
+            const base64 = content.split(',')[1]
+            if (!base64) throw new Error('Failed to read file')
+            const res = await api.writeSessionFile(sessionId, file.name, base64, undefined, true)
+            if (!res.success) throw new Error(res.error || t('file.upload.error'))
+            addToast({ title: t('file.upload.success'), body: file.name })
+            refreshDirectory()
+            void refetchGit()
+        } catch (err) {
+            addToast({ title: t('file.upload.error'), body: err instanceof Error ? err.message : '' })
+        }
+        e.target.value = ''
+    }, [api, sessionId, addToast, t, refreshDirectory, refetchGit])
+
     const handleContextMenu = useCallback((path: string, type: 'file' | 'directory', point: { x: number; y: number }) => {
         setContextMenu({ ...point, path, type })
     }, [])
@@ -386,6 +415,29 @@ export default function FilesPage() {
                 void navigator.clipboard.writeText(contextMenu.path)
             },
         })
+        if (!isDir) {
+            items.push({
+                label: t('file.context.download'),
+                icon: '↓',
+                onClick: async () => {
+                    if (!api || !sessionId) return
+                    try {
+                        const res = await api.readSessionFile(sessionId, contextMenu.path)
+                        if (!res.success || !res.content) return
+                        const byteChars = atob(res.content)
+                        const bytes = new Uint8Array(byteChars.length)
+                        for (let i = 0; i < byteChars.length; i++) bytes[i] = byteChars.charCodeAt(i)
+                        const blob = new Blob([bytes])
+                        const url = URL.createObjectURL(blob)
+                        const a = document.createElement('a')
+                        a.href = url
+                        a.download = fileName
+                        a.click()
+                        URL.revokeObjectURL(url)
+                    } catch {}
+                },
+            })
+        }
         items.push({
             label: t('file.context.move'),
             icon: '→',
@@ -404,7 +456,7 @@ export default function FilesPage() {
         })
 
         return items
-    }, [contextMenu, t])
+    }, [contextMenu, t, api, sessionId, addToast])
 
     return (
         <div className="flex h-full min-h-0 flex-col">
@@ -541,6 +593,20 @@ export default function FilesPage() {
                                     style={{ color: 'var(--hp-text-secondary)', background: 'var(--hp-surface-1)', minHeight: 32 }}
                                 >
                                     {t('file.toolbar.newFolder')}
+                                </button>
+                                <input
+                                    ref={uploadRef}
+                                    type="file"
+                                    className="hidden"
+                                    onChange={handleUpload}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => uploadRef.current?.click()}
+                                    className="px-2.5 py-1.5 text-xs rounded transition-colors"
+                                    style={{ color: 'var(--hp-text-secondary)', background: 'var(--hp-surface-1)', minHeight: 32 }}
+                                >
+                                    {t('file.context.upload')}
                                 </button>
                             </div>
                             <DirectoryTree

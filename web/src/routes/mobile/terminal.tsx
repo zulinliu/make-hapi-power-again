@@ -1,9 +1,11 @@
 import { useParams, useNavigate } from '@tanstack/react-router'
 import { useAppContext } from '@/lib/app-context'
+import { useTranslation } from '@/lib/use-translation'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { io, Socket } from 'socket.io-client'
 
 export default function MobileTerminalPage() {
+    const { t } = useTranslation()
     const { sessionId } = useParams({ strict: false }) as { sessionId: string }
     const { api, baseUrl, token } = useAppContext()
     const navigate = useNavigate()
@@ -43,7 +45,7 @@ export default function MobileTerminalPage() {
         })
 
         socket.on('terminal:error', (err: string) => {
-            setError(typeof err === 'string' ? err : '终端错误')
+            setError(typeof err === 'string' ? err : t('terminal.mobile.error'))
         })
 
         socket.on('terminal:exit', () => {
@@ -53,7 +55,7 @@ export default function MobileTerminalPage() {
         socket.on('disconnect', () => setConnected(false))
 
         socket.on('connect_error', (err) => {
-            setError('连接失败')
+            setError(t('terminal.mobile.connectFailed'))
             setConnected(false)
         })
 
@@ -81,8 +83,8 @@ export default function MobileTerminalPage() {
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6" /></svg>
                 </button>
                 <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-sm text-gray-200">终端</div>
-                    <div className="text-xs text-gray-500">只读模式 · 最近 200 行</div>
+                    <div className="font-semibold text-sm text-gray-200">{t('terminal.title')}</div>
+                    <div className="text-xs text-gray-500">{t('terminal.mobile.readonly')}</div>
                 </div>
                 <div className={`w-2 h-2 rounded-full ${connected ? 'bg-green-500' : 'bg-gray-600'}`} />
             </div>
@@ -94,7 +96,7 @@ export default function MobileTerminalPage() {
             {/* Terminal output */}
             <div ref={terminalRef} className="flex-1 min-h-0 overflow-y-auto p-3 text-xs leading-5">
                 {lines.length === 0 ? (
-                    <div className="text-gray-600">{connected ? '等待输出...' : '连接中...'}</div>
+                    <div className="text-gray-600">{connected ? t('terminal.mobile.waitingOutput') : t('terminal.mobile.connecting')}</div>
                 ) : (
                     lines.map((line, i) => (
                         <div key={i} className="whitespace-pre-wrap break-all min-h-[1.25rem]">

@@ -122,8 +122,7 @@ export function FileMoveDialog({
 
     useEffect(() => {
         if (isOpen) {
-            const fileName = sourcePath.split('/').pop() || ''
-            setDestPath(fileName)
+            setDestPath(sourcePath)
             setSubmitting(false)
             setError('')
         }
@@ -171,6 +170,9 @@ export function FileMoveDialog({
                             }
                         }}
                     />
+                    <div className="text-xs" style={{ color: 'var(--hp-text-tertiary)' }}>
+                        {t('file.move.pathHint')}
+                    </div>
                     {error && (
                         <p className="text-sm" style={{ color: 'var(--hp-danger)' }}>{error}</p>
                     )}
