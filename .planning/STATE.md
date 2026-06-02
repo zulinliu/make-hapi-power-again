@@ -290,5 +290,29 @@ TOP 10 缺口：EDIT-01, FILE-01, FILE-02, FILE-05, PTY-02, GIT-04, FILE-12, EDI
 - 需求文档：.planning/REQUIREMENTS-v0.7.md
 - 路线图：.planning/ROADMAP-v0.7.md
 
+### v0.7 补丁修复 (2026-06-02)
+
+**全流程测试修复** — 使用 tsintergy 真实 API 供应商进行端到端验证，发现并修复以下问题：
+
+| 修复 | 问题 | 解决方案 |
+|------|------|---------|
+| spawn providerId 传递 | machines.ts 解析了 providerId 但未传递给 engine | spawn 成功后自动查找供应商并 applySessionConfig |
+| ModelSelector 合并 | 供应商模型替换了标准模型，用户无法选择官方模型 | 标准 + 供应商模型合并显示（⇄ 前缀区分） |
+| AES 密钥持久化 | 加密密钥仅在内存中，hub 重启后 API Key 无法解密 | 持久化到 ~/.hapi-power/provider-encryption.key |
+| iOS 弹窗键盘 | Dialog 容器使用固定高度，键盘弹出后内容飘出 | 改用 overflow-y:auto + dvh 适配 |
+| SessionChat 同步 | 会话内模型切换同样存在替换而非合并的问题 | 统一使用合并逻辑 |
+| 错误消息修正 | providers API 说 "Only https" 但实际允许 http | 修正为 "public http(s)" |
+
+**E2E 测试结果（真实 API 供应商 tsintergy）：**
+- 创建供应商 → ✅
+- 分配给 Claude → ✅
+- 发现模型（21 个）→ ✅
+- 新建会话模型选择器显示 5 标准 + 21 供应商 → ✅
+- 删除供应商 → ✅
+- 重新创建供应商 → ✅
+- 再次验证模型选择器 → ✅
+
+**Commit**: a8f7e43 (9 files, +104/-41)
+
 ---
-*状态更新: 2026-05-31 (v0.7 全部 Phase 34~38 实现完成)*
+*状态更新: 2026-06-02 (v0.7 补丁修复 + 全流程 E2E 验证通过)*
