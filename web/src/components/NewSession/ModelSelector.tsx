@@ -29,7 +29,7 @@ export function ModelSelector(props: {
                 value={props.model}
                 onChange={(e) => props.onModelChange(e.target.value, providerIdMap.get(e.target.value))}
                 disabled={props.isDisabled || props.isLoading}
-                className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--app-divider)] bg-[var(--app-bg)] text-[var(--app-text)] focus:outline-none focus:ring-2 focus:ring-[var(--app-link)] disabled:opacity-50"
+                className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--app-divider)] bg-[var(--app-bg)] text-[var(--app-fg)] focus:outline-none focus:ring-2 focus:ring-[var(--app-link)] disabled:opacity-50"
             >
                 {options.map((option) => (
                     <option key={option.value} value={option.value}>
@@ -38,7 +38,7 @@ export function ModelSelector(props: {
                 ))}
             </select>
             {props.error ? (
-                <div className="text-xs text-red-600">
+                <div className="text-xs text-[var(--app-danger)]">
                     {props.error}
                 </div>
             ) : null}

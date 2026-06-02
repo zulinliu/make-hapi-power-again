@@ -132,6 +132,8 @@ export function SessionHeader(props: {
         setMenuOpen((open) => !open)
     }
 
+    const iconBtnClass = 'flex h-10 w-10 items-center justify-center rounded-full text-[var(--app-hint)] transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)] sm:h-8 sm:w-8'
+
     // In Telegram, don't render header (Telegram provides its own)
     if (isTelegramApp()) {
         return null
@@ -145,62 +147,46 @@ export function SessionHeader(props: {
                     <button
                         type="button"
                         onClick={props.onBack}
-                        className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--app-hint)] transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]"
+                        className={iconBtnClass}
                     >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <polyline points="15 18 9 12 15 6" />
                         </svg>
                     </button>
 
-                    {/* Session info - two lines: title and path */}
+                    {/* Session info */}
                     <div className="min-w-0 flex-1">
-                        <div className="truncate font-semibold">
+                        <div className="truncate text-sm font-semibold leading-tight sm:text-base">
                             {title}
                         </div>
-                        <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-[var(--app-hint)]">
-                            <span className="inline-flex items-center gap-1">
-                                <AgentFlavorIcon flavor={session.metadata?.flavor} className="h-3.5 w-3.5 shrink-0" />
-                                {session.metadata?.flavor?.trim() || 'unknown'}
+                        <div className="flex items-center gap-1.5 text-[11px] leading-tight text-[var(--app-hint)] sm:text-xs sm:gap-3">
+                            <span className="inline-flex shrink-0 items-center gap-1">
+                                <AgentFlavorIcon flavor={session.metadata?.flavor} className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                                <span className="max-w-[4rem] truncate">{session.metadata?.flavor?.trim() || 'unknown'}</span>
                             </span>
                             {modelLabel ? (
-                                <span>
+                                <span className="truncate">
                                     {t(modelLabel.key)}: {modelLabel.value}
                                 </span>
                             ) : null}
                             {worktreeBranch ? (
-                                <span>{t('session.item.worktree')}: {worktreeBranch}</span>
+                                <span className="hidden truncate sm:inline-flex">
+                                    {worktreeBranch}
+                                </span>
                             ) : null}
                         </div>
                     </div>
 
+                    {/* Primary actions — always visible */}
                     {props.onViewFiles ? (
-                        <button
-                            type="button"
-                            onClick={props.onViewFiles}
-                            className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--app-hint)] transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]"
-                            title={t('session.title')}
-                        >
+                        <button type="button" onClick={props.onViewFiles} className={iconBtnClass} title={t('session.title')}>
                             <FilesIcon />
                         </button>
                     ) : null}
 
+                    {/* Secondary actions — desktop only as icon buttons */}
                     {props.onViewGit ? (
-                        <button
-                            type="button"
-                            onClick={props.onViewGit}
-                            className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--app-hint)] transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]"
-                            title="Git"
-                        >
+                        <button type="button" onClick={props.onViewGit} className={`${iconBtnClass} hidden lg:flex`} title="Git">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <circle cx="18" cy="18" r="3" /><circle cx="6" cy="6" r="3" /><path d="M13 6h3a2 2 0 0 1 2 2v7" /><path d="M6 9v12" />
                             </svg>
@@ -208,12 +194,7 @@ export function SessionHeader(props: {
                     ) : null}
 
                     {props.onViewExtensions ? (
-                        <button
-                            type="button"
-                            onClick={props.onViewExtensions}
-                            className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--app-hint)] transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]"
-                            title={t('session.extensions') ?? 'Extensions'}
-                        >
+                        <button type="button" onClick={props.onViewExtensions} className={`${iconBtnClass} hidden lg:flex`} title={t('session.extensions') ?? 'Extensions'}>
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
                             </svg>
@@ -221,24 +202,13 @@ export function SessionHeader(props: {
                     ) : null}
 
                     {props.onOpenOutline ? (
-                        <button
-                            type="button"
-                            onClick={props.onOpenOutline}
-                            className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--app-hint)] transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]"
-                            title={t('session.outline.open')}
-                            aria-label={t('session.outline.open')}
-                        >
+                        <button type="button" onClick={props.onOpenOutline} className={`${iconBtnClass} hidden lg:flex`} title={t('session.outline.open')} aria-label={t('session.outline.open')}>
                             <OutlineIcon />
                         </button>
                     ) : null}
 
                     {props.onViewChanges ? (
-                        <button
-                            type="button"
-                            onClick={props.onViewChanges}
-                            className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--app-hint)] transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]"
-                            title="变更审查"
-                        >
+                        <button type="button" onClick={props.onViewChanges} className={`${iconBtnClass} hidden lg:flex`} title={t('session.changes') ?? 'Changes'}>
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
                             </svg>
@@ -246,12 +216,7 @@ export function SessionHeader(props: {
                     ) : null}
 
                     {props.onViewTimeline ? (
-                        <button
-                            type="button"
-                            onClick={props.onViewTimeline}
-                            className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--app-hint)] transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]"
-                            title="时间线"
-                        >
+                        <button type="button" onClick={props.onViewTimeline} className={`${iconBtnClass} hidden lg:flex`} title={t('session.timeline') ?? 'Timeline'}>
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
                             </svg>
@@ -259,12 +224,7 @@ export function SessionHeader(props: {
                     ) : null}
 
                     {props.onViewUndo ? (
-                        <button
-                            type="button"
-                            onClick={props.onViewUndo}
-                            className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--app-hint)] transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]"
-                            title="撤销变更"
-                        >
+                        <button type="button" onClick={props.onViewUndo} className={`${iconBtnClass} hidden lg:flex`} title={t('session.undo') ?? 'Undo'}>
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <polyline points="1 4 1 10 7 10" /><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
                             </svg>
@@ -272,18 +232,14 @@ export function SessionHeader(props: {
                     ) : null}
 
                     {props.onWhiteboard ? (
-                        <button
-                            type="button"
-                            onClick={props.onWhiteboard}
-                            className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--app-hint)] transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]"
-                            title="白板绘图"
-                        >
+                        <button type="button" onClick={props.onWhiteboard} className={`${iconBtnClass} hidden lg:flex`} title={t('session.whiteboard') ?? 'Whiteboard'}>
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <rect x="3" y="3" width="18" height="18" rx="2" /><path d="m9.3 6.3 1.4 1.4" /><path d="m14.7 6.3-1.4 1.4" /><path d="M9 15a3.5 3.5 0 0 0 6 0" />
                             </svg>
                         </button>
                     ) : null}
 
+                    {/* More menu — always visible */}
                     <button
                         type="button"
                         onClick={handleMenuToggle}
@@ -292,7 +248,7 @@ export function SessionHeader(props: {
                         aria-haspopup="menu"
                         aria-expanded={menuOpen}
                         aria-controls={menuOpen ? menuId : undefined}
-                        className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--app-hint)] transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]"
+                        className={iconBtnClass}
                         title={t('session.more')}
                     >
                         <MoreVerticalIcon />
@@ -304,9 +260,16 @@ export function SessionHeader(props: {
                 isOpen={menuOpen}
                 onClose={() => setMenuOpen(false)}
                 sessionActive={session.active}
-                onRename={() => setRenameOpen(true)}
-                onArchive={() => setArchiveOpen(true)}
-                onDelete={() => setDeleteOpen(true)}
+                onRename={() => { setMenuOpen(false); setRenameOpen(true) }}
+                onArchive={() => { setMenuOpen(false); setArchiveOpen(true) }}
+                onDelete={() => { setMenuOpen(false); setDeleteOpen(true) }}
+                onViewGit={props.onViewGit}
+                onViewExtensions={props.onViewExtensions}
+                onOpenOutline={props.onOpenOutline}
+                onViewChanges={props.onViewChanges}
+                onViewTimeline={props.onViewTimeline}
+                onViewUndo={props.onViewUndo}
+                onWhiteboard={props.onWhiteboard}
                 anchorPoint={menuAnchorPoint}
                 menuId={menuId}
             />
