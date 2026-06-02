@@ -703,6 +703,11 @@ export default {
   'extensions.pluginSource': '来源地址（可选）',
   'extensions.pluginInstallBtn': '安装',
   'extensions.installing': '安装中...',
+  'extensions.onlineSearch': '从 skills.sh 安装新技能',
+  'extensions.searchOnlinePlaceholder': '输入关键词搜索在线技能...',
+  'extensions.foundCount': '找到 {count} 个技能',
+  'extensions.installFailed': '安装失败，请确保会话处于活跃状态。',
+  'extensions.installSuccess': '成功安装 {name}',
 
   // 文件下载/上传
   'file.page.download': '下载文件',

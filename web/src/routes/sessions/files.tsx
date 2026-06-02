@@ -412,7 +412,9 @@ export default function FilesPage() {
             label: t('file.context.copyPath'),
             icon: '📋',
             onClick: () => {
-                void navigator.clipboard.writeText(contextMenu.path)
+                const basePath = session?.metadata?.path ?? ''
+                const fullPath = basePath ? `${basePath}/${contextMenu.path}` : contextMenu.path
+                void navigator.clipboard.writeText(fullPath)
             },
         })
         if (!isDir) {
@@ -456,7 +458,7 @@ export default function FilesPage() {
         })
 
         return items
-    }, [contextMenu, t, api, sessionId, addToast])
+    }, [contextMenu, t, api, sessionId, session?.metadata?.path])
 
     return (
         <div className="flex h-full min-h-0 flex-col">
