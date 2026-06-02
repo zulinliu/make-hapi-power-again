@@ -239,10 +239,7 @@ export function SessionActionMenu(props: SessionActionMenuProps) {
         { label: 'Git', icon: <GitIcon />, onClick: onViewGit },
         { label: t('session.extensions') ?? 'Extensions', icon: <ExtensionsIcon />, onClick: onViewExtensions },
         { label: t('session.outline.open') ?? 'Outline', icon: <OutlineIcon />, onClick: onOpenOutline },
-        { label: t('session.changes') ?? 'Changes', icon: <ChangesIcon />, onClick: onViewChanges },
-        { label: t('session.timeline') ?? 'Timeline', icon: <TimelineIcon />, onClick: onViewTimeline },
-        { label: t('session.undo') ?? 'Undo', icon: <UndoIcon />, onClick: onViewUndo },
-        { label: t('session.whiteboard') ?? 'Whiteboard', icon: <WhiteboardIcon />, onClick: onWhiteboard },
+        // Changes/Timeline/Undo/Whiteboard hidden — not in original requirements
     ].filter(item => item.onClick)
 
     return (

@@ -136,7 +136,8 @@ export function SessionChat(props: {
     const visibleGroupsRef = useRef<ToolGroupBlock[]>([])
     const [forceScrollToken, setForceScrollToken] = useState(0)
     const [outlineOpen, setOutlineOpen] = useState(false)
-    const [whiteboardOpen, setWhiteboardOpen] = useState(false)
+    // Whiteboard hidden — not in original requirements
+    // const [whiteboardOpen, setWhiteboardOpen] = useState(false)
     const { uploadBinaryFile } = useBinaryUpload()
     const agentFlavor = props.session.metadata?.flavor ?? null
     const controlledByUser = props.session.agentState?.controlledByUser === true
@@ -612,10 +613,6 @@ export function SessionChat(props: {
                 onOpenOutline={() => setOutlineOpen(true)}
                 onViewGit={handleViewGit}
                 onViewExtensions={handleViewExtensions}
-                onViewChanges={handleViewChanges}
-                onViewTimeline={handleViewTimeline}
-                onViewUndo={handleViewUndo}
-                onWhiteboard={() => setWhiteboardOpen(true)}
                 api={props.api}
                 onSessionDeleted={props.onBack}
             />
@@ -772,29 +769,7 @@ export function SessionChat(props: {
                 />
             )}
 
-            {whiteboardOpen && (
-                <Whiteboard
-                    onClose={() => setWhiteboardOpen(false)}
-                    onSend={async (dataUrl) => {
-                        setWhiteboardOpen(false)
-                        const res = await fetch(dataUrl)
-                        const blob = await res.blob()
-                        const file = new File([blob], `whiteboard-${Date.now()}.png`, { type: 'image/png' })
-                        const result = await uploadBinaryFile(props.session.id, file)
-                        if (result.success && result.path) {
-                            const metadata: AttachmentMetadata = {
-                                id: `wb-${Date.now()}`,
-                                filename: file.name,
-                                mimeType: 'image/png',
-                                size: file.size,
-                                path: result.path,
-                                previewUrl: dataUrl,
-                            }
-                            props.onSend('白板绘图', [metadata])
-                        }
-                    }}
-                />
-            )}
+            {/* Whiteboard hidden — not in original requirements */}
         </div>
     )
 }
