@@ -1,8 +1,12 @@
 import { createCipheriv, createDecipheriv, randomBytes, timingSafeEqual } from 'node:crypto'
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs'
+import { join } from 'node:path'
+import { homedir } from 'node:os'
 
 const AES_ALGORITHM = 'aes-256-gcm'
 const IV_LENGTH = 12
 const AUTH_TAG_LENGTH = 16
+const KEY_FILE_NAME = 'provider-encryption.key'
 
 export function constantTimeEquals(a: string | null | undefined, b: string | null | undefined): boolean {
     if (typeof a !== 'string' || typeof b !== 'string') {
@@ -22,27 +26,40 @@ export function constantTimeEquals(a: string | null | undefined, b: string | nul
     return matches && bufferA.length === bufferB.length
 }
 
+function getDataDir(): string {
+    const envDir = process.env.HAPI_POWER_HOME
+    if (envDir) return envDir.replace(/^~/, homedir())
+    return join(homedir(), '.hapi-power')
+}
+
+function getKeyFilePath(): string {
+    return join(getDataDir(), KEY_FILE_NAME)
+}
+
 export function getEncryptionKey(): Buffer {
-    const key = process.env.HAPI_POWER_PROVIDER_ENCRYPTION_KEY
-    if (key) {
-        const buf = Buffer.from(key, 'hex')
+    const envKey = process.env.HAPI_POWER_PROVIDER_ENCRYPTION_KEY
+    if (envKey) {
+        const buf = Buffer.from(envKey, 'hex')
         if (buf.length !== 32) {
             throw new Error('HAPI_POWER_PROVIDER_ENCRYPTION_KEY must be 32 bytes (64 hex characters)')
         }
         return buf
     }
-    const generatedKey = process.env.HAPI_POWER_PROVIDER_ENCRYPTION_KEY_GENERATED
-    if (generatedKey) {
-        const buf = Buffer.from(generatedKey, 'hex')
-        if (buf.length !== 32) return generateAndStoreKey()
-        return buf
-    }
-    return generateAndStoreKey()
-}
 
-function generateAndStoreKey(): Buffer {
+    const keyPath = getKeyFilePath()
+    if (existsSync(keyPath)) {
+        const stored = readFileSync(keyPath, 'utf8').trim()
+        const buf = Buffer.from(stored, 'hex')
+        if (buf.length === 32) return buf
+    }
+
+    const dataDir = getDataDir()
+    if (!existsSync(dataDir)) {
+        mkdirSync(dataDir, { recursive: true })
+    }
+
     const key = randomBytes(32)
-    process.env.HAPI_POWER_PROVIDER_ENCRYPTION_KEY_GENERATED = key.toString('hex')
+    writeFileSync(keyPath, key.toString('hex'), { mode: 0o600 })
     return key
 }
 

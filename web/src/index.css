@@ -582,6 +582,18 @@ html[data-theme="dark"] .shiki span {
     textarea {
         font-size: max(1rem, 16px) !important;
     }
+
+    .dialog-container-ios-safe {
+        -webkit-overflow-scrolling: touch;
+        overflow-y: auto;
+        max-height: 100dvh;
+    }
+
+    .dialog-container-ios-safe > div {
+        min-height: auto;
+        padding-top: env(safe-area-inset-top, 0px);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
 }
 
 /* ReactQueryDevtools button - move to middle-right to avoid blocking UI */
