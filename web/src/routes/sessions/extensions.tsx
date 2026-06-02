@@ -31,6 +31,14 @@ function SearchIcon() {
     )
 }
 
+function CloudDownloadIcon() {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 16V8m0 0l-3 3m3-3l3 3" /><path d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25" />
+        </svg>
+    )
+}
+
 type Tab = 'plugins' | 'skills'
 
 interface PluginInfo {
@@ -61,6 +69,7 @@ export default function ExtensionsPage() {
     const [skillQuery, setSkillQuery] = useState('')
     const [installing, setInstalling] = useState<string | null>(null)
     const [error, setError] = useState<string | null>(null)
+    const [successMsg, setSuccessMsg] = useState<string | null>(null)
     const [pluginIdInput, setPluginIdInput] = useState('')
     const [pluginSourceInput, setPluginSourceInput] = useState('')
 
@@ -99,21 +108,30 @@ export default function ExtensionsPage() {
         if (!api) return
         setInstalling(skill.name)
         setError(null)
+        setSuccessMsg(null)
         try {
-            await api.installSkillFromExternal(sessionId, skill.name, skill.repo, skill.path)
+            const res = await api.installSkillFromExternal(sessionId, skill.name, skill.repo, skill.path)
+            if (!res.success) {
+                setError(t('extensions.installFailed'))
+                return
+            }
+            setSuccessMsg(t('extensions.installSuccess', { name: skill.name }))
             await queryClient.invalidateQueries({ queryKey: queryKeys.skills(sessionId) })
         } catch (e) {
             setError(e instanceof Error ? e.message : 'Install failed')
         }
         setInstalling(null)
-    }, [api, sessionId, queryClient])
+    }, [api, sessionId, queryClient, t])
 
     const handleUninstallSkill = useCallback(async (name: string) => {
         if (!api) return
         setInstalling(name)
         setError(null)
         try {
-            await api.uninstallSkill(sessionId, name)
+            const res = await api.uninstallSkill(sessionId, name)
+            if (res && typeof res === 'object' && 'success' in res && !res.success) {
+                throw new Error((res as { error?: string }).error || 'Uninstall failed')
+            }
             await queryClient.invalidateQueries({ queryKey: queryKeys.skills(sessionId) })
         } catch (e) {
             setError(e instanceof Error ? e.message : 'Uninstall failed')
@@ -197,27 +215,83 @@ export default function ExtensionsPage() {
                         {error}
                     </div>
                 )}
+                {successMsg && (
+                    <div className="mx-3 mt-2 rounded-lg border border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/20 px-3 py-2 text-sm text-green-700 dark:text-green-400">
+                        {successMsg}
+                    </div>
+                )}
                 {activeTab === 'skills' && (
                     <div className="p-3 space-y-3">
-                        {/* Search */}
-                        <div className="relative">
-                            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--app-hint)]">
-                                <SearchIcon />
+                        {/* Online Search Section */}
+                        <div className="rounded-lg border border-[var(--app-border)] bg-[var(--app-secondary-bg)] p-3 space-y-2">
+                            <div className="flex items-center gap-2 text-xs font-semibold text-[var(--app-hint)] uppercase tracking-wider">
+                                <CloudDownloadIcon />
+                                {t('extensions.onlineSearch')}
                             </div>
-                            <input
-                                type="text"
-                                value={skillQuery}
-                                onChange={e => setSkillQuery(e.target.value)}
-                                placeholder={t('extensions.searchSkills')}
-                                className="w-full rounded-lg border border-[var(--app-border)] bg-[var(--app-secondary-bg)] py-2 pl-9 pr-3 text-sm text-[var(--app-fg)] placeholder:text-[var(--app-hint)] focus:outline-none focus:ring-1 focus:ring-[var(--app-link)]"
-                            />
+                            <div className="relative">
+                                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--app-hint)]">
+                                    <SearchIcon />
+                                </div>
+                                <input
+                                    type="text"
+                                    value={skillQuery}
+                                    onChange={e => setSkillQuery(e.target.value)}
+                                    placeholder={t('extensions.searchOnlinePlaceholder')}
+                                    className="w-full rounded-lg border border-[var(--app-border)] bg-[var(--app-bg)] py-2 pl-9 pr-3 text-sm text-[var(--app-fg)] placeholder:text-[var(--app-hint)] focus:outline-none focus:ring-1 focus:ring-[var(--app-link)]"
+                                />
+                            </div>
+
+                            {/* Search Results - inline within the search section */}
+                            {skillQuery.length >= 2 && (
+                                <div className="space-y-1 pt-1">
+                                    {searchLoading ? (
+                                        <div className="text-sm text-[var(--app-hint)] py-3 text-center">{t('extensions.searching')}</div>
+                                    ) : searchError ? (
+                                        <div className="text-sm text-red-500 py-3 text-center">{t('extensions.searchError')}</div>
+                                    ) : searchResults.length === 0 ? (
+                                        <div className="text-sm text-[var(--app-hint)] py-3 text-center">{t('extensions.noResults')}</div>
+                                    ) : (
+                                        <>
+                                            <div className="text-xs text-[var(--app-hint)] pb-1">{t('extensions.foundCount', { count: searchResults.length })}</div>
+                                            {searchResults.map(skill => {
+                                                const isInstalled = installedNames.has(skill.name.toLowerCase())
+                                                return (
+                                                    <div
+                                                        key={`${skill.repo}/${skill.path}`}
+                                                        className="flex items-center justify-between rounded-lg border border-[var(--app-border)] bg-[var(--app-bg)] px-3 py-2"
+                                                    >
+                                                        <div className="min-w-0 flex-1">
+                                                            <div className="text-sm font-medium text-[var(--app-fg)] truncate">{skill.name}</div>
+                                                            <div className="text-xs text-[var(--app-hint)] truncate">{skill.repo}{skill.stars ? ` · ${(skill.stars / 1000).toFixed(skill.stars >= 1000 ? 1 : 0)}k` : ''}</div>
+                                                        </div>
+                                                        {isInstalled ? (
+                                                            <span className="ml-2 shrink-0 rounded-md px-2 py-1 text-xs text-green-600 dark:text-green-400">
+                                                                {t('extensions.installed')}
+                                                            </span>
+                                                        ) : (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleInstallSkill(skill)}
+                                                                disabled={installing === skill.name}
+                                                                className="ml-2 shrink-0 rounded-md bg-[var(--app-link)] px-2.5 py-1 text-xs text-white hover:opacity-90 disabled:opacity-50"
+                                                            >
+                                                                {installing === skill.name ? '...' : t('extensions.install')}
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                )
+                                            })}
+                                        </>
+                                    )}
+                                </div>
+                            )}
                         </div>
 
-                        {/* Installed Skills */}
+                        {/* Installed Skills - below the online search */}
                         {installedSkills.length > 0 && (
                             <div>
                                 <h3 className="text-xs font-semibold text-[var(--app-hint)] uppercase tracking-wider mb-2">
-                                    {t('extensions.installed')}
+                                    {t('extensions.installed')} ({installedSkills.length})
                                 </h3>
                                 <div className="space-y-1">
                                     {installedSkills.map(skill => (
@@ -242,56 +316,6 @@ export default function ExtensionsPage() {
                                         </div>
                                     ))}
                                 </div>
-                            </div>
-                        )}
-
-                        {/* Search Results */}
-                        {skillQuery.length >= 2 && (
-                            <div>
-                                <h3 className="text-xs font-semibold text-[var(--app-hint)] uppercase tracking-wider mb-2">
-                                    {t('extensions.searchResults')}
-                                </h3>
-                                {searchLoading ? (
-                                    <div className="text-sm text-[var(--app-hint)] py-4 text-center">{t('extensions.searching')}</div>
-                                ) : searchError ? (
-                                    <div className="text-sm text-red-500 py-4 text-center">{t('extensions.searchError')}</div>
-                                ) : searchResults.length === 0 ? (
-                                    <div className="text-sm text-[var(--app-hint)] py-4 text-center">{t('extensions.noResults')}</div>
-                                ) : (
-                                    <div className="space-y-1">
-                                        {searchResults.map(skill => {
-                                            const isInstalled = installedNames.has(skill.name.toLowerCase())
-                                            return (
-                                                <div
-                                                    key={`${skill.repo}/${skill.path}`}
-                                                    className="flex items-center justify-between rounded-lg border border-[var(--app-border)] bg-[var(--app-secondary-bg)] px-3 py-2"
-                                                >
-                                                    <div className="min-w-0 flex-1">
-                                                        <div className="text-sm font-medium text-[var(--app-fg)] truncate">{skill.name}</div>
-                                                        {skill.description && (
-                                                            <div className="text-xs text-[var(--app-hint)] truncate">{skill.description}</div>
-                                                        )}
-                                                        <div className="text-xs text-[var(--app-hint)]">{skill.repo}{skill.stars ? ` * ${skill.stars}` : ''}</div>
-                                                    </div>
-                                                    {isInstalled ? (
-                                                        <span className="ml-2 shrink-0 rounded-md px-2 py-1 text-xs text-green-600 dark:text-green-400">
-                                                            {t('extensions.installed')}
-                                                        </span>
-                                                    ) : (
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => handleInstallSkill(skill)}
-                                                            disabled={installing === skill.name}
-                                                            className="ml-2 shrink-0 rounded-md bg-[var(--app-link)] px-2 py-1 text-xs text-white hover:opacity-90 disabled:opacity-50"
-                                                        >
-                                                            {installing === skill.name ? '...' : t('extensions.install')}
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            )
-                                        })}
-                                    </div>
-                                )}
                             </div>
                         )}
                     </div>

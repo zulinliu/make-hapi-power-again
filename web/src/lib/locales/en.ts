@@ -701,6 +701,11 @@ export default {
   'extensions.pluginSource': 'Source URL (optional)',
   'extensions.pluginInstallBtn': 'Install',
   'extensions.installing': 'Installing...',
+  'extensions.onlineSearch': 'Install from skills.sh',
+  'extensions.searchOnlinePlaceholder': 'Search online skills by keyword...',
+  'extensions.foundCount': 'Found {count} skills',
+  'extensions.installFailed': 'Installation failed. Make sure the session is active.',
+  'extensions.installSuccess': 'Successfully installed {name}',
 
   // File download/upload
   'file.page.download': 'Download file',
