@@ -37,6 +37,7 @@ import { useCodexModels } from '@/hooks/queries/useCodexModels'
 import { useCursorModels } from '@/hooks/queries/useCursorModels'
 import { useOpencodeModels } from '@/hooks/queries/useOpencodeModels'
 import { useFlavorModels } from '@/hooks/queries/useFlavorModels'
+import { getClaudeComposerModelOptions } from '@/components/AssistantChat/claudeModelOptions'
 import { useVoiceOptional } from '@/lib/voice-context'
 import { RealtimeVoiceSession, registerSessionStore, registerVoiceHooksStore, voiceHooks } from '@/realtime'
 import { isRemoteTerminalSupported } from '@/utils/terminalSupport'
@@ -200,15 +201,18 @@ export function SessionChat(props: {
         agentFlavor === 'claude'
     )
     const claudeModelOptions = useMemo(() => {
-        if (agentFlavor !== 'claude' || claudeFlavorModels.models.length === 0) {
-            return undefined
-        }
-
-        return claudeFlavorModels.models.map((m) => ({
+        if (agentFlavor !== 'claude') return undefined
+        if (claudeFlavorModels.models.length === 0) return undefined
+        const base = [
+            { value: 'auto', label: 'Default' },
+            ...getClaudeComposerModelOptions(undefined).filter(o => o.value !== 'auto'),
+        ]
+        const providerOpts = claudeFlavorModels.models.map((m) => ({
             value: m.id,
-            label: m.name,
+            label: `⇄ ${m.name}`,
             providerId: m.providerId,
         }))
+        return [...base, ...providerOpts]
     }, [agentFlavor, claudeFlavorModels.models])
     const {
         abortSession,

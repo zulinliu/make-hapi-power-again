@@ -56,7 +56,7 @@ export function createProviderRoutes(store: Store): Hono<WebAppEnv> {
 
         const req: CreateProviderRequest = parsed.data
         if (!isValidBaseUrl(req.baseUrl)) {
-            return c.json({ error: 'Invalid base URL. Only public https:// URLs are allowed.' }, 400)
+            return c.json({ error: 'Invalid base URL. Only public http(s):// URLs are allowed (no private/internal IPs).' }, 400)
         }
 
         const now = Date.now()
@@ -94,7 +94,7 @@ export function createProviderRoutes(store: Store): Hono<WebAppEnv> {
 
         const req: UpdateProviderRequest = parsed.data
         if (req.baseUrl !== undefined && !isValidBaseUrl(req.baseUrl)) {
-            return c.json({ error: 'Invalid base URL. Only public https:// URLs are allowed.' }, 400)
+            return c.json({ error: 'Invalid base URL. Only public http(s):// URLs are allowed (no private/internal IPs).' }, 400)
         }
 
         const key = getEncryptionKey()

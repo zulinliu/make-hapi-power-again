@@ -14,6 +14,7 @@ import { useDirectorySuggestions } from '@/hooks/useDirectorySuggestions'
 import { useRecentPaths } from '@/hooks/useRecentPaths'
 import { useTranslation } from '@/lib/use-translation'
 import type { AgentType, ClaudeEffort, CodexReasoningEffort, SessionType } from './types'
+import { MODEL_OPTIONS } from './types'
 import { ActionButtons } from './ActionButtons'
 import { AgentSelector } from './AgentSelector'
 import { DirectorySection } from './DirectorySection'
@@ -159,14 +160,15 @@ export function NewSession(props: {
         agent === 'claude'
     )
     const claudeModelOptions = useMemo(() => {
-        if (agent !== 'claude' || claudeFlavorModels.models.length === 0) {
-            return undefined
-        }
-        return claudeFlavorModels.models.map((m) => ({
+        if (agent !== 'claude') return undefined
+        const base = MODEL_OPTIONS.claude
+        if (claudeFlavorModels.models.length === 0) return undefined
+        const providerOpts = claudeFlavorModels.models.map((m) => ({
             value: m.id,
-            label: m.name,
+            label: `⇄ ${m.name}`,
             providerId: m.providerId,
         }))
+        return [...base, ...providerOpts]
     }, [agent, claudeFlavorModels.models])
 
     const recentPaths = useMemo(
@@ -363,7 +365,7 @@ export function NewSession(props: {
             const resolvedModelReasoningEffort = (agent === 'codex' || agent === 'opencode') && modelReasoningEffort !== 'default'
                 ? modelReasoningEffort
                 : undefined
-            const resolvedProviderId = agent === 'claude' && resolvedModel ? selectedProviderId : undefined
+            const resolvedProviderId = resolvedModel ? selectedProviderId : undefined
             const result = await spawnSession({
                 machineId,
                 directory: trimmedDirectory,
