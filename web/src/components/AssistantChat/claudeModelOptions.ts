@@ -3,6 +3,7 @@ import { CLAUDE_MODEL_PRESETS, getClaudeModelLabel } from '@hapipower/protocol'
 export type ClaudeComposerModelOption = {
     value: string | null
     label: string
+    providerId?: string
 }
 
 function normalizeClaudeComposerModel(model?: string | null): string | null {

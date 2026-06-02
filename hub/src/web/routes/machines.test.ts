@@ -4,6 +4,12 @@ import type { Machine, SyncEngine } from '../../sync/syncEngine'
 import type { WebAppEnv } from '../middleware/auth'
 import { createMachinesRoutes } from './machines'
 
+const mockStore = {
+    providers: {
+        getById: () => null,
+    },
+} as any
+
 function createMachine(overrides?: Partial<Machine>): Machine {
     return {
         id: 'machine-1',
@@ -44,7 +50,7 @@ describe('machines routes', () => {
             c.set('namespace', 'default')
             await next()
         })
-        app.route('/api', createMachinesRoutes(() => engine as SyncEngine))
+        app.route('/api', createMachinesRoutes(() => engine as SyncEngine, mockStore))
 
         const response = await app.request('/api/machines/machine-1/codex-models')
 
@@ -70,7 +76,7 @@ describe('machines routes', () => {
             c.set('namespace', 'default')
             await next()
         })
-        app.route('/api', createMachinesRoutes(() => engine as SyncEngine))
+        app.route('/api', createMachinesRoutes(() => engine as SyncEngine, mockStore))
 
         const response = await app.request('/api/machines/machine-1/opencode-models')
 
@@ -104,7 +110,7 @@ describe('machines routes', () => {
             c.set('namespace', 'default')
             await next()
         })
-        app.route('/api', createMachinesRoutes(() => engine as SyncEngine))
+        app.route('/api', createMachinesRoutes(() => engine as SyncEngine, mockStore))
 
         const response = await app.request(
             '/api/machines/machine-1/opencode-models?cwd=' + encodeURIComponent('/home/user/proj')
@@ -141,7 +147,7 @@ describe('machines routes', () => {
             c.set('namespace', 'default')
             await next()
         })
-        app.route('/api', createMachinesRoutes(() => engine as SyncEngine))
+        app.route('/api', createMachinesRoutes(() => engine as SyncEngine, mockStore))
 
         const response = await app.request('/api/machines/machine-1/cursor-models')
 

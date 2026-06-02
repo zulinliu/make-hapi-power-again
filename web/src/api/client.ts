@@ -30,6 +30,11 @@ import type {
 } from '@hapipower/protocol/apiTypes'
 import type { AgentFlavor } from '@hapipower/protocol'
 import type { CancelMessageResponse } from '@hapipower/protocol/schemas'
+import type {
+    DiscoverModelsResponse,
+    ProviderWithAssignments,
+    ProvidersListResponse,
+} from '@hapipower/protocol'
 
 type ApiClientOptions = {
     baseUrl?: string
@@ -525,10 +530,10 @@ export class ApiClient {
         })
     }
 
-    async setModel(sessionId: string, model: string | null): Promise<void> {
+    async setModel(sessionId: string, model: string | null, providerId?: string): Promise<void> {
         await this.request(`/api/sessions/${encodeURIComponent(sessionId)}/model`, {
             method: 'POST',
-            body: JSON.stringify({ model })
+            body: JSON.stringify({ model, providerId })
         })
     }
 
@@ -617,11 +622,12 @@ export class ApiClient {
         yolo?: boolean,
         sessionType?: 'simple' | 'worktree',
         worktreeName?: string,
-        effort?: string
+        effort?: string,
+        providerId?: string
     ): Promise<SpawnResponse> {
         return await this.request<SpawnResponse>(`/api/machines/${encodeURIComponent(machineId)}/spawn`, {
             method: 'POST',
-            body: JSON.stringify({ directory, agent, model, modelReasoningEffort, yolo, sessionType, worktreeName, effort })
+            body: JSON.stringify({ directory, agent, model, modelReasoningEffort, yolo, sessionType, worktreeName, effort, providerId })
         })
     }
 
@@ -968,5 +974,60 @@ export class ApiClient {
             share: { id: string; scope: string; createdAt: number; expiresAt: number | null }
             snapshot: Record<string, unknown>
         }>(`/api/s/${encodeURIComponent(shareId)}`)
+    }
+
+    async getProviders(): Promise<ProvidersListResponse> {
+        return await this.request<ProvidersListResponse>('/api/providers')
+    }
+
+    async getProvider(id: string): Promise<{ provider: ProviderWithAssignments }> {
+        return await this.request<{ provider: ProviderWithAssignments }>(`/api/providers/${encodeURIComponent(id)}`)
+    }
+
+    async createProvider(data: { name: string; baseUrl: string; apiKey: string; notes?: string }): Promise<{ provider: ProviderWithAssignments }> {
+        return await this.request<{ provider: ProviderWithAssignments }>('/api/providers', {
+            method: 'POST',
+            body: JSON.stringify(data)
+        })
+    }
+
+    async updateProvider(id: string, data: { name?: string; baseUrl?: string; apiKey?: string; notes?: string }): Promise<{ provider: ProviderWithAssignments }> {
+        return await this.request<{ provider: ProviderWithAssignments }>(`/api/providers/${encodeURIComponent(id)}`, {
+            method: 'PUT',
+            body: JSON.stringify(data)
+        })
+    }
+
+    async deleteProvider(id: string): Promise<void> {
+        await this.request(`/api/providers/${encodeURIComponent(id)}`, {
+            method: 'DELETE'
+        })
+    }
+
+    async assignProvider(providerId: string, agentFlavor: string, isDefault: boolean): Promise<void> {
+        await this.request(`/api/providers/${encodeURIComponent(providerId)}/assign`, {
+            method: 'POST',
+            body: JSON.stringify({ agentFlavor, isDefault })
+        })
+    }
+
+    async unassignProvider(providerId: string, agentFlavor: string): Promise<void> {
+        await this.request(`/api/providers/${encodeURIComponent(providerId)}/assign/${encodeURIComponent(agentFlavor)}`, {
+            method: 'DELETE'
+        })
+    }
+
+    async discoverModels(providerId: string): Promise<DiscoverModelsResponse> {
+        return await this.request<DiscoverModelsResponse>(`/api/providers/${encodeURIComponent(providerId)}/discover-models`, {
+            method: 'POST'
+        })
+    }
+
+    async getFlavorModels(flavor: string): Promise<{ models: Array<{ id: string; name: string; providerId: string; providerName: string }> }> {
+        return await this.request(`/api/providers/flavor/${encodeURIComponent(flavor)}/models`)
+    }
+
+    async getProviderApiKey(providerId: string): Promise<{ apiKey: string }> {
+        return await this.request<{ apiKey: string }>(`/api/providers/${encodeURIComponent(providerId)}/api-key`)
     }
 }

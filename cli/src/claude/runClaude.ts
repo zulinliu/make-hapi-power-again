@@ -388,7 +388,7 @@ export async function runClaude(options: StartOptions = {}): Promise<void> {
         if (!payload || typeof payload !== 'object') {
             throw new Error('Invalid session config payload');
         }
-        const config = payload as { permissionMode?: unknown; model?: unknown; effort?: unknown };
+        const config = payload as { permissionMode?: unknown; model?: unknown; effort?: unknown; providerBaseUrl?: unknown; providerApiKey?: unknown };
 
         if (config.permissionMode !== undefined) {
             currentPermissionMode = resolvePermissionMode(config.permissionMode);
@@ -400,6 +400,13 @@ export async function runClaude(options: StartOptions = {}): Promise<void> {
 
         if (config.effort !== undefined) {
             currentEffort = resolveEffort(config.effort);
+        }
+
+        if (typeof config.providerBaseUrl === 'string') {
+            process.env.ANTHROPIC_BASE_URL = config.providerBaseUrl;
+        }
+        if (typeof config.providerApiKey === 'string') {
+            process.env.ANTHROPIC_API_KEY = config.providerApiKey;
         }
 
         syncSessionModes();

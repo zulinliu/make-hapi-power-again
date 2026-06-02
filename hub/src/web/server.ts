@@ -27,6 +27,7 @@ import { createChangeTrackingRoutes } from './routes/changeTracking'
 import { createTimelineRoutes } from './routes/timeline'
 import { createUndoRoutes } from './routes/undo'
 import { createShareRoutes } from './routes/share'
+import { createProviderRoutes } from './routes/providers'
 import type { SSEManager } from '../sse/sseManager'
 import type { VisibilityTracker } from '../visibility/visibilityTracker'
 import type { Server as BunServer } from 'bun'
@@ -103,10 +104,10 @@ function createWebApp(options: {
 
     app.use('/api/*', createAuthMiddleware(options.jwtSecret))
     app.route('/api', createEventsRoutes(options.getSseManager, options.getSyncEngine, options.getVisibilityTracker))
-    app.route('/api', createSessionsRoutes(options.getSyncEngine))
+    app.route('/api', createSessionsRoutes(options.getSyncEngine, options.store))
     app.route('/api', createMessagesRoutes(options.getSyncEngine))
     app.route('/api', createPermissionsRoutes(options.getSyncEngine))
-    app.route('/api', createMachinesRoutes(options.getSyncEngine))
+    app.route('/api', createMachinesRoutes(options.getSyncEngine, options.store))
     app.route('/api', createGitRoutes(options.getSyncEngine))
     app.route('/api', createPluginsRoutes(options.getSyncEngine))
     app.route('/api', createSkillManagementRoutes(options.getSyncEngine))
@@ -118,6 +119,7 @@ function createWebApp(options: {
     app.route('/api', createVoiceRoutes())
     app.route('/api', createVoiceTranscriptionRoutes())
     app.route('/api', createOrchestrationRoutes())
+    app.route('/api', createProviderRoutes(options.store))
 
     // Skip static serving in relay mode, show helpful message on root
     if (options.relayMode) {

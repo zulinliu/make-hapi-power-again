@@ -6,7 +6,7 @@
 
 ## Core Value
 
-**让 AI 编码代理拥有完整的开发者环境 — 代码编辑、终端操作、版本控制、插件扩展，全部在浏览器中完成。**
+**让 AI 编码代理拥有完整的开发者环境 — 代码编辑、终端操作、版本控制、插件扩展、自定义模型 API 配置，全部在浏览器中完成。**
 
 ## Requirements
 
@@ -73,6 +73,23 @@
 - [ ] 压缩事件通知与详情查看
 - [ ] 手动压缩触发
 
+**Module H — 自定义模型 API 配置与切换（v0.7 新增）**
+- [ ] 全局供应商池管理（CRUD：名称 + Base URL + API Key + 分配给代理）
+- [ ] API Key 加密存储（AES-256-GCM，SQLite 存储）
+- [ ] 模型自动发现（/v1/models 端点探测，兼容子路径自动剥离）
+- [ ] 供应商配置 Hub→CLI RPC 下发（融入现有 sessionConfigRpc 机制）
+- [ ] ModelSelector 下拉框融合（自定义供应商无缝嵌入现有模型选择器）
+- [ ] 支持 Claude / Codex / Gemini / OpenCode 四种代理
+- [ ] Settings 页面新增"API 供应商"管理区域
+- [ ] 多供应商切换 + 会话级供应商绑定
+
+**Module I — API 协议转换（v0.8 规划）**
+- [ ] Hub 端 API 协议代理（Anthropic ↔ OpenAI Chat/Responses 双向转换）
+- [ ] Gemini Native 格式转换
+- [ ] Codex Responses API 转换
+- [ ] 熔断器 + 故障转移
+- [ ] 流式响应透传
+
 **Cross-cutting（跨模块）**
 - [ ] Hub EventBus 事件总线（ADR-003：跨模块事件通知）
 - [ ] 统一导航架构（ADR-008：侧边栏导航）
@@ -132,6 +149,10 @@
 | 统一数据库迁移（ADR-009） | V10 迁移脚本覆盖所有新增表 | ✓ Good |
 | 安全增强穿透（ADR-010） | N-1~N-8 安全发现全部穿透到对应模块设计 | ✓ Good |
 | 技术验证前置（ADR-011） | Phase 0.5 验证 node-pty + Bun 兼容性等关键技术风险 | — Pending |
+| v0.7 供应商全局池模型（ADR-012） | 统一管理 API 供应商，避免按应用分散配置 | — Pending |
+| v0.7 Hub→CLI RPC 配置下发（ADR-013） | 融入现有 sessionConfigRpc，不修改 CLI 配置文件 | — Pending |
+| v0.7 AES-256-GCM API Key 加密（ADR-014） | SQLite 加密存储，优于 cc-switch 的明文方案 | — Pending |
+| v0.8 协议转换延后（ADR-015） | v0.7 仅做配置+发现，协议转换由中转服务或 v0.8 Hub 代理实现 | — Pending |
 
 ## Evolution
 
@@ -151,4 +172,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-30 after initialization*
+*Last updated: 2026-05-31 after v0.7 planning (custom model API configuration)*

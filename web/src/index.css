@@ -15,6 +15,11 @@
     --app-banner-text: var(--tg-theme-button-text-color, #ffffff);
     --app-secondary-bg: var(--tg-theme-secondary-bg-color, #f4f4f8);
 
+    --app-accent: var(--app-button);
+    --app-hover: var(--app-subtle-bg);
+    --app-danger: #DA3633;
+    --app-text-muted: var(--app-hint);
+
     --app-dialog-bg: #ffffff;
     --app-chat-user-bg: #f4f4f8;
     --app-chat-user-surface-bg: var(--app-chat-user-bg);
@@ -88,6 +93,11 @@
     --app-bg: var(--tg-theme-bg-color, #0A0A0B);
     --app-secondary-bg: var(--tg-theme-secondary-bg-color, #141416);
     --app-dialog-bg: #1C1C1F;
+
+    --app-accent: var(--app-button);
+    --app-hover: var(--app-subtle-bg);
+    --app-danger: #f85149;
+    --app-text-muted: var(--app-hint);
 
     /* === Foreground === */
     --app-fg: var(--tg-theme-text-color, #E6EDF3);
@@ -563,6 +573,27 @@ html[data-theme="dark"] .shiki span {
 
 .animate-bounce-in {
   animation: bounce-in 0.3s ease-out;
+}
+
+/* Prevent iOS auto-zoom on input focus (font-size < 16px triggers zoom) */
+@supports (-webkit-touch-callout: none) {
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+    select,
+    textarea {
+        font-size: max(1rem, 16px) !important;
+    }
+
+    .dialog-container-ios-safe {
+        -webkit-overflow-scrolling: touch;
+        overflow-y: auto;
+        max-height: 100dvh;
+    }
+
+    .dialog-container-ios-safe > div {
+        min-height: auto;
+        padding-top: env(safe-area-inset-top, 0px);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
 }
 
 /* ReactQueryDevtools button - move to middle-right to avoid blocking UI */

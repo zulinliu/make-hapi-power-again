@@ -108,7 +108,8 @@ export const SessionCollaborationModeRequestSchema = z.object({
 export type SessionCollaborationModeRequest = z.infer<typeof SessionCollaborationModeRequestSchema>
 
 export const SessionModelRequestSchema = z.object({
-    model: z.string().trim().min(1).nullable()
+    model: z.string().trim().min(1).nullable(),
+    providerId: z.string().uuid().optional(),
 })
 
 export type SessionModelRequest = z.infer<typeof SessionModelRequestSchema>
@@ -182,7 +183,8 @@ export const SpawnSessionRequestSchema = z.object({
     modelReasoningEffort: z.string().optional(),
     yolo: z.boolean().optional(),
     sessionType: z.enum(['simple', 'worktree']).optional(),
-    worktreeName: z.string().optional()
+    worktreeName: z.string().optional(),
+    providerId: z.string().uuid().optional()
 })
 
 export type SpawnSessionRequest = z.infer<typeof SpawnSessionRequestSchema>
