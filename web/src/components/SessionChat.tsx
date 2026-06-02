@@ -36,6 +36,8 @@ import { useSessionActions } from '@/hooks/mutations/useSessionActions'
 import { useCodexModels } from '@/hooks/queries/useCodexModels'
 import { useCursorModels } from '@/hooks/queries/useCursorModels'
 import { useOpencodeModels } from '@/hooks/queries/useOpencodeModels'
+import { useFlavorModels } from '@/hooks/queries/useFlavorModels'
+import { getClaudeComposerModelOptions } from '@/components/AssistantChat/claudeModelOptions'
 import { useVoiceOptional } from '@/lib/voice-context'
 import { RealtimeVoiceSession, registerSessionStore, registerVoiceHooksStore, voiceHooks } from '@/realtime'
 import { isRemoteTerminalSupported } from '@/utils/terminalSupport'
@@ -193,6 +195,25 @@ export function SessionChat(props: {
                 }))
         ]
     }, [agentFlavor, cursorModelsState.availableModels])
+    const claudeFlavorModels = useFlavorModels(
+        props.api,
+        agentFlavor === 'claude' ? 'claude' : null,
+        agentFlavor === 'claude'
+    )
+    const claudeModelOptions = useMemo(() => {
+        if (agentFlavor !== 'claude') return undefined
+        if (claudeFlavorModels.models.length === 0) return undefined
+        const base = [
+            { value: 'auto', label: 'Default' },
+            ...getClaudeComposerModelOptions(undefined).filter(o => o.value !== 'auto'),
+        ]
+        const providerOpts = claudeFlavorModels.models.map((m) => ({
+            value: m.id,
+            label: `⇄ ${m.name}`,
+            providerId: m.providerId,
+        }))
+        return [...base, ...providerOpts]
+    }, [agentFlavor, claudeFlavorModels.models])
     const {
         abortSession,
         switchSession,
@@ -430,9 +451,9 @@ export function SessionChat(props: {
     }, [setCollaborationMode, props.onRefresh, haptic])
 
     // Model mode change handler
-    const handleModelChange = useCallback(async (model: string | null) => {
+    const handleModelChange = useCallback(async (model: string | null, providerId?: string) => {
         try {
-            await setModel(model)
+            await setModel(model, providerId)
             haptic.notification('success')
             props.onRefresh()
         } catch (e) {
@@ -692,7 +713,9 @@ export function SessionChat(props: {
                                     ? cursorModelOptions
                                     : agentFlavor === 'opencode'
                                         ? opencodeModelOptions
-                                        : undefined
+                                        : agentFlavor === 'claude'
+                                            ? claudeModelOptions
+                                            : undefined
                         }
                         active={props.session.active}
                         allowSendWhenInactive

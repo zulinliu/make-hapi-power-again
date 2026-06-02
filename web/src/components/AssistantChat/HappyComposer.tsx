@@ -62,10 +62,10 @@ export function HappyComposer(props: {
     contextWindow?: number | null
     controlledByUser?: boolean
     agentFlavor?: string | null
-    availableModelOptions?: Array<{ value: string | null; label: string }>
+    availableModelOptions?: Array<{ value: string | null; label: string; providerId?: string }>
     onCollaborationModeChange?: (mode: CodexCollaborationMode) => void
     onPermissionModeChange?: (mode: PermissionMode) => void
-    onModelChange?: (model: string | null) => void
+    onModelChange?: (model: string | null, providerId?: string) => void
     onModelReasoningEffortChange?: (modelReasoningEffort: string | null) => void
     onEffortChange?: (effort: string | null) => void
     onSwitchToRemote?: () => void
@@ -493,9 +493,9 @@ export function HappyComposer(props: {
         haptic('light')
     }, [onCollaborationModeChange, controlsDisabled, haptic])
 
-    const handleModelChange = useCallback((nextModel: string | null) => {
+    const handleModelChange = useCallback((nextModel: string | null, providerId?: string) => {
         if (!onModelChange || controlsDisabled) return
-        onModelChange(nextModel)
+        onModelChange(nextModel, providerId)
         setShowSettings(false)
         haptic('light')
     }, [onModelChange, controlsDisabled, haptic])
@@ -640,7 +640,7 @@ export function HappyComposer(props: {
                                                 ? 'cursor-not-allowed opacity-50'
                                                 : 'cursor-pointer hover:bg-[var(--app-secondary-bg)]'
                                         }`}
-                                        onClick={() => handleModelChange(option.value)}
+                                        onClick={() => handleModelChange(option.value, option.providerId)}
                                         onMouseDown={(e) => e.preventDefault()}
                                     >
                                         <div

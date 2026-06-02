@@ -5,10 +5,12 @@ import {
 } from '@hapipower/protocol'
 import { Hono } from 'hono'
 import type { SyncEngine } from '../../sync/syncEngine'
+import type { Store } from '../../store'
 import type { WebAppEnv } from '../middleware/auth'
 import { requireMachine } from './guards'
+import { decryptAES256GCM, getEncryptionKey } from '../../utils/crypto'
 
-export function createMachinesRoutes(getSyncEngine: () => SyncEngine | null): Hono<WebAppEnv> {
+export function createMachinesRoutes(getSyncEngine: () => SyncEngine | null, store: Store): Hono<WebAppEnv> {
     const app = new Hono<WebAppEnv>()
 
     app.get('/machines', (c) => {
@@ -52,6 +54,24 @@ export function createMachinesRoutes(getSyncEngine: () => SyncEngine | null): Ho
             undefined,
             parsed.data.effort
         )
+
+        if (result.type === 'success' && parsed.data.providerId) {
+            try {
+                const provider = store.providers.getById(parsed.data.providerId)
+                if (provider) {
+                    const key = getEncryptionKey()
+                    const apiKey = decryptAES256GCM(provider.apiKeyEncrypted, key)
+                    await engine.applySessionConfig(result.sessionId, {
+                        model: parsed.data.model,
+                        providerBaseUrl: provider.baseUrl,
+                        providerApiKey: apiKey,
+                    })
+                }
+            } catch {
+                // Provider config is best-effort; session already created
+            }
+        }
+
         return c.json(result)
     })
 

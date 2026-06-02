@@ -157,6 +157,12 @@ export async function runGemini(opts: {
                 sessionModel = config.model;
                 resolvedModel = sessionModel ?? machineDefault;
             }
+            if (config.providerBaseUrl !== undefined) {
+                process.env.GEMINI_BASE_URL = config.providerBaseUrl;
+            }
+            if (config.providerApiKey !== undefined) {
+                process.env.GEMINI_API_KEY = config.providerApiKey;
+            }
         },
         onAfterApply: syncSessionMode
     });

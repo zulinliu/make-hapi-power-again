@@ -4,6 +4,7 @@ import { useAppGoBack } from '@/hooks/useAppGoBack'
 import { getElevenLabsSupportedLanguages, getLanguageDisplayName, type Language } from '@/lib/languages'
 import { VOICES, getFallbackVoices } from '@/lib/voices'
 import { useAppContext } from '@/lib/app-context'
+import { ProviderSettings } from '@/components/ProviderSettings'
 import { fetchVoices, type VoiceInfo } from '@/api/voice'
 import { getFontScaleOptions, useFontScale, type FontScale } from '@/hooks/useFontScale'
 import { getTerminalFontSizeOptions, useTerminalFontSize, type TerminalFontSize } from '@/hooks/useTerminalFontSize'
@@ -925,6 +926,9 @@ export default function SettingsPage() {
                             t={t}
                         />
                     </div>
+
+                    {/* API Providers section */}
+                    <ProviderSettings />
 
                     {/* Voice Assistant section */}
                     <div className="border-b border-[var(--app-divider)]">
