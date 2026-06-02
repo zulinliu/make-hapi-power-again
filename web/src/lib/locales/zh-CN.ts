@@ -75,6 +75,12 @@ export default {
   // Session header
   'session.title': '文件',
   'session.more': '更多操作',
+  'session.tools': '工具',
+  'session.extensions': '扩展',
+  'session.changes': '变更审查',
+  'session.timeline': '时间线',
+  'session.undo': '撤销变更',
+  'session.whiteboard': '白板',
   'session.outline.open': '会话大纲',
   'session.outline.close': '关闭大纲',
   'session.outline.title': '大纲',

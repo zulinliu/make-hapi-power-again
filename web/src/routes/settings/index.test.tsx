@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor, act, cleanup } from '@testing-libra
 import { I18nContext, I18nProvider } from '@/lib/i18n-context'
 import { en } from '@/lib/locales'
 import { PROTOCOL_VERSION } from '@hapipower/protocol'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import SettingsPage from './index'
 
 vi.mock('@hapipower/protocol', () => ({
@@ -138,20 +139,26 @@ afterEach(() => {
     cleanup()
 })
 function renderWithProviders(ui: React.ReactElement) {
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
     return render(
-        <I18nProvider>
-            {ui}
-        </I18nProvider>
+        <QueryClientProvider client={queryClient}>
+            <I18nProvider>
+                {ui}
+            </I18nProvider>
+        </QueryClientProvider>
     )
 }
 
 function renderWithSpyT(ui: React.ReactElement) {
     const translations = en as Record<string, string>
     const spyT = vi.fn((key: string) => translations[key] ?? key)
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
     render(
-        <I18nContext.Provider value={{ t: spyT, locale: 'en', setLocale: vi.fn() }}>
-            {ui}
-        </I18nContext.Provider>
+        <QueryClientProvider client={queryClient}>
+            <I18nContext.Provider value={{ t: spyT, locale: 'en', setLocale: vi.fn() }}>
+                {ui}
+            </I18nContext.Provider>
+        </QueryClientProvider>
     )
     return spyT
 }

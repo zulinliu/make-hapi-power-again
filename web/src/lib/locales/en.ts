@@ -75,6 +75,12 @@ export default {
   // Session header
   'session.title': 'Files',
   'session.more': 'More actions',
+  'session.tools': 'Tools',
+  'session.extensions': 'Extensions',
+  'session.changes': 'Changes',
+  'session.timeline': 'Timeline',
+  'session.undo': 'Undo changes',
+  'session.whiteboard': 'Whiteboard',
   'session.outline.open': 'Conversation outline',
   'session.outline.close': 'Close outline',
   'session.outline.title': 'Outline',
