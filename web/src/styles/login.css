@@ -1,0 +1,372 @@
+/**
+ * Login Page Styles
+ * "Warm Terminal" design — inspired by Claude/Anthropic design language
+ * Uses --lp-* namespace to isolate from global theme
+ */
+
+:root {
+  --lp-bg: #faf9f5;
+  --lp-surface: #ffffff;
+  --lp-surface-elevated: #f5f4ed;
+  --lp-border: #e8e6dc;
+  --lp-border-focus: #d1cfc5;
+  --lp-text-primary: #141413;
+  --lp-text-secondary: #5e5d59;
+  --lp-text-tertiary: #87867f;
+  --lp-accent: #d97757;
+  --lp-accent-hover: #c96442;
+  --lp-accent-subtle: rgba(217, 119, 87, 0.18);
+  --lp-placeholder: #a8a69f;
+  --lp-error: #b53333;
+  --lp-error-bg: #fdf2f2;
+}
+
+[data-theme="dark"] {
+  --lp-bg: #1a1918;
+  --lp-surface: #262624;
+  --lp-surface-elevated: #2e2d2b;
+  --lp-border: #3d3d3a;
+  --lp-border-focus: #5e5d59;
+  --lp-text-primary: #f5f4ed;
+  --lp-text-secondary: #b0aea5;
+  --lp-text-tertiary: #87867f;
+  --lp-accent: #d97757;
+  --lp-accent-hover: #e08868;
+  --lp-accent-subtle: rgba(217, 119, 87, 0.2);
+  --lp-placeholder: #6e6d68;
+  --lp-error: #f85149;
+  --lp-error-bg: rgba(248, 81, 73, 0.08);
+}
+
+/* === Layout === */
+.login-page {
+  display: flex;
+  height: 100%;
+  position: relative;
+  background: var(--lp-bg);
+}
+
+/* === Left Panel (Brand) === */
+.login-brand-panel {
+  width: 45%;
+  background:
+    radial-gradient(ellipse at 30% 70%, rgba(255,255,255,0.08), transparent 60%),
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 40px,
+      rgba(255,255,255,0.02) 40px,
+      rgba(255,255,255,0.02) 41px
+    ),
+    linear-gradient(135deg, #d97757 0%, #c96442 50%, #b85540 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 64px;
+  position: relative;
+  overflow: hidden;
+  border-right: 1px solid rgba(0,0,0,0.06);
+}
+
+.login-brand-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+.login-brand-content {
+  margin-top: 8vh;
+}
+
+.login-brand-name {
+  font-family: var(--hp-font-display), Georgia, serif;
+  font-size: clamp(2.5rem, 2rem + 2vw, 3.5rem);
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  animation: lpFadeSlideUp 0.6s ease-out 0.2s both;
+}
+
+.login-tagline {
+  font-family: var(--hp-font-sans);
+  font-size: clamp(0.9rem, 0.8rem + 0.3vw, 1.05rem);
+  color: rgba(255,255,255,0.45);
+  margin-top: 12px;
+  letter-spacing: 0.01em;
+  animation: lpFadeSlideUp 0.5s ease-out 0.4s both;
+}
+
+.login-terminal {
+  position: absolute;
+  bottom: 48px;
+  left: 64px;
+  font-family: var(--hp-font-mono);
+  font-size: 13px;
+  color: rgba(255,255,255,0.35);
+  line-height: 1.6;
+  animation: lpFadeIn 0.8s ease-out 0.8s both;
+}
+
+.login-terminal-cursor {
+  display: inline-block;
+  width: 8px;
+  height: 15px;
+  background: rgba(255,255,255,0.45);
+  vertical-align: text-bottom;
+  animation: lpBlink 1s step-end infinite;
+}
+
+/* === Right Panel (Form) === */
+.login-form-panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  position: relative;
+  background: var(--lp-bg);
+}
+
+/* Language Switcher */
+.login-lang {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  animation: lpFadeIn 0.4s ease-out 0.9s both;
+}
+
+/* Form Container */
+.login-form-container {
+  width: 100%;
+  max-width: 400px;
+}
+
+.login-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--lp-text-secondary);
+  margin-bottom: 8px;
+  animation: lpFadeIn 0.4s ease-out 0.5s both;
+}
+
+.login-input {
+  width: 100%;
+  height: 48px;
+  padding: 0 16px;
+  font-family: var(--hp-font-sans);
+  font-size: 15px;
+  color: var(--lp-text-primary);
+  background: var(--lp-surface);
+  border: 1px solid var(--lp-border);
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 150ms ease-out, box-shadow 150ms ease-out;
+  animation: lpFadeSlideUp 0.4s ease-out 0.6s both;
+}
+
+.login-input::placeholder {
+  color: var(--lp-placeholder);
+}
+
+.login-input:hover {
+  border-color: var(--lp-border-focus);
+}
+
+.login-input:focus {
+  border-color: var(--lp-accent);
+  box-shadow: 0 0 0 3px var(--lp-accent-subtle);
+}
+
+.login-input:disabled {
+  opacity: 0.5;
+}
+
+.login-error {
+  margin-top: 12px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lp-error);
+  background: var(--lp-error-bg);
+  border-radius: 6px;
+  border-left: 3px solid var(--lp-error);
+  animation: lpFadeIn 0.2s ease-out;
+}
+
+.login-btn {
+  width: 100%;
+  height: 48px;
+  margin-top: 16px;
+  background: var(--lp-accent);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-family: var(--hp-font-sans);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: all 150ms ease-out;
+  animation: lpFadeSlideUp 0.4s ease-out 0.75s both;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.login-btn:hover {
+  background: var(--lp-accent-hover);
+  box-shadow: 0 2px 8px rgba(217,119,87,0.25);
+}
+
+.login-btn:active {
+  transform: translateY(1px);
+}
+
+.login-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Links */
+.login-links {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 24px;
+  animation: lpFadeIn 0.4s ease-out 0.9s both;
+}
+
+.login-link {
+  font-family: var(--hp-font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lp-text-secondary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: color 150ms ease-out;
+}
+
+.login-link:hover {
+  color: var(--lp-accent);
+}
+
+/* Footer */
+.login-footer {
+  position: absolute;
+  bottom: 28px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-family: var(--hp-font-sans);
+  font-size: 12px;
+  color: var(--lp-text-secondary);
+  animation: lpFadeIn 0.6s ease-out 1s both;
+}
+
+.login-footer-heart {
+  color: var(--lp-accent);
+}
+
+/* === Hub URL Dialog Overrides === */
+.login-form-panel [data-radix-presentation-content] {
+  backdrop-filter: blur(4px);
+}
+
+.login-form-panel .login-dialog-content {
+  background: var(--lp-surface);
+  border: 1px solid var(--lp-border);
+  border-radius: 12px;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.12);
+  max-width: 420px;
+  color: var(--lp-text-primary);
+}
+
+/* === Animations === */
+@keyframes lpFadeSlideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes lpFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes lpBlink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+/* === Responsive === */
+@media (max-width: 767px) {
+  .login-page {
+    flex-direction: column;
+  }
+
+  .login-brand-panel {
+    width: 100%;
+    min-height: 30vh;
+    padding: 32px;
+    border-right: none;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+  }
+
+  .login-brand-content {
+    margin-top: 2vh;
+  }
+
+  .login-brand-name {
+    font-size: clamp(2rem, 1.5rem + 3vw, 2.5rem);
+  }
+
+  .login-terminal {
+    display: none;
+  }
+
+  .login-form-panel {
+    flex: 1;
+    padding: 32px 24px;
+  }
+
+  .login-footer {
+    position: relative;
+    bottom: auto;
+    margin-top: auto;
+    padding-top: 24px;
+  }
+}
+
+@media (max-width: 400px) {
+  .login-brand-panel {
+    min-height: 25vh;
+    padding: 24px;
+  }
+
+  .login-form-panel {
+    padding: 24px 16px;
+  }
+}
+
+/* === Reduced Motion === */
+@media (prefers-reduced-motion: reduce) {
+  .login-page,
+  .login-page * {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
