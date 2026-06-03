@@ -102,55 +102,43 @@ export function GitBranchManager({ sessionId }: { sessionId: string }) {
           value={newBranchName}
           onChange={(e) => setNewBranchName(e.target.value)}
           placeholder={t('git.branch.newPlaceholder')}
-          className="flex-1 text-sm px-3 py-1.5 rounded-md border outline-none"
-          style={{
-            background: 'var(--hp-surface-1)',
-            borderColor: 'var(--hp-border)',
-            color: 'var(--hp-text-primary)',
-          }}
+          className="flex-1 text-sm px-3 py-1.5 rounded-md border outline-none bg-[var(--app-secondary-bg)] border-[var(--app-border)] text-[var(--app-fg)]"
           onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
         />
         <button
           onClick={handleCreate}
           disabled={!newBranchName.trim()}
-          className="text-xs px-3 py-1.5 rounded-md font-medium"
-          style={{
-            background: 'var(--hp-primary)',
-            color: 'var(--hp-primary-text)',
-            opacity: newBranchName.trim() ? 1 : 0.5,
-          }}
+          className="text-xs px-3 py-1.5 rounded-md font-medium bg-[var(--app-link)] text-[var(--app-button-text)]"
+          style={{ opacity: newBranchName.trim() ? 1 : 0.5 }}
         >
           {t('git.branch.create')}
         </button>
       </div>
 
-      {error && <p className="text-xs" style={{ color: 'var(--hp-danger)' }}>{error}</p>}
+      {error && <p className="text-xs text-[var(--app-danger)]">{error}</p>}
 
       {loading ? (
-        <p className="text-sm" style={{ color: 'var(--hp-text-tertiary)' }}>{t('git.branch.loading')}</p>
+        <p className="text-sm text-[var(--app-hint)]">{t('git.branch.loading')}</p>
       ) : (
         <div className="space-y-1">
           {branches.map((branch) => (
             <div key={branch.name} className="flex items-center gap-2 text-sm py-1.5 px-2 rounded"
-              style={{ background: branch.isCurrent ? 'var(--hp-primary-subtle)' : 'transparent' }}>
-              <span className="w-4 text-center" style={{ color: branch.isCurrent ? 'var(--hp-success)' : 'transparent' }}>
+              style={{ background: branch.isCurrent ? 'var(--app-primary-subtle)' : 'transparent' }}>
+              <span className="w-4 text-center" style={{ color: branch.isCurrent ? 'var(--app-success)' : 'transparent' }}>
                 ●
               </span>
-              <span className="font-mono text-xs flex-1 truncate" style={{ color: branch.isCurrent ? 'var(--hp-primary)' : 'var(--hp-text-primary)' }}>
+              <span className="font-mono text-xs flex-1 truncate" style={{ color: branch.isCurrent ? 'var(--app-link)' : 'var(--app-fg)' }}>
                 {branch.name}
               </span>
               {!branch.isCurrent && !branch.isRemote && (
                 <>
-                  <button onClick={() => handleMerge(branch.name)} className="text-xs px-2 py-0.5 rounded"
-                    style={{ color: 'var(--hp-text-tertiary)' }} title={t('git.branch.merge')}>
+                  <button onClick={() => handleMerge(branch.name)} className="text-xs px-2 py-0.5 rounded text-[var(--app-hint)]" title={t('git.branch.merge')}>
                     ⊕
                   </button>
-                  <button onClick={() => handleSwitch(branch.name)} className="text-xs px-2 py-0.5 rounded"
-                    style={{ color: 'var(--hp-text-tertiary)' }} title={t('git.branch.switch')}>
+                  <button onClick={() => handleSwitch(branch.name)} className="text-xs px-2 py-0.5 rounded text-[var(--app-hint)]" title={t('git.branch.switch')}>
                     ⇄
                   </button>
-                  <button onClick={() => handleDelete(branch.name)} className="text-xs px-2 py-0.5 rounded"
-                    style={{ color: 'var(--hp-text-tertiary)' }} title={t('git.branch.delete')}>
+                  <button onClick={() => handleDelete(branch.name)} className="text-xs px-2 py-0.5 rounded text-[var(--app-hint)]" title={t('git.branch.delete')}>
                     ×
                   </button>
                 </>
