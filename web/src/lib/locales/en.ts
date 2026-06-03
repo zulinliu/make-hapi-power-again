@@ -552,6 +552,12 @@ export default {
   'git.status.commitPlaceholder': 'Commit message…',
   'git.status.commitQuick': 'Commit All',
 
+  // Git context menu
+  'git.context.viewDiff': 'View Diff',
+  'git.context.copyPath': 'Copy Path',
+  'git.context.copyPathSuccess': 'Path copied to clipboard',
+  'git.context.openFile': 'Open File',
+
   // Git history
   'git.history.loading': 'Loading history…',
   'git.history.failed': 'Failed to load history',
