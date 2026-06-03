@@ -245,6 +245,7 @@ export default {
   'file.page.tab.file': 'File',
   'file.page.missingPath': 'No file path provided.',
   'file.page.binary': 'This looks like a binary file. It cannot be displayed.',
+  'file.page.saveFailed': 'Save failed',
   'file.page.imagePreviewAlt': 'Image preview for {name}',
   'file.page.empty': 'File is empty.',
   'file.page.noChanges': 'No changes to display.',
@@ -558,6 +559,15 @@ export default {
   'git.context.copyPathSuccess': 'Path copied to clipboard',
   'git.context.openFile': 'Open File',
 
+  // Git preview
+  'git.preview.title': 'File preview',
+  'git.preview.deleted': 'File has been deleted',
+  'git.preview.loadFailed': 'Failed to load file',
+  'git.preview.retry': 'Retry',
+  'git.preview.binary': 'Binary file, cannot preview',
+  'git.preview.noContent': 'No content available',
+  'git.preview.openInFileManager': 'Open in file manager',
+
   // Git history
   'git.history.loading': 'Loading history…',
   'git.history.failed': 'Failed to load history',
@@ -570,6 +580,7 @@ export default {
   'git.branch.createFailed': 'Failed to create branch',
   'git.branch.switchFailed': 'Failed to switch branch',
   'git.branch.deleteFailed': 'Failed to delete branch',
+  'git.branch.deleteConfirm': 'Delete branch "{name}"? This cannot be undone.',
   'git.branch.mergeFailed': 'Merge failed (possible conflicts)',
   'git.branch.merge': 'Merge into current',
   'git.branch.switch': 'Switch',

@@ -36,7 +36,6 @@ export function GitCommitDialog({
     const { t } = useTranslation()
     const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set())
     const [message, setMessage] = useState('')
-    const [sign, setSign] = useState(false)
     const [phase, setPhase] = useState<CommitPhase>('idle')
     const [error, setError] = useState('')
 
@@ -44,7 +43,6 @@ export function GitCommitDialog({
         if (isOpen) {
             setSelectedFiles(new Set(files.map(f => f.path)))
             setMessage('')
-            setSign(false)
             setPhase('idle')
             setError('')
         }
@@ -146,19 +144,6 @@ export function GitCommitDialog({
                         rows={3}
                         className="w-full rounded-md border border-[var(--app-border)] bg-transparent px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--app-link)] resize-none"
                     />
-
-                    <div className="flex items-center gap-4">
-                        <label className="flex items-center gap-2 text-sm">
-                            <input
-                                type="checkbox"
-                                checked={sign}
-                                onChange={(e) => setSign(e.target.checked)}
-                                disabled={phase === 'committing'}
-                                className="rounded"
-                            />
-                            <span style={{ color: 'var(--app-text-muted)' }}>{t('git.commit.sign')}</span>
-                        </label>
-                    </div>
 
                     {phase === 'committing' && (
                         <div className="rounded-md p-3 text-sm" style={{ background: 'var(--app-subtle-bg)' }}>

@@ -11,7 +11,7 @@ import { formatDiffError, formatReadFileError } from '@/lib/files-i18n'
 import { queryKeys } from '@/lib/query-keys'
 import { useTranslation } from '@/lib/use-translation'
 import { decodeBase64 } from '@/lib/utils'
-import { IMAGE_MIME_BY_EXTENSION, resolveImageMimeType, isBinaryContent, isMarkdownFile } from '@/lib/file-utils'
+import { resolveImageMimeType, isBinaryContent, isMarkdownFile } from '@/lib/file-utils'
 import { ImagePreview } from '@/components/ImagePreview'
 import { LoadingState } from '@/components/LoadingState'
 
@@ -151,6 +151,8 @@ export default function FilePage() {
             setLocalContent(newValue)
             queryClient.invalidateQueries({ queryKey: queryKeys.sessionFile(sessionId, filePath) })
             queryClient.invalidateQueries({ queryKey: queryKeys.gitFileDiff(sessionId, filePath, staged) })
+        } catch (err) {
+            alert(t('file.page.saveFailed') + ': ' + (err instanceof Error ? err.message : String(err)))
         } finally {
             setIsSaving(false)
         }

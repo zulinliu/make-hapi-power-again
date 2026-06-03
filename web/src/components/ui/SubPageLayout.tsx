@@ -23,7 +23,7 @@ export function SubPageLayout({
   return (
     <div className="flex h-full min-h-0 flex-col">
       {toolbar && (
-        <div className="border-b border-[var(--app-border)] bg-[var(--app-bg)] px-3 py-2 shrink-0">
+        <div className="border-b border-[var(--app-border)] bg-[var(--app-bg)] px-3 py-2 shrink-0 overflow-x-auto">
           <div className="mx-auto w-full max-w-content">
             {toolbar}
           </div>
@@ -36,7 +36,7 @@ export function SubPageLayout({
           role="tablist"
         >
           <div className="mx-auto w-full max-w-content">
-            <div className="flex">
+            <div className="flex overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
               {tabs.map((tab) => {
                 const isActive = tab.id === activeTab
                 return (
@@ -46,7 +46,7 @@ export function SubPageLayout({
                     role="tab"
                     aria-selected={isActive}
                     onClick={() => onTabChange?.(tab.id)}
-                    className="relative flex-1 py-3 text-center text-sm font-semibold transition-colors"
+                    className="relative flex-1 py-3 text-center text-sm font-semibold transition-colors whitespace-nowrap"
                   >
                     <span
                       className={
@@ -58,7 +58,7 @@ export function SubPageLayout({
                       {tab.label}
                     </span>
                     <span
-                      className={`absolute bottom-0 left-1/2 h-0.5 w-10 -translate-x-1/2 rounded-full transition-colors duration-150 ${
+                      className={`absolute bottom-0 left-[10%] h-0.5 w-4/5 rounded-full transition-colors duration-150 ${
                         isActive
                           ? 'bg-[var(--app-link)]'
                           : 'bg-transparent'
