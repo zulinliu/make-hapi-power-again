@@ -2,6 +2,9 @@ import { useState, useCallback } from 'react'
 import { useParams, useNavigate } from '@tanstack/react-router'
 import { useAppContext } from '@/lib/app-context'
 import { useTranslation } from '@/lib/use-translation'
+import { useToast } from '@/lib/toast-context'
+import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
+import { encodeBase64 } from '@/lib/utils'
 import { GitStatusPanel } from '@/components/git/GitStatusPanel'
 import { GitHistory } from '@/components/git/GitHistory'
 import { GitBranchManager } from '@/components/git/GitBranchManager'
@@ -27,6 +30,8 @@ export default function GitPage() {
   const { api } = useAppContext()
   const { t } = useTranslation()
   const { session, isLoading } = useSession(api, sessionId)
+  const { addToast } = useToast()
+  const { copy } = useCopyToClipboard()
   const [activeTab, setActiveTab] = useState<Tab>('status')
   const [cloneOpen, setCloneOpen] = useState(false)
   const [pushOpen, setPushOpen] = useState(false)
@@ -51,6 +56,22 @@ export default function GitPage() {
   const handleRemotesLoaded = useCallback((remoteList: { name: string; url: string }[]) => {
     setRemotes(remoteList)
   }, [])
+
+  const handleViewDiff = useCallback((path: string) => {
+    navigate({ to: '/sessions/$sessionId/file', params: { sessionId }, search: { path: encodeBase64(path) } })
+  }, [navigate, sessionId])
+
+  const handleCopyPath = useCallback((path: string) => {
+    const basePath = session?.metadata?.path || ''
+    const fullPath = basePath ? `${basePath}/${path}` : path
+    copy(fullPath).then((ok) => {
+      if (ok) addToast({ title: t('git.context.copyPathSuccess'), body: '' })
+    })
+  }, [session?.metadata?.path, copy, addToast, t])
+
+  const handleOpenFile = useCallback((path: string) => {
+    navigate({ to: '/sessions/$sessionId/file', params: { sessionId }, search: { path: encodeBase64(path) } })
+  }, [navigate, sessionId])
 
   const handleFetch = async () => {
     if (!api) return
@@ -142,7 +163,7 @@ export default function GitPage() {
           </>
         }
       >
-        {activeTab === 'status' && <GitStatusPanel sessionId={sessionId} onStatusLoaded={handleStatusLoaded} onFilesChanged={handleFilesChanged} />}
+        {activeTab === 'status' && <GitStatusPanel sessionId={sessionId} onStatusLoaded={handleStatusLoaded} onFilesChanged={handleFilesChanged} onViewDiff={handleViewDiff} onCopyPath={handleCopyPath} onOpenFile={handleOpenFile} />}
         {activeTab === 'history' && <GitHistory sessionId={sessionId} />}
         {activeTab === 'branches' && <GitBranchManager sessionId={sessionId} />}
         {activeTab === 'remotes' && <GitRemoteManager sessionId={sessionId} onRemotesLoaded={handleRemotesLoaded} />}

@@ -1,6 +1,9 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useAppContext } from '@/lib/app-context'
 import { useTranslation } from '@/lib/use-translation'
+import { useContextMenu } from '@/hooks/useContextMenu'
+import { ContextMenu } from '@/components/ui/ContextMenu'
+import type { ContextMenuItem } from '@/components/ui/ContextMenu'
 
 interface GitFile {
   status: string
@@ -14,11 +17,16 @@ interface StatusData {
   files: GitFile[]
 }
 
-export function GitStatusPanel({ sessionId, onStatusLoaded, onFilesChanged }: {
+interface GitStatusPanelProps {
   sessionId: string
   onStatusLoaded?: (branch: string) => void
   onFilesChanged?: (files: { status: string; path: string }[]) => void
-}) {
+  onViewDiff?: (path: string) => void
+  onCopyPath?: (path: string) => void
+  onOpenFile?: (path: string) => void
+}
+
+export function GitStatusPanel({ sessionId, onStatusLoaded, onFilesChanged, onViewDiff, onCopyPath, onOpenFile }: GitStatusPanelProps) {
   const { api } = useAppContext()
   const { t } = useTranslation()
   const [status, setStatus] = useState<StatusData | null>(null)
@@ -83,16 +91,98 @@ export function GitStatusPanel({ sessionId, onStatusLoaded, onFilesChanged }: {
       ) : (
         <div className="space-y-1">
           {status.files.map((file) => (
-            <div key={file.path} className="flex items-center gap-2 text-sm py-1 px-2 rounded bg-[var(--app-secondary-bg)]">
-              <GitStatusBadge status={file.status} />
-              <span className="font-mono text-xs truncate flex-1 text-[var(--app-fg)]">
-                {file.path}
-              </span>
-            </div>
+            <GitFileRow
+              key={file.path}
+              file={file}
+              onViewDiff={onViewDiff}
+              onCopyPath={onCopyPath}
+              onOpenFile={onOpenFile}
+            />
           ))}
         </div>
       )}
     </div>
+  )
+}
+
+function GitFileRow({ file, onViewDiff, onCopyPath, onOpenFile }: {
+  file: GitFile
+  onViewDiff?: (path: string) => void
+  onCopyPath?: (path: string) => void
+  onOpenFile?: (path: string) => void
+}) {
+  const { t } = useTranslation()
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null)
+  const justClosedRef = useRef(false)
+  const moreBtnRef = useRef<HTMLButtonElement>(null)
+
+  const handleContextMenu = useCallback((pos: { x: number; y: number }) => {
+    if (justClosedRef.current) return
+    setContextMenu(pos)
+  }, [])
+
+  const handlers = useContextMenu(handleContextMenu)
+
+  const handleClose = useCallback(() => {
+    setContextMenu(null)
+    justClosedRef.current = true
+    setTimeout(() => { justClosedRef.current = false }, 300)
+  }, [])
+
+  const handleMoreClick = useCallback(() => {
+    if (justClosedRef.current) return
+    const rect = moreBtnRef.current?.getBoundingClientRect()
+    if (rect) {
+      setContextMenu({ x: rect.left, y: rect.bottom + 4 })
+    }
+  }, [])
+
+  const contextMenuItems = useMemo<ContextMenuItem[]>(() => [
+    {
+      label: t('git.context.viewDiff'),
+      icon: '∓',
+      disabled: file.status === '?',
+      onClick: () => onViewDiff?.(file.path),
+    },
+    {
+      label: t('git.context.copyPath'),
+      icon: '📋',
+      onClick: () => onCopyPath?.(file.path),
+    },
+    {
+      label: t('git.context.openFile'),
+      icon: '↗',
+      onClick: () => onOpenFile?.(file.path),
+    },
+  ], [t, file.path, file.status, onViewDiff, onCopyPath, onOpenFile])
+
+  return (
+    <>
+      <div
+        {...handlers}
+        className="flex items-center gap-2 text-sm py-1 px-2 rounded bg-[var(--app-secondary-bg)] cursor-pointer hover:bg-[var(--app-subtle-bg)] transition-colors"
+      >
+        <GitStatusBadge status={file.status} />
+        <span className="font-mono text-xs truncate flex-1 text-[var(--app-fg)]">
+          {file.path}
+        </span>
+        <button
+          ref={moreBtnRef}
+          onClick={(e) => { e.stopPropagation(); handleMoreClick() }}
+          className="text-[var(--app-hint)] hover:text-[var(--app-fg)] px-1 text-sm leading-none"
+        >
+          ···
+        </button>
+      </div>
+      {contextMenu && (
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          items={contextMenuItems}
+          onClose={handleClose}
+        />
+      )}
+    </>
   )
 }
 

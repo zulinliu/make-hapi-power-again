@@ -554,6 +554,12 @@ export default {
   'git.status.commitPlaceholder': '提交消息…',
   'git.status.commitQuick': '全部提交',
 
+  // Git context menu
+  'git.context.viewDiff': '查看差异',
+  'git.context.copyPath': '复制路径',
+  'git.context.copyPathSuccess': '路径已复制到剪贴板',
+  'git.context.openFile': '打开文件',
+
   // Git history
   'git.history.loading': '加载历史…',
   'git.history.failed': '加载历史失败',
