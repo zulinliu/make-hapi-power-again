@@ -79,7 +79,7 @@ export function CodeEditor({ value, language, filePath, readOnly, onChange, onSa
                     lineNumbers: 'on',
                     scrollBeyondLastLine: false,
                     wordWrap: 'on',
-                    padding: { top: 12 },
+                    padding: { top: 16, bottom: 16 },
                     renderLineHighlight: 'gutter',
                     smoothScrolling: true,
                     cursorBlinking: 'smooth',

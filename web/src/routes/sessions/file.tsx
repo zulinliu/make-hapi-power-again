@@ -257,15 +257,15 @@ export default function FilePage() {
 
             <div className="flex-1 min-h-0">
                 {diffErrorMessage ? (
-                    <div className="p-4"><div className="mb-3 rounded-md bg-amber-500/10 p-2 text-xs text-[var(--app-hint)]">{diffErrorMessage}</div></div>
+                    <div className="p-4 sm:p-6"><div className="mb-3 rounded-md bg-amber-500/10 p-2 text-xs text-[var(--app-hint)]">{diffErrorMessage}</div></div>
                 ) : missingPath ? (
-                    <div className="p-4 text-sm text-[var(--app-hint)]">{t('file.page.missingPath')}</div>
+                    <div className="p-4 sm:p-6 text-sm text-[var(--app-hint)]">{t('file.page.missingPath')}</div>
                 ) : loading ? (
                     <FileContentSkeleton label={t('loading.file')} />
                 ) : fileErrorMessage ? (
-                    <div className="p-4 text-sm text-[var(--app-hint)]">{fileErrorMessage}</div>
+                    <div className="p-4 sm:p-6 text-sm text-[var(--app-hint)]">{fileErrorMessage}</div>
                 ) : displayMode === 'preview' && isMarkdown && decodedContent ? (
-                    <div className="app-scroll-y h-full p-4">
+                    <div className="app-scroll-y h-full p-4 sm:p-6 lg:p-8">
                         <MarkdownFilePreview content={decodedContent} />
                     </div>
                 ) : displayMode === 'diff' && diffContent && decodedContent ? (
@@ -280,12 +280,12 @@ export default function FilePage() {
                     </Suspense>
                 ) : displayMode === 'edit' ? (
                     imagePreviewUrl ? (
-                        <div className="app-scroll-y h-full p-4">
+                        <div className="app-scroll-y h-full p-4 sm:p-6 lg:p-8">
                             <ImagePreview src={imagePreviewUrl} fileName={fileName}
                                 label={t('file.page.imagePreviewAlt', { name: fileName })} />
                         </div>
                     ) : binaryFile ? (
-                        <div className="p-4 text-sm text-[var(--app-hint)]">{t('file.page.binary')}</div>
+                        <div className="p-4 sm:p-6 text-sm text-[var(--app-hint)]">{t('file.page.binary')}</div>
                     ) : (
                         <Suspense fallback={<FileContentSkeleton label="Loading editor..." />}>
                             <div className="relative h-full">
@@ -307,7 +307,7 @@ export default function FilePage() {
                         </Suspense>
                     )
                 ) : (
-                    <div className="p-4 text-sm text-[var(--app-hint)]">{t('file.page.noChanges')}</div>
+                    <div className="p-4 sm:p-6 text-sm text-[var(--app-hint)]">{t('file.page.noChanges')}</div>
                 )}
             </div>
         </div>
