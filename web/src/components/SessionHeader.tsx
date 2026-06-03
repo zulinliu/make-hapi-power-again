@@ -192,7 +192,7 @@ export function SessionHeader(props: {
                         <div className="truncate text-sm font-semibold leading-tight sm:text-base">
                             {title}
                         </div>
-                        <div className="flex items-center gap-1.5 text-[11px] leading-tight text-[var(--app-hint)] sm:text-xs sm:gap-3">
+                        <div className="flex items-center gap-1.5 text-xs leading-tight text-[var(--app-hint)] sm:gap-3">
                             <span className="inline-flex shrink-0 items-center gap-1">
                                 <AgentFlavorIcon flavor={session.metadata?.flavor} className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                                 <span className="max-w-[4rem] truncate">{session.metadata?.flavor?.trim() || 'unknown'}</span>

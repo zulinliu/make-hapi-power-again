@@ -180,7 +180,7 @@ function GitFileRow({ file, onViewDiff, onCopyPath, onOpenFile, onPreview }: {
         <button
           ref={moreBtnRef}
           onClick={(e) => { e.stopPropagation(); handleMoreClick() }}
-          className="text-[var(--app-hint)] hover:text-[var(--app-fg)] px-1 text-sm leading-none"
+          className="w-8 h-8 flex items-center justify-center text-[var(--app-hint)] hover:text-[var(--app-fg)] text-sm leading-none rounded-full hover:bg-[var(--app-subtle-bg)] transition-colors"
         >
           ···
         </button>
