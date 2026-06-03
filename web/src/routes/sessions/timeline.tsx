@@ -3,6 +3,7 @@ import { useParams } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAppContext } from '@/lib/app-context'
 import { useSession } from '@/hooks/queries/useSession'
+import { SubPageLayout } from '@/components/ui/SubPageLayout'
 
 type TimelineEntryType = 'tool_use' | 'file_change' | 'message' | 'summary' | 'checkpoint' | 'error'
 type FilterType = 'all' | TimelineEntryType
@@ -147,69 +148,63 @@ export default function TimelinePage() {
     const summaries = summariesData?.summaries ?? []
 
     return (
-        <div className="flex h-full min-h-0 flex-col">
-            {/* Filter tabs with checkpoint button */}
-            <div className="flex items-center gap-1 px-3 py-1.5 border-b border-[var(--app-border)] bg-[var(--app-bg)] overflow-x-auto">
-                {(['all', 'message', 'tool_use', 'file_change', 'summary', 'checkpoint', 'error'] as FilterType[]).map(f => (
+        <SubPageLayout
+            tabs={[
+                { id: 'all', label: '全部' },
+                { id: 'message', label: '消息' },
+                { id: 'tool_use', label: '工具调用' },
+                { id: 'file_change', label: '文件变更' },
+                { id: 'summary', label: '摘要' },
+                { id: 'checkpoint', label: '检查点' },
+                { id: 'error', label: '错误' },
+            ]}
+            activeTab={filter}
+            onTabChange={(id) => setFilter(id as FilterType)}
+            toolbar={
+                <div className="flex items-center justify-end">
                     <button
-                        key={f}
                         type="button"
-                        onClick={() => setFilter(f)}
-                        className={`shrink-0 px-2 py-1 text-xs rounded-md transition-colors ${
-                            filter === f
-                                ? 'bg-[var(--app-link)] text-white'
-                                : 'bg-[var(--app-secondary-bg)] text-[var(--app-hint)] hover:text-[var(--app-fg)]'
-                        }`}
+                        onClick={() => checkpointMutation.mutate(undefined)}
+                        disabled={checkpointMutation.isPending}
+                        className="px-2 py-1 text-xs rounded-md bg-[var(--app-link)] text-white hover:opacity-90 disabled:opacity-50"
                     >
-                        {f === 'all' ? '全部' : TYPE_LABELS[f]}
+                        创建检查点
                     </button>
-                ))}
-                <div className="flex-1" />
-                <button
-                    type="button"
-                    onClick={() => checkpointMutation.mutate(undefined)}
-                    disabled={checkpointMutation.isPending}
-                    className="shrink-0 px-2 py-1 text-xs rounded-md bg-[var(--app-link)] text-white hover:opacity-90 disabled:opacity-50"
-                >
-                    创建检查点
-                </button>
-            </div>
-
-            {/* Content */}
-            <div className="flex-1 min-h-0 overflow-y-auto app-scroll-y">
-                {truncated && (
-                    <div className="mx-3 mt-2 rounded-lg border border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950/20 px-3 py-2 text-xs text-yellow-700 dark:text-yellow-400">
-                        消息较多，仅显示最近 200 条消息
-                    </div>
-                )}
-                {isLoading ? (
-                    <div className="py-8 text-center text-sm text-[var(--app-hint)]">加载中...</div>
-                ) : entries.length === 0 ? (
-                    <div className="py-8 text-center text-sm text-[var(--app-hint)]">暂无时间线记录</div>
-                ) : (
-                    <div className="relative p-3 pl-8">
-                        {/* Timeline line */}
-                        <div className="absolute left-5 top-3 bottom-3 w-px bg-[var(--app-border)]" />
-                        <div className="space-y-2">
-                            {entries.map(entry => (
-                                <div key={entry.id} className="relative flex gap-3">
-                                    {/* Timeline dot */}
-                                    <div className={`absolute -left-3 top-2 w-2.5 h-2.5 rounded-full border-2 border-[var(--app-bg)] ${TYPE_COLORS[entry.type].split(' ')[0]}`} />
-                                    <div className="flex-1 min-w-0 rounded-md border border-[var(--app-border)] bg-[var(--app-secondary-bg)] px-3 py-2">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <span className={`shrink-0 text-xs px-1.5 py-0.5 rounded-full ${TYPE_COLORS[entry.type]}`}>
-                                                {TYPE_LABELS[entry.type]}
-                                            </span>
-                                            <span className="text-xs text-[var(--app-hint)]">{formatTime(entry.timestamp)}</span>
-                                        </div>
-                                        <EntryDetail entry={entry} />
+                </div>
+            }
+        >
+            {truncated && (
+                <div className="mx-3 mt-2 rounded-lg border border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950/20 px-3 py-2 text-xs text-yellow-700 dark:text-yellow-400">
+                    消息较多，仅显示最近 200 条消息
+                </div>
+            )}
+            {isLoading ? (
+                <div className="py-8 text-center text-sm text-[var(--app-hint)]">加载中...</div>
+            ) : entries.length === 0 ? (
+                <div className="py-8 text-center text-sm text-[var(--app-hint)]">暂无时间线记录</div>
+            ) : (
+                <div className="relative p-3 pl-8">
+                    {/* Timeline line */}
+                    <div className="absolute left-5 top-3 bottom-3 w-px bg-[var(--app-border)]" />
+                    <div className="space-y-2">
+                        {entries.map(entry => (
+                            <div key={entry.id} className="relative flex gap-3">
+                                {/* Timeline dot */}
+                                <div className={`absolute -left-3 top-2 w-2.5 h-2.5 rounded-full border-2 border-[var(--app-bg)] ${TYPE_COLORS[entry.type].split(' ')[0]}`} />
+                                <div className="flex-1 min-w-0 rounded-md border border-[var(--app-border)] bg-[var(--app-secondary-bg)] px-3 py-2">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <span className={`shrink-0 text-xs px-1.5 py-0.5 rounded-full ${TYPE_COLORS[entry.type]}`}>
+                                            {TYPE_LABELS[entry.type]}
+                                        </span>
+                                        <span className="text-xs text-[var(--app-hint)]">{formatTime(entry.timestamp)}</span>
                                     </div>
+                                    <EntryDetail entry={entry} />
                                 </div>
-                            ))}
-                        </div>
+                            </div>
+                        ))}
                     </div>
-                )}
-            </div>
-        </div>
+                </div>
+            )}
+        </SubPageLayout>
     )
 }
