@@ -259,7 +259,7 @@ export default function ChangesPage() {
                                                                     type="button"
                                                                     onClick={() => reviewMutation.mutate({ changeId: change.id, action: 'approved' })}
                                                                     disabled={reviewMutation.isPending}
-                                                                    className="flex items-center justify-center w-7 h-7 rounded-md text-green-600 hover:opacity-80 disabled:opacity-50"
+                                                                    className="flex items-center justify-center w-7 h-7 rounded-md text-[var(--app-success)] hover:opacity-80 disabled:opacity-50"
                                                                     style={{ background: 'var(--app-success-subtle)' }}
                                                                     title={t('changes.approve')}
                                                                 >
@@ -269,7 +269,7 @@ export default function ChangesPage() {
                                                                     type="button"
                                                                     onClick={() => reviewMutation.mutate({ changeId: change.id, action: 'rejected' })}
                                                                     disabled={reviewMutation.isPending}
-                                                                    className="flex items-center justify-center w-7 h-7 rounded-md text-red-600 hover:opacity-80 disabled:opacity-50"
+                                                                    className="flex items-center justify-center w-7 h-7 rounded-md text-[var(--app-danger)] hover:opacity-80 disabled:opacity-50"
                                                                     style={{ background: 'var(--app-badge-error-bg)' }}
                                                                     title={t('changes.reject')}
                                                                 >

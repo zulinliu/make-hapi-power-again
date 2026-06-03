@@ -265,7 +265,7 @@ export default function ExtensionsPage() {
                                             onChange={e => setInstalledFilter(e.target.value)}
                                             placeholder={t('extensions.filterInstalled')}
                                             enterKeyHint="search"
-                                            className="w-full rounded-lg border border-[var(--app-border)] bg-[var(--app-secondary-bg)] py-2 pl-9 pr-3 text-sm text-[var(--app-fg)] placeholder:text-[var(--app-hint)] focus:outline-none focus:ring-1 focus:ring-[var(--app-link)]"
+                                            className="w-full rounded-md border border-[var(--app-border)] bg-[var(--app-secondary-bg)] py-2 pl-9 pr-3 text-sm text-[var(--app-fg)] placeholder:text-[var(--app-hint)] focus:outline-none focus:ring-1 focus:ring-[var(--app-link)]"
                                             onKeyDown={e => {
                                                 if (e.key === 'Enter') setInstalledFilterTrigger(installedFilter.trim())
                                             }}
@@ -274,7 +274,7 @@ export default function ExtensionsPage() {
                                     <button
                                         type="button"
                                         onClick={() => setInstalledFilterTrigger(installedFilter.trim())}
-                                        className="shrink-0 rounded-lg bg-[var(--app-link)] px-3 py-2 text-sm text-white hover:opacity-90 disabled:opacity-50 transition-opacity"
+                                        className="shrink-0 rounded-md bg-[var(--app-link)] px-3 py-2 text-sm text-white hover:opacity-90 disabled:opacity-50 transition-opacity"
                                     >
                                         {t('extensions.search')}
                                     </button>
@@ -343,7 +343,7 @@ export default function ExtensionsPage() {
                                             onChange={e => setSkillQuery(e.target.value)}
                                             placeholder={t('extensions.searchOnlinePlaceholder')}
                                             enterKeyHint="search"
-                                            className="w-full rounded-lg border border-[var(--app-border)] bg-[var(--app-bg)] py-2 pl-9 pr-3 text-sm text-[var(--app-fg)] placeholder:text-[var(--app-hint)] focus:outline-none focus:ring-1 focus:ring-[var(--app-link)]"
+                                            className="w-full rounded-md border border-[var(--app-border)] bg-[var(--app-bg)] py-2 pl-9 pr-3 text-sm text-[var(--app-fg)] placeholder:text-[var(--app-hint)] focus:outline-none focus:ring-1 focus:ring-[var(--app-link)]"
                                             onKeyDown={e => {
                                                 if (e.key === 'Enter' && skillQuery.trim().length >= 2) {
                                                     setSkillSearchTrigger(skillQuery.trim())
@@ -355,7 +355,7 @@ export default function ExtensionsPage() {
                                         type="button"
                                         disabled={skillQuery.trim().length < 2 || searchLoading}
                                         onClick={() => setSkillSearchTrigger(skillQuery.trim())}
-                                        className="shrink-0 rounded-lg bg-[var(--app-link)] px-3 py-2 text-sm text-white hover:opacity-90 disabled:opacity-50 transition-opacity"
+                                        className="shrink-0 rounded-md bg-[var(--app-link)] px-3 py-2 text-sm text-white hover:opacity-90 disabled:opacity-50 transition-opacity"
                                     >
                                         {searchLoading ? '...' : t('extensions.search')}
                                     </button>
@@ -467,11 +467,10 @@ export default function ExtensionsPage() {
                                         <div className="flex items-center gap-2">
                                             <span className="text-sm font-medium text-[var(--app-fg)] truncate">{plugin.name}</span>
                                             <span className="text-xs text-[var(--app-hint)]">v{plugin.version}</span>
-                                            <span className={`text-xs px-1.5 py-0.5 rounded-full ${
-                                                plugin.enabled
-                                                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                                                    : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'
-                                            }`}>
+                                            <span className="text-xs px-1.5 py-0.5 rounded-full" style={{
+                                                background: plugin.enabled ? 'var(--app-success-subtle)' : 'var(--app-subtle-bg)',
+                                                color: plugin.enabled ? 'var(--app-success)' : 'var(--app-hint)',
+                                            }}>
                                                 {plugin.enabled ? t('extensions.active') : t('extensions.inactive')}
                                             </span>
                                         </div>
@@ -489,7 +488,7 @@ export default function ExtensionsPage() {
                                     <button
                                         type="button"
                                         onClick={() => handleUninstallPlugin(plugin.id)}
-                                        className="ml-2 shrink-0 rounded-md px-2 py-1 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20"
+                                        className="ml-2 shrink-0 rounded-md px-2 py-1 text-xs text-[var(--app-danger)] hover:opacity-80"
                                     >
                                         {t('extensions.remove')}
                                     </button>
