@@ -6,7 +6,6 @@ import { FileIcon } from '@/components/FileIcon'
 import { CopyIcon, CheckIcon } from '@/components/icons'
 import { MarkdownFilePreview } from '@/components/MarkdownFilePreview'
 import { useAppContext } from '@/lib/app-context'
-import { useAppGoBack } from '@/hooks/useAppGoBack'
 import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
 import { formatDiffError, formatReadFileError } from '@/lib/files-i18n'
 import { queryKeys } from '@/lib/query-keys'
@@ -31,16 +30,6 @@ function decodePath(value: string): string {
     if (!value) return ''
     const decoded = decodeBase64(value)
     return decoded.ok ? decoded.text : value
-}
-
-function BackIcon(props: { className?: string }) {
-    return (
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-            fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-            className={props.className}>
-            <polyline points="15 18 9 12 15 6" />
-        </svg>
-    )
 }
 
 function FileContentSkeleton(props: { label: string }) {
@@ -85,7 +74,6 @@ export default function FilePage() {
     const { copied: pathCopied, copy: copyPath } = useCopyToClipboard()
     const { copied: contentCopied, copy: copyContent } = useCopyToClipboard()
 
-    const goBack = useAppGoBack()
     const queryClient = useQueryClient()
     const { sessionId } = useParams({ from: '/sessions/$sessionId/file' })
     const search = useSearch({ from: '/sessions/$sessionId/file' })
@@ -203,19 +191,6 @@ export default function FilePage() {
 
     return (
         <div className="flex h-full min-h-0 flex-col">
-            <div className="bg-[var(--app-bg)] pt-[env(safe-area-inset-top)]">
-                <div className="mx-auto w-full max-w-content flex items-center gap-2 p-3 border-b border-[var(--app-border)]">
-                    <button type="button" onClick={goBack} aria-label={t('file.page.goBack')}
-                        className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--app-hint)] transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]">
-                        <BackIcon />
-                    </button>
-                    <div className="min-w-0 flex-1">
-                        <div className="truncate font-semibold">{fileName}</div>
-                        <div className="truncate text-xs text-[var(--app-hint)]">{filePath || t('file.page.unknownPath')}</div>
-                    </div>
-                </div>
-            </div>
-
             <div className="bg-[var(--app-bg)]">
                 <div className="mx-auto w-full max-w-content px-3 py-2 flex items-center gap-2 border-b border-[var(--app-divider)]">
                     <FileIcon fileName={fileName} size={20} />

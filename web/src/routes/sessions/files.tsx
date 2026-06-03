@@ -8,7 +8,6 @@ import type { ContextMenuItem } from '@/components/ui/ContextMenu'
 import { FileInputDialog, FileMoveDialog } from '@/components/ui/FileDialogs'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { useAppContext } from '@/lib/app-context'
-import { useAppGoBack } from '@/hooks/useAppGoBack'
 import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
 import { useGitStatusFiles } from '@/hooks/queries/useGitStatusFiles'
 import { useSession } from '@/hooks/queries/useSession'
@@ -24,25 +23,6 @@ import { queryKeys } from '@/lib/query-keys'
 import { useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from '@/lib/use-translation'
 import { useToast } from '@/lib/toast-context'
-
-function BackIcon(props: { className?: string }) {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className={props.className}
-        >
-            <polyline points="15 18 9 12 15 6" />
-        </svg>
-    )
-}
 
 function RefreshIcon(props: { className?: string }) {
     return (
@@ -248,7 +228,6 @@ export default function FilesPage() {
     const { addToast } = useToast()
     const navigate = useNavigate()
     const queryClient = useQueryClient()
-    const goBack = useAppGoBack()
     const { copy: copyToClipboard } = useCopyToClipboard()
     const { sessionId } = useParams({ from: '/sessions/$sessionId/files' })
     const search = useSearch({ from: '/sessions/$sessionId/files' })
@@ -484,43 +463,30 @@ export default function FilesPage() {
 
     return (
         <div className="flex h-full min-h-0 flex-col">
-            <div className="bg-[var(--app-bg)] pt-[env(safe-area-inset-top)]">
-                <div className="mx-auto w-full max-w-content flex items-center gap-2 p-3 border-b border-[var(--app-border)]">
-                    <button
-                        type="button"
-                        onClick={goBack}
-                        aria-label={t('file.page.goBack')}
-                        className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--app-hint)] transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]"
-                    >
-                        <BackIcon />
-                    </button>
-                    <div className="min-w-0 flex-1">
-                        <div className="truncate font-semibold">{t('files.page.title')}</div>
-                        <div className="truncate text-xs text-[var(--app-hint)]">{subtitle}</div>
-                    </div>
-                    <button
-                        type="button"
-                        onClick={handleRefresh}
-                        className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--app-hint)] transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]"
-                        title={t('files.page.refresh')}
-                    >
-                        <RefreshIcon />
-                    </button>
-                </div>
-            </div>
-
             <div className="bg-[var(--app-bg)]">
                 <div className="mx-auto w-full max-w-content p-3 border-b border-[var(--app-border)]">
-                    <div className="flex items-center gap-2 rounded-md bg-[var(--app-subtle-bg)] px-3 py-2">
-                        <SearchIcon className="text-[var(--app-hint)]" />
-                        <input
-                            value={searchQuery}
-                            onChange={(event) => setSearchQuery(event.target.value)}
-                            placeholder={t('files.page.searchPlaceholder')}
-                            className="w-full bg-transparent text-sm text-[var(--app-fg)] placeholder:text-[var(--app-hint)] focus:outline-none"
-                            autoCapitalize="none"
-                            autoCorrect="off"
-                        />
+                    <div className="flex items-center gap-2">
+                        <div className="relative flex-1">
+                            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--app-hint)]">
+                                <SearchIcon />
+                            </div>
+                            <input
+                                value={searchQuery}
+                                onChange={(event) => setSearchQuery(event.target.value)}
+                                placeholder={t('files.page.searchPlaceholder')}
+                                className="w-full rounded-md bg-[var(--app-subtle-bg)] py-2 pl-9 pr-3 text-sm text-[var(--app-fg)] placeholder:text-[var(--app-hint)] focus:outline-none focus:ring-1 focus:ring-[var(--app-link)]"
+                                autoCapitalize="none"
+                                autoCorrect="off"
+                            />
+                        </div>
+                        <button
+                            type="button"
+                            onClick={handleRefresh}
+                            className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--app-hint)] transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]"
+                            title={t('files.page.refresh')}
+                        >
+                            <RefreshIcon />
+                        </button>
                     </div>
                 </div>
             </div>
