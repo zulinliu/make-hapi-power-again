@@ -4,6 +4,7 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
+    DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { useAppContext } from '@/lib/app-context'
@@ -63,7 +64,7 @@ export function FileInputDialog({
                 <DialogHeader>
                     <DialogTitle>{title}</DialogTitle>
                 </DialogHeader>
-                <div className="space-y-3">
+                <div className="space-y-3 mt-3">
                     <input
                         type="text"
                         value={value}
@@ -71,11 +72,14 @@ export function FileInputDialog({
                         placeholder={placeholder}
                         disabled={submitting}
                         autoFocus
-                        className="w-full rounded-md border bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2"
+                        className="w-full rounded-lg border px-3 py-2.5 text-sm transition-colors focus:outline-none focus:ring-2"
                         style={{
-                            borderColor: 'var(--hp-border)',
-                            color: 'var(--hp-text-primary)',
-                        }}
+                            borderColor: 'var(--app-border)',
+                            background: 'var(--app-secondary-bg)',
+                            color: 'var(--app-fg)',
+                            minHeight: 44,
+                            '--tw-ring-color': 'var(--hp-primary)',
+                        } as React.CSSProperties}
                         onKeyDown={(e) => {
                             if (e.key === 'Enter' && value.trim() && !submitting) {
                                 handleSubmit()
@@ -83,17 +87,22 @@ export function FileInputDialog({
                         }}
                     />
                     {error && (
-                        <p className="text-sm" style={{ color: 'var(--hp-danger)' }}>{error}</p>
+                        <p className="text-sm rounded-lg px-3 py-2" style={{
+                            color: 'var(--hp-danger)',
+                            background: 'var(--hp-danger-subtle)'
+                        }}>{error}</p>
                     )}
-                    <div className="flex justify-end gap-2">
-                        <Button variant="outline" onClick={onClose} disabled={submitting}>
-                            {t('button.cancel')}
-                        </Button>
-                        <Button onClick={handleSubmit} disabled={!value.trim() || submitting}>
-                            {submitLabel}
-                        </Button>
-                    </div>
                 </div>
+                <DialogFooter>
+                    <Button variant="outline" onClick={onClose} disabled={submitting}
+                        className="min-h-[44px] flex-1 sm:flex-none">
+                        {t('button.cancel')}
+                    </Button>
+                    <Button onClick={handleSubmit} disabled={!value.trim() || submitting}
+                        className="min-h-[44px] flex-1 sm:flex-none">
+                        {submitLabel}
+                    </Button>
+                </DialogFooter>
             </DialogContent>
         </Dialog>
     )
@@ -153,12 +162,12 @@ function DirectoryPickerNode(props: {
     return (
         <div>
             <div
-                className={`flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer text-sm transition-colors ${
+                className={`flex items-center gap-2 px-2 py-2 rounded-lg cursor-pointer text-sm transition-colors ${
                     isSelected
-                        ? 'bg-[var(--app-subtle-bg)] text-[var(--app-fg)]'
-                        : 'hover:bg-[var(--app-subtle-bg)] text-[var(--app-fg)]'
+                        ? 'bg-[var(--hp-primary-subtle)] font-medium'
+                        : 'hover:bg-[var(--app-subtle-bg)]'
                 }`}
-                style={{ paddingLeft: indent }}
+                style={{ paddingLeft: indent, color: 'var(--app-fg)' }}
                 onClick={() => props.onSelect(props.path)}
             >
                 <span
@@ -177,7 +186,10 @@ function DirectoryPickerNode(props: {
                         <div className="h-3 w-32 rounded bg-[var(--app-subtle-bg)] animate-pulse" />
                     </div>
                 ) : error ? (
-                    <div className="px-2 py-1.5 text-xs text-amber-500" style={{ paddingLeft: 8 + childDepth * 16 }}>
+                    <div className="px-2 py-2 text-xs rounded-lg" style={{
+                        paddingLeft: 8 + childDepth * 16,
+                        color: 'var(--hp-warning)'
+                    }}>
                         {formatDirectoryError(error, t)}
                     </div>
                 ) : (
@@ -269,17 +281,17 @@ export function FileMoveDialog({
                 <DialogHeader>
                     <DialogTitle>{mode === 'move' ? t('file.move.title') : t('file.copy.title')}</DialogTitle>
                 </DialogHeader>
-                <div className="space-y-3">
-                    <div className="text-xs" style={{ color: 'var(--hp-text-tertiary)' }}>
+                <div className="space-y-3 mt-3">
+                    <div className="text-xs px-1" style={{ color: 'var(--app-hint)' }}>
                         {t('file.move.source')}: <span className="font-mono">{sourcePath}</span>
                     </div>
 
-                    <div className="text-xs font-medium" style={{ color: 'var(--hp-text-tertiary)' }}>
+                    <div className="text-xs font-medium px-1" style={{ color: 'var(--app-hint)' }}>
                         {t('file.move.selectDestination')}
                     </div>
 
-                    <div className="max-h-56 overflow-y-auto rounded-md border p-1.5"
-                        style={{ borderColor: 'var(--app-border)' }}>
+                    <div className="max-h-48 overflow-y-auto rounded-lg border p-1"
+                        style={{ borderColor: 'var(--app-border)', background: 'var(--app-secondary-bg)' }}>
                         <DirectoryPickerNode
                             api={api}
                             sessionId={sessionId}
@@ -293,44 +305,46 @@ export function FileMoveDialog({
                         />
                     </div>
 
-                    {selectedDir !== '' && (
-                        <div className="text-xs" style={{ color: 'var(--hp-text-tertiary)' }}>
-                            {t('file.move.selectedPath')}: <span className="font-mono">{selectedDir}</span>
-                        </div>
-                    )}
-
                     <input
                         type="text"
                         value={destPath}
                         onChange={(e) => setDestPath(e.target.value)}
                         placeholder={t('file.move.destinationPlaceholder')}
                         disabled={submitting}
-                        className="w-full rounded-md border bg-transparent px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2"
+                        className="w-full rounded-lg border px-3 py-2.5 text-sm font-mono transition-colors focus:outline-none focus:ring-2"
                         style={{
-                            borderColor: 'var(--hp-border)',
-                            color: 'var(--hp-text-primary)',
-                        }}
+                            borderColor: 'var(--app-border)',
+                            background: 'var(--app-secondary-bg)',
+                            color: 'var(--app-fg)',
+                            minHeight: 44,
+                            '--tw-ring-color': 'var(--hp-primary)',
+                        } as React.CSSProperties}
                         onKeyDown={(e) => {
                             if (e.key === 'Enter' && destPath.trim() && !submitting) {
                                 handleSubmit()
                             }
                         }}
                     />
-                    <div className="text-xs" style={{ color: 'var(--hp-text-tertiary)' }}>
+                    <div className="text-xs px-1" style={{ color: 'var(--app-hint)' }}>
                         {t('file.move.pathHint')}
                     </div>
                     {error && (
-                        <p className="text-sm" style={{ color: 'var(--hp-danger)' }}>{error}</p>
+                        <p className="text-sm rounded-lg px-3 py-2" style={{
+                            color: 'var(--hp-danger)',
+                            background: 'var(--hp-danger-subtle)'
+                        }}>{error}</p>
                     )}
-                    <div className="flex justify-end gap-2">
-                        <Button variant="outline" onClick={onClose} disabled={submitting}>
-                            {t('button.cancel')}
-                        </Button>
-                        <Button onClick={handleSubmit} disabled={!destPath.trim() || submitting}>
-                            {mode === 'move' ? t('file.move.submit') : t('file.copy.submit')}
-                        </Button>
-                    </div>
                 </div>
+                <DialogFooter>
+                    <Button variant="outline" onClick={onClose} disabled={submitting}
+                        className="min-h-[44px] flex-1 sm:flex-none">
+                        {t('button.cancel')}
+                    </Button>
+                    <Button onClick={handleSubmit} disabled={!destPath.trim() || submitting}
+                        className="min-h-[44px] flex-1 sm:flex-none">
+                        {mode === 'move' ? t('file.move.submit') : t('file.copy.submit')}
+                    </Button>
+                </DialogFooter>
             </DialogContent>
         </Dialog>
     )

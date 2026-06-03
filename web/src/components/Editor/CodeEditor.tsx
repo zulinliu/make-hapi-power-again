@@ -37,18 +37,37 @@ export function CodeEditor({ value, language, filePath, readOnly, onChange, onSa
     const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
     const [dirty, setDirty] = useState(false)
     const [saving, setSaving] = useState(false)
+    const valueRef = useRef(value)
+    valueRef.current = value
 
     const lang = language ?? (filePath ? resolveLanguage(filePath) : undefined)
 
     const handleMount: OnMount = useCallback((editorInstance) => {
         editorRef.current = editorInstance
-    }, [])
+        // Bind Ctrl+S / Cmd+S to save (KeyMod.CtrlCmd=2048, KeyCode.KeyS=49)
+        editorInstance.addCommand(2048 | 49, () => {
+            const current = editorRef.current?.getValue() ?? ''
+            onSave?.(current)
+        })
+    }, [onSave])
 
     const handleChange = useCallback((newValue: string | undefined) => {
         const v = newValue ?? ''
-        if (v !== value) setDirty(true)
+        if (v !== valueRef.current) setDirty(true)
         onChange?.(v)
-    }, [value, onChange])
+    }, [onChange])
+
+    const handleSave = useCallback(async () => {
+        if (!onSave || !dirty || saving) return
+        const current = editorRef.current?.getValue() ?? ''
+        setSaving(true)
+        try {
+            await onSave(current)
+            setDirty(false)
+        } finally {
+            setSaving(false)
+        }
+    }, [onSave, dirty, saving])
 
     return (
         <div className="relative h-full">
@@ -59,9 +78,14 @@ export function CodeEditor({ value, language, filePath, readOnly, onChange, onSa
                             Saved
                         </span>
                     ) : dirty ? (
-                        <span className="px-2 py-0.5 rounded" style={{ background: 'var(--hp-warning-subtle)', color: 'var(--hp-warning)' }}>
-                            Modified
-                        </span>
+                        <button
+                            type="button"
+                            onClick={handleSave}
+                            className="px-2 py-0.5 rounded cursor-pointer hover:opacity-80 transition-opacity"
+                            style={{ background: 'var(--hp-warning-subtle)', color: 'var(--hp-warning)' }}
+                        >
+                            Modified · Save
+                        </button>
                     ) : null}
                 </div>
             )}
@@ -72,6 +96,11 @@ export function CodeEditor({ value, language, filePath, readOnly, onChange, onSa
                 onChange={handleChange}
                 onMount={handleMount}
                 theme="vs-dark"
+                loading={
+                    <div className="flex items-center justify-center h-full" style={{ background: '#1e1e1e', color: '#888' }}>
+                        <span className="text-sm">Loading editor...</span>
+                    </div>
+                }
                 options={{
                     readOnly,
                     minimap: { enabled: false },
@@ -85,6 +114,10 @@ export function CodeEditor({ value, language, filePath, readOnly, onChange, onSa
                     cursorBlinking: 'smooth',
                     bracketPairColorization: { enabled: true },
                     automaticLayout: true,
+                    scrollbar: {
+                        verticalScrollbarSize: 8,
+                        horizontalScrollbarSize: 8,
+                    },
                 }}
             />
         </div>

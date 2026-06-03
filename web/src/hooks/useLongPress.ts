@@ -26,6 +26,7 @@ export function useLongPress(options: UseLongPressOptions): UseLongPressHandlers
     const isLongPressRef = useRef(false)
     const touchMoved = useRef(false)
     const pressPointRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 })
+    const isTouchingRef = useRef(false)
 
     const clearTimer = useCallback(() => {
         if (timerRef.current) {
@@ -44,6 +45,11 @@ export function useLongPress(options: UseLongPressOptions): UseLongPressHandlers
 
         timerRef.current = setTimeout(() => {
             isLongPressRef.current = true
+            // Clear any text selection triggered by iOS during the long press hold
+            const selection = window.getSelection()
+            if (selection && selection.toString().length > 0) {
+                selection.removeAllRanges()
+            }
             onLongPress(pressPointRef.current)
         }, threshold)
     }, [disabled, clearTimer, onLongPress, threshold])
@@ -60,19 +66,24 @@ export function useLongPress(options: UseLongPressOptions): UseLongPressHandlers
     }, [clearTimer, onClick])
 
     const onMouseDown = useCallback<React.MouseEventHandler>((e) => {
+        // Ignore mouse events after a touch interaction to prevent double-firing
+        if (isTouchingRef.current) return
         if (e.button !== 0) return
         startTimer(e.clientX, e.clientY)
     }, [startTimer])
 
     const onMouseUp = useCallback<React.MouseEventHandler>(() => {
+        if (isTouchingRef.current) return
         handleEnd(!isLongPressRef.current)
     }, [handleEnd])
 
     const onMouseLeave = useCallback<React.MouseEventHandler>(() => {
+        if (isTouchingRef.current) return
         handleEnd(false)
     }, [handleEnd])
 
     const onTouchStart = useCallback<React.TouchEventHandler>((e) => {
+        isTouchingRef.current = true
         const touch = e.touches[0]
         startTimer(touch.clientX, touch.clientY)
     }, [startTimer])
@@ -82,6 +93,8 @@ export function useLongPress(options: UseLongPressOptions): UseLongPressHandlers
             e.preventDefault()
         }
         handleEnd(!isLongPressRef.current)
+        // Reset after a short delay to allow any synthetic mouse events to be ignored
+        setTimeout(() => { isTouchingRef.current = false }, 400)
     }, [handleEnd])
 
     const onTouchMove = useCallback<React.TouchEventHandler>((e) => {
