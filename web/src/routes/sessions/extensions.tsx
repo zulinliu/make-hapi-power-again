@@ -5,6 +5,7 @@ import { useAppContext } from '@/lib/app-context'
 import { useSession } from '@/hooks/queries/useSession'
 import { queryKeys } from '@/lib/query-keys'
 import { useTranslation } from '@/lib/use-translation'
+import { SubPageLayout } from '@/components/ui/SubPageLayout'
 
 function BackIcon() {
     return (
@@ -205,319 +206,305 @@ export default function ExtensionsPage() {
     }, [installedSkills, installedFilterTrigger])
 
     return (
-        <div className="flex h-full min-h-0 flex-col">
-            {/* Tabs */}
-            <div className="flex border-b border-[var(--app-border)] bg-[var(--app-bg)]">
-                {(['skills', 'plugins'] as Tab[]).map(tab => (
-                    <button
-                        key={tab}
-                        type="button"
-                        onClick={() => setActiveTab(tab)}
-                        className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
-                            activeTab === tab
-                                ? 'text-[var(--app-fg)] border-b-2 border-[var(--app-link)]'
-                                : 'text-[var(--app-hint)] hover:text-[var(--app-fg)]'
-                        }`}
-                    >
-                        {tab === 'skills' ? t('extensions.skills') : t('extensions.plugins')}
-                    </button>
-                ))}
-            </div>
+        <SubPageLayout
+            tabs={[
+                { id: 'skills', label: t('extensions.skills') },
+                { id: 'plugins', label: t('extensions.plugins') },
+            ]}
+            activeTab={activeTab}
+            onTabChange={(id) => setActiveTab(id as Tab)}
+        >
+            {error && (
+                <div className="mx-3 mt-2 rounded-lg px-3 py-2 text-sm text-[var(--app-danger)] bg-[var(--app-badge-error-bg)]">
+                    {error}
+                </div>
+            )}
+            {successMsg && (
+                <div className="mx-3 mt-2 rounded-lg px-3 py-2 text-sm text-[var(--app-success)] bg-[var(--app-success-subtle)]">
+                    {successMsg}
+                </div>
+            )}
 
-            {/* Content */}
-            <div className="flex-1 min-h-0 overflow-y-auto app-scroll-y">
-                {error && (
-                    <div className="mx-3 mt-2 rounded-lg px-3 py-2 text-sm text-[var(--app-danger)] bg-[var(--app-badge-error-bg)]">
-                        {error}
+            {activeTab === 'skills' && (
+                <div className="flex flex-col h-full">
+                    {/* Skill sub-tabs */}
+                    <div className="flex border-b border-[var(--app-border)] bg-[var(--app-bg)]">
+                        <button
+                            type="button"
+                            onClick={() => setSkillSubTab('installed')}
+                            className={`flex-1 px-4 py-2 text-xs font-medium transition-colors ${
+                                skillSubTab === 'installed'
+                                    ? 'text-[var(--app-fg)] border-b-2 border-[var(--app-link)]'
+                                    : 'text-[var(--app-hint)] hover:text-[var(--app-fg)]'
+                            }`}
+                        >
+                            {t('extensions.installedSkills')} ({installedSkills.length})
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setSkillSubTab('online')}
+                            className={`flex-1 px-4 py-2 text-xs font-medium transition-colors ${
+                                skillSubTab === 'online'
+                                    ? 'text-[var(--app-fg)] border-b-2 border-[var(--app-link)]'
+                                    : 'text-[var(--app-hint)] hover:text-[var(--app-fg)]'
+                            }`}
+                        >
+                            <span className="inline-flex items-center gap-1.5">
+                                <CloudDownloadIcon />
+                                {t('extensions.onlineInstall')}
+                            </span>
+                        </button>
                     </div>
-                )}
-                {successMsg && (
-                    <div className="mx-3 mt-2 rounded-lg px-3 py-2 text-sm text-[var(--app-success)] bg-[var(--app-success-subtle)]">
-                        {successMsg}
-                    </div>
-                )}
 
-                {activeTab === 'skills' && (
-                    <div className="flex flex-col h-full">
-                        {/* Skill sub-tabs */}
-                        <div className="flex border-b border-[var(--app-border)] bg-[var(--app-bg)]">
-                            <button
-                                type="button"
-                                onClick={() => setSkillSubTab('installed')}
-                                className={`flex-1 px-4 py-2 text-xs font-medium transition-colors ${
-                                    skillSubTab === 'installed'
-                                        ? 'text-[var(--app-fg)] border-b-2 border-[var(--app-link)]'
-                                        : 'text-[var(--app-hint)] hover:text-[var(--app-fg)]'
-                                }`}
-                            >
-                                {t('extensions.installedSkills')} ({installedSkills.length})
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setSkillSubTab('online')}
-                                className={`flex-1 px-4 py-2 text-xs font-medium transition-colors ${
-                                    skillSubTab === 'online'
-                                        ? 'text-[var(--app-fg)] border-b-2 border-[var(--app-link)]'
-                                        : 'text-[var(--app-hint)] hover:text-[var(--app-fg)]'
-                                }`}
-                            >
-                                <span className="inline-flex items-center gap-1.5">
-                                    <CloudDownloadIcon />
-                                    {t('extensions.onlineInstall')}
-                                </span>
-                            </button>
-                        </div>
-
-                        {/* Installed skills tab */}
-                        {skillSubTab === 'installed' && (
-                            <div className="p-3 space-y-2">
-                                {installedSkills.length > 0 && (
-                                    <div className="flex gap-2">
-                                        <div className="relative flex-1">
-                                            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--app-hint)]">
-                                                <SearchIcon />
-                                            </div>
-                                            <input
-                                                type="text"
-                                                value={installedFilter}
-                                                onChange={e => setInstalledFilter(e.target.value)}
-                                                placeholder={t('extensions.filterInstalled')}
-                                                enterKeyHint="search"
-                                                className="w-full rounded-lg border border-[var(--app-border)] bg-[var(--app-secondary-bg)] py-2 pl-9 pr-3 text-sm text-[var(--app-fg)] placeholder:text-[var(--app-hint)] focus:outline-none focus:ring-1 focus:ring-[var(--app-link)]"
-                                                onKeyDown={e => {
-                                                    if (e.key === 'Enter') setInstalledFilterTrigger(installedFilter.trim())
-                                                }}
-                                            />
+                    {/* Installed skills tab */}
+                    {skillSubTab === 'installed' && (
+                        <div className="p-3 space-y-2">
+                            {installedSkills.length > 0 && (
+                                <div className="flex gap-2">
+                                    <div className="relative flex-1">
+                                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--app-hint)]">
+                                            <SearchIcon />
                                         </div>
+                                        <input
+                                            type="text"
+                                            value={installedFilter}
+                                            onChange={e => setInstalledFilter(e.target.value)}
+                                            placeholder={t('extensions.filterInstalled')}
+                                            enterKeyHint="search"
+                                            className="w-full rounded-lg border border-[var(--app-border)] bg-[var(--app-secondary-bg)] py-2 pl-9 pr-3 text-sm text-[var(--app-fg)] placeholder:text-[var(--app-hint)] focus:outline-none focus:ring-1 focus:ring-[var(--app-link)]"
+                                            onKeyDown={e => {
+                                                if (e.key === 'Enter') setInstalledFilterTrigger(installedFilter.trim())
+                                            }}
+                                        />
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => setInstalledFilterTrigger(installedFilter.trim())}
+                                        className="shrink-0 rounded-lg bg-[var(--app-link)] px-3 py-2 text-sm text-white hover:opacity-90 disabled:opacity-50 transition-opacity"
+                                    >
+                                        {t('extensions.search')}
+                                    </button>
+                                </div>
+                            )}
+                            {filteredInstalled.length === 0 ? (
+                                installedSkills.length === 0 ? (
+                                    <div className="py-12 text-center">
+                                        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[var(--app-secondary-bg)] mb-3">
+                                            <PuzzleIcon />
+                                        </div>
+                                        <div className="text-sm text-[var(--app-hint)]">{t('extensions.noSkills')}</div>
                                         <button
                                             type="button"
-                                            onClick={() => setInstalledFilterTrigger(installedFilter.trim())}
-                                            className="shrink-0 rounded-lg bg-[var(--app-link)] px-3 py-2 text-sm text-white hover:opacity-90 disabled:opacity-50 transition-opacity"
+                                            onClick={() => setSkillSubTab('online')}
+                                            className="mt-3 text-sm text-[var(--app-link)] hover:underline"
                                         >
-                                            {t('extensions.search')}
+                                            {t('extensions.goOnlineInstall')}
                                         </button>
                                     </div>
-                                )}
-                                {filteredInstalled.length === 0 ? (
-                                    installedSkills.length === 0 ? (
-                                        <div className="py-12 text-center">
-                                            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[var(--app-secondary-bg)] mb-3">
-                                                <PuzzleIcon />
+                                ) : (
+                                    <div className="py-6 text-center text-sm text-[var(--app-hint)]">
+                                        {t('extensions.noFilterResults')}
+                                    </div>
+                                )
+                            ) : (
+                                <div className="space-y-1">
+                                    {filteredInstalled.map(skill => (
+                                        <div
+                                            key={skill.name}
+                                            className="flex items-center justify-between rounded-lg border border-[var(--app-border)] bg-[var(--app-secondary-bg)] px-3 py-2.5"
+                                        >
+                                            <div className="min-w-0 flex-1">
+                                                <div className="text-sm font-medium text-[var(--app-fg)] truncate">{skill.name}</div>
+                                                {skill.description && (
+                                                    <div className="text-xs text-[var(--app-hint)] truncate mt-0.5">{skill.description}</div>
+                                                )}
                                             </div>
-                                            <div className="text-sm text-[var(--app-hint)]">{t('extensions.noSkills')}</div>
                                             <button
                                                 type="button"
-                                                onClick={() => setSkillSubTab('online')}
-                                                className="mt-3 text-sm text-[var(--app-link)] hover:underline"
+                                                onClick={() => handleUninstallSkill(skill.name)}
+                                                disabled={installing === skill.name}
+                                                className="ml-2 shrink-0 inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs transition-colors disabled:opacity-50 text-[var(--app-danger)]"
                                             >
-                                                {t('extensions.goOnlineInstall')}
+                                                {installing === skill.name ? '...' : <><TrashIcon /> {t('extensions.remove')}</>}
                                             </button>
                                         </div>
-                                    ) : (
-                                        <div className="py-6 text-center text-sm text-[var(--app-hint)]">
-                                            {t('extensions.noFilterResults')}
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Online install tab */}
+                    {skillSubTab === 'online' && (
+                        <div className="p-3 space-y-3">
+                            <div className="rounded-lg border border-[var(--app-border)] bg-[var(--app-secondary-bg)] p-3 space-y-2">
+                                <div className="flex gap-2">
+                                    <div className="relative flex-1">
+                                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--app-hint)]">
+                                            <SearchIcon />
                                         </div>
-                                    )
-                                ) : (
-                                    <div className="space-y-1">
-                                        {filteredInstalled.map(skill => (
-                                            <div
-                                                key={skill.name}
-                                                className="flex items-center justify-between rounded-lg border border-[var(--app-border)] bg-[var(--app-secondary-bg)] px-3 py-2.5"
-                                            >
-                                                <div className="min-w-0 flex-1">
-                                                    <div className="text-sm font-medium text-[var(--app-fg)] truncate">{skill.name}</div>
-                                                    {skill.description && (
-                                                        <div className="text-xs text-[var(--app-hint)] truncate mt-0.5">{skill.description}</div>
-                                                    )}
-                                                </div>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => handleUninstallSkill(skill.name)}
-                                                    disabled={installing === skill.name}
-                                                    className="ml-2 shrink-0 inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs transition-colors disabled:opacity-50 text-[var(--app-danger)]"
-                                                >
-                                                    {installing === skill.name ? '...' : <><TrashIcon /> {t('extensions.remove')}</>}
-                                                </button>
-                                            </div>
-                                        ))}
+                                        <input
+                                            type="text"
+                                            value={skillQuery}
+                                            onChange={e => setSkillQuery(e.target.value)}
+                                            placeholder={t('extensions.searchOnlinePlaceholder')}
+                                            enterKeyHint="search"
+                                            className="w-full rounded-lg border border-[var(--app-border)] bg-[var(--app-bg)] py-2 pl-9 pr-3 text-sm text-[var(--app-fg)] placeholder:text-[var(--app-hint)] focus:outline-none focus:ring-1 focus:ring-[var(--app-link)]"
+                                            onKeyDown={e => {
+                                                if (e.key === 'Enter' && skillQuery.trim().length >= 2) {
+                                                    setSkillSearchTrigger(skillQuery.trim())
+                                                }
+                                            }}
+                                        />
+                                    </div>
+                                    <button
+                                        type="button"
+                                        disabled={skillQuery.trim().length < 2 || searchLoading}
+                                        onClick={() => setSkillSearchTrigger(skillQuery.trim())}
+                                        className="shrink-0 rounded-lg bg-[var(--app-link)] px-3 py-2 text-sm text-white hover:opacity-90 disabled:opacity-50 transition-opacity"
+                                    >
+                                        {searchLoading ? '...' : t('extensions.search')}
+                                    </button>
+                                </div>
+
+                                {/* Search Results */}
+                                {skillSearchTrigger.length >= 2 && (
+                                    <div className="space-y-1 pt-1">
+                                        {searchLoading ? (
+                                            <div className="text-sm text-[var(--app-hint)] py-3 text-center">{t('extensions.searching')}</div>
+                                        ) : searchError ? (
+                                            <div className="text-sm py-3 text-center text-[var(--app-danger)]">{t('extensions.searchError')}</div>
+                                        ) : searchResults.length === 0 ? (
+                                            <div className="text-sm text-[var(--app-hint)] py-3 text-center">{t('extensions.noResults')}</div>
+                                        ) : (
+                                            <>
+                                                <div className="text-xs text-[var(--app-hint)] pb-1">{t('extensions.foundCount', { count: searchResults.length })}</div>
+                                                {searchResults.map(skill => {
+                                                    const isInstalled = installedNames.has(skill.name.toLowerCase())
+                                                    return (
+                                                        <div
+                                                            key={`${skill.repo}/${skill.name}`}
+                                                            className="flex items-center justify-between rounded-lg border border-[var(--app-border)] bg-[var(--app-bg)] px-3 py-2"
+                                                        >
+                                                            <div className="min-w-0 flex-1">
+                                                                <div className="flex items-center gap-1.5">
+                                                                    <span className="text-sm font-medium text-[var(--app-fg)] truncate">{skill.name}</span>
+                                                                    {isInstalled && (
+                                                                        <span className="shrink-0 inline-flex items-center gap-0.5 text-xs text-[var(--app-success)]">
+                                                                            <CheckIcon />
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                                <div className="text-xs text-[var(--app-hint)] truncate">{skill.repo}{skill.stars ? ` · ${(skill.stars / 1000).toFixed(skill.stars >= 1000 ? 1 : 0)}k` : ''}</div>
+                                                            </div>
+                                                            {isInstalled ? (
+                                                                <span className="ml-2 shrink-0 rounded-md px-2 py-1 text-xs text-[var(--app-success)]">
+                                                                    {t('extensions.installed')}
+                                                                </span>
+                                                            ) : (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => handleInstallSkill(skill)}
+                                                                    disabled={installing === skill.name}
+                                                                    className="ml-2 shrink-0 rounded-md bg-[var(--app-link)] px-2.5 py-1 text-xs text-white hover:opacity-90 disabled:opacity-50"
+                                                                >
+                                                                    {installing === skill.name ? '...' : t('extensions.install')}
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    )
+                                                })}
+                                            </>
+                                        )}
                                     </div>
                                 )}
                             </div>
-                        )}
-
-                        {/* Online install tab */}
-                        {skillSubTab === 'online' && (
-                            <div className="p-3 space-y-3">
-                                <div className="rounded-lg border border-[var(--app-border)] bg-[var(--app-secondary-bg)] p-3 space-y-2">
-                                    <div className="flex gap-2">
-                                        <div className="relative flex-1">
-                                            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--app-hint)]">
-                                                <SearchIcon />
-                                            </div>
-                                            <input
-                                                type="text"
-                                                value={skillQuery}
-                                                onChange={e => setSkillQuery(e.target.value)}
-                                                placeholder={t('extensions.searchOnlinePlaceholder')}
-                                                enterKeyHint="search"
-                                                className="w-full rounded-lg border border-[var(--app-border)] bg-[var(--app-bg)] py-2 pl-9 pr-3 text-sm text-[var(--app-fg)] placeholder:text-[var(--app-hint)] focus:outline-none focus:ring-1 focus:ring-[var(--app-link)]"
-                                                onKeyDown={e => {
-                                                    if (e.key === 'Enter' && skillQuery.trim().length >= 2) {
-                                                        setSkillSearchTrigger(skillQuery.trim())
-                                                    }
-                                                }}
-                                            />
-                                        </div>
-                                        <button
-                                            type="button"
-                                            disabled={skillQuery.trim().length < 2 || searchLoading}
-                                            onClick={() => setSkillSearchTrigger(skillQuery.trim())}
-                                            className="shrink-0 rounded-lg bg-[var(--app-link)] px-3 py-2 text-sm text-white hover:opacity-90 disabled:opacity-50 transition-opacity"
-                                        >
-                                            {searchLoading ? '...' : t('extensions.search')}
-                                        </button>
-                                    </div>
-
-                                    {/* Search Results */}
-                                    {skillSearchTrigger.length >= 2 && (
-                                        <div className="space-y-1 pt-1">
-                                            {searchLoading ? (
-                                                <div className="text-sm text-[var(--app-hint)] py-3 text-center">{t('extensions.searching')}</div>
-                                            ) : searchError ? (
-                                                <div className="text-sm py-3 text-center text-[var(--app-danger)]">{t('extensions.searchError')}</div>
-                                            ) : searchResults.length === 0 ? (
-                                                <div className="text-sm text-[var(--app-hint)] py-3 text-center">{t('extensions.noResults')}</div>
-                                            ) : (
-                                                <>
-                                                    <div className="text-xs text-[var(--app-hint)] pb-1">{t('extensions.foundCount', { count: searchResults.length })}</div>
-                                                    {searchResults.map(skill => {
-                                                        const isInstalled = installedNames.has(skill.name.toLowerCase())
-                                                        return (
-                                                            <div
-                                                                key={`${skill.repo}/${skill.name}`}
-                                                                className="flex items-center justify-between rounded-lg border border-[var(--app-border)] bg-[var(--app-bg)] px-3 py-2"
-                                                            >
-                                                                <div className="min-w-0 flex-1">
-                                                                    <div className="flex items-center gap-1.5">
-                                                                        <span className="text-sm font-medium text-[var(--app-fg)] truncate">{skill.name}</span>
-                                                                        {isInstalled && (
-                                                                            <span className="shrink-0 inline-flex items-center gap-0.5 text-xs text-[var(--app-success)]">
-                                                                                <CheckIcon />
-                                                                            </span>
-                                                                        )}
-                                                                    </div>
-                                                                    <div className="text-xs text-[var(--app-hint)] truncate">{skill.repo}{skill.stars ? ` · ${(skill.stars / 1000).toFixed(skill.stars >= 1000 ? 1 : 0)}k` : ''}</div>
-                                                                </div>
-                                                                {isInstalled ? (
-                                                                    <span className="ml-2 shrink-0 rounded-md px-2 py-1 text-xs text-[var(--app-success)]">
-                                                                        {t('extensions.installed')}
-                                                                    </span>
-                                                                ) : (
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => handleInstallSkill(skill)}
-                                                                        disabled={installing === skill.name}
-                                                                        className="ml-2 shrink-0 rounded-md bg-[var(--app-link)] px-2.5 py-1 text-xs text-white hover:opacity-90 disabled:opacity-50"
-                                                                    >
-                                                                        {installing === skill.name ? '...' : t('extensions.install')}
-                                                                    </button>
-                                                                )}
-                                                            </div>
-                                                        )
-                                                    })}
-                                                </>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {activeTab === 'plugins' && (
-                    <div className="p-3 space-y-3">
-                        {/* Install Plugin Form */}
-                        <div className="rounded-lg border border-[var(--app-border)] bg-[var(--app-secondary-bg)] p-3 space-y-2">
-                            <h3 className="text-xs font-semibold text-[var(--app-hint)] uppercase tracking-wider">
-                                {t('extensions.installPlugin')}
-                            </h3>
-                            <input
-                                type="text"
-                                value={pluginIdInput}
-                                onChange={e => setPluginIdInput(e.target.value)}
-                                placeholder={t('extensions.pluginId')}
-                                className="w-full rounded-md border border-[var(--app-border)] bg-[var(--app-bg)] py-1.5 px-3 text-sm text-[var(--app-fg)] placeholder:text-[var(--app-hint)] focus:outline-none focus:ring-1 focus:ring-[var(--app-link)]"
-                            />
-                            <input
-                                type="text"
-                                value={pluginSourceInput}
-                                onChange={e => setPluginSourceInput(e.target.value)}
-                                placeholder={t('extensions.pluginSource')}
-                                className="w-full rounded-md border border-[var(--app-border)] bg-[var(--app-bg)] py-1.5 px-3 text-sm text-[var(--app-fg)] placeholder:text-[var(--app-hint)] focus:outline-none focus:ring-1 focus:ring-[var(--app-link)]"
-                            />
-                            <button
-                                type="button"
-                                onClick={handleInstallPlugin}
-                                disabled={!pluginIdInput.trim() || installing === pluginIdInput}
-                                className="rounded-md bg-[var(--app-link)] px-3 py-1.5 text-sm text-white hover:opacity-90 disabled:opacity-50"
-                            >
-                                {installing === pluginIdInput ? t('extensions.installing') : t('extensions.pluginInstallBtn')}
-                            </button>
                         </div>
+                    )}
+                </div>
+            )}
 
-                        {pluginsLoading ? (
-                            <div className="text-sm text-[var(--app-hint)] py-4 text-center">{t('extensions.loading')}</div>
-                        ) : plugins.length === 0 ? (
-                            <div className="py-8 text-center">
-                                <PuzzleIcon />
-                                <div className="mt-2 text-sm text-[var(--app-hint)]">{t('extensions.noPlugins')}</div>
-                            </div>
-                        ) : (
-                            plugins.map(plugin => (
-                                <div
-                                    key={plugin.id}
-                                    className="rounded-lg border border-[var(--app-border)] bg-[var(--app-secondary-bg)] px-3 py-2"
-                                >
-                                    <div className="flex items-center justify-between">
-                                        <div className="min-w-0 flex-1">
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-sm font-medium text-[var(--app-fg)] truncate">{plugin.name}</span>
-                                                <span className="text-xs text-[var(--app-hint)]">v{plugin.version}</span>
-                                                <span className={`text-xs px-1.5 py-0.5 rounded-full ${
-                                                    plugin.enabled
-                                                        ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                                                        : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'
-                                                }`}>
-                                                    {plugin.enabled ? t('extensions.active') : t('extensions.inactive')}
-                                                </span>
-                                            </div>
-                                            {plugin.description && (
-                                                <div className="text-xs text-[var(--app-hint)] mt-0.5">{plugin.description}</div>
-                                            )}
-                                            {plugin.permissions.length > 0 && (
-                                                <div className="flex flex-wrap gap-1 mt-1">
-                                                    {plugin.permissions.map(p => (
-                                                        <span key={p} className="text-xs px-1.5 py-0.5 rounded bg-[var(--app-bg)] text-[var(--app-hint)]">{p}</span>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
-                                        <button
-                                            type="button"
-                                            onClick={() => handleUninstallPlugin(plugin.id)}
-                                            className="ml-2 shrink-0 rounded-md px-2 py-1 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20"
-                                        >
-                                            {t('extensions.remove')}
-                                        </button>
-                                    </div>
-                                </div>
-                            ))
-                        )}
+            {activeTab === 'plugins' && (
+                <div className="p-3 space-y-3">
+                    {/* Install Plugin Form */}
+                    <div className="rounded-lg border border-[var(--app-border)] bg-[var(--app-secondary-bg)] p-3 space-y-2">
+                        <h3 className="text-xs font-semibold text-[var(--app-hint)] uppercase tracking-wider">
+                            {t('extensions.installPlugin')}
+                        </h3>
+                        <input
+                            type="text"
+                            value={pluginIdInput}
+                            onChange={e => setPluginIdInput(e.target.value)}
+                            placeholder={t('extensions.pluginId')}
+                            className="w-full rounded-md border border-[var(--app-border)] bg-[var(--app-bg)] py-1.5 px-3 text-sm text-[var(--app-fg)] placeholder:text-[var(--app-hint)] focus:outline-none focus:ring-1 focus:ring-[var(--app-link)]"
+                        />
+                        <input
+                            type="text"
+                            value={pluginSourceInput}
+                            onChange={e => setPluginSourceInput(e.target.value)}
+                            placeholder={t('extensions.pluginSource')}
+                            className="w-full rounded-md border border-[var(--app-border)] bg-[var(--app-bg)] py-1.5 px-3 text-sm text-[var(--app-fg)] placeholder:text-[var(--app-hint)] focus:outline-none focus:ring-1 focus:ring-[var(--app-link)]"
+                        />
+                        <button
+                            type="button"
+                            onClick={handleInstallPlugin}
+                            disabled={!pluginIdInput.trim() || installing === pluginIdInput}
+                            className="rounded-md bg-[var(--app-link)] px-3 py-1.5 text-sm text-white hover:opacity-90 disabled:opacity-50"
+                        >
+                            {installing === pluginIdInput ? t('extensions.installing') : t('extensions.pluginInstallBtn')}
+                        </button>
                     </div>
-                )}
-            </div>
-        </div>
+
+                    {pluginsLoading ? (
+                        <div className="text-sm text-[var(--app-hint)] py-4 text-center">{t('extensions.loading')}</div>
+                    ) : plugins.length === 0 ? (
+                        <div className="py-8 text-center">
+                            <PuzzleIcon />
+                            <div className="mt-2 text-sm text-[var(--app-hint)]">{t('extensions.noPlugins')}</div>
+                        </div>
+                    ) : (
+                        plugins.map(plugin => (
+                            <div
+                                key={plugin.id}
+                                className="rounded-lg border border-[var(--app-border)] bg-[var(--app-secondary-bg)] px-3 py-2"
+                            >
+                                <div className="flex items-center justify-between">
+                                    <div className="min-w-0 flex-1">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-sm font-medium text-[var(--app-fg)] truncate">{plugin.name}</span>
+                                            <span className="text-xs text-[var(--app-hint)]">v{plugin.version}</span>
+                                            <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+                                                plugin.enabled
+                                                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                                                    : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'
+                                            }`}>
+                                                {plugin.enabled ? t('extensions.active') : t('extensions.inactive')}
+                                            </span>
+                                        </div>
+                                        {plugin.description && (
+                                            <div className="text-xs text-[var(--app-hint)] mt-0.5">{plugin.description}</div>
+                                        )}
+                                        {plugin.permissions.length > 0 && (
+                                            <div className="flex flex-wrap gap-1 mt-1">
+                                                {plugin.permissions.map(p => (
+                                                    <span key={p} className="text-xs px-1.5 py-0.5 rounded bg-[var(--app-bg)] text-[var(--app-hint)]">{p}</span>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleUninstallPlugin(plugin.id)}
+                                        className="ml-2 shrink-0 rounded-md px-2 py-1 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20"
+                                    >
+                                        {t('extensions.remove')}
+                                    </button>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+            )}
+        </SubPageLayout>
     )
 }
