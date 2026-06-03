@@ -267,6 +267,7 @@ export default function FilesPage() {
     const [moveDialog, setMoveDialog] = useState<{ isOpen: boolean; path: string; mode: 'move' | 'copy' }>({ isOpen: false, path: '', mode: 'move' })
     const [newFileDialog, setNewFileDialog] = useState<{ isOpen: boolean; basePath: string }>({ isOpen: false, basePath: '' })
     const [newFolderDialog, setNewFolderDialog] = useState<{ isOpen: boolean; basePath: string }>({ isOpen: false, basePath: '' })
+    const [uploadBasePath, setUploadBasePath] = useState('')
     const [deleting, setDeleting] = useState(false)
     const uploadRef = useRef<HTMLInputElement>(null)
 
@@ -369,7 +370,8 @@ export default function FilesPage() {
             })
             const base64 = content.split(',')[1]
             if (!base64) throw new Error('Failed to read file')
-            const res = await api.writeSessionFile(sessionId, file.name, base64, undefined, true)
+            const destPath = uploadBasePath ? `${uploadBasePath}/${file.name}` : file.name
+            const res = await api.writeSessionFile(sessionId, destPath, base64, undefined, true)
             if (!res.success) throw new Error(res.error || t('file.upload.error'))
             addToast({ title: t('file.upload.success'), body: file.name })
             refreshDirectory()
@@ -378,7 +380,8 @@ export default function FilesPage() {
             addToast({ title: t('file.upload.error'), body: err instanceof Error ? err.message : '' })
         }
         e.target.value = ''
-    }, [api, sessionId, addToast, t, refreshDirectory, refetchGit])
+        setUploadBasePath('')
+    }, [api, sessionId, addToast, t, refreshDirectory, refetchGit, uploadBasePath])
 
     const handleContextMenu = useCallback((path: string, type: 'file' | 'directory', point: { x: number; y: number }) => {
         setContextMenu({ ...point, path, type })
@@ -400,6 +403,14 @@ export default function FilesPage() {
                 label: t('file.context.newFolder'),
                 icon: '+',
                 onClick: () => setNewFolderDialog({ isOpen: true, basePath: contextMenu.path }),
+            })
+            items.push({
+                label: t('file.context.uploadHere'),
+                icon: '↑',
+                onClick: () => {
+                    setUploadBasePath(contextMenu.path)
+                    setTimeout(() => uploadRef.current?.click(), 0)
+                },
             })
         }
 

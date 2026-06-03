@@ -657,6 +657,9 @@ export default {
   'file.move.source': 'Source',
   'file.move.destinationPlaceholder': 'Enter destination path',
   'file.move.pathHint': 'Edit the full path to move or rename. Change the directory part to move, or the filename to rename.',
+  'file.move.selectDestination': 'Select destination directory:',
+  'file.move.selectedPath': 'Selected:',
+  'file.move.rootLabel': 'Root',
 
   'file.copy.title': 'Copy',
   'file.copy.submit': 'Copy',
@@ -711,6 +714,7 @@ export default {
   'file.page.download': 'Download file',
   'file.context.download': 'Download',
   'file.context.upload': 'Upload file',
+  'file.context.uploadHere': 'Upload Here',
   'file.upload.success': 'File uploaded successfully',
   'file.upload.error': 'Upload failed',
   'file.upload.tooLarge': 'File is too large (max 5MB)',

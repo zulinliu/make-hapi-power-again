@@ -659,6 +659,9 @@ export default {
   'file.move.source': '源路径',
   'file.move.destinationPlaceholder': '输入目标路径',
   'file.move.pathHint': '编辑完整路径来移动或重命名。修改目录部分可移动，修改文件名可重命名。',
+  'file.move.selectDestination': '选择目标目录：',
+  'file.move.selectedPath': '已选择：',
+  'file.move.rootLabel': '根目录',
 
   'file.copy.title': '复制',
   'file.copy.submit': '复制',
@@ -713,6 +716,7 @@ export default {
   'file.page.download': '下载文件',
   'file.context.download': '下载',
   'file.context.upload': '上传文件',
+  'file.context.uploadHere': '上传到此处',
   'file.upload.success': '文件上传成功',
   'file.upload.error': '上传失败',
   'file.upload.tooLarge': '文件过大（最大 5MB）',
