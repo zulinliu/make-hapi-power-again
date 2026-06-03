@@ -16,6 +16,7 @@ export function GitBranchManager({ sessionId }: { sessionId: string }) {
   const [loading, setLoading] = useState(false)
   const [newBranchName, setNewBranchName] = useState('')
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const loadBranches = useCallback(async () => {
@@ -70,6 +71,7 @@ export function GitBranchManager({ sessionId }: { sessionId: string }) {
   const handleDelete = useCallback(async (name: string) => {
     if (!api) return
     setDeleteTarget(null)
+    setDeleting(true)
     try {
       const res = await api.deleteGitBranch(sessionId, name)
       if (res.success) {
@@ -79,6 +81,8 @@ export function GitBranchManager({ sessionId }: { sessionId: string }) {
       }
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : String(e))
+    } finally {
+      setDeleting(false)
     }
   }, [api, sessionId, loadBranches, t])
 
@@ -159,7 +163,7 @@ export function GitBranchManager({ sessionId }: { sessionId: string }) {
         confirmLabel={t('git.branch.delete')}
         confirmingLabel={t('git.branch.delete')}
         onConfirm={async () => { if (deleteTarget) await handleDelete(deleteTarget) }}
-        isPending={false}
+        isPending={deleting}
         destructive
       />
     </div>

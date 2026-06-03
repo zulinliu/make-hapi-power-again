@@ -220,31 +220,33 @@ export default function ExtensionsPage() {
             {activeTab === 'skills' && (
                 <div className="flex flex-col">
                     {/* Skill sub-tabs */}
-                    <div className="flex border-b border-[var(--app-border)] bg-[var(--app-bg)]">
+                    <div className="flex border-b border-[var(--app-border)]">
                         <button
                             type="button"
                             onClick={() => setSkillSubTab('installed')}
-                            className={`flex-1 px-4 py-2 text-xs font-medium transition-colors ${
-                                skillSubTab === 'installed'
-                                    ? 'text-[var(--app-fg)] border-b-2 border-[var(--app-link)]'
-                                    : 'text-[var(--app-hint)] hover:text-[var(--app-fg)]'
-                            }`}
+                            className="relative flex-1 px-4 py-2 text-xs font-medium transition-colors"
                         >
-                            {t('extensions.installedSkills')} ({installedSkills.length})
+                            <span className={skillSubTab === 'installed' ? 'text-[var(--app-fg)]' : 'text-[var(--app-hint)] hover:text-[var(--app-fg)]'}>
+                                {t('extensions.installedSkills')} ({installedSkills.length})
+                            </span>
+                            <span className={`absolute bottom-0 left-[10%] h-0.5 w-4/5 rounded-full transition-colors duration-150 ${
+                                skillSubTab === 'installed' ? 'bg-[var(--app-link)]' : 'bg-transparent'
+                            }`} />
                         </button>
                         <button
                             type="button"
                             onClick={() => setSkillSubTab('online')}
-                            className={`flex-1 px-4 py-2 text-xs font-medium transition-colors ${
-                                skillSubTab === 'online'
-                                    ? 'text-[var(--app-fg)] border-b-2 border-[var(--app-link)]'
-                                    : 'text-[var(--app-hint)] hover:text-[var(--app-fg)]'
-                            }`}
+                            className="relative flex-1 px-4 py-2 text-xs font-medium transition-colors"
                         >
-                            <span className="inline-flex items-center gap-1.5">
-                                <CloudDownloadIcon />
-                                {t('extensions.onlineInstall')}
+                            <span className={skillSubTab === 'online' ? 'text-[var(--app-fg)]' : 'text-[var(--app-hint)] hover:text-[var(--app-fg)]'}>
+                                <span className="inline-flex items-center gap-1.5">
+                                    <CloudDownloadIcon />
+                                    {t('extensions.onlineInstall')}
+                                </span>
                             </span>
+                            <span className={`absolute bottom-0 left-[10%] h-0.5 w-4/5 rounded-full transition-colors duration-150 ${
+                                skillSubTab === 'online' ? 'bg-[var(--app-link)]' : 'bg-transparent'
+                            }`} />
                         </button>
                     </div>
 

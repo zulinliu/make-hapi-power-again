@@ -33,8 +33,14 @@ export function GitFilePreview({ sessionId, filePath, fileStatus, onClose, onOpe
   const [open, setOpen] = useState(false)
   const [closing, setClosing] = useState(false)
   const closeBtnRef = useRef<HTMLButtonElement>(null)
+  const closedRef = useRef(false)
+  const panelRef = useRef<HTMLDivElement>(null)
+  const touchStartY = useRef(0)
+  const touchCurrentY = useRef(0)
 
   const handleClose = useCallback(() => {
+    if (closedRef.current) return
+    closedRef.current = true
     setClosing(true)
     setOpen(false)
     setTimeout(() => {
@@ -45,6 +51,7 @@ export function GitFilePreview({ sessionId, filePath, fileStatus, onClose, onOpe
 
   useEffect(() => {
     requestAnimationFrame(() => setOpen(true))
+    return () => { closedRef.current = true }
   }, [])
 
   useEffect(() => {
@@ -60,6 +67,44 @@ export function GitFilePreview({ sessionId, filePath, fileStatus, onClose, onOpe
       closeBtnRef.current.focus()
     }
   }, [open])
+
+  // Swipe-to-dismiss for mobile bottom sheet
+  useEffect(() => {
+    const panel = panelRef.current
+    if (!panel) return
+    const isMobile = window.matchMedia('(max-width: 768px)').matches
+    if (!isMobile) return
+
+    function onTouchStart(e: TouchEvent) {
+      touchStartY.current = e.touches[0].clientY
+    }
+    function onTouchMove(e: TouchEvent) {
+      touchCurrentY.current = e.touches[0].clientY
+      const delta = touchCurrentY.current - touchStartY.current
+      if (delta > 0 && panel) {
+        panel.style.transform = `translateY(${delta}px)`
+      }
+    }
+    function onTouchEnd() {
+      const delta = touchCurrentY.current - touchStartY.current
+      if (delta > 80) {
+        handleClose()
+      } else if (panel) {
+        panel.style.transform = ''
+      }
+      touchStartY.current = 0
+      touchCurrentY.current = 0
+    }
+
+    panel.addEventListener('touchstart', onTouchStart, { passive: true })
+    panel.addEventListener('touchmove', onTouchMove, { passive: true })
+    panel.addEventListener('touchend', onTouchEnd)
+    return () => {
+      panel.removeEventListener('touchstart', onTouchStart)
+      panel.removeEventListener('touchmove', onTouchMove)
+      panel.removeEventListener('touchend', onTouchEnd)
+    }
+  }, [handleClose])
 
   const fileName = filePath.split('/').pop() || filePath
 
@@ -145,12 +190,13 @@ export function GitFilePreview({ sessionId, filePath, fileStatus, onClose, onOpe
   return (
     <div className="fixed inset-0 z-50 flex items-stretch" role="dialog" aria-modal="true" aria-label={t('git.preview.title')}>
       <div
-        className="fixed inset-0 bg-black/40 transition-opacity duration-200"
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-200"
         style={{ opacity: open ? 1 : 0 }}
         onClick={handleClose}
       />
       <div
-        className="absolute right-0 top-0 bottom-0 w-[55vw] max-w-[800px] min-w-[320px] bg-[var(--app-bg)] border-l border-[var(--app-divider)] flex flex-col transition-transform duration-200 ease-out md:translate-x-0 max-md:inset-x-0 max-md:bottom-0 max-md:top-auto max-md:h-full max-md:w-full max-md:min-w-0 max-md:max-w-none max-md:rounded-t-xl max-md:border-l-0 max-md:border-t"
+        ref={panelRef}
+        className="absolute right-0 top-0 bottom-0 w-[55vw] max-w-[800px] min-w-[320px] bg-[var(--app-bg)] border-l border-[var(--app-divider)] flex flex-col transition-transform duration-200 ease-out max-md:inset-x-0 max-md:bottom-0 max-md:top-auto max-md:h-full max-md:w-full max-md:min-w-0 max-md:max-w-none max-md:rounded-t-xl max-md:border-l-0 max-md:border-t"
         style={{
           transform: open ? 'translateX(0)' : 'translateX(100%)',
         }}
@@ -159,7 +205,7 @@ export function GitFilePreview({ sessionId, filePath, fileStatus, onClose, onOpe
           <button
             ref={closeBtnRef}
             onClick={handleClose}
-            className="h-8 w-8 rounded-full flex items-center justify-center hover:bg-[var(--app-secondary-bg)] transition-colors text-[var(--app-hint)]"
+            className="h-10 w-10 max-md:h-10 max-md:w-10 md:h-8 md:w-8 rounded-full flex items-center justify-center hover:bg-[var(--app-secondary-bg)] transition-colors text-[var(--app-hint)]"
             aria-label={t('button.close')}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -176,7 +222,7 @@ export function GitFilePreview({ sessionId, filePath, fileStatus, onClose, onOpe
             {t('git.preview.openInFileManager')}
           </button>
         </div>
-        <div className="flex-1 overflow-y-auto min-h-0">
+        <div className="flex-1 overflow-y-auto min-h-0 pb-[env(safe-area-inset-bottom)]">
           {content}
         </div>
       </div>

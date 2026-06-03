@@ -140,38 +140,38 @@ export default function GitPage() {
               <button
                 onClick={handleFetch}
                 disabled={fetching}
-                className="px-2 py-1 text-xs rounded transition-colors hover:bg-[var(--app-secondary-bg)] disabled:opacity-50 text-[var(--app-hint)]"
+                className="px-3 py-1.5 text-xs rounded-md transition-colors hover:bg-[var(--app-secondary-bg)] disabled:opacity-50 text-[var(--app-hint)]"
               >
                 {fetching ? t('git.fetch.fetching') : t('git.fetch')}
               </button>
               <button
                 onClick={() => { setPushPullError(''); setPullOpen(true) }}
-                className="px-2 py-1 text-xs rounded transition-colors hover:bg-[var(--app-secondary-bg)] text-[var(--app-hint)]"
+                className="px-3 py-1.5 text-xs rounded-md transition-colors hover:bg-[var(--app-secondary-bg)] text-[var(--app-hint)]"
               >
                 {t('git.pull')}
               </button>
               <button
                 onClick={() => { setPushPullError(''); setPushOpen(true) }}
-                className="px-2 py-1 text-xs rounded transition-colors hover:bg-[var(--app-secondary-bg)] text-[var(--app-hint)]"
+                className="px-3 py-1.5 text-xs rounded-md transition-colors hover:bg-[var(--app-secondary-bg)] text-[var(--app-hint)]"
               >
                 {t('git.push')}
               </button>
               <button
                 onClick={() => setCommitOpen(true)}
                 disabled={changedFiles.length === 0}
-                className="px-2 py-1 text-xs rounded transition-colors hover:bg-[var(--app-secondary-bg)] disabled:opacity-50 text-[var(--app-link)]"
+                className="px-3 py-1.5 text-xs rounded-md transition-colors hover:bg-[var(--app-secondary-bg)] disabled:opacity-50 text-[var(--app-link)]"
               >
                 {t('git.commit')}
               </button>
               <button
                 onClick={() => setCloneOpen(true)}
-                className="px-2 py-1 text-xs rounded transition-colors hover:bg-[var(--app-secondary-bg)] text-[var(--app-link)]"
+                className="px-3 py-1.5 text-xs rounded-md transition-colors hover:bg-[var(--app-secondary-bg)] text-[var(--app-link)]"
               >
                 {t('git.clone')}
               </button>
             </div>
             {(pushPullError || fetchResult) && (
-              <div className={`text-xs mt-1 ${fetchResult?.ok ? 'text-green-400' : 'text-red-400'}`}>
+              <div className={`text-xs mt-1 ${fetchResult?.ok ? 'text-[var(--app-success)]' : 'text-[var(--app-danger)]'}`}>
                 {pushPullError || fetchResult?.msg}
               </div>
             )}
