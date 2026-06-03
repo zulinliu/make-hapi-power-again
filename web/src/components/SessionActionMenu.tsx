@@ -139,6 +139,16 @@ export function SessionActionMenu(props: SessionActionMenuProps) {
     const resolvedMenuId = menuId ?? `session-action-menu-${internalId}`
     const headingId = `${resolvedMenuId}-heading`
 
+    // Desktop detection: hide tools section on desktop (>=1024px)
+    const [isDesktop, setIsDesktop] = useState(false)
+    useEffect(() => {
+        const mql = window.matchMedia('(min-width: 1024px)')
+        setIsDesktop(mql.matches)
+        const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches)
+        mql.addEventListener('change', handler)
+        return () => mql.removeEventListener('change', handler)
+    }, [])
+
     const hasSecondaryActions = onViewGit || onViewExtensions || onOpenOutline || onViewChanges || onViewTimeline || onViewUndo || onWhiteboard
 
     const handleAction = (callback?: () => void) => {
@@ -248,8 +258,8 @@ export function SessionActionMenu(props: SessionActionMenuProps) {
             className="fixed z-50 min-w-[200px] max-h-[80vh] overflow-y-auto rounded-lg border border-[var(--app-border)] bg-[var(--app-bg)] p-1 shadow-lg animate-menu-pop"
             style={menuStyle}
         >
-            {/* Secondary tools section — mobile shortcut */}
-            {hasSecondaryActions && secondaryActions.length > 0 && (
+            {/* Secondary tools section — mobile only (desktop has icon shortcuts) */}
+            {!isDesktop && hasSecondaryActions && secondaryActions.length > 0 && (
                 <>
                     <div
                         className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--app-hint)]"

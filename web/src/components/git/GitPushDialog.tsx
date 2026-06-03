@@ -159,7 +159,7 @@ export function GitPushDialog({
                                 disabled={phase === 'pushing'}
                                 className="rounded"
                             />
-                            <span style={{ color: 'var(--hp-danger)' }}>{t('git.push.force')}</span>
+                            <span className="text-[var(--app-danger)]">{t('git.push.force')}</span>
                         </label>
                     </div>
 
