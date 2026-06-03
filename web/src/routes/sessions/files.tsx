@@ -384,7 +384,10 @@ export default function FilesPage() {
     }, [api, sessionId, addToast, t, refreshDirectory, refetchGit, uploadBasePath])
 
     const handleContextMenu = useCallback((path: string, type: 'file' | 'directory', point: { x: number; y: number }) => {
-        setContextMenu({ ...point, path, type })
+        setContextMenu((prev) => {
+            if (prev && prev.path === path && prev.type === type) return null
+            return { ...point, path, type }
+        })
     }, [])
 
     const contextMenuItems = useMemo((): ContextMenuItem[] => {
@@ -590,38 +593,12 @@ export default function FilesPage() {
                         )
                     ) : activeTab === 'directories' ? (
                         <div>
-                            <div className="flex items-center gap-1 px-3 py-2 border-b border-[var(--app-divider)]">
-                                <button
-                                    type="button"
-                                    onClick={() => setNewFileDialog({ isOpen: true, basePath: '' })}
-                                    className="px-2.5 py-1.5 text-xs rounded transition-colors"
-                                    style={{ color: 'var(--hp-text-secondary)', background: 'var(--hp-surface-1)', minHeight: 32 }}
-                                >
-                                    {t('file.toolbar.newFile')}
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setNewFolderDialog({ isOpen: true, basePath: '' })}
-                                    className="px-2.5 py-1.5 text-xs rounded transition-colors"
-                                    style={{ color: 'var(--hp-text-secondary)', background: 'var(--hp-surface-1)', minHeight: 32 }}
-                                >
-                                    {t('file.toolbar.newFolder')}
-                                </button>
-                                <input
-                                    ref={uploadRef}
-                                    type="file"
-                                    className="hidden"
-                                    onChange={handleUpload}
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => uploadRef.current?.click()}
-                                    className="px-2.5 py-1.5 text-xs rounded transition-colors"
-                                    style={{ color: 'var(--hp-text-secondary)', background: 'var(--hp-surface-1)', minHeight: 32 }}
-                                >
-                                    {t('file.context.upload')}
-                                </button>
-                            </div>
+                            <input
+                                ref={uploadRef}
+                                type="file"
+                                className="hidden"
+                                onChange={handleUpload}
+                            />
                             <DirectoryTree
                                 api={api}
                                 sessionId={sessionId}
