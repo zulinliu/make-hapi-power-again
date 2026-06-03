@@ -187,13 +187,17 @@
 
 html {
     font-size: calc(100% * var(--app-font-scale, 1));
-    color-scheme: dark;
+    color-scheme: light dark;
     scrollbar-color: var(--app-scrollbar-thumb) transparent;
     scrollbar-width: thin;
 }
 
 [data-theme="light"] {
     color-scheme: light;
+}
+
+[data-theme="dark"] {
+    color-scheme: dark;
 }
 
 * {

@@ -1,4 +1,4 @@
-import { mkdir, readFile, rm, writeFile } from 'fs/promises'
+import { mkdir, readFile, rm, readdir, writeFile } from 'fs/promises'
 import { existsSync } from 'fs'
 import { join, resolve } from 'path'
 import { homedir } from 'os'
@@ -17,6 +17,64 @@ const REPO_RE = /^[a-zA-Z0-9._-]+\/[a-zA-Z0-9._-]+$/
 
 function getHome(): string {
     return process.env.HOME ?? process.env.USERPROFILE ?? homedir()
+}
+
+async function findSkillMd(dir: string): Promise<string | null> {
+    const entries = await readdir(dir, { withFileTypes: true })
+    for (const entry of entries) {
+        if (entry.name === 'SKILL.md') return join(dir, 'SKILL.md')
+        if (entry.name.startsWith('.') || entry.name === '.git') continue
+        if (entry.isDirectory()) {
+            const found = await findSkillMd(join(dir, entry.name)).catch(() => null)
+            if (found) return found
+        }
+    }
+    return null
+}
+
+/**
+ * Find the skill subdirectory within a cloned repo that contains the target skill.
+ * Handles multi-skill repos where skills live in subdirectories like skills/<name>/.
+ */
+async function findSkillDirInRepo(repoDir: string, skillName: string): Promise<string> {
+    // Strategy 1: SKILL.md at repo root (single-skill repo)
+    if (existsSync(join(repoDir, 'SKILL.md'))) {
+        return repoDir
+    }
+
+    // Strategy 2: <skillName>/SKILL.md
+    if (existsSync(join(repoDir, skillName, 'SKILL.md'))) {
+        return join(repoDir, skillName)
+    }
+
+    // Strategy 3: skills/<skillName>/SKILL.md (common multi-skill repo layout)
+    if (existsSync(join(repoDir, 'skills', skillName, 'SKILL.md'))) {
+        return join(repoDir, 'skills', skillName)
+    }
+
+    // Strategy 4: Recursive search for a directory named <skillName> containing SKILL.md
+    async function searchDir(dir: string, depth: number): Promise<string | null> {
+        if (depth > 5) return null
+        try {
+            const entries = await readdir(dir, { withFileTypes: true })
+            for (const entry of entries) {
+                if (!entry.isDirectory() || entry.name.startsWith('.') || entry.name === '.git') continue
+                const subPath = join(dir, entry.name)
+                if (entry.name === skillName && existsSync(join(subPath, 'SKILL.md'))) {
+                    return subPath
+                }
+                const found = await searchDir(subPath, depth + 1)
+                if (found) return found
+            }
+        } catch { /* ignore */ }
+        return null
+    }
+
+    const found = await searchDir(repoDir, 0)
+    if (found) return found
+
+    // Fallback: return repo root
+    return repoDir
 }
 
 interface SkillMeta {
@@ -85,7 +143,7 @@ export function registerSkillManagementHandlers(rpcHandlerManager: RpcHandlerMan
         path?: string
     }) => {
         try {
-            const { name, repo, path } = request
+            const { name, repo } = request
 
             if (!name || !SKILL_NAME_RE.test(name)) {
                 return rpcError('Invalid skill name')
@@ -102,26 +160,48 @@ export function registerSkillManagementHandlers(rpcHandlerManager: RpcHandlerMan
                 return rpcError('Invalid skill path')
             }
 
-            if (existsSync(targetDir)) {
+            // Check if already installed (SKILL.md at root means valid install)
+            if (existsSync(targetDir) && existsSync(join(targetDir, 'SKILL.md'))) {
                 return rpcError(`Skill already installed: ${name}`)
             }
 
-            await mkdir(targetDir, { recursive: true })
-
-            const branch = 'main'
-            try {
-                await execFileAsync('git', ['clone', '--depth', '1', '--sparse', '--branch', branch, `https://github.com/${repo}.git`, targetDir], { timeout: 60_000 })
-            } catch {
-                // Try without branch specification
-                await execFileAsync('git', ['clone', '--depth', '1', '--sparse', `https://github.com/${repo}.git`, targetDir], { timeout: 60_000 })
+            // Clean up any incomplete/broken install
+            if (existsSync(targetDir)) {
+                await rm(targetDir, { recursive: true, force: true })
             }
 
-            // If a specific path is specified, use sparse-checkout
-            if (path) {
+            await mkdir(skillsDir, { recursive: true })
+
+            // Clone to temp directory first, then extract the correct skill subdirectory
+            const tmpDir = resolve(skillsDir, `.tmp-${name}-${Date.now()}`)
+
+            try {
+                // Clone repo to temp dir
                 try {
-                    await execFileAsync('git', ['sparse-checkout', 'set', path], { cwd: targetDir, timeout: 30_000 })
+                    await execFileAsync('git', ['clone', '--depth', '1', '--branch', 'main', `https://github.com/${repo}.git`, tmpDir], { timeout: 60_000 })
                 } catch {
-                    logger.debug(`sparse-checkout failed for ${name}, full clone used`)
+                    try {
+                        await execFileAsync('git', ['clone', '--depth', '1', `https://github.com/${repo}.git`, tmpDir], { timeout: 60_000 })
+                    } catch {
+                        throw new Error(`Failed to clone ${repo}`)
+                    }
+                }
+
+                // Find the skill directory within the cloned repo
+                const skillSourceDir = await findSkillDirInRepo(tmpDir, name)
+
+                // Copy skill contents to target (excluding .git)
+                await mkdir(targetDir, { recursive: true })
+                await execFileAsync('cp', ['-r', `${skillSourceDir}/.`, targetDir], { timeout: 30_000 })
+                // Remove .git from target to save space
+                const gitDir = join(targetDir, '.git')
+                if (existsSync(gitDir)) {
+                    await rm(gitDir, { recursive: true, force: true })
+                }
+            } finally {
+                // Always clean up temp directory
+                if (existsSync(tmpDir)) {
+                    await rm(tmpDir, { recursive: true, force: true }).catch(() => {})
                 }
             }
 
@@ -129,13 +209,13 @@ export function registerSkillManagementHandlers(rpcHandlerManager: RpcHandlerMan
             await writeSkillMeta(name, {
                 source: 'skills-sh',
                 repo,
-                originalPath: path,
+                originalPath: request.path,
                 installedAt: new Date().toISOString(),
             })
 
-            // Read SKILL.md content for response
+            // Read description from SKILL.md (now at root of target)
             let description: string | undefined
-            const skillMdPath = join(targetDir, path ?? '', 'SKILL.md')
+            const skillMdPath = join(targetDir, 'SKILL.md')
             if (existsSync(skillMdPath)) {
                 const content = await readFile(skillMdPath, 'utf-8')
                 const descMatch = content.match(/^description:\s*(.+)$/m)
@@ -145,7 +225,7 @@ export function registerSkillManagementHandlers(rpcHandlerManager: RpcHandlerMan
             logger.info(`Skill installed: ${name} from ${repo}`)
             return {
                 success: true,
-                skill: { name, description, repo, path, installedAt: new Date().toISOString() }
+                skill: { name, description, repo, installedAt: new Date().toISOString() }
             }
         } catch (error) {
             // Cleanup on failure

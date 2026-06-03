@@ -229,7 +229,7 @@ export function StatusBar(props: {
                     </span>
                 </div>
                 {contextUsageLabel ? (
-                    <span className={`min-w-0 whitespace-nowrap text-[10px] ${contextWarning?.color ?? 'text-[var(--app-hint)]'}`}>
+                    <span className={`min-w-0 whitespace-nowrap text-[11px] sm:text-[10px] ${contextWarning?.color ?? 'text-[var(--app-hint)]'}`}>
                         <span className="sm:hidden">
                             {compactContextUsageLabel}
                         </span>

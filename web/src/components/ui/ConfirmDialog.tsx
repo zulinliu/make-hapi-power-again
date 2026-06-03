@@ -4,7 +4,8 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
-    DialogDescription
+    DialogDescription,
+    DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { useTranslation } from '@/lib/use-translation'
@@ -37,7 +38,6 @@ export function ConfirmDialog(props: ConfirmDialogProps) {
 
     const [error, setError] = useState<string | null>(null)
 
-    // Clear error when dialog opens/closes
     useEffect(() => {
         if (isOpen) {
             setError(null)
@@ -59,39 +59,44 @@ export function ConfirmDialog(props: ConfirmDialogProps) {
     }
 
     return (
-        <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+        <Dialog open={isOpen} onOpenChange={(open) => !open && !isPending && onClose()}>
             <DialogContent className="max-w-sm">
                 <DialogHeader>
                     <DialogTitle>{title}</DialogTitle>
-                    <DialogDescription className="mt-2">
+                    <DialogDescription className="mt-1.5">
                         {description}
                     </DialogDescription>
                 </DialogHeader>
 
-                {error ? (
-                    <div className="mt-3 rounded-md bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
+                {error && (
+                    <div className="mt-3 rounded-lg px-3 py-2 text-sm" style={{
+                        color: 'var(--hp-danger)',
+                        background: 'var(--hp-danger-subtle)'
+                    }}>
                         {error}
                     </div>
-                ) : null}
+                )}
 
-                <div className="mt-4 flex gap-2 justify-end">
+                <DialogFooter>
                     <Button
                         type="button"
-                        variant="secondary"
+                        variant="outline"
                         onClick={onClose}
                         disabled={isPending}
+                        className="min-h-[44px] flex-1 sm:flex-none"
                     >
                         {t('button.cancel')}
                     </Button>
                     <Button
                         type="button"
-                        variant={destructive ? 'destructive' : 'secondary'}
+                        variant={destructive ? 'destructive' : 'default'}
                         onClick={handleConfirm}
                         disabled={isPending}
+                        className="min-h-[44px] flex-1 sm:flex-none"
                     >
                         {isPending ? confirmingLabel : confirmLabel}
                     </Button>
-                </div>
+                </DialogFooter>
             </DialogContent>
         </Dialog>
     )

@@ -5,12 +5,12 @@ import type { WebAppEnv } from '../middleware/auth'
 import { requireSessionFromParam, requireSyncEngine } from './guards'
 
 const skillInstallSchema = z.object({
-    name: z.string().min(1).max(100).regex(/^[a-zA-Z0-9_-]+$/, 'Invalid skill name'),
-    repo: z.string().min(1).regex(/^[a-zA-Z0-9._-]+\/[a-zA-Z0-9._-]+$/, 'Invalid repo format (expected owner/repo)'),
+    name: z.string().min(1).max(200),
+    repo: z.string().min(1).max(200),
     path: z.string().optional(),
 })
 
-const skillNameSchema = z.string().min(1).max(100).regex(/^[a-zA-Z0-9_-]+$/, 'Invalid skill name')
+const skillNameSchema = z.string().min(1).max(200)
 
 function runRpc<T>(fn: () => Promise<T>): Promise<T | { success: false; error: string }> {
     return fn().catch((error) => ({ success: false as const, error: error instanceof Error ? error.message : String(error) }))
@@ -19,21 +19,38 @@ function runRpc<T>(fn: () => Promise<T>): Promise<T | { success: false; error: s
 export function createSkillManagementRoutes(getSyncEngine: () => SyncEngine | null): Hono<WebAppEnv> {
     const app = new Hono<WebAppEnv>()
 
-    // Search skills.sh
+    // Search skills.sh — Hub proxies directly, no CLI agent required
     app.get('/sessions/:id/skills/search', async (c) => {
-        const engine = requireSyncEngine(c, getSyncEngine)
-        if (engine instanceof Response) return engine
-        const sessionResult = requireSessionFromParam(c, engine)
-        if (sessionResult instanceof Response) return sessionResult
-
         const query = c.req.query('q') ?? ''
         if (!query || query.length < 2) {
             return c.json({ success: true, results: [], total: 0 })
         }
 
         const limit = Math.min(Math.max(parseInt(c.req.query('limit') ?? '20', 10) || 20, 1), 50)
-        const result = await runRpc(() => engine.skillSearch(sessionResult.sessionId, query, limit))
-        return c.json(result)
+        try {
+            const resp = await fetch(`https://skills.sh/api/search?q=${encodeURIComponent(query)}&limit=${limit}`, {
+                signal: AbortSignal.timeout(10_000),
+            })
+            if (!resp.ok) {
+                return c.json({ success: false, error: `skills.sh returned ${resp.status}` })
+            }
+            const data = await resp.json() as {
+                skills?: Array<{ id: string; skillId: string; name: string; installs?: number; source: string }>
+                count?: number
+            }
+            const raw = data.skills ?? []
+            const results = raw
+                .filter(s => /^[a-zA-Z0-9._-]+\/[a-zA-Z0-9._-]+$/.test(s.source))
+                .map(s => ({
+                    name: s.skillId,
+                    description: `${s.source}/${s.skillId}`,
+                    repo: s.source,
+                    stars: s.installs,
+                }))
+            return c.json({ success: true, results, total: results.length })
+        } catch (err) {
+            return c.json({ success: false, error: err instanceof Error ? err.message : 'Search failed' })
+        }
     })
 
     // Install skill

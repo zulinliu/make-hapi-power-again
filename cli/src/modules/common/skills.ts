@@ -176,12 +176,21 @@ async function listTopLevelSkillDirs(skillsRoot: string, options: { includeCodex
 
 async function readSkillsFromDirs(skillDirs: string[]): Promise<SkillSummary[]> {
     const skills = await Promise.all(skillDirs.map(async (dir): Promise<SkillSummary | null> => {
-        const filePath = join(dir, 'SKILL.md');
+        // Try SKILL.md at root first
+        const rootPath = join(dir, 'SKILL.md');
         try {
-            const fileContent = await readFile(filePath, 'utf-8');
+            const fileContent = await readFile(rootPath, 'utf-8');
             return extractSkillSummary(dir, fileContent);
         } catch {
-            return null;
+            // SKILL.md not at root — search one level deep for a matching subdirectory
+            try {
+                const dirName = basename(dir);
+                const nestedPath = join(dir, 'skills', dirName, 'SKILL.md');
+                const fileContent = await readFile(nestedPath, 'utf-8');
+                return extractSkillSummary(dir, fileContent);
+            } catch {
+                return null;
+            }
         }
     }));
 
