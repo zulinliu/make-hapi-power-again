@@ -78,7 +78,7 @@ export function FileInputDialog({
                             background: 'var(--app-secondary-bg)',
                             color: 'var(--app-fg)',
                             minHeight: 44,
-                            '--tw-ring-color': 'var(--hp-primary)',
+                            '--tw-ring-color': 'var(--app-link)',
                         } as React.CSSProperties}
                         onKeyDown={(e) => {
                             if (e.key === 'Enter' && value.trim() && !submitting) {
@@ -87,10 +87,7 @@ export function FileInputDialog({
                         }}
                     />
                     {error && (
-                        <p className="text-sm rounded-lg px-3 py-2" style={{
-                            color: 'var(--hp-danger)',
-                            background: 'var(--hp-danger-subtle)'
-                        }}>{error}</p>
+                        <p className="text-sm rounded-lg px-3 py-2 text-[var(--app-danger)] bg-[var(--app-badge-error-bg)]">{error}</p>
                     )}
                 </div>
                 <DialogFooter>
@@ -164,7 +161,7 @@ function DirectoryPickerNode(props: {
             <div
                 className={`flex items-center gap-2 px-2 py-2 rounded-lg cursor-pointer text-sm transition-colors ${
                     isSelected
-                        ? 'bg-[var(--hp-primary-subtle)] font-medium'
+                        ? 'bg-[var(--app-primary-subtle)] font-medium'
                         : 'hover:bg-[var(--app-subtle-bg)]'
                 }`}
                 style={{ paddingLeft: indent, color: 'var(--app-fg)' }}
@@ -186,10 +183,7 @@ function DirectoryPickerNode(props: {
                         <div className="h-3 w-32 rounded bg-[var(--app-subtle-bg)] animate-pulse" />
                     </div>
                 ) : error ? (
-                    <div className="px-2 py-2 text-xs rounded-lg" style={{
-                        paddingLeft: 8 + childDepth * 16,
-                        color: 'var(--hp-warning)'
-                    }}>
+                    <div className="px-2 py-2 text-xs rounded-lg text-[var(--app-warning)]" style={{ paddingLeft: 8 + childDepth * 16 }}>
                         {formatDirectoryError(error, t)}
                     </div>
                 ) : (
@@ -317,7 +311,7 @@ export function FileMoveDialog({
                             background: 'var(--app-secondary-bg)',
                             color: 'var(--app-fg)',
                             minHeight: 44,
-                            '--tw-ring-color': 'var(--hp-primary)',
+                            '--tw-ring-color': 'var(--app-link)',
                         } as React.CSSProperties}
                         onKeyDown={(e) => {
                             if (e.key === 'Enter' && destPath.trim() && !submitting) {
@@ -329,10 +323,7 @@ export function FileMoveDialog({
                         {t('file.move.pathHint')}
                     </div>
                     {error && (
-                        <p className="text-sm rounded-lg px-3 py-2" style={{
-                            color: 'var(--hp-danger)',
-                            background: 'var(--hp-danger-subtle)'
-                        }}>{error}</p>
+                        <p className="text-sm rounded-lg px-3 py-2 text-[var(--app-danger)] bg-[var(--app-badge-error-bg)]">{error}</p>
                     )}
                 </div>
                 <DialogFooter>
