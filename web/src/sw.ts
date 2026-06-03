@@ -21,14 +21,21 @@ type PushPayload = {
     }
 }
 
-// Ensure new SW activates immediately without waiting for old tabs to close
-self.addEventListener('install', () => self.skipWaiting())
-self.addEventListener('activate', () => self.clients.claim())
+// Only skip waiting when explicitly requested by the client (via postMessage)
+// Do NOT auto-skipWaiting on install — that causes page reload when user switches apps
+self.addEventListener('install', () => {
+    // Wait for old SW to be replaced naturally or via user action
+})
 
-// Allow client to trigger skipWaiting via postMessage
+self.addEventListener('activate', () => {
+    // Only claim clients when explicitly activated (user triggered update)
+})
+
+// Allow client to trigger skipWaiting + clients.claim via postMessage (user-initiated update)
 self.addEventListener('message', (event) => {
     if (event.data?.type === 'SKIP_WAITING') {
         self.skipWaiting()
+        self.addEventListener('activate', () => self.clients.claim())
     }
 })
 

@@ -54,26 +54,31 @@ async function bootstrap() {
 
     const updateSW = registerSW({
         onNeedRefresh() {
+            // Notify the UI that an update is available, but don't force reload
+            // The user can choose to update via the update banner
             window.dispatchEvent(new CustomEvent('sw-update-available', {
                 detail: { updateSW }
             }))
         },
         onOfflineReady() {
-            console.log('App ready for offline use')
+            // App ready for offline use
         },
         onRegistered(registration) {
             if (registration) {
-                // iOS compensation: poll every 30 min (iOS doesn't guarantee SW update on launch)
-                setInterval(() => {
-                    registration.update()
-                }, 30 * 60 * 1000)
+                // Only check for updates when the page becomes visible again
+                // This prevents the 30-min polling interval from triggering SW updates
+                // while the app is in the background on iOS Safari
+                const handleVisibility = () => {
+                    if (document.visibilityState === 'visible') {
+                        registration.update()
+                    }
+                }
+                document.addEventListener('visibilitychange', handleVisibility)
 
                 // Request persistent storage to prevent cache cleanup
                 if (navigator.storage?.persist) {
-                    navigator.storage.persist().then((granted) => {
-                        if (granted) {
-                            console.log('Persistent storage granted')
-                        }
+                    navigator.storage.persist().then(() => {
+                        // Persistence granted or denied
                     }).catch(() => {
                         // Ignore persistence errors
                     })

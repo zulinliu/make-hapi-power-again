@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, lazy, Suspense } from 'react'
+import { useEffect, useMemo, useState, useCallback, lazy, Suspense } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useParams, useSearch } from '@tanstack/react-router'
 import type { GitCommandResponse } from '@/types/api'
@@ -15,9 +15,6 @@ import { decodeBase64 } from '@/lib/utils'
 import { ImagePreview } from '@/components/ImagePreview'
 import { LoadingState } from '@/components/LoadingState'
 
-const CodeEditor = lazy(() =>
-    import('@/components/Editor/CodeEditor').then(m => ({ default: m.CodeEditor }))
-)
 const DiffView = lazy(() =>
     import('@/components/Editor/DiffView').then(m => ({ default: m.DiffView }))
 )
@@ -87,6 +84,7 @@ export default function FilePage() {
     const { t } = useTranslation()
     const { copied: pathCopied, copy: copyPath } = useCopyToClipboard()
     const { copied: contentCopied, copy: copyContent } = useCopyToClipboard()
+
     const goBack = useAppGoBack()
     const queryClient = useQueryClient()
     const { sessionId } = useParams({ from: '/sessions/$sessionId/file' })
@@ -142,16 +140,34 @@ export default function FilePage() {
         && decodedContent.length > 0
         && contentSizeBytes <= MAX_COPYABLE_FILE_BYTES
 
+    const handleDownload = useCallback(() => {
+        if (!fileContentResult?.success || !fileContentResult.content) return
+        const byteCharacters = atob(fileContentResult.content)
+        const byteNumbers = new Uint8Array(byteCharacters.length)
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i)
+        }
+        const blob = new Blob([byteNumbers])
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = fileName
+        a.click()
+        URL.revokeObjectURL(url)
+    }, [fileContentResult, fileName])
+
     const [displayMode, setDisplayMode] = useState<DisplayMode>('diff')
     const [localContent, setLocalContent] = useState('')
 
     const isMarkdown = useMemo(() => isMarkdownFile(filePath), [filePath])
 
+    const [isSaving, setIsSaving] = useState(false)
+
     useEffect(() => {
-        if (decodedContent && localContent !== decodedContent) {
+        if (decodedContent && !isSaving) {
             setLocalContent(decodedContent)
         }
-    }, [decodedContent])
+    }, [decodedContent, isSaving])
 
     useEffect(() => {
         if (isMarkdown) {
@@ -165,10 +181,16 @@ export default function FilePage() {
 
     async function handleSave(newValue: string) {
         if (!api || !sessionId || !filePath || !fileContentResult?.success) return
-        const encoded = btoa(unescape(encodeURIComponent(newValue)))
-        await api.writeSessionFile(sessionId, filePath, encoded, undefined, true)
-        queryClient.invalidateQueries({ queryKey: queryKeys.sessionFile(sessionId, filePath) })
-        queryClient.invalidateQueries({ queryKey: queryKeys.gitFileDiff(sessionId, filePath, staged) })
+        setIsSaving(true)
+        try {
+            const encoded = btoa(unescape(encodeURIComponent(newValue)))
+            await api.writeSessionFile(sessionId, filePath, encoded, undefined, true)
+            setLocalContent(newValue)
+            queryClient.invalidateQueries({ queryKey: queryKeys.sessionFile(sessionId, filePath) })
+            queryClient.invalidateQueries({ queryKey: queryKeys.gitFileDiff(sessionId, filePath, staged) })
+        } finally {
+            setIsSaving(false)
+        }
     }
 
     const loading = diffQuery.isLoading || fileQuery.isLoading
@@ -203,6 +225,15 @@ export default function FilePage() {
                         title={t('file.page.copyPath')}>
                         {pathCopied ? <CheckIcon className="h-3.5 w-3.5" /> : <CopyIcon className="h-3.5 w-3.5" />}
                     </button>
+                    {fileContentResult?.success && fileContentResult.content && (
+                        <button type="button" onClick={handleDownload}
+                            className="shrink-0 rounded p-1 text-[var(--app-hint)] hover:bg-[var(--app-subtle-bg)] hover:text-[var(--app-fg)] transition-colors"
+                            title={t('file.page.download')}>
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" x2="12" y1="15" y2="3" />
+                            </svg>
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -231,15 +262,15 @@ export default function FilePage() {
 
             <div className="flex-1 min-h-0">
                 {diffErrorMessage ? (
-                    <div className="p-4"><div className="mb-3 rounded-md bg-amber-500/10 p-2 text-xs text-[var(--app-hint)]">{diffErrorMessage}</div></div>
+                    <div className="p-4 sm:p-6"><div className="mb-3 rounded-md bg-amber-500/10 p-2 text-xs text-[var(--app-hint)]">{diffErrorMessage}</div></div>
                 ) : missingPath ? (
-                    <div className="p-4 text-sm text-[var(--app-hint)]">{t('file.page.missingPath')}</div>
+                    <div className="p-4 sm:p-6 text-sm text-[var(--app-hint)]">{t('file.page.missingPath')}</div>
                 ) : loading ? (
                     <FileContentSkeleton label={t('loading.file')} />
                 ) : fileErrorMessage ? (
-                    <div className="p-4 text-sm text-[var(--app-hint)]">{fileErrorMessage}</div>
+                    <div className="p-4 sm:p-6 text-sm text-[var(--app-hint)]">{fileErrorMessage}</div>
                 ) : displayMode === 'preview' && isMarkdown && decodedContent ? (
-                    <div className="app-scroll-y h-full p-4">
+                    <div className="app-scroll-y h-full p-4 sm:p-6 lg:p-8">
                         <MarkdownFilePreview content={decodedContent} />
                     </div>
                 ) : displayMode === 'diff' && diffContent && decodedContent ? (
@@ -254,34 +285,59 @@ export default function FilePage() {
                     </Suspense>
                 ) : displayMode === 'edit' ? (
                     imagePreviewUrl ? (
-                        <div className="app-scroll-y h-full p-4">
+                        <div className="app-scroll-y h-full p-4 sm:p-6 lg:p-8">
                             <ImagePreview src={imagePreviewUrl} fileName={fileName}
                                 label={t('file.page.imagePreviewAlt', { name: fileName })} />
                         </div>
                     ) : binaryFile ? (
-                        <div className="p-4 text-sm text-[var(--app-hint)]">{t('file.page.binary')}</div>
+                        <div className="p-4 sm:p-6 text-sm text-[var(--app-hint)]">{t('file.page.binary')}</div>
                     ) : (
-                        <Suspense fallback={<FileContentSkeleton label="Loading editor..." />}>
-                            <div className="relative h-full">
-                                {canCopyContent && (
-                                    <button type="button" onClick={() => copyContent(localContent)}
-                                        className="absolute right-2 top-2 z-10 rounded p-1 text-[var(--app-hint)] hover:bg-[var(--app-subtle-bg)] hover:text-[var(--app-fg)] transition-colors"
-                                        title={t('file.page.copyContent')}>
-                                        {contentCopied ? <CheckIcon className="h-3.5 w-3.5" /> : <CopyIcon className="h-3.5 w-3.5" />}
+                        <div className="flex flex-col h-full">
+                            <div className="flex items-center gap-2 px-3 py-1.5 border-b shrink-0"
+                                style={{ borderColor: 'var(--app-divider)', background: 'var(--app-subtle-bg)' }}>
+                                <div className="flex-1 text-xs" style={{ color: 'var(--app-hint)' }}>
+                                    {localContent !== decodedContent ? (
+                                        <span style={{ color: 'var(--hp-warning)' }}>Modified</span>
+                                    ) : (
+                                        <span>Read-only preview</span>
+                                    )}
+                                </div>
+                                <button type="button" onClick={() => copyContent(localContent)}
+                                    className="rounded p-1 text-[var(--app-hint)] hover:bg-[var(--app-subtle-bg)] transition-colors"
+                                    title={t('file.page.copyContent')}>
+                                    {contentCopied ? <CheckIcon className="h-3.5 w-3.5" /> : <CopyIcon className="h-3.5 w-3.5" />}
+                                </button>
+                                <button type="button" onClick={handleDownload}
+                                    className="rounded p-1 text-[var(--app-hint)] hover:bg-[var(--app-subtle-bg)] transition-colors"
+                                    title={t('file.page.download')}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" x2="12" y1="15" y2="3" />
+                                    </svg>
+                                </button>
+                                {localContent !== decodedContent && (
+                                    <button type="button" onClick={() => handleSave(localContent)}
+                                        className="px-3 py-1 rounded text-xs font-semibold transition-colors"
+                                        style={{ background: 'var(--app-button)', color: 'var(--app-button-text)' }}>
+                                        Save
                                     </button>
                                 )}
-                                <CodeEditor
-                                    value={localContent}
-                                    filePath={filePath}
-                                    readOnly={false}
-                                    onChange={(v) => setLocalContent(v)}
-                                    onSave={handleSave}
-                                />
                             </div>
-                        </Suspense>
+                            <textarea
+                                value={localContent}
+                                onChange={(e) => setLocalContent(e.target.value)}
+                                spellCheck={false}
+                                className="flex-1 w-full resize-none p-4 font-mono text-sm leading-relaxed focus:outline-none"
+                                style={{
+                                    background: 'var(--app-bg)',
+                                    color: 'var(--app-fg)',
+                                    tabSize: 4,
+                                    WebkitAppearance: 'none',
+                                }}
+                            />
+                        </div>
                     )
                 ) : (
-                    <div className="p-4 text-sm text-[var(--app-hint)]">{t('file.page.noChanges')}</div>
+                    <div className="p-4 sm:p-6 text-sm text-[var(--app-hint)]">{t('file.page.noChanges')}</div>
                 )}
             </div>
         </div>
