@@ -190,7 +190,7 @@ export function GitFilePreview({ sessionId, filePath, fileStatus, onClose, onOpe
   return (
     <div className="fixed inset-0 z-50 flex items-stretch" role="dialog" aria-modal="true" aria-label={t('git.preview.title')}>
       <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-200"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-200"
         style={{ opacity: open ? 1 : 0 }}
         onClick={handleClose}
       />

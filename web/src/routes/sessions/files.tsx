@@ -515,7 +515,7 @@ export default function FilesPage() {
             ) : null}
 
             {showGitErrorBanner && activeTab === 'changes' ? (
-                <div className="border-b border-[var(--app-divider)] bg-amber-500/10 px-3 py-2 text-xs text-[var(--app-hint)]">
+                <div className="border-b border-[var(--app-divider)] bg-[var(--app-warning-subtle)] px-3 py-2 text-xs text-[var(--app-hint)]">
                     {gitErrorMessage}
                 </div>
             ) : null}
