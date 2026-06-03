@@ -40,19 +40,19 @@ function SessionsEmptyState(props: {
 
     return (
         <div className="flex flex-col items-center justify-center gap-4 px-6 py-12 text-center">
-            <div className="text-xl font-semibold" style={{ color: 'var(--hp-text-primary)' }}>
+            <div className="text-xl font-semibold text-[var(--app-fg)]">
                 Welcome to Hapi Power
             </div>
-            <div className="max-w-md text-sm" style={{ color: 'var(--hp-text-tertiary)' }}>
+            <div className="max-w-md text-sm text-[var(--app-hint)]">
                 Your AI-powered development workstation. Clone a repo, code with AI, review and push.
             </div>
 
             <div className="flex gap-4 mt-4">
                 {steps.map((step, i) => (
-                    <div key={i} className="flex flex-col items-center gap-2 w-36 p-3 rounded-lg" style={{ background: 'var(--hp-surface-1)' }}>
+                    <div key={i} className="flex flex-col items-center gap-2 w-36 p-3 rounded-lg bg-[var(--app-secondary-bg)]">
                         <div className="text-2xl">{step.icon}</div>
-                        <div className="text-sm font-medium" style={{ color: 'var(--hp-text-primary)' }}>{step.label}</div>
-                        <div className="text-xs" style={{ color: 'var(--hp-text-tertiary)' }}>{step.desc}</div>
+                        <div className="text-sm font-medium text-[var(--app-fg)]">{step.label}</div>
+                        <div className="text-xs text-[var(--app-hint)]">{step.desc}</div>
                     </div>
                 ))}
             </div>

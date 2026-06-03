@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import rehypeSanitize from 'rehype-sanitize'
 
 interface MarkdownFilePreviewProps {
     content: string
@@ -9,6 +10,7 @@ interface MarkdownFilePreviewProps {
 
 export function MarkdownFilePreview({ content, className }: MarkdownFilePreviewProps) {
     const plugins = useMemo(() => [remarkGfm], [])
+    const rehypePlugins = useMemo(() => [rehypeSanitize], [])
 
     return (
         <div
@@ -30,7 +32,7 @@ export function MarkdownFilePreview({ content, className }: MarkdownFilePreviewP
                 '--tw-prose-td-borders': 'var(--app-divider)',
             } as React.CSSProperties}
         >
-            <ReactMarkdown remarkPlugins={plugins}>
+            <ReactMarkdown remarkPlugins={plugins} rehypePlugins={rehypePlugins}>
                 {content}
             </ReactMarkdown>
         </div>

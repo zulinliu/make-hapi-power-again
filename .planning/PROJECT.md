@@ -90,6 +90,12 @@
 - [ ] 熔断器 + 故障转移
 - [ ] 流式响应透传
 
+**Module J — v9 UI 统一优化（feat/v9）**
+- [ ] SessionHeader 响应式工具栏（桌面端直接显示 Git/扩展/大纲图标，移动端收入"..."菜单）
+- [ ] 所有子页面布局统一（CSS 变量、max-w-content、安全区域、返回按钮、Tab 指示器、padding）
+- [ ] 右键菜单全局适配（桌面端右键、移动端"..."按钮，统一封装 useContextMenu hook）
+- [ ] Git 状态页文件预览（点击变更文件预览内容）
+
 **Cross-cutting（跨模块）**
 - [ ] Hub EventBus 事件总线（ADR-003：跨模块事件通知）
 - [ ] 统一导航架构（ADR-008：侧边栏导航）
@@ -172,4 +178,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-31 after v0.7 planning (custom model API configuration)*
+*Last updated: 2026-06-03 after v9 UI统一优化规划*
