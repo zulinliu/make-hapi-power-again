@@ -1,4 +1,5 @@
 import { useId, useMemo, useRef, useState } from 'react'
+import { useLocation, useNavigate } from '@tanstack/react-router'
 import type { Session } from '@/types/api'
 import type { ApiClient } from '@/api/client'
 import { isTelegramApp } from '@/hooks/useTelegram'
@@ -88,22 +89,20 @@ function MoreVerticalIcon(props: { className?: string }) {
 export function SessionHeader(props: {
     session: Session
     onBack: () => void
-    onViewFiles?: () => void
-    onOpenOutline?: () => void
-    onViewGit?: () => void
-    onViewExtensions?: () => void
-    onViewTimeline?: () => void
-    onViewUndo?: () => void
-    onViewChanges?: () => void
-    onWhiteboard?: () => void
     api: ApiClient | null
+    sessionId: string
+    isSubPage: boolean
     onSessionDeleted?: () => void
+    onToggleOutline?: () => void
 }) {
     const { t } = useTranslation()
     const { session, api, onSessionDeleted } = props
     const title = useMemo(() => getSessionTitle(session), [session])
     const worktreeBranch = session.metadata?.worktree?.branch
     const modelLabel = getSessionModelLabel(session)
+    const navigate = useNavigate()
+    const pathname = useLocation().pathname
+    const basePath = `/sessions/${props.sessionId}`
 
     const [menuOpen, setMenuOpen] = useState(false)
     const [menuAnchorPoint, setMenuAnchorPoint] = useState<{ x: number; y: number }>({ x: 0, y: 0 })
@@ -132,7 +131,40 @@ export function SessionHeader(props: {
         setMenuOpen((open) => !open)
     }
 
-    const iconBtnClass = 'flex h-10 w-10 items-center justify-center rounded-full text-[var(--app-hint)] transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)] sm:h-8 sm:w-8'
+    // Route-aware active state detection
+    const isFilesActive = pathname.includes('/files') || pathname.includes('/file')
+    const isGitActive = pathname.includes('/git')
+    const isExtensionsActive = pathname.includes('/extensions')
+
+    // Toggle navigation: active icon -> chat, inactive icon -> that tool
+    const handleFilesClick = () => {
+        if (isFilesActive) {
+            navigate({ to: basePath })
+        } else {
+            navigate({ to: `${basePath}/files` })
+        }
+    }
+    const handleGitClick = () => {
+        if (isGitActive) {
+            navigate({ to: basePath })
+        } else {
+            navigate({ to: `${basePath}/git` })
+        }
+    }
+    const handleExtensionsClick = () => {
+        if (isExtensionsActive) {
+            navigate({ to: basePath })
+        } else {
+            navigate({ to: `${basePath}/extensions` })
+        }
+    }
+
+    // Mobile menu navigation callbacks
+    const handleMenuGit = () => { setMenuOpen(false); navigate({ to: `${basePath}/git` }) }
+    const handleMenuExtensions = () => { setMenuOpen(false); navigate({ to: `${basePath}/extensions` }) }
+    const handleMenuOutline = () => { setMenuOpen(false); props.onToggleOutline?.() }
+
+    const iconBtnClass = 'flex h-10 w-10 items-center justify-center rounded-full transition-colors sm:h-8 sm:w-8'
 
     // In Telegram, don't render header (Telegram provides its own)
     if (isTelegramApp()) {
@@ -141,13 +173,13 @@ export function SessionHeader(props: {
 
     return (
         <>
-            <div className="bg-[var(--app-bg)] pt-[env(safe-area-inset-top)]">
+            <div className={`bg-[var(--app-bg)] pt-[env(safe-area-inset-top)] ${props.isSubPage ? 'border-b border-[var(--app-border)]' : ''}`}>
                 <div className="mx-auto w-full max-w-content flex items-center gap-2 p-3">
                     {/* Back button */}
                     <button
                         type="button"
                         onClick={props.onBack}
-                        className={iconBtnClass}
+                        className={`${iconBtnClass} text-[var(--app-hint)] hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]`}
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <polyline points="15 18 9 12 15 6" />
@@ -177,37 +209,52 @@ export function SessionHeader(props: {
                         </div>
                     </div>
 
-                    {/* Primary actions — always visible */}
-                    {props.onViewFiles ? (
-                        <button type="button" onClick={props.onViewFiles} className={iconBtnClass} title={t('session.title')}>
-                            <FilesIcon />
-                        </button>
-                    ) : null}
+                    {/* Files icon — always visible */}
+                    <button
+                        type="button"
+                        onClick={handleFilesClick}
+                        className={`${iconBtnClass} ${isFilesActive ? 'text-[var(--app-link)]' : 'text-[var(--app-hint)]'} hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]`}
+                        title={t('session.title')}
+                    >
+                        <FilesIcon />
+                    </button>
 
-                    {/* Secondary actions — desktop only as icon buttons */}
-                    {props.onViewGit ? (
-                        <button type="button" onClick={props.onViewGit} className={`${iconBtnClass} hidden lg:flex`} title="Git">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <circle cx="18" cy="18" r="3" /><circle cx="6" cy="6" r="3" /><path d="M13 6h3a2 2 0 0 1 2 2v7" /><path d="M6 9v12" />
-                            </svg>
-                        </button>
-                    ) : null}
+                    {/* Git icon — desktop only */}
+                    <button
+                        type="button"
+                        onClick={handleGitClick}
+                        className={`${iconBtnClass} ${isGitActive ? 'text-[var(--app-link)]' : 'text-[var(--app-hint)]'} hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)] hidden lg:flex`}
+                        title="Git"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="18" cy="18" r="3" /><circle cx="6" cy="6" r="3" /><path d="M13 6h3a2 2 0 0 1 2 2v7" /><path d="M6 9v12" />
+                        </svg>
+                    </button>
 
-                    {props.onViewExtensions ? (
-                        <button type="button" onClick={props.onViewExtensions} className={`${iconBtnClass} hidden lg:flex`} title={t('session.extensions') ?? 'Extensions'}>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-                            </svg>
-                        </button>
-                    ) : null}
+                    {/* Extensions icon — desktop only */}
+                    <button
+                        type="button"
+                        onClick={handleExtensionsClick}
+                        className={`${iconBtnClass} ${isExtensionsActive ? 'text-[var(--app-link)]' : 'text-[var(--app-hint)]'} hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)] hidden lg:flex`}
+                        title={t('session.extensions') ?? 'Extensions'}
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                        </svg>
+                    </button>
 
-                    {props.onOpenOutline ? (
-                        <button type="button" onClick={props.onOpenOutline} className={`${iconBtnClass} hidden lg:flex`} title={t('session.outline.open')} aria-label={t('session.outline.open')}>
+                    {/* Outline icon — desktop only, overlay toggle */}
+                    {props.onToggleOutline ? (
+                        <button
+                            type="button"
+                            onClick={props.onToggleOutline}
+                            className={`${iconBtnClass} text-[var(--app-hint)] hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)] hidden lg:flex`}
+                            title={t('session.outline.open')}
+                            aria-label={t('session.outline.open')}
+                        >
                             <OutlineIcon />
                         </button>
                     ) : null}
-
-                    {/* Changes/Timeline/Undo/Whiteboard hidden — not in original requirements */}
 
                     {/* More menu — always visible */}
                     <button
@@ -218,7 +265,7 @@ export function SessionHeader(props: {
                         aria-haspopup="menu"
                         aria-expanded={menuOpen}
                         aria-controls={menuOpen ? menuId : undefined}
-                        className={iconBtnClass}
+                        className={`${iconBtnClass} text-[var(--app-hint)] hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]`}
                         title={t('session.more')}
                     >
                         <MoreVerticalIcon />
@@ -233,13 +280,9 @@ export function SessionHeader(props: {
                 onRename={() => { setMenuOpen(false); setRenameOpen(true) }}
                 onArchive={() => { setMenuOpen(false); setArchiveOpen(true) }}
                 onDelete={() => { setMenuOpen(false); setDeleteOpen(true) }}
-                onViewGit={props.onViewGit}
-                onViewExtensions={props.onViewExtensions}
-                onOpenOutline={props.onOpenOutline}
-                onViewChanges={props.onViewChanges}
-                onViewTimeline={props.onViewTimeline}
-                onViewUndo={props.onViewUndo}
-                onWhiteboard={props.onWhiteboard}
+                onViewGit={handleMenuGit}
+                onViewExtensions={handleMenuExtensions}
+                onOpenOutline={handleMenuOutline}
                 anchorPoint={menuAnchorPoint}
                 menuId={menuId}
             />

@@ -29,7 +29,6 @@ import { ImagePasteDrop } from '@/components/ImagePasteDrop'
 import { Whiteboard } from '@/components/Whiteboard'
 import { useBinaryUpload } from '@/hooks/useBinaryUpload'
 import { useTranslation } from '@/lib/use-translation'
-import { SessionHeader } from '@/components/SessionHeader'
 import { TeamPanel } from '@/components/TeamPanel'
 import { usePlatform } from '@/hooks/usePlatform'
 import { useSessionActions } from '@/hooks/mutations/useSessionActions'
@@ -125,6 +124,8 @@ export function SessionChat(props: {
     onRetryMessage?: (localId: string) => void
     autocompleteSuggestions?: (query: string) => Promise<Suggestion[]>
     availableSlashCommands?: readonly SlashCommand[]
+    outlineOpen?: boolean
+    onOutlineOpenChange?: (open: boolean | ((prev: boolean) => boolean)) => void
 }) {
     const { haptic } = usePlatform()
     const { t } = useTranslation()
@@ -135,7 +136,8 @@ export function SessionChat(props: {
     const blocksByIdRef = useRef<Map<string, ChatBlock>>(new Map())
     const visibleGroupsRef = useRef<ToolGroupBlock[]>([])
     const [forceScrollToken, setForceScrollToken] = useState(0)
-    const [outlineOpen, setOutlineOpen] = useState(false)
+    const outlineOpen = props.outlineOpen ?? false
+    const setOutlineOpen = props.onOutlineOpenChange ?? (() => {})
     // Whiteboard hidden — not in original requirements
     // const [whiteboardOpen, setWhiteboardOpen] = useState(false)
     const { uploadBinaryFile } = useBinaryUpload()
@@ -327,7 +329,6 @@ export function SessionChat(props: {
         normalizedCacheRef.current.clear()
         blocksByIdRef.current.clear()
         visibleGroupsRef.current = []
-        setOutlineOpen(false)
     }, [props.session.id])
 
     // Exclude user messages that haven't been invoked yet — those appear in the
@@ -497,51 +498,9 @@ export function SessionChat(props: {
         props.onRefresh()
     }, [switchSession, props.onRefresh])
 
-    const handleViewFiles = useCallback(() => {
-        navigate({
-            to: '/sessions/$sessionId/files',
-            params: { sessionId: props.session.id }
-        })
-    }, [navigate, props.session.id])
-
     const handleViewTerminal = useCallback(() => {
         navigate({
             to: '/sessions/$sessionId/terminal',
-            params: { sessionId: props.session.id }
-        })
-    }, [navigate, props.session.id])
-
-    const handleViewChanges = useCallback(() => {
-        navigate({
-            to: '/sessions/$sessionId/changes',
-            params: { sessionId: props.session.id }
-        })
-    }, [navigate, props.session.id])
-
-    const handleViewTimeline = useCallback(() => {
-        navigate({
-            to: '/sessions/$sessionId/timeline',
-            params: { sessionId: props.session.id }
-        })
-    }, [navigate, props.session.id])
-
-    const handleViewUndo = useCallback(() => {
-        navigate({
-            to: '/sessions/$sessionId/undo',
-            params: { sessionId: props.session.id }
-        })
-    }, [navigate, props.session.id])
-
-    const handleViewGit = useCallback(() => {
-        navigate({
-            to: '/sessions/$sessionId/git',
-            params: { sessionId: props.session.id }
-        })
-    }, [navigate, props.session.id])
-
-    const handleViewExtensions = useCallback(() => {
-        navigate({
-            to: '/sessions/$sessionId/extensions',
             params: { sessionId: props.session.id }
         })
     }, [navigate, props.session.id])
@@ -606,17 +565,6 @@ export function SessionChat(props: {
 
     return (
         <div className="flex h-full min-h-0 flex-col">
-            <SessionHeader
-                session={props.session}
-                onBack={props.onBack}
-                onViewFiles={props.session.metadata?.path ? handleViewFiles : undefined}
-                onOpenOutline={() => setOutlineOpen(true)}
-                onViewGit={handleViewGit}
-                onViewExtensions={handleViewExtensions}
-                api={props.api}
-                onSessionDeleted={props.onBack}
-            />
-
             {props.session.teamState && (
                 <TeamPanel teamState={props.session.teamState} />
             )}
