@@ -260,6 +260,7 @@ export default function FilesPage() {
         path: string
         type: 'file' | 'directory'
     } | null>(null)
+    const justClosedRef = useRef(false)
 
     // Dialog states
     const [renameDialog, setRenameDialog] = useState<{ isOpen: boolean; path: string }>({ isOpen: false, path: '' })
@@ -384,6 +385,10 @@ export default function FilesPage() {
     }, [api, sessionId, addToast, t, refreshDirectory, refetchGit, uploadBasePath])
 
     const handleContextMenu = useCallback((path: string, type: 'file' | 'directory', point: { x: number; y: number }) => {
+        if (justClosedRef.current) {
+            justClosedRef.current = false
+            return
+        }
         setContextMenu((prev) => {
             if (prev && prev.path === path && prev.type === type) return null
             return { ...point, path, type }
@@ -664,7 +669,11 @@ export default function FilesPage() {
                     x={contextMenu.x}
                     y={contextMenu.y}
                     items={contextMenuItems}
-                    onClose={() => setContextMenu(null)}
+                    onClose={() => {
+                        setContextMenu(null)
+                        justClosedRef.current = true
+                        setTimeout(() => { justClosedRef.current = false }, 300)
+                    }}
                 />
             )}
 
