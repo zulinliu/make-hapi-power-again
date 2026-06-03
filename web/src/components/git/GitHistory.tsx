@@ -71,12 +71,12 @@ export function GitHistory({ sessionId }: { sessionId: string }) {
 function parseLog(raw: string): CommitEntry[] {
   if (!raw) return []
   return raw.split('\n').filter(Boolean).map((line) => {
-    const match = line.match(/^(\*|\||\/|\\)\s+([a-f0-9]+)\s*(?:\(([^)]*)\))?\s*(.*)/)
+    const match = line.match(/^(?:[\*|\/\\]\s+)?([a-f0-9]+)\s*(?:\(([^)]*)\))?\s*(.*)/)
     if (!match) return null
     return {
-      hash: match[2],
-      refs: match[3] || '',
-      message: match[4] || '',
+      hash: match[1],
+      refs: match[2] || '',
+      message: match[3] || '',
     }
   }).filter(Boolean) as CommitEntry[]
 }

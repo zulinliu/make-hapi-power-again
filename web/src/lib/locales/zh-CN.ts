@@ -247,6 +247,7 @@ export default {
   'file.page.tab.file': '文件',
   'file.page.missingPath': '未提供文件路径。',
   'file.page.binary': '该文件看起来是二进制文件，无法显示。',
+  'file.page.saveFailed': '保存失败',
   'file.page.imagePreviewAlt': '{name} 图片预览',
   'file.page.empty': '文件为空。',
   'file.page.noChanges': '没有可显示的变更。',
@@ -560,6 +561,15 @@ export default {
   'git.context.copyPathSuccess': '路径已复制到剪贴板',
   'git.context.openFile': '打开文件',
 
+  // Git preview
+  'git.preview.title': '文件预览',
+  'git.preview.deleted': '文件已删除',
+  'git.preview.loadFailed': '加载文件失败',
+  'git.preview.retry': '重试',
+  'git.preview.binary': '二进制文件，无法预览',
+  'git.preview.noContent': '无内容',
+  'git.preview.openInFileManager': '在文件管理中打开',
+
   // Git history
   'git.history.loading': '加载历史…',
   'git.history.failed': '加载历史失败',
@@ -572,6 +582,7 @@ export default {
   'git.branch.createFailed': '创建分支失败',
   'git.branch.switchFailed': '切换分支失败',
   'git.branch.deleteFailed': '删除分支失败',
+  'git.branch.deleteConfirm': '确定删除分支 "{name}"？此操作不可撤销。',
   'git.branch.mergeFailed': '合并失败（可能有冲突）',
   'git.branch.merge': '合并到当前分支',
   'git.branch.switch': '切换',

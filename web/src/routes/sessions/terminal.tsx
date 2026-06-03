@@ -400,7 +400,6 @@ export default function TerminalPage() {
         )
     }
 
-    const subtitle = session.metadata?.path ?? sessionId
     const status = terminalState.status
     const errorMessage = !terminalSupported
         ? t('terminal.unsupportedWindows')

@@ -118,10 +118,13 @@ function GitFileRow({ file, onViewDiff, onCopyPath, onOpenFile, onPreview }: {
   const { t } = useTranslation()
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null)
   const justClosedRef = useRef(false)
+  const longPressJustFiredRef = useRef(false)
   const moreBtnRef = useRef<HTMLButtonElement>(null)
 
   const handleContextMenu = useCallback((pos: { x: number; y: number }) => {
     if (justClosedRef.current) return
+    longPressJustFiredRef.current = true
+    setTimeout(() => { longPressJustFiredRef.current = false }, 400)
     setContextMenu(pos)
   }, [])
 
@@ -164,8 +167,11 @@ function GitFileRow({ file, onViewDiff, onCopyPath, onOpenFile, onPreview }: {
     <>
       <div
         {...handlers}
-        onClick={() => onPreview?.(file.path, file.status)}
+        onClick={() => { if (!longPressJustFiredRef.current) onPreview?.(file.path, file.status) }}
         className="flex items-center gap-2 text-sm py-1 px-2 rounded bg-[var(--app-secondary-bg)] cursor-pointer hover:bg-[var(--app-subtle-bg)] transition-colors"
+        tabIndex={0}
+        role="button"
+        aria-label={`${file.path} ${file.status}`}
       >
         <GitStatusBadge status={file.status} />
         <span className="font-mono text-xs truncate flex-1 text-[var(--app-fg)]">
