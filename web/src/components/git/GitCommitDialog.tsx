@@ -107,7 +107,7 @@ export function GitCommitDialog({
                         {files.map((file) => (
                             <label
                                 key={file.path}
-                                className="flex items-center gap-2 text-sm py-1 px-2 rounded cursor-pointer hover:bg-[var(--hp-surface-1)]"
+                                className="flex items-center gap-2 text-sm py-1 px-2 rounded cursor-pointer hover:bg-[var(--app-secondary-bg)]"
                             >
                                 <input
                                     type="checkbox"
@@ -119,19 +119,19 @@ export function GitCommitDialog({
                                 <span
                                     className="text-xs font-mono font-bold px-1.5 py-0.5 rounded"
                                     style={{
-                                        color: file.status === 'M' ? 'var(--hp-warning)' :
-                                            file.status === 'A' ? 'var(--hp-success)' :
-                                                file.status === 'D' ? 'var(--hp-danger)' :
-                                                    file.status === '?' ? 'var(--hp-text-tertiary)' : 'var(--hp-primary)',
-                                        background: file.status === 'M' ? 'var(--hp-warning-subtle)' :
-                                            file.status === 'A' ? 'var(--hp-success-subtle)' :
-                                                file.status === 'D' ? 'var(--hp-danger-subtle)' :
-                                                    file.status === '?' ? 'var(--hp-surface-2)' : 'var(--hp-primary-subtle)',
+                                        color: file.status === 'M' ? 'var(--app-warning)' :
+                                            file.status === 'A' ? 'var(--app-success)' :
+                                                file.status === 'D' ? 'var(--app-danger)' :
+                                                    file.status === '?' ? 'var(--app-hint)' : 'var(--app-link)',
+                                        background: file.status === 'M' ? 'var(--app-warning-subtle)' :
+                                            file.status === 'A' ? 'var(--app-success-subtle)' :
+                                                file.status === 'D' ? 'var(--app-badge-error-bg)' :
+                                                    file.status === '?' ? 'var(--app-subtle-bg)' : 'var(--app-primary-subtle)',
                                     }}
                                 >
                                     {file.status}
                                 </span>
-                                <span className="font-mono text-xs truncate" style={{ color: 'var(--hp-text-primary)' }}>
+                                <span className="font-mono text-xs truncate text-[var(--app-fg)]">
                                     {file.path}
                                 </span>
                             </label>
