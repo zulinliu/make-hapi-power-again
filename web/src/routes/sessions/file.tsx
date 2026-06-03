@@ -272,7 +272,7 @@ export default function FilePage() {
                                 style={{ borderColor: 'var(--app-divider)', background: 'var(--app-subtle-bg)' }}>
                                 <div className="flex-1 text-xs" style={{ color: 'var(--app-hint)' }}>
                                     {localContent !== decodedContent ? (
-                                        <span style={{ color: 'var(--hp-warning)' }}>Modified</span>
+                                        <span className="text-[var(--app-warning)]">Modified</span>
                                     ) : (
                                         <span>Read-only preview</span>
                                     )}
