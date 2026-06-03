@@ -131,10 +131,11 @@ export function SessionHeader(props: {
         setMenuOpen((open) => !open)
     }
 
-    // Route-aware active state detection
-    const isFilesActive = pathname.includes('/files') || pathname.includes('/file')
-    const isGitActive = pathname.includes('/git')
-    const isExtensionsActive = pathname.includes('/extensions')
+    // Route-aware active state detection (exact suffix matching)
+    const pathSuffix = pathname.slice(basePath.length)
+    const isFilesActive = pathSuffix === '/files' || pathSuffix.startsWith('/files/') || pathSuffix.startsWith('/file')
+    const isGitActive = pathSuffix === '/git' || pathSuffix.startsWith('/git/')
+    const isExtensionsActive = pathSuffix === '/extensions' || pathSuffix.startsWith('/extensions/')
 
     // Toggle navigation: active icon -> chat, inactive icon -> that tool
     const handleFilesClick = () => {

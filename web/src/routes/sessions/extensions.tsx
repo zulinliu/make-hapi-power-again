@@ -7,14 +7,6 @@ import { queryKeys } from '@/lib/query-keys'
 import { useTranslation } from '@/lib/use-translation'
 import { SubPageLayout } from '@/components/ui/SubPageLayout'
 
-function BackIcon() {
-    return (
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6" />
-        </svg>
-    )
-}
-
 function PuzzleIcon() {
     return (
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -226,7 +218,7 @@ export default function ExtensionsPage() {
             )}
 
             {activeTab === 'skills' && (
-                <div className="flex flex-col h-full">
+                <div className="flex flex-col">
                     {/* Skill sub-tabs */}
                     <div className="flex border-b border-[var(--app-border)] bg-[var(--app-bg)]">
                         <button

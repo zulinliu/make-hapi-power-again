@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAppContext } from '@/lib/app-context'
+import { useTranslation } from '@/lib/use-translation'
 import { decodeBase64 } from '@/lib/utils'
 import { isBinaryContent, resolveImageMimeType, isMarkdownFile } from '@/lib/file-utils'
 import { langAlias } from '@/lib/shiki'
@@ -27,22 +28,38 @@ function resolveLanguage(path: string): string | undefined {
 
 export function GitFilePreview({ sessionId, filePath, fileStatus, onClose, onOpenInFileManager }: GitFilePreviewProps) {
   const { api } = useAppContext()
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
+  const [closing, setClosing] = useState(false)
+  const closeBtnRef = useRef<HTMLButtonElement>(null)
+
+  const handleClose = useCallback(() => {
+    setClosing(true)
+    setOpen(false)
+    setTimeout(() => {
+      setClosing(false)
+      onClose()
+    }, 200)
+  }, [onClose])
 
   useEffect(() => {
     requestAnimationFrame(() => setOpen(true))
+  }, [])
+
+  useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === 'Escape') handleClose()
     }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  }, [])
+  }, [handleClose])
 
-  function handleClose() {
-    setOpen(false)
-    setTimeout(onClose, 200)
-  }
+  useEffect(() => {
+    if (open && closeBtnRef.current) {
+      closeBtnRef.current.focus()
+    }
+  }, [open])
 
   const fileName = filePath.split('/').pop() || filePath
 
@@ -65,20 +82,20 @@ export function GitFilePreview({ sessionId, filePath, fileStatus, onClose, onOpe
         <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 opacity-40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" />
         </svg>
-        <span className="text-sm">File has been deleted</span>
+        <span className="text-sm">{t('git.preview.deleted')}</span>
       </div>
     )
   } else if (fileQuery.isLoading) {
-    content = <LoadingState label="Loading..." />
+    content = <LoadingState label={t('loading')} />
   } else if (fileQuery.error) {
     content = (
       <div className="flex flex-col items-center justify-center gap-3 py-12 text-[var(--app-hint)]">
-        <span className="text-sm">Failed to load file</span>
+        <span className="text-sm">{t('git.preview.loadFailed')}</span>
         <button
           onClick={() => queryClient.invalidateQueries({ queryKey: queryKeys.sessionFile(sessionId, filePath) })}
           className="text-xs text-[var(--app-link)] hover:underline"
         >
-          Retry
+          {t('git.preview.retry')}
         </button>
       </div>
     )
@@ -100,7 +117,7 @@ export function GitFilePreview({ sessionId, filePath, fileStatus, onClose, onOpe
           <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 opacity-40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="10" /><line x1="4.93" x2="19.07" y1="4.93" y2="19.07" />
           </svg>
-          <span className="text-sm">Binary file, cannot preview</span>
+          <span className="text-sm">{t('git.preview.binary')}</span>
         </div>
       )
     } else if (isMarkdownFile(filePath)) {
@@ -120,13 +137,13 @@ export function GitFilePreview({ sessionId, filePath, fileStatus, onClose, onOpe
   } else {
     content = (
       <div className="flex items-center justify-center py-12 text-sm text-[var(--app-hint)]">
-        No content available
+        {t('git.preview.noContent')}
       </div>
     )
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-stretch">
+    <div className="fixed inset-0 z-50 flex items-stretch" role="dialog" aria-modal="true" aria-label={t('git.preview.title')}>
       <div
         className="fixed inset-0 bg-black/40 transition-opacity duration-200"
         style={{ opacity: open ? 1 : 0 }}
@@ -140,8 +157,10 @@ export function GitFilePreview({ sessionId, filePath, fileStatus, onClose, onOpe
       >
         <div className="flex items-center gap-2 px-4 py-3 border-b border-[var(--app-divider)] shrink-0">
           <button
+            ref={closeBtnRef}
             onClick={handleClose}
             className="h-8 w-8 rounded-full flex items-center justify-center hover:bg-[var(--app-secondary-bg)] transition-colors text-[var(--app-hint)]"
+            aria-label={t('button.close')}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" x2="6" y1="6" y2="18" /><line x1="6" x2="18" y1="6" y2="18" />
@@ -151,9 +170,10 @@ export function GitFilePreview({ sessionId, filePath, fileStatus, onClose, onOpe
           <GitStatusBadge status={fileStatus} />
           <button
             onClick={onOpenInFileManager}
-            className="text-xs text-[var(--app-link)] hover:underline shrink-0"
+            disabled={closing}
+            className="text-xs text-[var(--app-link)] hover:underline shrink-0 disabled:opacity-50"
           >
-            Open in file manager
+            {t('git.preview.openInFileManager')}
           </button>
         </div>
         <div className="flex-1 overflow-y-auto min-h-0">

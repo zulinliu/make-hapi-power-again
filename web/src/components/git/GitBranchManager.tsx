@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAppContext } from '@/lib/app-context'
 import { useTranslation } from '@/lib/use-translation'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 
 interface Branch {
   name: string
@@ -14,6 +15,7 @@ export function GitBranchManager({ sessionId }: { sessionId: string }) {
   const [branches, setBranches] = useState<Branch[]>([])
   const [loading, setLoading] = useState(false)
   const [newBranchName, setNewBranchName] = useState('')
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const loadBranches = useCallback(async () => {
@@ -65,8 +67,9 @@ export function GitBranchManager({ sessionId }: { sessionId: string }) {
     }
   }
 
-  const handleDelete = async (name: string) => {
+  const handleDelete = useCallback(async (name: string) => {
     if (!api) return
+    setDeleteTarget(null)
     try {
       const res = await api.deleteGitBranch(sessionId, name)
       if (res.success) {
@@ -77,7 +80,7 @@ export function GitBranchManager({ sessionId }: { sessionId: string }) {
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : String(e))
     }
-  }
+  }, [api, sessionId, loadBranches, t])
 
   const handleMerge = async (name: string) => {
     if (!api) return
@@ -138,7 +141,7 @@ export function GitBranchManager({ sessionId }: { sessionId: string }) {
                   <button onClick={() => handleSwitch(branch.name)} className="text-xs px-2 py-0.5 rounded text-[var(--app-hint)]" title={t('git.branch.switch')}>
                     ⇄
                   </button>
-                  <button onClick={() => handleDelete(branch.name)} className="text-xs px-2 py-0.5 rounded text-[var(--app-hint)]" title={t('git.branch.delete')}>
+                  <button onClick={() => setDeleteTarget(branch.name)} className="text-xs px-2 py-0.5 rounded text-[var(--app-hint)]" title={t('git.branch.delete')}>
                     ×
                   </button>
                 </>
@@ -147,6 +150,18 @@ export function GitBranchManager({ sessionId }: { sessionId: string }) {
           ))}
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={deleteTarget !== null}
+        onClose={() => setDeleteTarget(null)}
+        title={t('git.branch.delete')}
+        description={t('git.branch.deleteConfirm', { name: deleteTarget ?? '' })}
+        confirmLabel={t('git.branch.delete')}
+        confirmingLabel={t('git.branch.delete')}
+        onConfirm={async () => { if (deleteTarget) await handleDelete(deleteTarget) }}
+        isPending={false}
+        destructive
+      />
     </div>
   )
 }
