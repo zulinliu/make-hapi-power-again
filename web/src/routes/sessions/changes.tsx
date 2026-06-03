@@ -2,17 +2,8 @@ import { useCallback, useState } from 'react'
 import { useParams } from '@tanstack/react-router'
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
 import { useAppContext } from '@/lib/app-context'
-import { useAppGoBack } from '@/hooks/useAppGoBack'
 import { useSession } from '@/hooks/queries/useSession'
 import { DiffView } from '@/components/DiffView'
-
-function BackIcon() {
-    return (
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6" />
-        </svg>
-    )
-}
 
 function CheckIcon() {
     return (
@@ -90,7 +81,6 @@ function ChangeTypeBadge({ type }: { type: FileChange['changeType'] }) {
 export default function ChangesPage() {
     const { sessionId } = useParams({ from: '/sessions/$sessionId/changes' })
     const { api } = useAppContext()
-    const goBack = useAppGoBack()
     const queryClient = useQueryClient()
     const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
     const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set())
@@ -158,25 +148,6 @@ export default function ChangesPage() {
 
     return (
         <div className="flex h-full min-h-0 flex-col">
-            {/* Header */}
-            <div className="flex items-center gap-2 border-b border-[var(--app-border)] bg-[var(--app-bg)] px-3 py-2 pt-[calc(0.5rem+env(safe-area-inset-top))]">
-                <button
-                    type="button"
-                    onClick={goBack}
-                    className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--app-hint)] transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]"
-                >
-                    <BackIcon />
-                </button>
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <span className="font-semibold text-sm truncate">变更审查</span>
-                    {pendingCount > 0 && (
-                        <span className="shrink-0 rounded-full bg-yellow-100 dark:bg-yellow-900/30 px-2 py-0.5 text-xs font-medium text-yellow-700 dark:text-yellow-400">
-                            {pendingCount} 待审查
-                        </span>
-                    )}
-                </div>
-            </div>
-
             {/* Context bar */}
             {context && (
                 <div className="flex items-center gap-2 px-3 py-1.5 border-b border-[var(--app-border)] bg-[var(--app-bg)] text-xs">

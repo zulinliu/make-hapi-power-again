@@ -2,7 +2,6 @@ import { useCallback, useMemo, useState } from 'react'
 import { useParams } from '@tanstack/react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAppContext } from '@/lib/app-context'
-import { useAppGoBack } from '@/hooks/useAppGoBack'
 import { useSession } from '@/hooks/queries/useSession'
 import { queryKeys } from '@/lib/query-keys'
 import { useTranslation } from '@/lib/use-translation'
@@ -78,7 +77,6 @@ interface SkillSearchResult {
 export default function ExtensionsPage() {
     const { sessionId } = useParams({ from: '/sessions/$sessionId/extensions' })
     const { api } = useAppContext()
-    const goBack = useAppGoBack()
     const { t } = useTranslation()
     const queryClient = useQueryClient()
     const [activeTab, setActiveTab] = useState<Tab>('skills')
@@ -208,23 +206,6 @@ export default function ExtensionsPage() {
 
     return (
         <div className="flex h-full min-h-0 flex-col">
-            {/* Header */}
-            <div className="flex items-center gap-2 border-b border-[var(--app-border)] bg-[var(--app-bg)] px-3 py-2 pt-[calc(0.5rem+env(safe-area-inset-top))]">
-                <button
-                    type="button"
-                    onClick={goBack}
-                    className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--app-hint)] transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]"
-                >
-                    <BackIcon />
-                </button>
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <PuzzleIcon />
-                    <span className="font-semibold text-sm truncate">
-                        {t('extensions.title')}
-                    </span>
-                </div>
-            </div>
-
             {/* Tabs */}
             <div className="flex border-b border-[var(--app-border)] bg-[var(--app-bg)]">
                 {(['skills', 'plugins'] as Tab[]).map(tab => (

@@ -2,16 +2,7 @@ import { useCallback, useState } from 'react'
 import { useParams } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAppContext } from '@/lib/app-context'
-import { useAppGoBack } from '@/hooks/useAppGoBack'
 import { useSession } from '@/hooks/queries/useSession'
-
-function BackIcon() {
-    return (
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6" />
-        </svg>
-    )
-}
 
 type TimelineEntryType = 'tool_use' | 'file_change' | 'message' | 'summary' | 'checkpoint' | 'error'
 type FilterType = 'all' | TimelineEntryType
@@ -127,7 +118,6 @@ function EntryDetail({ entry }: { entry: TimelineEntry }) {
 export default function TimelinePage() {
     const { sessionId } = useParams({ from: '/sessions/$sessionId/timeline' })
     const { api } = useAppContext()
-    const goBack = useAppGoBack()
     const queryClient = useQueryClient()
     const [filter, setFilter] = useState<FilterType>('all')
 
@@ -158,28 +148,7 @@ export default function TimelinePage() {
 
     return (
         <div className="flex h-full min-h-0 flex-col">
-            {/* Header */}
-            <div className="flex items-center gap-2 border-b border-[var(--app-border)] bg-[var(--app-bg)] px-3 py-2 pt-[calc(0.5rem+env(safe-area-inset-top))]">
-                <button
-                    type="button"
-                    onClick={goBack}
-                    className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--app-hint)] transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]"
-                >
-                    <BackIcon />
-                </button>
-                <span className="font-semibold text-sm">时间线</span>
-                <div className="flex-1" />
-                <button
-                    type="button"
-                    onClick={() => checkpointMutation.mutate(undefined)}
-                    disabled={checkpointMutation.isPending}
-                    className="px-2 py-1 text-xs rounded-md bg-[var(--app-link)] text-white hover:opacity-90 disabled:opacity-50"
-                >
-                    创建检查点
-                </button>
-            </div>
-
-            {/* Filter tabs */}
+            {/* Filter tabs with checkpoint button */}
             <div className="flex items-center gap-1 px-3 py-1.5 border-b border-[var(--app-border)] bg-[var(--app-bg)] overflow-x-auto">
                 {(['all', 'message', 'tool_use', 'file_change', 'summary', 'checkpoint', 'error'] as FilterType[]).map(f => (
                     <button
@@ -195,6 +164,15 @@ export default function TimelinePage() {
                         {f === 'all' ? '全部' : TYPE_LABELS[f]}
                     </button>
                 ))}
+                <div className="flex-1" />
+                <button
+                    type="button"
+                    onClick={() => checkpointMutation.mutate(undefined)}
+                    disabled={checkpointMutation.isPending}
+                    className="shrink-0 px-2 py-1 text-xs rounded-md bg-[var(--app-link)] text-white hover:opacity-90 disabled:opacity-50"
+                >
+                    创建检查点
+                </button>
             </div>
 
             {/* Content */}
