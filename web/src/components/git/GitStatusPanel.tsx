@@ -159,9 +159,9 @@ function GitFileRow({ file, onViewDiff, onCopyPath, onOpenFile, onPreview }: {
     {
       label: t('git.context.openFile'),
       icon: '↗',
-      onClick: () => onOpenFile?.(file.path),
+      onClick: () => onPreview?.(file.path, file.status),
     },
-  ], [t, file.path, file.status, onViewDiff, onCopyPath, onOpenFile])
+  ], [t, file.path, file.status, onViewDiff, onCopyPath, onPreview])
 
   return (
     <>
