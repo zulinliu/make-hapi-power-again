@@ -200,6 +200,7 @@ export default {
   'terminal.mobile.connecting': '连接中…',
   'terminal.mobile.error': '终端错误',
   'terminal.mobile.connectFailed': '连接失败',
+  'terminal.scrollToBottom': '回到底部',
   'terminal.paste.fallbackTitle': '粘贴输入',
   'terminal.paste.fallbackDescription': '无法读取剪贴板，请在下方粘贴文本。',
   'terminal.paste.placeholder': '在此粘贴终端输入…',

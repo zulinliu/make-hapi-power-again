@@ -10,10 +10,13 @@ export default function MobileTerminalPage() {
     const { api, baseUrl, token } = useAppContext()
     const navigate = useNavigate()
     const terminalRef = useRef<HTMLDivElement>(null)
+    const preRef = useRef<HTMLPreElement>(null)
     const [lines, setLines] = useState<string[]>([])
     const [connected, setConnected] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const socketRef = useRef<Socket | null>(null)
+    const userScrolledRef = useRef(false)
+    const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
     useEffect(() => {
         if (!baseUrl || !token) return
@@ -39,7 +42,7 @@ export default function MobileTerminalPage() {
                 setLines(prev => {
                     const newLines = data.split('\n')
                     const updated = [...prev, ...newLines]
-                    return updated.slice(-200)
+                    return updated.slice(-500)
                 })
             }
         })
@@ -54,7 +57,7 @@ export default function MobileTerminalPage() {
 
         socket.on('disconnect', () => setConnected(false))
 
-        socket.on('connect_error', (err) => {
+        socket.on('connect_error', () => {
             setError(t('terminal.mobile.connectFailed'))
             setConnected(false)
         })
@@ -65,11 +68,41 @@ export default function MobileTerminalPage() {
         }
     }, [baseUrl, token, sessionId])
 
+    const scrollToBottom = useCallback(() => {
+        const el = terminalRef.current
+        if (!el) return
+        el.scrollTop = el.scrollHeight
+        userScrolledRef.current = false
+    }, [])
+
     useEffect(() => {
-        if (terminalRef.current) {
-            terminalRef.current.scrollTop = terminalRef.current.scrollHeight
+        if (userScrolledRef.current) return
+        requestAnimationFrame(() => {
+            scrollToBottom()
+        })
+    }, [lines, scrollToBottom])
+
+    const handleScroll = useCallback(() => {
+        const el = terminalRef.current
+        if (!el) return
+        const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 40
+        userScrolledRef.current = !atBottom
+
+        if (scrollTimeoutRef.current) {
+            clearTimeout(scrollTimeoutRef.current)
         }
-    }, [lines])
+        scrollTimeoutRef.current = setTimeout(() => {
+            userScrolledRef.current = false
+        }, 5000)
+    }, [])
+
+    useEffect(() => {
+        return () => {
+            if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current)
+        }
+    }, [])
+
+    const textContent = lines.join('\n')
 
     return (
         <div className="flex flex-col h-[100dvh] bg-gray-950 text-green-400 font-mono">
@@ -94,17 +127,37 @@ export default function MobileTerminalPage() {
             )}
 
             {/* Terminal output */}
-            <div ref={terminalRef} className="flex-1 min-h-0 overflow-y-auto p-3 text-xs leading-5">
+            <div
+                ref={terminalRef}
+                onScroll={handleScroll}
+                className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-3"
+                style={{
+                    WebkitOverflowScrolling: 'touch',
+                    scrollBehavior: 'auto',
+                }}
+            >
                 {lines.length === 0 ? (
-                    <div className="text-gray-600">{connected ? t('terminal.mobile.waitingOutput') : t('terminal.mobile.connecting')}</div>
+                    <div className="text-gray-600 text-xs">{connected ? t('terminal.mobile.waitingOutput') : t('terminal.mobile.connecting')}</div>
                 ) : (
-                    lines.map((line, i) => (
-                        <div key={i} className="whitespace-pre-wrap break-all min-h-[1.25rem]">
-                            {line || ' '}
-                        </div>
-                    ))
+                    <pre
+                        ref={preRef}
+                        className="text-xs leading-5 whitespace-pre-wrap break-all font-mono m-0"
+                    >{textContent}</pre>
                 )}
             </div>
+
+            {/* Scroll to bottom button */}
+            {userScrolledRef.current && lines.length > 0 && (
+                <div className="flex justify-center pb-[env(safe-area-inset-bottom)]">
+                    <button
+                        type="button"
+                        onClick={scrollToBottom}
+                        className="mb-2 rounded-full bg-gray-800 px-4 py-1.5 text-xs text-gray-300 shadow-lg active:bg-gray-700"
+                    >
+                        ↓ {t('terminal.scrollToBottom')}
+                    </button>
+                </div>
+            )}
         </div>
     )
 }

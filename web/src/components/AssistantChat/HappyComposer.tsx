@@ -28,7 +28,6 @@ import { FloatingOverlay } from '@/components/ChatInput/FloatingOverlay'
 import { Autocomplete } from '@/components/ChatInput/Autocomplete'
 import { StatusBar } from '@/components/AssistantChat/StatusBar'
 import { ComposerButtons } from '@/components/AssistantChat/ComposerButtons'
-import { VoiceRecorder } from '@/components/VoiceRecorder'
 import type { PendingSchedule } from '@/components/AssistantChat/ScheduleTimePicker'
 import { AttachmentItem } from '@/components/AssistantChat/AttachmentItem'
 import { useTranslation } from '@/lib/use-translation'
@@ -866,13 +865,8 @@ export function HappyComposer(props: {
                             onSchedule={setPendingSchedule}
                             onClearSchedule={isControlled ? onClearScheduleProp : () => setPendingScheduleLocal(null)}
                             hasAttachments={hasAttachments}
+                            onVoiceTranscribed={props.onVoiceTranscribed}
                         />
-                        {props.onVoiceTranscribed && (
-                            <VoiceRecorder
-                                onTranscribed={props.onVoiceTranscribed}
-                                onError={(err) => console.warn('[VoiceRecorder]', err)}
-                            />
-                        )}
                     </div>
                 </ComposerPrimitive.Root>
             </div>
