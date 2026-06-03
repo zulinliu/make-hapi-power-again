@@ -13,6 +13,7 @@ import { GitRemoteManager } from '@/components/git/GitRemoteManager'
 import { GitPushDialog } from '@/components/git/GitPushDialog'
 import { GitPullDialog } from '@/components/git/GitPullDialog'
 import { GitCommitDialog } from '@/components/git/GitCommitDialog'
+import { GitFilePreview } from '@/components/git/GitFilePreview'
 import { LoadingState } from '@/components/LoadingState'
 import { SubPageLayout } from '@/components/ui/SubPageLayout'
 import { useSession } from '@/hooks/queries/useSession'
@@ -44,6 +45,7 @@ export default function GitPage() {
   const [currentBranch, setCurrentBranch] = useState('')
   const [remotes, setRemotes] = useState<{ name: string; url: string }[]>([])
   const [changedFiles, setChangedFiles] = useState<GitFile[]>([])
+  const [previewFile, setPreviewFile] = useState<{ path: string; status: string } | null>(null)
 
   const handleStatusLoaded = useCallback((branch: string) => {
     setCurrentBranch(branch)
@@ -70,6 +72,19 @@ export default function GitPage() {
   }, [session?.metadata?.path, copy, addToast, t])
 
   const handleOpenFile = useCallback((path: string) => {
+    navigate({ to: '/sessions/$sessionId/file', params: { sessionId }, search: { path: encodeBase64(path) } })
+  }, [navigate, sessionId])
+
+  const handlePreview = useCallback((path: string, status: string) => {
+    setPreviewFile({ path, status })
+  }, [])
+
+  const handleClosePreview = useCallback(() => {
+    setPreviewFile(null)
+  }, [])
+
+  const handleOpenInFileManager = useCallback((path: string) => {
+    setPreviewFile(null)
     navigate({ to: '/sessions/$sessionId/file', params: { sessionId }, search: { path: encodeBase64(path) } })
   }, [navigate, sessionId])
 
@@ -163,7 +178,7 @@ export default function GitPage() {
           </>
         }
       >
-        {activeTab === 'status' && <GitStatusPanel sessionId={sessionId} onStatusLoaded={handleStatusLoaded} onFilesChanged={handleFilesChanged} onViewDiff={handleViewDiff} onCopyPath={handleCopyPath} onOpenFile={handleOpenFile} />}
+        {activeTab === 'status' && <GitStatusPanel sessionId={sessionId} onStatusLoaded={handleStatusLoaded} onFilesChanged={handleFilesChanged} onViewDiff={handleViewDiff} onCopyPath={handleCopyPath} onOpenFile={handleOpenFile} onPreview={handlePreview} />}
         {activeTab === 'history' && <GitHistory sessionId={sessionId} />}
         {activeTab === 'branches' && <GitBranchManager sessionId={sessionId} />}
         {activeTab === 'remotes' && <GitRemoteManager sessionId={sessionId} onRemotesLoaded={handleRemotesLoaded} />}
@@ -197,6 +212,15 @@ export default function GitPage() {
         files={changedFiles}
         onCommitComplete={() => setActiveTab('status')}
       />
+      {previewFile && (
+        <GitFilePreview
+          sessionId={sessionId}
+          filePath={previewFile.path}
+          fileStatus={previewFile.status}
+          onClose={handleClosePreview}
+          onOpenInFileManager={() => handleOpenInFileManager(previewFile.path)}
+        />
+      )}
     </>
   )
 }

@@ -4,6 +4,7 @@ import { useTranslation } from '@/lib/use-translation'
 import { useContextMenu } from '@/hooks/useContextMenu'
 import { ContextMenu } from '@/components/ui/ContextMenu'
 import type { ContextMenuItem } from '@/components/ui/ContextMenu'
+import { GitStatusBadge } from '@/components/git/GitStatusBadge'
 
 interface GitFile {
   status: string
@@ -24,9 +25,10 @@ interface GitStatusPanelProps {
   onViewDiff?: (path: string) => void
   onCopyPath?: (path: string) => void
   onOpenFile?: (path: string) => void
+  onPreview?: (path: string, status: string) => void
 }
 
-export function GitStatusPanel({ sessionId, onStatusLoaded, onFilesChanged, onViewDiff, onCopyPath, onOpenFile }: GitStatusPanelProps) {
+export function GitStatusPanel({ sessionId, onStatusLoaded, onFilesChanged, onViewDiff, onCopyPath, onOpenFile, onPreview }: GitStatusPanelProps) {
   const { api } = useAppContext()
   const { t } = useTranslation()
   const [status, setStatus] = useState<StatusData | null>(null)
@@ -97,6 +99,7 @@ export function GitStatusPanel({ sessionId, onStatusLoaded, onFilesChanged, onVi
               onViewDiff={onViewDiff}
               onCopyPath={onCopyPath}
               onOpenFile={onOpenFile}
+              onPreview={onPreview}
             />
           ))}
         </div>
@@ -105,11 +108,12 @@ export function GitStatusPanel({ sessionId, onStatusLoaded, onFilesChanged, onVi
   )
 }
 
-function GitFileRow({ file, onViewDiff, onCopyPath, onOpenFile }: {
+function GitFileRow({ file, onViewDiff, onCopyPath, onOpenFile, onPreview }: {
   file: GitFile
   onViewDiff?: (path: string) => void
   onCopyPath?: (path: string) => void
   onOpenFile?: (path: string) => void
+  onPreview?: (path: string, status: string) => void
 }) {
   const { t } = useTranslation()
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null)
@@ -160,6 +164,7 @@ function GitFileRow({ file, onViewDiff, onCopyPath, onOpenFile }: {
     <>
       <div
         {...handlers}
+        onClick={() => onPreview?.(file.path, file.status)}
         className="flex items-center gap-2 text-sm py-1 px-2 rounded bg-[var(--app-secondary-bg)] cursor-pointer hover:bg-[var(--app-subtle-bg)] transition-colors"
       >
         <GitStatusBadge status={file.status} />
@@ -183,35 +188,6 @@ function GitFileRow({ file, onViewDiff, onCopyPath, onOpenFile }: {
         />
       )}
     </>
-  )
-}
-
-function GitStatusBadge({ status }: { status: string }) {
-  const colorMap: Record<string, string> = {
-    'M': 'var(--app-warning)',
-    'A': 'var(--app-success)',
-    'D': 'var(--app-danger)',
-    'R': 'var(--app-link)',
-    '?': 'var(--app-hint)',
-  }
-  const bgMap: Record<string, string> = {
-    'M': 'var(--app-warning-subtle)',
-    'A': 'var(--app-success-subtle)',
-    'D': 'var(--app-badge-error-bg)',
-    'R': 'var(--app-primary-subtle)',
-    '?': 'var(--app-subtle-bg)',
-  }
-
-  const color = colorMap[status] || 'var(--app-hint)'
-  const bg = bgMap[status] || 'var(--app-subtle-bg)'
-
-  return (
-    <span
-      className="text-xs font-mono font-bold px-1.5 py-0.5 rounded"
-      style={{ color, background: bg }}
-    >
-      {status}
-    </span>
   )
 }
 
