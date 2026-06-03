@@ -39,14 +39,15 @@ export function createSkillManagementRoutes(getSyncEngine: () => SyncEngine | nu
                 count?: number
             }
             const raw = data.skills ?? []
-            const results = raw.map(s => ({
-                name: s.skillId,
-                description: `${s.source}/${s.skillId}`,
-                repo: s.source,
-                path: s.skillId,
-                stars: s.installs,
-            }))
-            return c.json({ success: true, results, total: data.count ?? results.length })
+            const results = raw
+                .filter(s => /^[a-zA-Z0-9._-]+\/[a-zA-Z0-9._-]+$/.test(s.source))
+                .map(s => ({
+                    name: s.skillId,
+                    description: `${s.source}/${s.skillId}`,
+                    repo: s.source,
+                    stars: s.installs,
+                }))
+            return c.json({ success: true, results, total: results.length })
         } catch (err) {
             return c.json({ success: false, error: err instanceof Error ? err.message : 'Search failed' })
         }

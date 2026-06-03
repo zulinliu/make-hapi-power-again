@@ -9,6 +9,7 @@ import { FileInputDialog, FileMoveDialog } from '@/components/ui/FileDialogs'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { useAppContext } from '@/lib/app-context'
 import { useAppGoBack } from '@/hooks/useAppGoBack'
+import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
 import { useGitStatusFiles } from '@/hooks/queries/useGitStatusFiles'
 import { useSession } from '@/hooks/queries/useSession'
 import { useSessionFileSearch } from '@/hooks/queries/useSessionFileSearch'
@@ -248,6 +249,7 @@ export default function FilesPage() {
     const navigate = useNavigate()
     const queryClient = useQueryClient()
     const goBack = useAppGoBack()
+    const { copy: copyToClipboard } = useCopyToClipboard()
     const { sessionId } = useParams({ from: '/sessions/$sessionId/files' })
     const search = useSearch({ from: '/sessions/$sessionId/files' })
     const { session } = useSession(api, sessionId)
@@ -430,10 +432,11 @@ export default function FilesPage() {
         items.push({
             label: t('file.context.copyPath'),
             icon: '📋',
-            onClick: () => {
+            onClick: async () => {
                 const basePath = session?.metadata?.path ?? ''
                 const fullPath = basePath ? `${basePath}/${contextMenu.path}` : contextMenu.path
-                void navigator.clipboard.writeText(fullPath)
+                const ok = await copyToClipboard(fullPath)
+                if (ok) addToast({ title: t('file.context.copyPathSuccess'), body: '' })
             },
         })
         if (!isDir) {
