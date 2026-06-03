@@ -78,7 +78,7 @@ export default function GitPage() {
   if (!session) {
     return (
       <div className="p-4">
-        <p className="text-sm" style={{ color: 'var(--hp-danger)' }}>{t('git.sessionNotFound')}</p>
+        <p className="text-sm text-[var(--app-danger)]">{t('git.sessionNotFound')}</p>
         <button onClick={() => navigate({ to: '/sessions' })} className="text-xs mt-2 underline">{t('git.backToSessions')}</button>
       </div>
     )

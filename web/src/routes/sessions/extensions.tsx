@@ -227,18 +227,12 @@ export default function ExtensionsPage() {
             {/* Content */}
             <div className="flex-1 min-h-0 overflow-y-auto app-scroll-y">
                 {error && (
-                    <div className="mx-3 mt-2 rounded-lg px-3 py-2 text-sm" style={{
-                        color: 'var(--hp-danger)',
-                        background: 'var(--hp-danger-subtle)'
-                    }}>
+                    <div className="mx-3 mt-2 rounded-lg px-3 py-2 text-sm text-[var(--app-danger)] bg-[var(--app-badge-error-bg)]">
                         {error}
                     </div>
                 )}
                 {successMsg && (
-                    <div className="mx-3 mt-2 rounded-lg px-3 py-2 text-sm" style={{
-                        color: 'var(--hp-success, #16a34a)',
-                        background: 'var(--hp-success-subtle, #f0fdf4)'
-                    }}>
+                    <div className="mx-3 mt-2 rounded-lg px-3 py-2 text-sm text-[var(--app-success)] bg-[var(--app-success-subtle)]">
                         {successMsg}
                     </div>
                 )}
@@ -341,8 +335,7 @@ export default function ExtensionsPage() {
                                                     type="button"
                                                     onClick={() => handleUninstallSkill(skill.name)}
                                                     disabled={installing === skill.name}
-                                                    className="ml-2 shrink-0 inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs transition-colors disabled:opacity-50"
-                                                    style={{ color: 'var(--hp-danger)' }}
+                                                    className="ml-2 shrink-0 inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs transition-colors disabled:opacity-50 text-[var(--app-danger)]"
                                                 >
                                                     {installing === skill.name ? '...' : <><TrashIcon /> {t('extensions.remove')}</>}
                                                 </button>
@@ -392,7 +385,7 @@ export default function ExtensionsPage() {
                                             {searchLoading ? (
                                                 <div className="text-sm text-[var(--app-hint)] py-3 text-center">{t('extensions.searching')}</div>
                                             ) : searchError ? (
-                                                <div className="text-sm py-3 text-center" style={{ color: 'var(--hp-danger)' }}>{t('extensions.searchError')}</div>
+                                                <div className="text-sm py-3 text-center text-[var(--app-danger)]">{t('extensions.searchError')}</div>
                                             ) : searchResults.length === 0 ? (
                                                 <div className="text-sm text-[var(--app-hint)] py-3 text-center">{t('extensions.noResults')}</div>
                                             ) : (
@@ -409,7 +402,7 @@ export default function ExtensionsPage() {
                                                                     <div className="flex items-center gap-1.5">
                                                                         <span className="text-sm font-medium text-[var(--app-fg)] truncate">{skill.name}</span>
                                                                         {isInstalled && (
-                                                                            <span className="shrink-0 inline-flex items-center gap-0.5 text-xs" style={{ color: 'var(--hp-success, #16a34a)' }}>
+                                                                            <span className="shrink-0 inline-flex items-center gap-0.5 text-xs text-[var(--app-success)]">
                                                                                 <CheckIcon />
                                                                             </span>
                                                                         )}
@@ -417,7 +410,7 @@ export default function ExtensionsPage() {
                                                                     <div className="text-xs text-[var(--app-hint)] truncate">{skill.repo}{skill.stars ? ` · ${(skill.stars / 1000).toFixed(skill.stars >= 1000 ? 1 : 0)}k` : ''}</div>
                                                                 </div>
                                                                 {isInstalled ? (
-                                                                    <span className="ml-2 shrink-0 rounded-md px-2 py-1 text-xs" style={{ color: 'var(--hp-success, #16a34a)' }}>
+                                                                    <span className="ml-2 shrink-0 rounded-md px-2 py-1 text-xs text-[var(--app-success)]">
                                                                         {t('extensions.installed')}
                                                                     </span>
                                                                 ) : (
