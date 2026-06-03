@@ -168,7 +168,7 @@ function GitFileRow({ file, onViewDiff, onCopyPath, onOpenFile, onPreview }: {
       <div
         {...handlers}
         onClick={() => { if (!longPressJustFiredRef.current) onPreview?.(file.path, file.status) }}
-        className="flex items-center gap-2 text-sm py-1 px-2 rounded bg-[var(--app-secondary-bg)] cursor-pointer hover:bg-[var(--app-subtle-bg)] transition-colors"
+        className="flex items-center gap-2 text-sm py-2 px-2 rounded-md bg-[var(--app-secondary-bg)] cursor-pointer hover:bg-[var(--app-subtle-bg)] active:bg-[var(--app-subtle-bg)] transition-colors min-h-[44px]"
         tabIndex={0}
         role="button"
         aria-label={`${file.path} ${file.status}`}
