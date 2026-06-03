@@ -11,6 +11,7 @@ import { GitPushDialog } from '@/components/git/GitPushDialog'
 import { GitPullDialog } from '@/components/git/GitPullDialog'
 import { GitCommitDialog } from '@/components/git/GitCommitDialog'
 import { LoadingState } from '@/components/LoadingState'
+import { SubPageLayout } from '@/components/ui/SubPageLayout'
 import { useSession } from '@/hooks/queries/useSession'
 
 type Tab = 'status' | 'history' | 'branches' | 'remotes'
@@ -92,72 +93,60 @@ export default function GitPage() {
   ]
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Git action toolbar */}
-      <div className="flex items-center gap-1 px-4 py-2 border-b border-[var(--app-border)] bg-[var(--app-bg)] shrink-0">
-        <button
-          onClick={handleFetch}
-          disabled={fetching}
-          className="px-2 py-1 text-xs rounded transition-colors hover:bg-[var(--app-secondary-bg)] disabled:opacity-50 text-[var(--app-hint)]"
-        >
-          {fetching ? t('git.fetch.fetching') : t('git.fetch')}
-        </button>
-        <button
-          onClick={() => { setPushPullError(''); setPullOpen(true) }}
-          className="px-2 py-1 text-xs rounded transition-colors hover:bg-[var(--app-secondary-bg)] text-[var(--app-hint)]"
-        >
-          {t('git.pull')}
-        </button>
-        <button
-          onClick={() => { setPushPullError(''); setPushOpen(true) }}
-          className="px-2 py-1 text-xs rounded transition-colors hover:bg-[var(--app-secondary-bg)] text-[var(--app-hint)]"
-        >
-          {t('git.push')}
-        </button>
-        <button
-          onClick={() => setCommitOpen(true)}
-          disabled={changedFiles.length === 0}
-          className="px-2 py-1 text-xs rounded transition-colors hover:bg-[var(--app-secondary-bg)] disabled:opacity-50 text-[var(--app-link)]"
-        >
-          {t('git.commit')}
-        </button>
-        <button
-          onClick={() => setCloneOpen(true)}
-          className="px-2 py-1 text-xs rounded transition-colors hover:bg-[var(--app-secondary-bg)] text-[var(--app-link)]"
-        >
-          {t('git.clone')}
-        </button>
-      </div>
-
-      {(pushPullError || fetchResult) && (
-        <div className={`px-4 py-2 text-xs border-b border-[var(--app-border)] ${fetchResult?.ok ? 'text-green-400 bg-green-500/10' : 'text-red-400 bg-red-500/10'}`}>
-          {pushPullError || fetchResult?.msg}
-        </div>
-      )}
-
-      <div className="flex border-b border-[var(--app-border)] shrink-0">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className="flex-1 py-2 text-sm text-center border-b-2 transition-colors"
-            style={{
-              borderColor: activeTab === tab.id ? 'var(--app-link)' : 'transparent',
-              color: activeTab === tab.id ? 'var(--app-link)' : 'var(--app-hint)',
-              fontWeight: activeTab === tab.id ? 500 : 400,
-            }}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="flex-1 overflow-y-auto">
+    <>
+      <SubPageLayout
+        tabs={tabs}
+        activeTab={activeTab}
+        onTabChange={(id) => setActiveTab(id as Tab)}
+        toolbar={
+          <>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={handleFetch}
+                disabled={fetching}
+                className="px-2 py-1 text-xs rounded transition-colors hover:bg-[var(--app-secondary-bg)] disabled:opacity-50 text-[var(--app-hint)]"
+              >
+                {fetching ? t('git.fetch.fetching') : t('git.fetch')}
+              </button>
+              <button
+                onClick={() => { setPushPullError(''); setPullOpen(true) }}
+                className="px-2 py-1 text-xs rounded transition-colors hover:bg-[var(--app-secondary-bg)] text-[var(--app-hint)]"
+              >
+                {t('git.pull')}
+              </button>
+              <button
+                onClick={() => { setPushPullError(''); setPushOpen(true) }}
+                className="px-2 py-1 text-xs rounded transition-colors hover:bg-[var(--app-secondary-bg)] text-[var(--app-hint)]"
+              >
+                {t('git.push')}
+              </button>
+              <button
+                onClick={() => setCommitOpen(true)}
+                disabled={changedFiles.length === 0}
+                className="px-2 py-1 text-xs rounded transition-colors hover:bg-[var(--app-secondary-bg)] disabled:opacity-50 text-[var(--app-link)]"
+              >
+                {t('git.commit')}
+              </button>
+              <button
+                onClick={() => setCloneOpen(true)}
+                className="px-2 py-1 text-xs rounded transition-colors hover:bg-[var(--app-secondary-bg)] text-[var(--app-link)]"
+              >
+                {t('git.clone')}
+              </button>
+            </div>
+            {(pushPullError || fetchResult) && (
+              <div className={`text-xs mt-1 ${fetchResult?.ok ? 'text-green-400' : 'text-red-400'}`}>
+                {pushPullError || fetchResult?.msg}
+              </div>
+            )}
+          </>
+        }
+      >
         {activeTab === 'status' && <GitStatusPanel sessionId={sessionId} onStatusLoaded={handleStatusLoaded} onFilesChanged={handleFilesChanged} />}
         {activeTab === 'history' && <GitHistory sessionId={sessionId} />}
         {activeTab === 'branches' && <GitBranchManager sessionId={sessionId} />}
         {activeTab === 'remotes' && <GitRemoteManager sessionId={sessionId} onRemotesLoaded={handleRemotesLoaded} />}
-      </div>
+      </SubPageLayout>
 
       <GitCloneDialog
         isOpen={cloneOpen}
@@ -187,6 +176,6 @@ export default function GitPage() {
         files={changedFiles}
         onCommitComplete={() => setActiveTab('status')}
       />
-    </div>
+    </>
   )
 }
