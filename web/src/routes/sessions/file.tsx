@@ -6,12 +6,12 @@ import { FileIcon } from '@/components/FileIcon'
 import { CopyIcon, CheckIcon } from '@/components/icons'
 import { MarkdownFilePreview } from '@/components/MarkdownFilePreview'
 import { useAppContext } from '@/lib/app-context'
-import { useAppGoBack } from '@/hooks/useAppGoBack'
 import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
 import { formatDiffError, formatReadFileError } from '@/lib/files-i18n'
 import { queryKeys } from '@/lib/query-keys'
 import { useTranslation } from '@/lib/use-translation'
 import { decodeBase64 } from '@/lib/utils'
+import { resolveImageMimeType, isBinaryContent, isMarkdownFile } from '@/lib/file-utils'
 import { ImagePreview } from '@/components/ImagePreview'
 import { LoadingState } from '@/components/LoadingState'
 
@@ -20,12 +20,6 @@ const DiffView = lazy(() =>
 )
 
 const MAX_COPYABLE_FILE_BYTES = 1_000_000
-const IMAGE_MIME_BY_EXTENSION: Record<string, string> = {
-    apng: 'image/apng', avif: 'image/avif', bmp: 'image/bmp',
-    gif: 'image/gif', ico: 'image/x-icon', jpeg: 'image/jpeg',
-    jpg: 'image/jpeg', png: 'image/png', svg: 'image/svg+xml',
-    tif: 'image/tiff', tiff: 'image/tiff', webp: 'image/webp'
-}
 
 function decodePath(value: string): string {
     if (!value) return ''
@@ -33,42 +27,12 @@ function decodePath(value: string): string {
     return decoded.ok ? decoded.text : value
 }
 
-function BackIcon(props: { className?: string }) {
-    return (
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-            fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-            className={props.className}>
-            <polyline points="15 18 9 12 15 6" />
-        </svg>
-    )
-}
-
 function FileContentSkeleton(props: { label: string }) {
     return <LoadingState label={props.label} />
 }
 
-function resolveImageMimeType(path: string): string | null {
-    const ext = path.split('.').pop()?.toLowerCase()
-    if (!ext) return null
-    return IMAGE_MIME_BY_EXTENSION[ext] ?? null
-}
-
 function getUtf8ByteLength(value: string): number {
     return new TextEncoder().encode(value).length
-}
-
-function isBinaryContent(content: string): boolean {
-    if (!content) return false
-    if (content.includes('\0')) return true
-    const nonPrintable = content.split('').filter((char) => {
-        const code = char.charCodeAt(0)
-        return code < 32 && code !== 9 && code !== 10 && code !== 13
-    }).length
-    return nonPrintable / content.length > 0.1
-}
-
-function isMarkdownFile(path: string): boolean {
-    return /\.(md|mdx|markdown)$/i.test(path)
 }
 
 type DisplayMode = 'preview' | 'edit' | 'diff'
@@ -85,7 +49,6 @@ export default function FilePage() {
     const { copied: pathCopied, copy: copyPath } = useCopyToClipboard()
     const { copied: contentCopied, copy: copyContent } = useCopyToClipboard()
 
-    const goBack = useAppGoBack()
     const queryClient = useQueryClient()
     const { sessionId } = useParams({ from: '/sessions/$sessionId/file' })
     const search = useSearch({ from: '/sessions/$sessionId/file' })
@@ -188,6 +151,8 @@ export default function FilePage() {
             setLocalContent(newValue)
             queryClient.invalidateQueries({ queryKey: queryKeys.sessionFile(sessionId, filePath) })
             queryClient.invalidateQueries({ queryKey: queryKeys.gitFileDiff(sessionId, filePath, staged) })
+        } catch (err) {
+            alert(t('file.page.saveFailed') + ': ' + (err instanceof Error ? err.message : String(err)))
         } finally {
             setIsSaving(false)
         }
@@ -203,19 +168,6 @@ export default function FilePage() {
 
     return (
         <div className="flex h-full min-h-0 flex-col">
-            <div className="bg-[var(--app-bg)] pt-[env(safe-area-inset-top)]">
-                <div className="mx-auto w-full max-w-content flex items-center gap-2 p-3 border-b border-[var(--app-border)]">
-                    <button type="button" onClick={goBack} aria-label={t('file.page.goBack')}
-                        className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--app-hint)] transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]">
-                        <BackIcon />
-                    </button>
-                    <div className="min-w-0 flex-1">
-                        <div className="truncate font-semibold">{fileName}</div>
-                        <div className="truncate text-xs text-[var(--app-hint)]">{filePath || t('file.page.unknownPath')}</div>
-                    </div>
-                </div>
-            </div>
-
             <div className="bg-[var(--app-bg)]">
                 <div className="mx-auto w-full max-w-content px-3 py-2 flex items-center gap-2 border-b border-[var(--app-divider)]">
                     <FileIcon fileName={fileName} size={20} />
@@ -297,7 +249,7 @@ export default function FilePage() {
                                 style={{ borderColor: 'var(--app-divider)', background: 'var(--app-subtle-bg)' }}>
                                 <div className="flex-1 text-xs" style={{ color: 'var(--app-hint)' }}>
                                     {localContent !== decodedContent ? (
-                                        <span style={{ color: 'var(--hp-warning)' }}>Modified</span>
+                                        <span className="text-[var(--app-warning)]">Modified</span>
                                     ) : (
                                         <span>Read-only preview</span>
                                     )}

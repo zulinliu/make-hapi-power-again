@@ -72,17 +72,16 @@ export function CodeEditor({ value, language, filePath, readOnly, onChange, onSa
     return (
         <div className="relative h-full">
             {(dirty || saving) && (
-                <div className="absolute top-2 right-12 z-10 flex items-center gap-2 text-xs" style={{ color: 'var(--hp-text-tertiary)' }}>
+                <div className="absolute top-2 right-12 z-10 flex items-center gap-2 text-xs text-[var(--app-hint)]">
                     {saving ? (
-                        <span className="px-2 py-0.5 rounded" style={{ background: 'var(--hp-success-subtle)', color: 'var(--hp-success)' }}>
+                        <span className="px-2 py-0.5 rounded text-[var(--app-success)] bg-[var(--app-success-subtle)]">
                             Saved
                         </span>
                     ) : dirty ? (
                         <button
                             type="button"
                             onClick={handleSave}
-                            className="px-2 py-0.5 rounded cursor-pointer hover:opacity-80 transition-opacity"
-                            style={{ background: 'var(--hp-warning-subtle)', color: 'var(--hp-warning)' }}
+                            className="px-2 py-0.5 rounded cursor-pointer hover:opacity-80 transition-opacity text-[var(--app-warning)] bg-[var(--app-warning-subtle)]"
                         >
                             Modified · Save
                         </button>

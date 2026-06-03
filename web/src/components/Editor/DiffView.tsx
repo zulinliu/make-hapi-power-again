@@ -55,10 +55,10 @@ export function DiffView({ original, modified, language, filePath, readOnly }: D
 
     return (
         <div className="flex h-full flex-col">
-            <div className="flex items-center gap-3 px-3 py-1.5 border-b shrink-0 text-xs" style={{ borderColor: 'var(--hp-border)' }}>
-                <span style={{ color: 'var(--hp-success)' }}>+{stats.added}</span>
-                <span style={{ color: 'var(--hp-danger)' }}>-{stats.removed}</span>
-                <span style={{ color: 'var(--hp-text-tertiary)' }}>{filePath}</span>
+            <div className="flex items-center gap-3 px-3 py-1.5 border-b shrink-0 text-xs border-[var(--app-border)]">
+                <span className="text-[var(--app-success)]">+{stats.added}</span>
+                <span className="text-[var(--app-danger)]">-{stats.removed}</span>
+                <span className="text-[var(--app-hint)]">{filePath}</span>
             </div>
             <div className="flex-1 min-h-0">
                 <DiffEditor
@@ -85,10 +85,10 @@ export function DiffView({ original, modified, language, filePath, readOnly }: D
 
 export function DiffStatsBar({ stats }: { stats: DiffStats }) {
     return (
-        <div className="flex items-center gap-3 px-3 py-1.5 text-xs" style={{ color: 'var(--hp-text-tertiary)' }}>
+        <div className="flex items-center gap-3 px-3 py-1.5 text-xs text-[var(--app-hint)]">
             <span>{stats.changedFiles} file{stats.changedFiles !== 1 ? 's' : ''}</span>
-            <span style={{ color: 'var(--hp-success)' }}>+{stats.added}</span>
-            <span style={{ color: 'var(--hp-danger)' }}>-{stats.removed}</span>
+            <span className="text-[var(--app-success)]">+{stats.added}</span>
+            <span className="text-[var(--app-danger)]">-{stats.removed}</span>
         </div>
     )
 }
