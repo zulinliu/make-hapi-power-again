@@ -92,69 +92,58 @@ export default function GitPage() {
   ]
 
   return (
-    <div className="h-full flex flex-col" style={{ background: 'var(--hp-surface-0)' }}>
-      <div className="flex items-center gap-3 px-4 h-12 border-b shrink-0" style={{ borderColor: 'var(--hp-border)' }}>
-        <button onClick={() => navigate({ to: '/sessions/$sessionId', params: { sessionId } })}
-          className="text-sm" style={{ color: 'var(--hp-text-tertiary)' }}>←</button>
-        <h2 className="text-sm font-semibold" style={{ color: 'var(--hp-text-primary)' }}>{t('git.title')}</h2>
-        <span className="text-xs font-mono" style={{ color: 'var(--hp-text-tertiary)' }}>{sessionId.slice(0, 8)}</span>
-
-        <div className="ml-auto flex items-center gap-1">
-          <button
-            onClick={handleFetch}
-            disabled={fetching}
-            className="px-2 py-1 text-xs rounded transition-colors hover:bg-[var(--hp-surface-1)] disabled:opacity-50"
-            style={{ color: 'var(--hp-text-tertiary)' }}
-          >
-            {fetching ? t('git.fetch.fetching') : t('git.fetch')}
-          </button>
-          <button
-            onClick={() => { setPushPullError(''); setPullOpen(true) }}
-            className="px-2 py-1 text-xs rounded transition-colors hover:bg-[var(--hp-surface-1)]"
-            style={{ color: 'var(--hp-text-tertiary)' }}
-          >
-            {t('git.pull')}
-          </button>
-          <button
-            onClick={() => { setPushPullError(''); setPushOpen(true) }}
-            className="px-2 py-1 text-xs rounded transition-colors hover:bg-[var(--hp-surface-1)]"
-            style={{ color: 'var(--hp-text-tertiary)' }}
-          >
-            {t('git.push')}
-          </button>
-          <button
-            onClick={() => setCommitOpen(true)}
-            disabled={changedFiles.length === 0}
-            className="px-2 py-1 text-xs rounded transition-colors hover:bg-[var(--hp-surface-1)] disabled:opacity-50"
-            style={{ color: 'var(--hp-primary)' }}
-          >
-            {t('git.commit')}
-          </button>
-          <button
-            onClick={() => setCloneOpen(true)}
-            className="px-2 py-1 text-xs rounded transition-colors hover:bg-[var(--hp-surface-1)]"
-            style={{ color: 'var(--hp-accent)' }}
-          >
-            {t('git.clone')}
-          </button>
-        </div>
+    <div className="h-full flex flex-col">
+      {/* Git action toolbar */}
+      <div className="flex items-center gap-1 px-4 py-2 border-b border-[var(--app-border)] bg-[var(--app-bg)] shrink-0">
+        <button
+          onClick={handleFetch}
+          disabled={fetching}
+          className="px-2 py-1 text-xs rounded transition-colors hover:bg-[var(--app-secondary-bg)] disabled:opacity-50 text-[var(--app-hint)]"
+        >
+          {fetching ? t('git.fetch.fetching') : t('git.fetch')}
+        </button>
+        <button
+          onClick={() => { setPushPullError(''); setPullOpen(true) }}
+          className="px-2 py-1 text-xs rounded transition-colors hover:bg-[var(--app-secondary-bg)] text-[var(--app-hint)]"
+        >
+          {t('git.pull')}
+        </button>
+        <button
+          onClick={() => { setPushPullError(''); setPushOpen(true) }}
+          className="px-2 py-1 text-xs rounded transition-colors hover:bg-[var(--app-secondary-bg)] text-[var(--app-hint)]"
+        >
+          {t('git.push')}
+        </button>
+        <button
+          onClick={() => setCommitOpen(true)}
+          disabled={changedFiles.length === 0}
+          className="px-2 py-1 text-xs rounded transition-colors hover:bg-[var(--app-secondary-bg)] disabled:opacity-50 text-[var(--app-link)]"
+        >
+          {t('git.commit')}
+        </button>
+        <button
+          onClick={() => setCloneOpen(true)}
+          className="px-2 py-1 text-xs rounded transition-colors hover:bg-[var(--app-secondary-bg)] text-[var(--app-link)]"
+        >
+          {t('git.clone')}
+        </button>
       </div>
 
       {(pushPullError || fetchResult) && (
-        <div className={`px-4 py-2 text-xs border-b ${fetchResult?.ok ? 'text-green-400 bg-green-500/10' : 'text-red-400 bg-red-500/10'}`} style={{ borderColor: 'var(--hp-border)' }}>
+        <div className={`px-4 py-2 text-xs border-b border-[var(--app-border)] ${fetchResult?.ok ? 'text-green-400 bg-green-500/10' : 'text-red-400 bg-red-500/10'}`}>
           {pushPullError || fetchResult?.msg}
         </div>
       )}
 
-      <div className="flex border-b shrink-0" style={{ borderColor: 'var(--hp-border)' }}>
+      <div className="flex border-b border-[var(--app-border)] shrink-0">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className="flex-1 py-2 text-sm text-center border-b-2 transition-colors"
             style={{
-              borderColor: activeTab === tab.id ? 'var(--hp-primary)' : 'transparent',
-              color: activeTab === tab.id ? 'var(--hp-primary)' : 'var(--hp-text-tertiary)',
+              borderColor: activeTab === tab.id ? 'var(--app-link)' : 'transparent',
+              color: activeTab === tab.id ? 'var(--app-link)' : 'var(--app-hint)',
               fontWeight: activeTab === tab.id ? 500 : 400,
             }}
           >
