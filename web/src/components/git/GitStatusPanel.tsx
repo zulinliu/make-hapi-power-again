@@ -49,14 +49,14 @@ export function GitStatusPanel({ sessionId, onStatusLoaded, onFilesChanged }: {
   useEffect(() => { refresh() }, [refresh])
 
   if (loading && !status) {
-    return <div className="p-4 text-sm" style={{ color: 'var(--hp-text-tertiary)' }}>{t('git.status.loading')}</div>
+    return <div className="p-4 text-sm text-[var(--app-hint)]">{t('git.status.loading')}</div>
   }
 
   if (error) {
     return (
       <div className="p-4">
-        <p className="text-sm" style={{ color: 'var(--hp-danger)' }}>{error}</p>
-        <button onClick={refresh} className="text-xs mt-2 underline" style={{ color: 'var(--hp-primary)' }}>{t('git.status.retry')}</button>
+        <p className="text-sm text-[var(--app-danger)]">{error}</p>
+        <button onClick={refresh} className="text-xs mt-2 underline text-[var(--app-link)]">{t('git.status.retry')}</button>
       </div>
     )
   }
@@ -66,26 +66,26 @@ export function GitStatusPanel({ sessionId, onStatusLoaded, onFilesChanged }: {
   return (
     <div className="p-4 space-y-3">
       <div className="flex items-center gap-2">
-        <span className="text-xs font-mono px-2 py-0.5 rounded" style={{ background: 'var(--hp-primary-subtle)', color: 'var(--hp-primary)' }}>
+        <span className="text-xs font-mono px-2 py-0.5 rounded text-[var(--app-link)] bg-[var(--app-primary-subtle)]">
           {status.branch}
         </span>
         {(status.ahead > 0 || status.behind > 0) && (
-          <span className="text-xs" style={{ color: 'var(--hp-text-tertiary)' }}>
+          <span className="text-xs text-[var(--app-hint)]">
             {status.ahead > 0 && `↑${status.ahead}`}
             {status.behind > 0 && `↓${status.behind}`}
           </span>
         )}
-        <button onClick={refresh} className="ml-auto text-xs" style={{ color: 'var(--hp-text-tertiary)' }} title="Refresh">↻</button>
+        <button onClick={refresh} className="ml-auto text-xs text-[var(--app-hint)]" title="Refresh">↻</button>
       </div>
 
       {status.files.length === 0 ? (
-        <p className="text-sm" style={{ color: 'var(--hp-text-tertiary)' }}>{t('git.status.clean')}</p>
+        <p className="text-sm text-[var(--app-hint)]">{t('git.status.clean')}</p>
       ) : (
         <div className="space-y-1">
           {status.files.map((file) => (
-            <div key={file.path} className="flex items-center gap-2 text-sm py-1 px-2 rounded" style={{ background: 'var(--hp-surface-1)' }}>
+            <div key={file.path} className="flex items-center gap-2 text-sm py-1 px-2 rounded bg-[var(--app-secondary-bg)]">
               <GitStatusBadge status={file.status} />
-              <span className="font-mono text-xs truncate flex-1" style={{ color: 'var(--hp-text-primary)' }}>
+              <span className="font-mono text-xs truncate flex-1 text-[var(--app-fg)]">
                 {file.path}
               </span>
             </div>
@@ -98,22 +98,22 @@ export function GitStatusPanel({ sessionId, onStatusLoaded, onFilesChanged }: {
 
 function GitStatusBadge({ status }: { status: string }) {
   const colorMap: Record<string, string> = {
-    'M': 'var(--hp-warning)',
-    'A': 'var(--hp-success)',
-    'D': 'var(--hp-danger)',
-    'R': 'var(--hp-primary)',
-    '?': 'var(--hp-text-tertiary)',
+    'M': 'var(--app-warning)',
+    'A': 'var(--app-success)',
+    'D': 'var(--app-danger)',
+    'R': 'var(--app-link)',
+    '?': 'var(--app-hint)',
   }
   const bgMap: Record<string, string> = {
-    'M': 'var(--hp-warning-subtle)',
-    'A': 'var(--hp-success-subtle)',
-    'D': 'var(--hp-danger-subtle)',
-    'R': 'var(--hp-primary-subtle)',
-    '?': 'var(--hp-surface-2)',
+    'M': 'var(--app-warning-subtle)',
+    'A': 'var(--app-success-subtle)',
+    'D': 'var(--app-badge-error-bg)',
+    'R': 'var(--app-primary-subtle)',
+    '?': 'var(--app-subtle-bg)',
   }
 
-  const color = colorMap[status] || 'var(--hp-text-tertiary)'
-  const bg = bgMap[status] || 'var(--hp-surface-2)'
+  const color = colorMap[status] || 'var(--app-hint)'
+  const bg = bgMap[status] || 'var(--app-subtle-bg)'
 
   return (
     <span
