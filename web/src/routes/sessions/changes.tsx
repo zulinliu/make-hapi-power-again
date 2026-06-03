@@ -3,6 +3,7 @@ import { useParams } from '@tanstack/react-router'
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
 import { useAppContext } from '@/lib/app-context'
 import { useSession } from '@/hooks/queries/useSession'
+import { useTranslation } from '@/lib/use-translation'
 import { DiffView } from '@/components/DiffView'
 import { SubPageLayout } from '@/components/ui/SubPageLayout'
 
@@ -54,26 +55,28 @@ interface ChangeGroup {
 type StatusFilter = 'all' | 'pending' | 'approved' | 'rejected'
 
 function StatusBadge({ status }: { status: FileChange['reviewStatus'] }) {
+    const { t } = useTranslation()
     const config = {
-        pending: { bg: 'bg-yellow-100 dark:bg-yellow-900/30', text: 'text-yellow-700 dark:text-yellow-400', label: '待审查' },
-        approved: { bg: 'bg-green-100 dark:bg-green-900/30', text: 'text-green-700 dark:text-green-400', label: '已批准' },
-        rejected: { bg: 'bg-red-100 dark:bg-red-900/30', text: 'text-red-700 dark:text-red-400', label: '已拒绝' },
+        pending: { bg: 'var(--app-warning-subtle)', text: 'var(--app-warning)', label: t('changes.status.pending') },
+        approved: { bg: 'var(--app-success-subtle)', text: 'var(--app-success)', label: t('changes.status.approved') },
+        rejected: { bg: 'var(--app-badge-error-bg)', text: 'var(--app-danger)', label: t('changes.status.rejected') },
     }[status]
     return (
-        <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${config.bg} ${config.text}`}>
+        <span className="text-xs px-1.5 py-0.5 rounded-full font-medium" style={{ background: config.bg, color: config.text }}>
             {config.label}
         </span>
     )
 }
 
 function ChangeTypeBadge({ type }: { type: FileChange['changeType'] }) {
+    const { t } = useTranslation()
     const config = {
-        created: { bg: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-700 dark:text-blue-400', label: '新建' },
-        modified: { bg: 'bg-amber-100 dark:bg-amber-900/30', text: 'text-amber-700 dark:text-amber-400', label: '修改' },
-        deleted: { bg: 'bg-red-100 dark:bg-red-900/30', text: 'text-red-700 dark:text-red-400', label: '删除' },
+        created: { bg: 'var(--app-primary-subtle)', text: 'var(--app-link)', label: t('changes.type.created') },
+        modified: { bg: 'var(--app-warning-subtle)', text: 'var(--app-warning)', label: t('changes.type.modified') },
+        deleted: { bg: 'var(--app-badge-error-bg)', text: 'var(--app-danger)', label: t('changes.type.deleted') },
     }[type]
     return (
-        <span className={`text-xs px-1.5 py-0.5 rounded-full ${config.bg} ${config.text}`}>
+        <span className="text-xs px-1.5 py-0.5 rounded-full" style={{ background: config.bg, color: config.text }}>
             {config.label}
         </span>
     )
@@ -82,6 +85,7 @@ function ChangeTypeBadge({ type }: { type: FileChange['changeType'] }) {
 export default function ChangesPage() {
     const { sessionId } = useParams({ from: '/sessions/$sessionId/changes' })
     const { api } = useAppContext()
+    const { t } = useTranslation()
     const queryClient = useQueryClient()
     const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
     const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set())
@@ -150,10 +154,10 @@ export default function ChangesPage() {
     return (
         <SubPageLayout
             tabs={[
-                { id: 'all', label: '全部' },
-                { id: 'pending', label: '待审查' },
-                { id: 'approved', label: '已批准' },
-                { id: 'rejected', label: '已拒绝' },
+                { id: 'all', label: t('changes.tab.all') },
+                { id: 'pending', label: t('changes.tab.pending') },
+                { id: 'approved', label: t('changes.tab.approved') },
+                { id: 'rejected', label: t('changes.tab.rejected') },
             ]}
             activeTab={statusFilter}
             onTabChange={(id) => setStatusFilter(id as StatusFilter)}
@@ -161,13 +165,13 @@ export default function ChangesPage() {
                 <div className="flex items-center gap-2">
                     {context && (
                         <>
-                            <span className="text-[var(--app-hint)]">上下文</span>
+                            <span className="text-[var(--app-hint)]">{t('changes.context')}</span>
                             <div className="flex-1 h-1.5 rounded-full bg-[var(--app-secondary-bg)] overflow-hidden max-w-[120px]">
                                 <div
                                     className="h-full rounded-full transition-all"
                                     style={{
                                         width: `${Math.min(100, (context.usedTokens / context.contextWindow) * 100)}%`,
-                                        background: context.status === 'critical' ? '#ef4444' : context.status === 'warning' ? '#f59e0b' : '#22c55e',
+                                        background: context.status === 'critical' ? 'var(--app-danger)' : context.status === 'warning' ? 'var(--app-warning)' : 'var(--app-success)',
                                     }}
                                 />
                             </div>
@@ -183,17 +187,17 @@ export default function ChangesPage() {
                                 type="button"
                                 onClick={() => handleBulkAction('approved')}
                                 disabled={bulkReviewMutation.isPending}
-                                className="flex items-center gap-1 px-2 py-1 text-xs rounded-md bg-green-600 text-white hover:bg-green-700 disabled:opacity-50"
+                                className="flex items-center gap-1 px-3 py-1.5 text-xs rounded-md bg-green-600 text-white hover:bg-green-700 disabled:opacity-50"
                             >
-                                <CheckIcon /> 全部批准
+                                <CheckIcon /> {t('changes.approveAll')}
                             </button>
                             <button
                                 type="button"
                                 onClick={() => handleBulkAction('rejected')}
                                 disabled={bulkReviewMutation.isPending}
-                                className="flex items-center gap-1 px-2 py-1 text-xs rounded-md bg-red-500 text-white hover:bg-red-600 disabled:opacity-50"
+                                className="flex items-center gap-1 px-3 py-1.5 text-xs rounded-md bg-red-500 text-white hover:bg-red-600 disabled:opacity-50"
                             >
-                                <XIcon /> 全部拒绝
+                                <XIcon /> {t('changes.rejectAll')}
                             </button>
                         </div>
                     )}
@@ -201,14 +205,14 @@ export default function ChangesPage() {
             }
         >
             {truncated && (
-                <div className="mx-3 mt-2 rounded-lg border border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950/20 px-3 py-2 text-xs text-yellow-700 dark:text-yellow-400">
-                    消息较多，仅显示最近 200 条消息中的变更
+                <div className="mx-3 mt-2 rounded-md border border-[var(--app-border)] bg-[var(--app-warning-subtle)] px-3 py-2 text-xs text-[var(--app-warning)]">
+                    {t('changes.truncated')}
                 </div>
             )}
             {isLoading ? (
-                <div className="py-8 text-center text-sm text-[var(--app-hint)]">加载中...</div>
+                <div className="py-8 text-center text-sm text-[var(--app-hint)]">{t('changes.loading')}</div>
             ) : groups.length === 0 ? (
-                <div className="py-8 text-center text-sm text-[var(--app-hint)]">暂无变更记录</div>
+                <div className="py-8 text-center text-sm text-[var(--app-hint)]">{t('changes.empty')}</div>
             ) : (
                 <div className="p-3 space-y-2">
                     {groups.filter(g => g.changes.length > 0).map(group => {
@@ -255,8 +259,9 @@ export default function ChangesPage() {
                                                                     type="button"
                                                                     onClick={() => reviewMutation.mutate({ changeId: change.id, action: 'approved' })}
                                                                     disabled={reviewMutation.isPending}
-                                                                    className="flex items-center justify-center w-7 h-7 rounded-md bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/50 disabled:opacity-50"
-                                                                    title="批准"
+                                                                    className="flex items-center justify-center w-7 h-7 rounded-md text-green-600 hover:opacity-80 disabled:opacity-50"
+                                                                    style={{ background: 'var(--app-success-subtle)' }}
+                                                                    title={t('changes.approve')}
                                                                 >
                                                                     <CheckIcon />
                                                                 </button>
@@ -264,8 +269,9 @@ export default function ChangesPage() {
                                                                     type="button"
                                                                     onClick={() => reviewMutation.mutate({ changeId: change.id, action: 'rejected' })}
                                                                     disabled={reviewMutation.isPending}
-                                                                    className="flex items-center justify-center w-7 h-7 rounded-md bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50 disabled:opacity-50"
-                                                                    title="拒绝"
+                                                                    className="flex items-center justify-center w-7 h-7 rounded-md text-red-600 hover:opacity-80 disabled:opacity-50"
+                                                                    style={{ background: 'var(--app-badge-error-bg)' }}
+                                                                    title={t('changes.reject')}
                                                                 >
                                                                     <XIcon />
                                                                 </button>
