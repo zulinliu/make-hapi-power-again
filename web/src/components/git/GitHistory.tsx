@@ -36,29 +36,29 @@ export function GitHistory({ sessionId }: { sessionId: string }) {
   useEffect(() => { loadHistory() }, [loadHistory])
 
   if (loading && commits.length === 0) {
-    return <div className="p-4 text-sm" style={{ color: 'var(--hp-text-tertiary)' }}>{t('git.history.loading')}</div>
+    return <div className="p-4 text-sm text-[var(--app-hint)]">{t('git.history.loading')}</div>
   }
 
   if (error) {
-    return <div className="p-4 text-sm" style={{ color: 'var(--hp-danger)' }}>{error}</div>
+    return <div className="p-4 text-sm text-[var(--app-danger)]">{error}</div>
   }
 
   if (commits.length === 0) {
-    return <div className="p-4 text-sm" style={{ color: 'var(--hp-text-tertiary)' }}>{t('git.history.empty')}</div>
+    return <div className="p-4 text-sm text-[var(--app-hint)]">{t('git.history.empty')}</div>
   }
 
   return (
-    <div className="divide-y" style={{ borderColor: 'var(--hp-border)' }}>
+    <div className="divide-y border-[var(--app-border)]">
       {commits.map((commit) => (
         <div key={commit.hash} className="flex items-start gap-3 px-4 py-2">
-          <code className="text-xs font-mono shrink-0 mt-0.5" style={{ color: 'var(--hp-primary)' }}>
+          <code className="text-xs font-mono shrink-0 mt-0.5 text-[var(--app-link)]">
             {commit.hash.slice(0, 7)}
           </code>
           <div className="flex-1 min-w-0">
-            <p className="text-sm truncate" style={{ color: 'var(--hp-text-primary)' }}>{commit.message}</p>
+            <p className="text-sm truncate text-[var(--app-fg)]">{commit.message}</p>
           </div>
           {commit.refs && (
-            <span className="text-xs px-1.5 py-0.5 rounded shrink-0" style={{ background: 'var(--hp-surface-2)', color: 'var(--hp-text-secondary)' }}>
+            <span className="text-xs px-1.5 py-0.5 rounded shrink-0 bg-[var(--app-subtle-bg)] text-[var(--app-text-secondary)]">
               {commit.refs}
             </span>
           )}
@@ -71,12 +71,12 @@ export function GitHistory({ sessionId }: { sessionId: string }) {
 function parseLog(raw: string): CommitEntry[] {
   if (!raw) return []
   return raw.split('\n').filter(Boolean).map((line) => {
-    const match = line.match(/^(\*|\||\/|\\)\s+([a-f0-9]+)\s*(?:\(([^)]*)\))?\s*(.*)/)
+    const match = line.match(/^(?:[\*|\/\\]\s+)?([a-f0-9]+)\s*(?:\(([^)]*)\))?\s*(.*)/)
     if (!match) return null
     return {
-      hash: match[2],
-      refs: match[3] || '',
-      message: match[4] || '',
+      hash: match[1],
+      refs: match[2] || '',
+      message: match[3] || '',
     }
   }).filter(Boolean) as CommitEntry[]
 }

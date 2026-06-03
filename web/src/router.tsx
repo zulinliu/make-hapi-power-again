@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import {
     Navigate,
@@ -14,6 +14,7 @@ import {
 import { getScrollRestorationKey } from '@/lib/scrollRestorationKey'
 import { App } from '@/App'
 import { SessionChat } from '@/components/SessionChat'
+import { SessionHeader } from '@/components/SessionHeader'
 import { SessionList } from '@/components/SessionList'
 import { NewSession } from '@/components/NewSession'
 import { WorkspaceBrowser } from '@/components/WorkspaceBrowser'
@@ -266,7 +267,7 @@ function SessionsIndexPage() {
     return null
 }
 
-function SessionPage() {
+function SessionPage(props: { outlineOpen?: boolean; setOutlineOpen?: (open: boolean | ((prev: boolean) => boolean)) => void }) {
     const { api } = useAppContext()
     const { t } = useTranslation()
     const goBack = useAppGoBack()
@@ -435,6 +436,8 @@ function SessionPage() {
             onRetryMessage={retryMessage}
             autocompleteSuggestions={getAutocompleteSuggestions}
             availableSlashCommands={slashCommands}
+            outlineOpen={props.outlineOpen ?? false}
+            onOutlineOpenChange={props.setOutlineOpen}
         />
     )
 }
@@ -444,7 +447,10 @@ function SessionDetailRoute() {
     const pathname = useLocation({ select: location => location.pathname })
     const { sessionId } = useParams({ from: '/sessions/$sessionId' })
     const navigate = useNavigate()
-    const { notFound: sessionNotFound } = useSession(api, sessionId)
+    const goBack = useAppGoBack()
+    const { session, notFound: sessionNotFound } = useSession(api, sessionId)
+    const [outlineOpen, setOutlineOpen] = useState(false)
+
     const basePath = `/sessions/${sessionId}`
     const isChat = pathname === basePath || pathname === `${basePath}/`
 
@@ -463,7 +469,26 @@ function SessionDetailRoute() {
         )
     }
 
-    return isChat ? <SessionPage /> : <Outlet />
+    return (
+        <div className="flex h-full min-h-0 flex-col">
+            {session && (
+                <SessionHeader
+                    session={session}
+                    onBack={goBack}
+                    api={api}
+                    sessionId={sessionId}
+                    isSubPage={!isChat}
+                    onSessionDeleted={() => navigate({ to: '/sessions' })}
+                    onToggleOutline={() => setOutlineOpen(prev => !prev)}
+                />
+            )}
+            {isChat ? (
+                <SessionPage outlineOpen={outlineOpen} setOutlineOpen={setOutlineOpen} />
+            ) : (
+                <Outlet />
+            )}
+        </div>
+    )
 }
 
 function NewSessionPage() {
