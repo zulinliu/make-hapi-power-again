@@ -50,8 +50,8 @@ export function GitFilePreview({ sessionId, filePath, fileStatus, onClose, onOpe
   }, [onClose])
 
   useEffect(() => {
+    closedRef.current = false
     requestAnimationFrame(() => setOpen(true))
-    return () => { closedRef.current = true }
   }, [])
 
   useEffect(() => {
