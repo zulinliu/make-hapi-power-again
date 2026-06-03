@@ -7,8 +7,8 @@ import { ContextMenu } from '@/components/ui/ContextMenu'
 import type { ContextMenuItem } from '@/components/ui/ContextMenu'
 import { FileInputDialog, FileMoveDialog } from '@/components/ui/FileDialogs'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { SubPageLayout } from '@/components/ui/SubPageLayout'
 import { useAppContext } from '@/lib/app-context'
-import { useAppGoBack } from '@/hooks/useAppGoBack'
 import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
 import { useGitStatusFiles } from '@/hooks/queries/useGitStatusFiles'
 import { useSession } from '@/hooks/queries/useSession'
@@ -24,25 +24,6 @@ import { queryKeys } from '@/lib/query-keys'
 import { useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from '@/lib/use-translation'
 import { useToast } from '@/lib/toast-context'
-
-function BackIcon(props: { className?: string }) {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className={props.className}
-        >
-            <polyline points="15 18 9 12 15 6" />
-        </svg>
-    )
-}
 
 function RefreshIcon(props: { className?: string }) {
     return (
@@ -126,27 +107,27 @@ function FolderIcon(props: { className?: string }) {
 }
 
 function StatusBadge(props: { status: GitFileStatus['status'] }) {
-    const { label, color } = useMemo(() => {
+    const { label, color, bg } = useMemo(() => {
         switch (props.status) {
             case 'added':
-                return { label: 'A', color: 'var(--app-git-staged-color)' }
+                return { label: 'A', color: 'var(--app-git-staged-color)', bg: 'var(--app-success-subtle)' }
             case 'deleted':
-                return { label: 'D', color: 'var(--app-git-deleted-color)' }
+                return { label: 'D', color: 'var(--app-git-deleted-color)', bg: 'var(--app-badge-error-bg)' }
             case 'renamed':
-                return { label: 'R', color: 'var(--app-git-renamed-color)' }
+                return { label: 'R', color: 'var(--app-git-renamed-color)', bg: 'var(--app-primary-subtle)' }
             case 'untracked':
-                return { label: '?', color: 'var(--app-git-untracked-color)' }
+                return { label: '?', color: 'var(--app-git-untracked-color)', bg: 'var(--app-subtle-bg)' }
             case 'conflicted':
-                return { label: 'U', color: 'var(--app-git-deleted-color)' }
+                return { label: 'U', color: 'var(--app-git-deleted-color)', bg: 'var(--app-badge-error-bg)' }
             default:
-                return { label: 'M', color: 'var(--app-git-unstaged-color)' }
+                return { label: 'M', color: 'var(--app-git-unstaged-color)', bg: 'var(--app-warning-subtle)' }
         }
     }, [props.status])
 
     return (
         <span
-            className="inline-flex items-center justify-center rounded border px-1.5 py-0.5 text-[10px] font-semibold"
-            style={{ color, borderColor: color }}
+            className="inline-flex items-center justify-center rounded px-1.5 py-0.5 text-[10px] font-bold font-mono"
+            style={{ color, background: bg }}
         >
             {label}
         </span>
@@ -248,7 +229,6 @@ export default function FilesPage() {
     const { addToast } = useToast()
     const navigate = useNavigate()
     const queryClient = useQueryClient()
-    const goBack = useAppGoBack()
     const { copy: copyToClipboard } = useCopyToClipboard()
     const { sessionId } = useParams({ from: '/sessions/$sessionId/files' })
     const search = useSearch({ from: '/sessions/$sessionId/files' })
@@ -482,21 +462,31 @@ export default function FilesPage() {
         return items
     }, [contextMenu, t, api, sessionId, session?.metadata?.path])
 
+    const filesTabs = useMemo(() => [
+        { id: 'changes', label: t('files.tab.changes') },
+        { id: 'directories', label: t('files.tab.directories') },
+    ], [t])
+
     return (
-        <div className="flex h-full min-h-0 flex-col">
-            <div className="bg-[var(--app-bg)] pt-[env(safe-area-inset-top)]">
-                <div className="mx-auto w-full max-w-content flex items-center gap-2 p-3 border-b border-[var(--app-border)]">
-                    <button
-                        type="button"
-                        onClick={goBack}
-                        aria-label={t('file.page.goBack')}
-                        className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--app-hint)] transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]"
-                    >
-                        <BackIcon />
-                    </button>
-                    <div className="min-w-0 flex-1">
-                        <div className="truncate font-semibold">{t('files.page.title')}</div>
-                        <div className="truncate text-xs text-[var(--app-hint)]">{subtitle}</div>
+        <>
+        <SubPageLayout
+            tabs={filesTabs}
+            activeTab={activeTab}
+            onTabChange={(id) => handleTabChange(id as 'changes' | 'directories')}
+            toolbar={
+                <div className="flex items-center gap-2">
+                    <div className="relative flex-1">
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--app-hint)]">
+                            <SearchIcon />
+                        </div>
+                        <input
+                            value={searchQuery}
+                            onChange={(event) => setSearchQuery(event.target.value)}
+                            placeholder={t('files.page.searchPlaceholder')}
+                            className="w-full rounded-md bg-[var(--app-subtle-bg)] py-2 pl-9 pr-3 text-sm text-[var(--app-fg)] placeholder:text-[var(--app-hint)] focus:outline-none focus:ring-1 focus:ring-[var(--app-link)]"
+                            autoCapitalize="none"
+                            autoCorrect="off"
+                        />
                     </div>
                     <button
                         type="button"
@@ -507,165 +497,114 @@ export default function FilesPage() {
                         <RefreshIcon />
                     </button>
                 </div>
-            </div>
-
-            <div className="bg-[var(--app-bg)]">
-                <div className="mx-auto w-full max-w-content p-3 border-b border-[var(--app-border)]">
-                    <div className="flex items-center gap-2 rounded-md bg-[var(--app-subtle-bg)] px-3 py-2">
-                        <SearchIcon className="text-[var(--app-hint)]" />
-                        <input
-                            value={searchQuery}
-                            onChange={(event) => setSearchQuery(event.target.value)}
-                            placeholder={t('files.page.searchPlaceholder')}
-                            className="w-full bg-transparent text-sm text-[var(--app-fg)] placeholder:text-[var(--app-hint)] focus:outline-none"
-                            autoCapitalize="none"
-                            autoCorrect="off"
-                        />
-                    </div>
-                </div>
-            </div>
-
-            <div className="bg-[var(--app-bg)] border-b border-[var(--app-divider)]" role="tablist">
-                <div className="mx-auto w-full max-w-content grid grid-cols-2">
-                    <button
-                        type="button"
-                        role="tab"
-                        aria-selected={activeTab === 'changes'}
-                        onClick={() => handleTabChange('changes')}
-                        className={`relative py-3 text-center text-sm font-semibold transition-colors hover:bg-[var(--app-subtle-bg)] ${activeTab === 'changes' ? 'text-[var(--app-fg)]' : 'text-[var(--app-hint)]'}`}
-                    >
-                        {t('files.tab.changes')}
-                        <span
-                            className={`absolute bottom-0 left-1/2 h-0.5 w-10 -translate-x-1/2 rounded-full ${activeTab === 'changes' ? 'bg-[var(--app-link)]' : 'bg-transparent'}`}
-                        />
-                    </button>
-                    <button
-                        type="button"
-                        role="tab"
-                        aria-selected={activeTab === 'directories'}
-                        onClick={() => handleTabChange('directories')}
-                        className={`relative py-3 text-center text-sm font-semibold transition-colors hover:bg-[var(--app-subtle-bg)] ${activeTab === 'directories' ? 'text-[var(--app-fg)]' : 'text-[var(--app-hint)]'}`}
-                    >
-                        {t('files.tab.directories')}
-                        <span
-                            className={`absolute bottom-0 left-1/2 h-0.5 w-10 -translate-x-1/2 rounded-full ${activeTab === 'directories' ? 'bg-[var(--app-link)]' : 'bg-transparent'}`}
-                        />
-                    </button>
-                </div>
-            </div>
-
+            }
+        >
             {!gitLoading && gitStatus && !searchQuery && activeTab === 'changes' ? (
-                <div className="bg-[var(--app-bg)]">
-                    <div className="mx-auto w-full max-w-content px-3 py-2 border-b border-[var(--app-divider)]">
-                        <div className="flex items-center gap-2 text-sm">
-                            <GitBranchIcon className="text-[var(--app-hint)]" />
-                            <span className="font-semibold">{branchLabel}</span>
-                        </div>
-                        <div className="text-xs text-[var(--app-hint)]">
-                            {t('files.branch.summary', {
-                                staged: gitStatus.totalStaged,
-                                unstaged: gitStatus.totalUnstaged,
-                            })}
-                        </div>
+                <div className="px-3 py-2 border-b border-[var(--app-divider)]">
+                    <div className="flex items-center gap-2 text-sm">
+                        <GitBranchIcon className="text-[var(--app-hint)]" />
+                        <span className="font-semibold">{branchLabel}</span>
+                    </div>
+                    <div className="text-xs text-[var(--app-hint)]">
+                        {t('files.branch.summary', {
+                            staged: gitStatus.totalStaged,
+                            unstaged: gitStatus.totalUnstaged,
+                        })}
                     </div>
                 </div>
             ) : null}
 
-            <div className="app-scroll-y flex-1 min-h-0">
-                <div className="mx-auto w-full max-w-content">
-                    {showGitErrorBanner && activeTab === 'changes' ? (
-                        <div className="border-b border-[var(--app-divider)] bg-amber-500/10 px-3 py-2 text-xs text-[var(--app-hint)]">
-                            {gitErrorMessage}
+            {showGitErrorBanner && activeTab === 'changes' ? (
+                <div className="border-b border-[var(--app-divider)] bg-[var(--app-warning-subtle)] px-3 py-2 text-xs text-[var(--app-hint)]">
+                    {gitErrorMessage}
+                </div>
+            ) : null}
+            {shouldSearch ? (
+                searchResults.isLoading ? (
+                    <FileListSkeleton label={t('loading.files')} />
+                ) : searchResults.error ? (
+                    <div className="p-6 text-sm text-[var(--app-hint)]">{searchErrorMessage}</div>
+                ) : searchResults.files.length === 0 ? (
+                    <div className="p-6 text-sm text-[var(--app-hint)]">
+                        {t('files.search.empty')}
+                    </div>
+                ) : (
+                    <div className="border-t border-[var(--app-divider)]">
+                        {searchResults.files.map((file, index) => (
+                            <SearchResultRow
+                                key={`${file.fullPath}-${index}`}
+                                file={file}
+                                onOpen={() => handleOpenFile(file.fullPath)}
+                                showDivider={index < searchResults.files.length - 1}
+                            />
+                        ))}
+                    </div>
+                )
+            ) : activeTab === 'directories' ? (
+                <div>
+                    <input
+                        ref={uploadRef}
+                        type="file"
+                        className="hidden"
+                        onChange={handleUpload}
+                    />
+                    <DirectoryTree
+                        api={api}
+                        sessionId={sessionId}
+                        rootLabel={rootLabel}
+                        onOpenFile={(path) => handleOpenFile(path)}
+                        onContextMenu={handleContextMenu}
+                    />
+                </div>
+            ) : gitLoading ? (
+                <FileListSkeleton label={t('loading.git')} />
+            ) : (
+                <div>
+                    {gitStatus?.stagedFiles.length ? (
+                        <div>
+                            <div className="border-b border-[var(--app-divider)] px-3 py-2 text-xs font-semibold text-[var(--app-git-staged-color)]">
+                                {t('files.changes.section.staged', { n: gitStatus.stagedFiles.length })}
+                            </div>
+                            {gitStatus.stagedFiles.map((file, index) => (
+                                <GitFileRow
+                                    key={`staged-${file.fullPath}-${index}`}
+                                    file={file}
+                                    onOpen={() => handleOpenFile(file.fullPath, file.isStaged)}
+                                    showDivider={index < gitStatus.stagedFiles.length - 1 || gitStatus.unstagedFiles.length > 0}
+                                />
+                            ))}
                         </div>
                     ) : null}
-                    {shouldSearch ? (
-                        searchResults.isLoading ? (
-                            <FileListSkeleton label={t('loading.files')} />
-                        ) : searchResults.error ? (
-                            <div className="p-6 text-sm text-[var(--app-hint)]">{searchErrorMessage}</div>
-                        ) : searchResults.files.length === 0 ? (
-                            <div className="p-6 text-sm text-[var(--app-hint)]">
-                                {t('files.search.empty')}
-                            </div>
-                        ) : (
-                            <div className="border-t border-[var(--app-divider)]">
-                                {searchResults.files.map((file, index) => (
-                                    <SearchResultRow
-                                        key={`${file.fullPath}-${index}`}
-                                        file={file}
-                                        onOpen={() => handleOpenFile(file.fullPath)}
-                                        showDivider={index < searchResults.files.length - 1}
-                                    />
-                                ))}
-                            </div>
-                        )
-                    ) : activeTab === 'directories' ? (
+
+                    {gitStatus?.unstagedFiles.length ? (
                         <div>
-                            <input
-                                ref={uploadRef}
-                                type="file"
-                                className="hidden"
-                                onChange={handleUpload}
-                            />
-                            <DirectoryTree
-                                api={api}
-                                sessionId={sessionId}
-                                rootLabel={rootLabel}
-                                onOpenFile={(path) => handleOpenFile(path)}
-                                onContextMenu={handleContextMenu}
-                            />
+                            <div className="border-b border-[var(--app-divider)] px-3 py-2 text-xs font-semibold text-[var(--app-git-unstaged-color)]">
+                                {t('files.changes.section.unstaged', { n: gitStatus.unstagedFiles.length })}
+                            </div>
+                            {gitStatus.unstagedFiles.map((file, index) => (
+                                <GitFileRow
+                                    key={`unstaged-${file.fullPath}-${index}`}
+                                    file={file}
+                                    onOpen={() => handleOpenFile(file.fullPath, file.isStaged)}
+                                    showDivider={index < gitStatus.unstagedFiles.length - 1}
+                                />
+                            ))}
                         </div>
-                    ) : gitLoading ? (
-                        <FileListSkeleton label={t('loading.git')} />
-                    ) : (
-                        <div>
-                            {gitStatus?.stagedFiles.length ? (
-                                <div>
-                                    <div className="border-b border-[var(--app-divider)] bg-[var(--app-bg)] px-3 py-2 text-xs font-semibold text-[var(--app-git-staged-color)]">
-                                        {t('files.changes.section.staged', { n: gitStatus.stagedFiles.length })}
-                                    </div>
-                                    {gitStatus.stagedFiles.map((file, index) => (
-                                        <GitFileRow
-                                            key={`staged-${file.fullPath}-${index}`}
-                                            file={file}
-                                            onOpen={() => handleOpenFile(file.fullPath, file.isStaged)}
-                                            showDivider={index < gitStatus.stagedFiles.length - 1 || gitStatus.unstagedFiles.length > 0}
-                                        />
-                                    ))}
-                                </div>
-                            ) : null}
+                    ) : null}
 
-                            {gitStatus?.unstagedFiles.length ? (
-                                <div>
-                                    <div className="border-b border-[var(--app-divider)] bg-[var(--app-bg)] px-3 py-2 text-xs font-semibold text-[var(--app-git-unstaged-color)]">
-                                        {t('files.changes.section.unstaged', { n: gitStatus.unstagedFiles.length })}
-                                    </div>
-                                    {gitStatus.unstagedFiles.map((file, index) => (
-                                        <GitFileRow
-                                            key={`unstaged-${file.fullPath}-${index}`}
-                                            file={file}
-                                            onOpen={() => handleOpenFile(file.fullPath, file.isStaged)}
-                                            showDivider={index < gitStatus.unstagedFiles.length - 1}
-                                        />
-                                    ))}
-                                </div>
-                            ) : null}
-
-                            {!gitStatus ? (
-                                <div className="p-6 text-sm text-[var(--app-hint)]">
-                                    {t('files.changes.empty.unavailable')}
-                                </div>
-                            ) : null}
-
-                            {gitStatus && gitStatus.stagedFiles.length === 0 && gitStatus.unstagedFiles.length === 0 ? (
-                                <div className="p-6 text-sm text-[var(--app-hint)]">
-                                    {t('files.changes.empty.none')}
-                                </div>
-                            ) : null}
+                    {!gitStatus ? (
+                        <div className="p-6 text-sm text-[var(--app-hint)]">
+                            {t('files.changes.empty.unavailable')}
                         </div>
-                    )}
+                    ) : null}
+
+                    {gitStatus && gitStatus.stagedFiles.length === 0 && gitStatus.unstagedFiles.length === 0 ? (
+                        <div className="p-6 text-sm text-[var(--app-hint)]">
+                            {t('files.changes.empty.none')}
+                        </div>
+                    ) : null}
                 </div>
-            </div>
+            )}
 
             {contextMenu && (
                 <ContextMenu
@@ -679,99 +618,100 @@ export default function FilesPage() {
                     }}
                 />
             )}
+        </SubPageLayout>
 
-            <FileInputDialog
-                isOpen={renameDialog.isOpen}
-                onClose={() => setRenameDialog({ isOpen: false, path: '' })}
-                title={t('file.rename.title')}
-                placeholder={t('file.rename.placeholder')}
-                initialValue={renameDialog.path.split('/').pop() || ''}
-                submitLabel={t('file.rename.submit')}
-                onSubmit={async (newName) => {
-                    if (!api) return
-                    const dir = renameDialog.path.includes('/') ? renameDialog.path.substring(0, renameDialog.path.lastIndexOf('/')) : ''
-                    const newPath = dir ? `${dir}/${newName}` : newName
-                    const res = await api.renameSessionFile(sessionId, renameDialog.path, newPath)
-                    if (!res.success) throw new Error(res.error || t('file.rename.failed'))
-                    addToast({ title: t('file.rename.success'), body: newPath })
-                    refreshDirectory()
-                }}
-            />
+        <FileInputDialog
+            isOpen={renameDialog.isOpen}
+            onClose={() => setRenameDialog({ isOpen: false, path: '' })}
+            title={t('file.rename.title')}
+            placeholder={t('file.rename.placeholder')}
+            initialValue={renameDialog.path.split('/').pop() || ''}
+            submitLabel={t('file.rename.submit')}
+            onSubmit={async (newName) => {
+                if (!api) return
+                const dir = renameDialog.path.includes('/') ? renameDialog.path.substring(0, renameDialog.path.lastIndexOf('/')) : ''
+                const newPath = dir ? `${dir}/${newName}` : newName
+                const res = await api.renameSessionFile(sessionId, renameDialog.path, newPath)
+                if (!res.success) throw new Error(res.error || t('file.rename.failed'))
+                addToast({ title: t('file.rename.success'), body: newPath })
+                refreshDirectory()
+            }}
+        />
 
-            <ConfirmDialog
-                isOpen={deleteDialog.isOpen}
-                onClose={() => setDeleteDialog({ isOpen: false, path: '', type: 'file' })}
-                title={t('file.delete.title')}
-                description={t('file.delete.confirm', { path: deleteDialog.path })}
-                confirmLabel={t('file.delete.submit')}
-                confirmingLabel={t('file.delete.submitting')}
-                destructive
-                isPending={deleting}
-                onConfirm={async () => {
-                    if (!api) return
-                    setDeleting(true)
-                    try {
-                        const res = await api.deleteSessionFile(sessionId, deleteDialog.path, deleteDialog.type === 'directory')
-                        if (!res.success) {
-                            throw new Error(res.error || t('file.delete.failed'))
-                        }
-                        addToast({ title: t('file.delete.success'), body: deleteDialog.path })
-                        refreshDirectory()
-                    } finally {
-                        setDeleting(false)
+        <ConfirmDialog
+            isOpen={deleteDialog.isOpen}
+            onClose={() => setDeleteDialog({ isOpen: false, path: '', type: 'file' })}
+            title={t('file.delete.title')}
+            description={t('file.delete.confirm', { path: deleteDialog.path })}
+            confirmLabel={t('file.delete.submit')}
+            confirmingLabel={t('file.delete.submitting')}
+            destructive
+            isPending={deleting}
+            onConfirm={async () => {
+                if (!api) return
+                setDeleting(true)
+                try {
+                    const res = await api.deleteSessionFile(sessionId, deleteDialog.path, deleteDialog.type === 'directory')
+                    if (!res.success) {
+                        throw new Error(res.error || t('file.delete.failed'))
                     }
-                }}
-            />
-
-            <FileMoveDialog
-                isOpen={moveDialog.isOpen}
-                onClose={() => setMoveDialog({ isOpen: false, path: '', mode: 'move' })}
-                sessionId={sessionId}
-                sourcePath={moveDialog.path}
-                mode={moveDialog.mode}
-                onSubmit={async (destPath) => {
-                    if (!api) return
-                    const res = moveDialog.mode === 'move'
-                        ? await api.moveSessionFile(sessionId, moveDialog.path, destPath)
-                        : await api.copySessionFile(sessionId, moveDialog.path, destPath)
-                    if (!res.success) throw new Error(res.error || t('file.move.failed'))
-                    addToast({ title: moveDialog.mode === 'move' ? t('file.move.success') : t('file.copy.success'), body: destPath })
+                    addToast({ title: t('file.delete.success'), body: deleteDialog.path })
                     refreshDirectory()
-                }}
-            />
+                } finally {
+                    setDeleting(false)
+                }
+            }}
+        />
 
-            <FileInputDialog
-                isOpen={newFileDialog.isOpen}
-                onClose={() => setNewFileDialog({ isOpen: false, basePath: '' })}
-                title={t('file.newFile.title')}
-                placeholder={t('file.newFile.placeholder')}
-                submitLabel={t('file.newFile.submit')}
-                onSubmit={async (name) => {
-                    if (!api) return
-                    const fullPath = newFileDialog.basePath ? `${newFileDialog.basePath}/${name}` : name
-                    const res = await api.writeSessionFile(sessionId, fullPath, '', undefined, true)
-                    if (!res.success) throw new Error(res.error || t('file.newFile.failed'))
-                    addToast({ title: t('file.newFile.success'), body: fullPath })
-                    refreshDirectory()
-                    handleOpenFile(fullPath)
-                }}
-            />
+        <FileMoveDialog
+            isOpen={moveDialog.isOpen}
+            onClose={() => setMoveDialog({ isOpen: false, path: '', mode: 'move' })}
+            sessionId={sessionId}
+            sourcePath={moveDialog.path}
+            mode={moveDialog.mode}
+            onSubmit={async (destPath) => {
+                if (!api) return
+                const res = moveDialog.mode === 'move'
+                    ? await api.moveSessionFile(sessionId, moveDialog.path, destPath)
+                    : await api.copySessionFile(sessionId, moveDialog.path, destPath)
+                if (!res.success) throw new Error(res.error || t('file.move.failed'))
+                addToast({ title: moveDialog.mode === 'move' ? t('file.move.success') : t('file.copy.success'), body: destPath })
+                refreshDirectory()
+            }}
+        />
 
-            <FileInputDialog
-                isOpen={newFolderDialog.isOpen}
-                onClose={() => setNewFolderDialog({ isOpen: false, basePath: '' })}
-                title={t('file.newFolder.title')}
-                placeholder={t('file.newFolder.placeholder')}
-                submitLabel={t('file.newFolder.submit')}
-                onSubmit={async (name) => {
-                    if (!api) return
-                    const fullPath = newFolderDialog.basePath ? `${newFolderDialog.basePath}/${name}` : name
-                    const res = await api.createDirectory(sessionId, fullPath, true)
-                    if (!res.success) throw new Error(res.error || t('file.newFolder.failed'))
-                    addToast({ title: t('file.newFolder.success'), body: fullPath })
-                    refreshDirectory()
-                }}
-            />
-        </div>
+        <FileInputDialog
+            isOpen={newFileDialog.isOpen}
+            onClose={() => setNewFileDialog({ isOpen: false, basePath: '' })}
+            title={t('file.newFile.title')}
+            placeholder={t('file.newFile.placeholder')}
+            submitLabel={t('file.newFile.submit')}
+            onSubmit={async (name) => {
+                if (!api) return
+                const fullPath = newFileDialog.basePath ? `${newFileDialog.basePath}/${name}` : name
+                const res = await api.writeSessionFile(sessionId, fullPath, '', undefined, true)
+                if (!res.success) throw new Error(res.error || t('file.newFile.failed'))
+                addToast({ title: t('file.newFile.success'), body: fullPath })
+                refreshDirectory()
+                handleOpenFile(fullPath)
+            }}
+        />
+
+        <FileInputDialog
+            isOpen={newFolderDialog.isOpen}
+            onClose={() => setNewFolderDialog({ isOpen: false, basePath: '' })}
+            title={t('file.newFolder.title')}
+            placeholder={t('file.newFolder.placeholder')}
+            submitLabel={t('file.newFolder.submit')}
+            onSubmit={async (name) => {
+                if (!api) return
+                const fullPath = newFolderDialog.basePath ? `${newFolderDialog.basePath}/${name}` : name
+                const res = await api.createDirectory(sessionId, fullPath, true)
+                if (!res.success) throw new Error(res.error || t('file.newFolder.failed'))
+                addToast({ title: t('file.newFolder.success'), body: fullPath })
+                refreshDirectory()
+            }}
+        />
+        </>
     )
 }

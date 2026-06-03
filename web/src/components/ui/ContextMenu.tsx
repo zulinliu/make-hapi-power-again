@@ -68,8 +68,8 @@ export function ContextMenu({ x, y, items, onClose }: ContextMenuProps) {
             style={{
                 left: position.x,
                 top: position.y,
-                background: 'var(--hp-surface-0)',
-                borderColor: 'var(--hp-border)',
+                background: 'var(--app-bg)',
+                borderColor: 'var(--app-border)',
             }}
         >
             {items.map((item, index) => (
@@ -79,7 +79,7 @@ export function ContextMenu({ x, y, items, onClose }: ContextMenuProps) {
                     disabled={item.disabled}
                     className="flex w-full items-center gap-2 px-3 py-2.5 text-sm text-left transition-colors disabled:opacity-50"
                     style={{
-                        color: item.danger ? 'var(--hp-danger)' : 'var(--hp-text-primary)',
+                        color: item.danger ? 'var(--app-danger)' : 'var(--app-fg)',
                         minHeight: 44,
                     }}
                     onClick={() => {
@@ -88,7 +88,7 @@ export function ContextMenu({ x, y, items, onClose }: ContextMenuProps) {
                     }}
                     onMouseEnter={(e) => {
                         if (!item.disabled) {
-                            e.currentTarget.style.background = 'var(--hp-surface-1)'
+                            e.currentTarget.style.background = 'var(--app-secondary-bg)'
                         }
                     }}
                     onMouseLeave={(e) => {

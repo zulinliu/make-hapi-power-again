@@ -82,6 +82,14 @@
     --app-badge-error-text: #a11d1d;
     --app-badge-error-border: rgba(218, 54, 51, 0.25);
 
+    /* Semantic status colors (light) */
+    --app-success: #238636;
+    --app-success-subtle: rgba(35, 134, 54, 0.12);
+    --app-warning: #D29922;
+    --app-warning-subtle: rgba(210, 153, 34, 0.12);
+    --app-primary-subtle: rgba(26, 26, 46, 0.08);
+    --app-text-secondary: #4b5563;
+
     --app-font-scale: 1;
     --app-chat-font-size: 0.9375rem;
     --app-chat-line-height: 1.75rem;
@@ -183,6 +191,14 @@
     --app-badge-error-bg: rgba(218, 54, 51, 0.15);
     --app-badge-error-text: #DA3633;
     --app-badge-error-border: rgba(218, 54, 51, 0.3);
+
+    /* Semantic status colors (dark) */
+    --app-success: #3fb950;
+    --app-success-subtle: rgba(63, 185, 80, 0.15);
+    --app-warning: #D29922;
+    --app-warning-subtle: rgba(210, 153, 34, 0.15);
+    --app-primary-subtle: rgba(230, 237, 243, 0.08);
+    --app-text-secondary: #8B949E;
 }
 
 html {
