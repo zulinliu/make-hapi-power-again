@@ -316,3 +316,31 @@ TOP 10 缺口：EDIT-01, FILE-01, FILE-02, FILE-05, PTY-02, GIT-04, FILE-12, EDI
 
 ---
 *状态更新: 2026-06-02 (v0.7 补丁修复 + 全流程 E2E 验证通过)*
+
+## v9 规划中 — UI 统一优化 (feat/v9)
+
+### 核心用户场景
+用户在桌面端浏览器中使用 Hapi Power → SessionHeader 直接看到所有功能入口（Files/Git/Extensions/Outline）→ 进入任何子页面体验一致的布局和交互 → 文件列表支持右键操作 → Git 状态页可直接预览变更文件
+
+### Phase v9.1~v9.4 已规划
+- [ ] Phase v9.1: SessionHeader 响应式工具栏（桌面端直显图标，移动端"..."菜单）
+- [ ] Phase v9.2: 全局子页面布局统一（SubPageLayout + CSS 变量 + max-w-content + Tab 样式）
+- [ ] Phase v9.3: 右键菜单全局适配（useContextMenu hook + 桌面右键 + 移动端"..."）
+- [ ] Phase v9.4: Git 状态文件预览（点击变更文件预览内容 + 代码高亮 + 跳转）
+
+### 关键问题（代码探索发现）
+
+| 页面 | CSS 变量 | max-w-content | 安全区域 | 返回按钮 | Tab 指示器 | Header padding |
+|------|----------|---------------|---------|---------|-----------|----------------|
+| 文件页(参考) | `--app-*` ✓ | ✓ | ✓ 外层div | ✓ 圆形图标 | ✓ 绝对定位 | `p-3` ✓ |
+| Git页 | `--hp-*` ✗ | ✗ | ✗ 缺失 | ✗ 文字"←" | ✗ border-b-2 | `px-4 h-12` |
+| 扩展页 | `--app-*` ✓ | ✗ | ⚠ 内联计算 | ✓ | ⚠ border-b-2 | `px-3 py-2` |
+| 变更/时间线/撤销 | `--app-*` ✓ | ✗ | ⚠ 内联计算 | ✓ | N/A | `px-3 py-2` |
+
+### 需求文档
+- 需求：.planning/REQUIREMENTS-v9.md（22 项需求，4 个分类）
+- 路线图：.planning/ROADMAP-v9.md（4 个 Phase，6 个 Plan）
+- 配置：.planning/config-v9.json（YOLO + 粗粒度 + 并行）
+
+---
+*状态更新: 2026-06-03 (v9 UI统一优化规划完成)*
