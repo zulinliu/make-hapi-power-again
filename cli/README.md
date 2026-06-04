@@ -1,3 +1,5 @@
+> Part of [Hapi Power](../README.md) — AI Coding Agent Workbench
+
 # CLI
 
 Hapi Power 命令行工具 — 封装多种 AI 编码代理，连接到 Hub 实现远程管理和多端协同。

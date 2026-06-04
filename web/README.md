@@ -1,3 +1,5 @@
+> Part of [Hapi Power](../README.md) — AI Coding Agent Workbench
+
 # Web
 
 Hapi Power 前端 — React PWA，提供完整的浏览器内 AI 代理开发体验。

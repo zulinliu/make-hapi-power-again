@@ -1,5 +1,7 @@
 # 贡献指南
 
+> Part of [Hapi Power](./README.md) — AI Coding Agent Workbench
+
 感谢你对 Hapi Power 的关注！欢迎提交 Bug 修复、功能建议和代码贡献。
 
 ## 行为准则
@@ -137,4 +139,8 @@ shared/   共享类型、Schema
 
 ## 许可证
 
-贡献的代码将基于 AGPL-3.0 许可证发布，与项目保持一致。
+By contributing, you agree that:
+
+1. Your code will be licensed under [AGPL-3.0](./LICENSE)
+2. You have the right to submit this code under that license
+3. You certify the [Developer Certificate of Origin](https://developercertificate.org/)

@@ -1,3 +1,5 @@
+> Part of [Hapi Power](../README.md) — AI Coding Agent Workbench
+
 # Hub
 
 Hapi Power 服务端核心 — Hono HTTP API + Socket.IO 实时通信 + SSE 推送 + 推送通知 + SQLite 持久化。
