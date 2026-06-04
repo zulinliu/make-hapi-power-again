@@ -1,11 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
 import { useTranslation, type Locale } from '@/lib/use-translation'
 import { useAppGoBack } from '@/hooks/useAppGoBack'
-import { getElevenLabsSupportedLanguages, getLanguageDisplayName, type Language } from '@/lib/languages'
-import { VOICES, getFallbackVoices } from '@/lib/voices'
 import { useAppContext } from '@/lib/app-context'
 import { ProviderSettings } from '@/components/ProviderSettings'
-import { fetchVoices, type VoiceInfo } from '@/api/voice'
 import { getFontScaleOptions, useFontScale, type FontScale } from '@/hooks/useFontScale'
 import { getTerminalFontSizeOptions, useTerminalFontSize, type TerminalFontSize } from '@/hooks/useTerminalFontSize'
 import { getComposerEnterBehaviorOptions, useComposerEnterBehavior, type ComposerEnterBehavior } from '@/hooks/useComposerEnterBehavior'
@@ -33,8 +30,6 @@ const locales: { value: Locale; nativeLabel: string }[] = [
     { value: 'en', nativeLabel: 'English' },
     { value: 'zh-CN', nativeLabel: '简体中文' },
 ]
-
-const voiceLanguages = getElevenLabsSupportedLanguages()
 
 function BackIcon(props: { className?: string }) {
     return (
@@ -89,36 +84,6 @@ function ChevronDownIcon(props: { className?: string }) {
             className={props.className}
         >
             <polyline points="6 9 12 15 18 9" />
-        </svg>
-    )
-}
-
-function PlayIcon(props: { className?: string }) {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="12"
-            height="12"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            className={props.className}
-        >
-            <polygon points="5 3 19 12 5 21 5 3" />
-        </svg>
-    )
-}
-
-function StopIcon(props: { className?: string }) {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="12"
-            height="12"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            className={props.className}
-        >
-            <rect x="3" y="3" width="18" height="18" rx="2" />
         </svg>
     )
 }
@@ -310,8 +275,6 @@ export default function SettingsPage() {
     const [isChatOpen, setIsChatOpen] = useState(false)
     const [isTerminalToolDisplayOpen, setIsTerminalToolDisplayOpen] = useState(false)
     const [isSessionListStatusOpen, setIsSessionListStatusOpen] = useState(false)
-    const [isVoiceOpen, setIsVoiceOpen] = useState(false)
-    const [isVoicePickerOpen, setIsVoicePickerOpen] = useState(false)
     const containerRef = useRef<HTMLDivElement>(null)
     const appearanceContainerRef = useRef<HTMLDivElement>(null)
     const fontContainerRef = useRef<HTMLDivElement>(null)
@@ -319,8 +282,6 @@ export default function SettingsPage() {
     const chatContainerRef = useRef<HTMLDivElement>(null)
     const terminalToolDisplayContainerRef = useRef<HTMLDivElement>(null)
     const sessionListStatusContainerRef = useRef<HTMLDivElement>(null)
-    const voiceContainerRef = useRef<HTMLDivElement>(null)
-    const voicePickerContainerRef = useRef<HTMLDivElement>(null)
     const { fontScale, setFontScale } = useFontScale()
     const { terminalFontSize, setTerminalFontSize } = useTerminalFontSize()
     const { sessionPreviewLimit, setSessionPreviewLimit } = useSessionPreviewLimit()
@@ -335,21 +296,6 @@ export default function SettingsPage() {
     } = useChatSurfaceColors()
     const { appearance, setAppearance } = useAppearance()
 
-    // Voice language state - read from localStorage
-    const [voiceLanguage, setVoiceLanguage] = useState<string | null>(() => {
-        return localStorage.getItem('hapi-power-voice-lang')
-    })
-
-    // Voice ID state - read from localStorage
-    const [voiceId, setVoiceId] = useState<string | null>(() => {
-        return localStorage.getItem('hapi-power-voice-id')
-    })
-
-    // Dynamic voice list fetched from hub (includes user's cloned voices)
-    const [dynamicVoices, setDynamicVoices] = useState<VoiceInfo[] | null>(null)
-    const [playingVoiceId, setPlayingVoiceId] = useState<string | null>(null)
-    const currentAudioRef = useRef<HTMLAudioElement | null>(null)
-
     const fontScaleOptions = getFontScaleOptions()
     const terminalFontSizeOptions = getTerminalFontSizeOptions()
     const composerEnterBehaviorOptions = getComposerEnterBehaviorOptions()
@@ -363,17 +309,6 @@ export default function SettingsPage() {
     const currentComposerEnterBehaviorLabel = composerEnterBehaviorOptions.find((opt) => opt.value === composerEnterBehavior)?.labelKey ?? 'settings.chat.enterBehavior.send'
     const currentTerminalToolDisplayModeLabel = terminalToolDisplayModeOptions.find((opt) => opt.value === terminalToolDisplayMode)?.labelKey ?? 'settings.chat.terminalToolDisplay.compact'
     const currentSessionListStatusModeLabel = sessionListStatusModeOptions.find((opt) => opt.value === sessionListStatusMode)?.labelKey ?? 'settings.display.sessionListStatus.standard'
-    const currentVoiceLanguage = voiceLanguages.find((lang) => lang.code === voiceLanguage)
-
-    // Voice list: dynamic (from ElevenLabs API, includes clones) or static fallback
-    const fallbackVoices = getFallbackVoices(locale)
-    const voiceOptions: VoiceInfo[] = dynamicVoices && dynamicVoices.length > 0
-        ? dynamicVoices
-        : fallbackVoices.map(v => ({ id: v.id, name: v.name, previewUrl: '', category: 'premade' }))
-
-    const currentVoiceName = voiceId
-        ? (voiceOptions.find(v => v.id === voiceId)?.name ?? fallbackVoices.find(v => v.id === voiceId)?.name ?? voiceId)
-        : null
 
     const handleLocaleChange = (newLocale: Locale) => {
         setLocale(newLocale)
@@ -410,66 +345,9 @@ export default function SettingsPage() {
         setIsSessionListStatusOpen(false)
     }
 
-    const handleVoiceLanguageChange = (language: Language) => {
-        setVoiceLanguage(language.code)
-        if (language.code === null) {
-            localStorage.removeItem('hapi-power-voice-lang')
-        } else {
-            localStorage.setItem('hapi-power-voice-lang', language.code)
-        }
-        setIsVoiceOpen(false)
-    }
-
-    const handleVoiceChange = (id: string | null) => {
-        setVoiceId(id)
-        if (id === null) {
-            localStorage.removeItem('hapi-power-voice-id')
-        } else {
-            localStorage.setItem('hapi-power-voice-id', id)
-        }
-        setIsVoicePickerOpen(false)
-    }
-
-    // Fetch available voices from hub on mount
-    useEffect(() => {
-        fetchVoices(api).then(voices => {
-            if (voices.length > 0) setDynamicVoices(voices)
-        })
-    }, [api])
-
-    const handleVoicePreview = (previewUrl: string, voiceId: string, event: React.MouseEvent) => {
-        event.stopPropagation()
-        if (!previewUrl) return
-
-        if (playingVoiceId === voiceId) {
-            currentAudioRef.current?.pause()
-            currentAudioRef.current = null
-            setPlayingVoiceId(null)
-            return
-        }
-
-        currentAudioRef.current?.pause()
-        const audio = new Audio(previewUrl)
-        currentAudioRef.current = audio
-        setPlayingVoiceId(voiceId)
-        audio.play().catch(() => setPlayingVoiceId(null))
-        audio.addEventListener('ended', () => {
-            setPlayingVoiceId(null)
-            currentAudioRef.current = null
-        })
-    }
-
-    useEffect(() => {
-        return () => {
-            currentAudioRef.current?.pause()
-            currentAudioRef.current = null
-            setPlayingVoiceId(null)
-        }
-    }, [])
-
     // Close dropdown when clicking outside
     useEffect(() => {
-        if (!isOpen && !isAppearanceOpen && !isFontOpen && !isTerminalFontOpen && !isChatOpen && !isTerminalToolDisplayOpen && !isSessionListStatusOpen && !isVoiceOpen && !isVoicePickerOpen) return
+        if (!isOpen && !isAppearanceOpen && !isFontOpen && !isTerminalFontOpen && !isChatOpen && !isTerminalToolDisplayOpen && !isSessionListStatusOpen) return
 
         const handleClickOutside = (event: MouseEvent) => {
             if (isOpen && containerRef.current && !containerRef.current.contains(event.target as Node)) {
@@ -493,21 +371,15 @@ export default function SettingsPage() {
             if (isSessionListStatusOpen && sessionListStatusContainerRef.current && !sessionListStatusContainerRef.current.contains(event.target as Node)) {
                 setIsSessionListStatusOpen(false)
             }
-            if (isVoiceOpen && voiceContainerRef.current && !voiceContainerRef.current.contains(event.target as Node)) {
-                setIsVoiceOpen(false)
-            }
-            if (isVoicePickerOpen && voicePickerContainerRef.current && !voicePickerContainerRef.current.contains(event.target as Node)) {
-                setIsVoicePickerOpen(false)
-            }
         }
 
         document.addEventListener('mousedown', handleClickOutside)
         return () => document.removeEventListener('mousedown', handleClickOutside)
-    }, [isOpen, isAppearanceOpen, isFontOpen, isTerminalFontOpen, isChatOpen, isTerminalToolDisplayOpen, isSessionListStatusOpen, isVoiceOpen, isVoicePickerOpen])
+    }, [isOpen, isAppearanceOpen, isFontOpen, isTerminalFontOpen, isChatOpen, isTerminalToolDisplayOpen, isSessionListStatusOpen])
 
     // Close on escape key
     useEffect(() => {
-        if (!isOpen && !isAppearanceOpen && !isFontOpen && !isTerminalFontOpen && !isChatOpen && !isTerminalToolDisplayOpen && !isSessionListStatusOpen && !isVoiceOpen && !isVoicePickerOpen) return
+        if (!isOpen && !isAppearanceOpen && !isFontOpen && !isTerminalFontOpen && !isChatOpen && !isTerminalToolDisplayOpen && !isSessionListStatusOpen) return
 
         const handleEscape = (event: KeyboardEvent) => {
             if (event.key === 'Escape') {
@@ -518,14 +390,12 @@ export default function SettingsPage() {
                 setIsChatOpen(false)
                 setIsTerminalToolDisplayOpen(false)
                 setIsSessionListStatusOpen(false)
-                setIsVoiceOpen(false)
-                setIsVoicePickerOpen(false)
             }
         }
 
         document.addEventListener('keydown', handleEscape)
         return () => document.removeEventListener('keydown', handleEscape)
-    }, [isOpen, isAppearanceOpen, isFontOpen, isTerminalFontOpen, isChatOpen, isTerminalToolDisplayOpen, isSessionListStatusOpen, isVoiceOpen, isVoicePickerOpen])
+    }, [isOpen, isAppearanceOpen, isFontOpen, isTerminalFontOpen, isChatOpen, isTerminalToolDisplayOpen, isSessionListStatusOpen])
 
     return (
         <div className="flex h-full min-h-0 flex-col">
@@ -929,157 +799,6 @@ export default function SettingsPage() {
 
                     {/* API Providers section */}
                     <ProviderSettings />
-
-                    {/* Voice Assistant section */}
-                    <div className="border-b border-[var(--app-divider)]">
-                        <div className="px-3 py-2 text-xs font-semibold text-[var(--app-hint)] uppercase tracking-wide">
-                            {t('settings.voice.title')}
-                        </div>
-                        <div ref={voiceContainerRef} className="relative">
-                            <button
-                                type="button"
-                                onClick={() => setIsVoiceOpen(!isVoiceOpen)}
-                                className="flex w-full items-center justify-between px-3 py-3 text-left transition-colors hover:bg-[var(--app-subtle-bg)]"
-                                aria-expanded={isVoiceOpen}
-                                aria-haspopup="listbox"
-                            >
-                                <span className="text-[var(--app-fg)]">{t('settings.voice.language')}</span>
-                                <span className="flex items-center gap-1 text-[var(--app-hint)]">
-                                    <span>
-                                        {currentVoiceLanguage
-                                            ? currentVoiceLanguage.code === null
-                                                ? t('settings.voice.autoDetect')
-                                                : getLanguageDisplayName(currentVoiceLanguage)
-                                            : t('settings.voice.autoDetect')}
-                                    </span>
-                                    <ChevronDownIcon className={`transition-transform ${isVoiceOpen ? 'rotate-180' : ''}`} />
-                                </span>
-                            </button>
-
-                            {isVoiceOpen && (
-                                <div
-                                    className="absolute right-3 top-full mt-1 min-w-[200px] max-h-[300px] overflow-y-auto rounded-lg border border-[var(--app-border)] bg-[var(--app-bg)] shadow-lg z-50"
-                                    role="listbox"
-                                    aria-label={t('settings.voice.title')}
-                                >
-                                    {voiceLanguages.map((lang) => {
-                                        const isSelected = voiceLanguage === lang.code
-                                        const displayName = lang.code === null
-                                            ? t('settings.voice.autoDetect')
-                                            : getLanguageDisplayName(lang)
-                                        return (
-                                            <button
-                                                key={lang.code ?? 'auto'}
-                                                type="button"
-                                                role="option"
-                                                aria-selected={isSelected}
-                                                onClick={() => handleVoiceLanguageChange(lang)}
-                                                className={`flex items-center justify-between w-full px-3 py-2 text-base text-left transition-colors ${
-                                                    isSelected
-                                                        ? 'text-[var(--app-link)] bg-[var(--app-subtle-bg)]'
-                                                        : 'text-[var(--app-fg)] hover:bg-[var(--app-subtle-bg)]'
-                                                }`}
-                                            >
-                                                <span>{displayName}</span>
-                                                {isSelected && (
-                                                    <span className="ml-2 text-[var(--app-link)]">
-                                                        <CheckIcon />
-                                                    </span>
-                                                )}
-                                            </button>
-                                        )
-                                    })}
-                                </div>
-                            )}
-                        </div>
-
-                        <div ref={voicePickerContainerRef} className="relative">
-                            <button
-                                type="button"
-                                onClick={() => setIsVoicePickerOpen(!isVoicePickerOpen)}
-                                className="flex w-full items-center justify-between px-3 py-3 text-left transition-colors hover:bg-[var(--app-subtle-bg)]"
-                                aria-expanded={isVoicePickerOpen}
-                                aria-haspopup="listbox"
-                            >
-                                <span className="text-[var(--app-fg)]">{t('settings.voice.voice')}</span>
-                                <span className="flex items-center gap-1 text-[var(--app-hint)]">
-                                    <span>{currentVoiceName ?? t('settings.voice.voiceDefault')}</span>
-                                    <ChevronDownIcon className={`transition-transform ${isVoicePickerOpen ? 'rotate-180' : ''}`} />
-                                </span>
-                            </button>
-
-                            {isVoicePickerOpen && (
-                                <div
-                                    className="absolute right-3 top-full mt-1 min-w-[220px] max-h-[300px] overflow-y-auto rounded-lg border border-[var(--app-border)] bg-[var(--app-bg)] shadow-lg z-50"
-                                    role="listbox"
-                                    aria-label={t('settings.voice.voice')}
-                                >
-                                    <div
-                                        role="option"
-                                        aria-selected={voiceId === null}
-                                        className={`flex items-center w-full text-base transition-colors ${
-                                            voiceId === null
-                                                ? 'text-[var(--app-link)] bg-[var(--app-subtle-bg)]'
-                                                : 'text-[var(--app-fg)] hover:bg-[var(--app-subtle-bg)]'
-                                        }`}
-                                    >
-                                        <button
-                                            type="button"
-                                            onClick={() => handleVoiceChange(null)}
-                                            className="flex flex-1 items-center justify-between px-3 py-2 text-left"
-                                        >
-                                            <span>{t('settings.voice.voiceDefault')}</span>
-                                            {voiceId === null && <span className="ml-2"><CheckIcon /></span>}
-                                        </button>
-                                    </div>
-                                    {voiceOptions.map((voice) => {
-                                        const isSelected = voiceId === voice.id
-                                        const isPlaying = playingVoiceId === voice.id
-                                        return (
-                                            <div
-                                                key={voice.id}
-                                                role="option"
-                                                aria-selected={isSelected}
-                                                className={`flex items-center w-full text-base transition-colors ${
-                                                    isSelected
-                                                        ? 'text-[var(--app-link)] bg-[var(--app-subtle-bg)]'
-                                                        : 'text-[var(--app-fg)] hover:bg-[var(--app-subtle-bg)]'
-                                                }`}
-                                            >
-                                                <button
-                                                    type="button"
-                                                    onClick={() => handleVoiceChange(voice.id)}
-                                                    className="flex flex-1 items-center justify-between px-3 py-2 text-left min-w-0"
-                                                >
-                                                    <span className="truncate">
-                                                        {voice.name}
-                                                        {voice.category === 'cloned' && (
-                                                            <span className="ml-2 text-xs text-[var(--app-hint)]">clone</span>
-                                                        )}
-                                                    </span>
-                                                    {isSelected && <span className="ml-2 shrink-0"><CheckIcon /></span>}
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    onClick={(e) => handleVoicePreview(voice.previewUrl, voice.id, e)}
-                                                    aria-label={isPlaying ? 'Stop preview' : 'Preview voice'}
-                                                    title={voice.previewUrl ? (isPlaying ? 'Stop preview' : 'Preview voice') : 'Preview unavailable without an ElevenLabs API key'}
-                                                    disabled={!voice.previewUrl}
-                                                    className={`flex h-full shrink-0 items-center px-3 py-2 ${
-                                                        voice.previewUrl
-                                                            ? 'text-[var(--app-hint)] hover:text-[var(--app-fg)]'
-                                                            : 'text-[var(--app-divider)] cursor-not-allowed'
-                                                    }`}
-                                                >
-                                                    {isPlaying ? <StopIcon /> : <PlayIcon />}
-                                                </button>
-                                            </div>
-                                        )
-                                    })}
-                                </div>
-                            )}
-                        </div>
-                    </div>
 
                     {/* About section */}
                     <div className="border-b border-[var(--app-divider)]">

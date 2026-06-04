@@ -343,4 +343,50 @@ TOP 10 缺口：EDIT-01, FILE-01, FILE-02, FILE-05, PTY-02, GIT-04, FILE-12, EDI
 - 配置：.planning/config-v9.json（YOLO + 粗粒度 + 并行）
 
 ---
+
+## v0.12.0 已完成 — 功能精简与焦点聚焦
+
+### 核心目的
+删除已屏蔽/禁用的非核心功能代码，保持代码库整洁，聚焦核心实用功能（会话管理、聊天、文件管理、Git、终端、扩展系统、供应商配置），形成生产可用的稳定版本。
+
+### 已删除功能 (9 项)
+
+| # | 功能 | 删除范围 | 原因 |
+|---|------|---------|------|
+| 1 | 白板 (Whiteboard) | 组件 + SessionChat 引用 + i18n | 完全隐藏，从未渲染 |
+| 2 | Skill编排 (Orchestration) | 前端页面 + 后端路由(假数据) + 测试 | 纯假数据，无真实后端 |
+| 3 | 移动端路由 (/m/*) | 2 个页面 + 路由注册 | 无导航入口，硬编码中文 |
+| 4 | 变更审查页 (Changes) | 前端页面 + 后端路由 + API方法 + i18n | 导航隐藏，后端独立 |
+| 5 | 撤销页 (Undo) | 前端页面 + 后端路由 + API方法 + i18n | 导航隐藏，后端独立 |
+| 6 | 操作时间线 (Timeline) | 前端页面 + 后端路由 + API方法 + i18n | 导航隐藏，reducerTimeline保留(聊天核心) |
+| 7 | 会话分享 (Share) | 前端页面 + 后端路由(含DB) + API方法 + i18n | 后端完整但无创建UI |
+| 8 | 语音录制 STT (Whisper) | VoiceRecorder + 后端转录路由 | 外部API依赖，非核心 |
+| 9 | 实时语音 (ElevenLabs) | realtime/ 目录 + VoiceProvider + 语音设置 + 后端路由 + 共享协议 | onVoiceToggle=undefined 禁用 |
+
+### 代码变更统计
+
+- **删除文件**: ~40 个
+- **修改文件**: ~25 个
+- **删除 i18n 键**: 103 个 (en + zh-CN)
+- **移除 npm 依赖**: @elevenlabs/react
+- **预估净删减**: ~4000+ 行
+
+### 保留的基础设施
+
+- `reducerTimeline.ts` + `reducerTimeline.test.ts` — 聊天消息核心渲染器，非时间线功能
+- `FileSnapshotStore` + `file_snapshots` 表 — DB Schema 基础设施，保留兼容
+- Push Notifications + App Badge API — 活跃 PWA 基础设施
+- ServerChan / Telegram Bot — 活跃通知渠道
+
+### 质量门禁
+
+- typecheck: 通过
+- vitest: 77 文件 651 测试全部通过
+- build: 成功
+
+### 规划文档
+- 方案：.planning/phases/code-cleanup/PLAN.md
+
+---
+*状态更新: 2026-06-04 (v0.12.0 功能精简完成 — 9 项非核心功能已删除)*
 *状态更新: 2026-06-03 (v9 UI统一优化规划完成)*

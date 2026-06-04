@@ -26,7 +26,6 @@ import { QueuedMessagesBar } from '@/components/AssistantChat/QueuedMessagesBar'
 import { useHappyRuntime } from '@/lib/assistant-runtime'
 import { createAttachmentAdapter } from '@/lib/attachmentAdapter'
 import { ImagePasteDrop } from '@/components/ImagePasteDrop'
-import { Whiteboard } from '@/components/Whiteboard'
 import { useBinaryUpload } from '@/hooks/useBinaryUpload'
 import { useTranslation } from '@/lib/use-translation'
 import { TeamPanel } from '@/components/TeamPanel'
@@ -37,8 +36,6 @@ import { useCursorModels } from '@/hooks/queries/useCursorModels'
 import { useOpencodeModels } from '@/hooks/queries/useOpencodeModels'
 import { useFlavorModels } from '@/hooks/queries/useFlavorModels'
 import { getClaudeComposerModelOptions } from '@/components/AssistantChat/claudeModelOptions'
-import { useVoiceOptional } from '@/lib/voice-context'
-import { RealtimeVoiceSession, registerSessionStore, registerVoiceHooksStore, voiceHooks } from '@/realtime'
 import { isRemoteTerminalSupported } from '@/utils/terminalSupport'
 
 /**
@@ -138,8 +135,6 @@ export function SessionChat(props: {
     const [forceScrollToken, setForceScrollToken] = useState(0)
     const outlineOpen = props.outlineOpen ?? false
     const setOutlineOpen = props.onOutlineOpenChange ?? (() => {})
-    // Whiteboard hidden — not in original requirements
-    // const [whiteboardOpen, setWhiteboardOpen] = useState(false)
     const { uploadBinaryFile } = useBinaryUpload()
     const agentFlavor = props.session.metadata?.flavor ?? null
     const controlledByUser = props.session.agentState?.controlledByUser === true
@@ -231,96 +226,6 @@ export function SessionChat(props: {
         agentFlavor,
         codexCollaborationModeSupported
     )
-
-    // Voice assistant integration
-    const voice = useVoiceOptional()
-
-    // Register session store for voice client tools
-    useEffect(() => {
-        registerSessionStore({
-            getSession: () => props.session as { agentState?: { requests?: Record<string, unknown> } } | null,
-            sendMessage: (_sessionId: string, message: string) => props.onSend(message),
-            approvePermission: async (_sessionId: string, requestId: string) => {
-                await props.api.approvePermission(props.session.id, requestId)
-                props.onRefresh()
-            },
-            denyPermission: async (_sessionId: string, requestId: string) => {
-                await props.api.denyPermission(props.session.id, requestId)
-                props.onRefresh()
-            }
-        })
-    }, [props.session, props.api, props.onSend, props.onRefresh])
-
-    useEffect(() => {
-        registerVoiceHooksStore(
-            (sessionId) => (sessionId === props.session.id ? props.session : null),
-            (sessionId) => (sessionId === props.session.id ? props.messages : [])
-        )
-    }, [props.session, props.messages])
-
-    // Track and report new messages to voice assistant
-    // Note: voiceHooks internally checks isVoiceSessionStarted() so we don't need to check voice.status here
-    const prevMessagesRef = useRef<DecryptedMessage[]>([])
-
-    useEffect(() => {
-        const prevIds = new Set(prevMessagesRef.current.map(m => m.id))
-        const newMessages = props.messages.filter(m => !prevIds.has(m.id))
-
-        if (newMessages.length > 0) {
-            voiceHooks.onMessages(props.session.id, newMessages)
-        }
-
-        prevMessagesRef.current = props.messages
-    }, [props.messages, props.session.id])
-
-    // Report ready event when thinking stops
-    // Note: voiceHooks internally checks isVoiceSessionStarted() so we don't need to check voice.status here
-    const prevThinkingRef = useRef(props.session.thinking)
-
-    useEffect(() => {
-        // Detect transition: thinking → not thinking
-        if (prevThinkingRef.current && !props.session.thinking) {
-            voiceHooks.onReady(props.session.id)
-        }
-
-        prevThinkingRef.current = props.session.thinking
-    }, [props.session.thinking, props.session.id])
-
-    // Report permission requests to voice assistant
-    // Note: voiceHooks internally checks isVoiceSessionStarted() so we don't need to check voice.status here
-    const prevRequestIdsRef = useRef<Set<string>>(new Set())
-
-    useEffect(() => {
-        const requests = props.session.agentState?.requests ?? {}
-        const currentIds = new Set(Object.keys(requests))
-
-        for (const [requestId, request] of Object.entries(requests)) {
-            if (!prevRequestIdsRef.current.has(requestId)) {
-                voiceHooks.onPermissionRequested(
-                    props.session.id,
-                    requestId,
-                    (request as { tool?: string }).tool ?? 'unknown',
-                    (request as { arguments?: unknown }).arguments
-                )
-            }
-        }
-
-        prevRequestIdsRef.current = currentIds
-    }, [props.session.agentState?.requests, props.session.id])
-
-    const handleVoiceToggle = useCallback(async () => {
-        if (!voice) return
-        if (voice.status === 'connected' || voice.status === 'connecting') {
-            await voice.stopVoice()
-        } else {
-            await voice.startVoice(props.session.id)
-        }
-    }, [voice, props.session.id])
-
-    const handleVoiceMicToggle = useCallback(() => {
-        if (!voice) return
-        voice.toggleMic()
-    }, [voice])
 
     // Track session id to clear caches when it changes
     const prevSessionIdRef = useRef<string | null>(null)
@@ -694,30 +599,11 @@ export function SessionChat(props: {
                         onTerminal={props.session.active && terminalSupported ? handleViewTerminal : undefined}
                         terminalUnsupported={props.session.active && !terminalSupported}
                         autocompleteSuggestions={props.autocompleteSuggestions}
-                        voiceStatus={voice?.status}
-                        voiceMicMuted={voice?.micMuted}
-                        onVoiceToggle={undefined}
-                        onVoiceMicToggle={undefined}
-                        onVoiceTranscribed={(text: string) => {
-                            if (text.trim()) {
-                                props.onSend(text.trim())
-                            }
-                        }}
                     />
                 </div>
                 </ImagePasteDrop>
             </AssistantRuntimeProvider>
 
-            {/* Voice session component - renders nothing but initializes ElevenLabs */}
-            {voice && (
-                <RealtimeVoiceSession
-                    api={props.api}
-                    micMuted={voice.micMuted}
-                    onStatusChange={voice.setStatus}
-                />
-            )}
-
-            {/* Whiteboard hidden — not in original requirements */}
         </div>
     )
 }
