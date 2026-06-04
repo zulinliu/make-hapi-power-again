@@ -282,17 +282,16 @@
 }
 
 /* === Hub URL Dialog Overrides === */
-.login-form-panel [data-radix-presentation-content] {
-  backdrop-filter: blur(4px);
+.login-dialog-content {
+  border: 1px solid var(--lp-border) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.12) !important;
+  max-width: 420px !important;
 }
 
-.login-form-panel .login-dialog-content {
-  background: var(--lp-surface);
-  border: 1px solid var(--lp-border);
-  border-radius: 12px;
-  box-shadow: 0 16px 48px rgba(0,0,0,0.12);
-  max-width: 420px;
-  color: var(--lp-text-primary);
+.login-dialog-content button[variant="outline"] {
+  border-color: var(--lp-border);
+  color: var(--lp-text-secondary);
 }
 
 /* === Animations === */
@@ -319,18 +318,22 @@
 
   .login-brand-panel {
     width: 100%;
-    min-height: 30vh;
-    padding: 32px;
+    min-height: 28vh;
+    padding: 28px 24px;
     border-right: none;
     border-bottom: 1px solid rgba(0,0,0,0.06);
   }
 
   .login-brand-content {
-    margin-top: 2vh;
+    margin-top: 1vh;
   }
 
   .login-brand-name {
-    font-size: clamp(2rem, 1.5rem + 3vw, 2.5rem);
+    font-size: clamp(1.75rem, 1.25rem + 3vw, 2.25rem);
+  }
+
+  .login-tagline {
+    margin-top: 8px;
   }
 
   .login-terminal {
@@ -339,25 +342,67 @@
 
   .login-form-panel {
     flex: 1;
-    padding: 32px 24px;
+    padding: 28px 20px 16px;
+  }
+
+  .login-form-container {
+    max-width: 100%;
+  }
+
+  .login-label {
+    margin-bottom: 6px;
+  }
+
+  .login-input {
+    height: 44px;
+    font-size: 16px;
+  }
+
+  .login-error {
+    margin-top: 8px;
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .login-btn {
+    height: 44px;
+    margin-top: 12px;
+    font-size: 14px;
+  }
+
+  .login-links {
+    margin-top: 16px;
   }
 
   .login-footer {
     position: relative;
     bottom: auto;
     margin-top: auto;
-    padding-top: 24px;
+    padding-top: 16px;
+    padding-bottom: env(safe-area-inset-bottom, 8px);
+    font-size: 11px;
+  }
+
+  /* Dialog safe area on mobile */
+  .login-dialog-content {
+    max-width: calc(100vw - 32px) !important;
+    max-height: calc(85dvh - env(safe-area-inset-bottom, 0px)) !important;
+    margin-bottom: env(safe-area-inset-bottom, 8px);
   }
 }
 
 @media (max-width: 400px) {
   .login-brand-panel {
-    min-height: 25vh;
-    padding: 24px;
+    min-height: 22vh;
+    padding: 20px 16px;
   }
 
   .login-form-panel {
-    padding: 24px 16px;
+    padding: 20px 16px 12px;
+  }
+
+  .login-brand-name {
+    font-size: clamp(1.5rem, 1.1rem + 3vw, 1.75rem);
   }
 }
 
