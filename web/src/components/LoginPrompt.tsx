@@ -65,9 +65,9 @@ export function LoginPrompt(props: LoginPromptProps) {
                 }
                 props.onLogin(trimmedToken)
             }
-        } catch (e) {
+        } catch {
             const fallbackMessage = isBindMode ? t('login.error.bindFailed') : t('login.error.authFailed')
-            setError(e instanceof Error ? e.message : fallbackMessage)
+            setError(fallbackMessage)
         } finally {
             setIsLoading(false)
         }
@@ -191,7 +191,15 @@ export function LoginPrompt(props: LoginPromptProps) {
                                         Hub {props.serverUrl ? t('login.server.custom') : t('login.server.default')}
                                     </button>
                                 </DialogTrigger>
-                                <DialogContent className="login-dialog-content">
+                                <DialogContent
+                                    className="login-dialog-content"
+                                    style={{
+                                        '--app-dialog-bg': 'var(--lp-surface)',
+                                        '--app-fg': 'var(--lp-text-primary)',
+                                        '--app-hint': 'var(--lp-text-secondary)',
+                                        '--app-border': 'var(--lp-border)',
+                                    } as React.CSSProperties}
+                                >
                                     <DialogHeader>
                                         <DialogTitle>{t('login.server.title')}</DialogTitle>
                                         <DialogDescription>
