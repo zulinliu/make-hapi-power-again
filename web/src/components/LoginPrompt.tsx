@@ -115,147 +115,136 @@ export function LoginPrompt(props: LoginPromptProps) {
 
     return (
         <div className="login-page">
-            {/* Left Panel: Brand Visual */}
-            <div className="login-brand-panel">
-                <div className="login-brand-content">
-                    <h1 className="login-brand-name">{title}</h1>
-                    {!isBindMode && <p className="login-tagline">{subtitle}</p>}
-                </div>
+            <div className="login-lang">
+                <LanguageSwitcher />
+            </div>
+
+            {/* Brand */}
+            <div className="login-brand">
+                <h1 className="login-brand-name">{title}</h1>
+                {!isBindMode && <p className="login-tagline">{subtitle}</p>}
+            </div>
+
+            {/* Form */}
+            <div className="login-form-container">
+                <form onSubmit={handleSubmit}>
+                    <label className="login-label" htmlFor="login-token-input">
+                        {inputLabel}
+                    </label>
+                    <input
+                        id="login-token-input"
+                        type="password"
+                        value={accessToken}
+                        onChange={(e) => setAccessToken(e.target.value)}
+                        placeholder={t('login.placeholder')}
+                        autoComplete="current-password"
+                        disabled={isLoading}
+                        className="login-input"
+                    />
+
+                    {displayError && (
+                        <div className="login-error" role="alert">
+                            {displayError}
+                        </div>
+                    )}
+
+                    <button
+                        type="submit"
+                        disabled={isLoading || !accessToken.trim()}
+                        aria-busy={isLoading}
+                        className="login-btn"
+                    >
+                        {isLoading ? (
+                            <>
+                                <Spinner size="sm" label={null} />
+                                {isBindMode ? t('login.bind.submitting') : t('login.submitting')}
+                            </>
+                        ) : (
+                            submitLabel
+                        )}
+                    </button>
+                </form>
+
                 {!isBindMode && (
-                    <div className="login-terminal">
-                        <div>{'>'} hapi-power --login</div>
-                        <div>&nbsp;&nbsp;connecting...</div>
-                        <div>&nbsp;&nbsp;<span className="login-terminal-cursor" /></div>
+                    <div className="login-links">
+                        <a
+                            href={`${props.serverUrl || props.baseUrl}/docs`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="login-link"
+                        >
+                            {t('login.help')}
+                        </a>
+                        <Dialog open={isServerDialogOpen} onOpenChange={handleServerDialogOpenChange}>
+                            <DialogTrigger asChild>
+                                <button type="button" className="login-link">
+                                    Hub {props.serverUrl ? t('login.server.custom') : t('login.server.default')}
+                                </button>
+                            </DialogTrigger>
+                            <DialogContent
+                                className="login-dialog-content"
+                                style={{
+                                    '--app-dialog-bg': 'var(--lp-surface)',
+                                    '--app-fg': 'var(--lp-text-primary)',
+                                    '--app-hint': 'var(--lp-text-secondary)',
+                                    '--app-border': 'var(--lp-border)',
+                                } as React.CSSProperties}
+                            >
+                                <DialogHeader>
+                                    <DialogTitle>{t('login.server.title')}</DialogTitle>
+                                    <DialogDescription>
+                                        {t('login.server.description')}
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <form onSubmit={handleSaveServer} className="space-y-4">
+                                    <div className="text-xs text-[var(--lp-text-tertiary)]">
+                                        {t('login.server.current')} {serverSummary}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="login-label" htmlFor="login-server-input">{t('login.server.origin')}</label>
+                                        <input
+                                            id="login-server-input"
+                                            type="url"
+                                            value={serverInput}
+                                            onChange={(e) => {
+                                                setServerInput(e.target.value)
+                                                setServerError(null)
+                                            }}
+                                            placeholder={t('login.server.placeholder')}
+                                            className="login-input"
+                                        />
+                                        <div className="text-[11px] text-[var(--lp-text-tertiary)]">
+                                            {t('login.server.hint')}
+                                        </div>
+                                    </div>
+
+                                    {serverError && (
+                                        <div className="login-error" role="alert">
+                                            {serverError}
+                                        </div>
+                                    )}
+
+                                    <div className="flex items-center justify-end gap-2">
+                                        {props.serverUrl && (
+                                            <Button type="button" variant="outline" onClick={handleClearServer}>
+                                                {t('login.server.useSameOrigin')}
+                                            </Button>
+                                        )}
+                                        <Button type="submit">
+                                            {t('login.server.save')}
+                                        </Button>
+                                    </div>
+                                </form>
+                            </DialogContent>
+                        </Dialog>
                     </div>
                 )}
             </div>
 
-            {/* Right Panel: Form */}
-            <main className="login-form-panel">
-                <div className="login-lang">
-                    <LanguageSwitcher />
-                </div>
-
-                <div className="login-form-container">
-                    <form onSubmit={handleSubmit}>
-                        <label className="login-label" htmlFor="login-token-input">
-                            {inputLabel}
-                        </label>
-                        <input
-                            id="login-token-input"
-                            type="password"
-                            value={accessToken}
-                            onChange={(e) => setAccessToken(e.target.value)}
-                            placeholder={t('login.placeholder')}
-                            autoComplete="current-password"
-                            disabled={isLoading}
-                            className="login-input"
-                        />
-
-                        {displayError && (
-                            <div className="login-error" role="alert">
-                                {displayError}
-                            </div>
-                        )}
-
-                        <button
-                            type="submit"
-                            disabled={isLoading || !accessToken.trim()}
-                            aria-busy={isLoading}
-                            className="login-btn"
-                        >
-                            {isLoading ? (
-                                <>
-                                    <Spinner size="sm" label={null} />
-                                    {isBindMode ? t('login.bind.submitting') : t('login.submitting')}
-                                </>
-                            ) : (
-                                submitLabel
-                            )}
-                        </button>
-                    </form>
-
-                    {!isBindMode && (
-                        <div className="login-links">
-                            <a
-                                href={`${props.serverUrl || props.baseUrl}/docs`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="login-link"
-                            >
-                                {t('login.help')}
-                            </a>
-                            <Dialog open={isServerDialogOpen} onOpenChange={handleServerDialogOpenChange}>
-                                <DialogTrigger asChild>
-                                    <button type="button" className="login-link">
-                                        Hub {props.serverUrl ? t('login.server.custom') : t('login.server.default')}
-                                    </button>
-                                </DialogTrigger>
-                                <DialogContent
-                                    className="login-dialog-content"
-                                    style={{
-                                        '--app-dialog-bg': 'var(--lp-surface)',
-                                        '--app-fg': 'var(--lp-text-primary)',
-                                        '--app-hint': 'var(--lp-text-secondary)',
-                                        '--app-border': 'var(--lp-border)',
-                                    } as React.CSSProperties}
-                                >
-                                    <DialogHeader>
-                                        <DialogTitle>{t('login.server.title')}</DialogTitle>
-                                        <DialogDescription>
-                                            {t('login.server.description')}
-                                        </DialogDescription>
-                                    </DialogHeader>
-                                    <form onSubmit={handleSaveServer} className="space-y-4">
-                                        <div className="text-xs text-[var(--lp-text-tertiary)]">
-                                            {t('login.server.current')} {serverSummary}
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="login-label" htmlFor="login-server-input">{t('login.server.origin')}</label>
-                                            <input
-                                                id="login-server-input"
-                                                type="url"
-                                                value={serverInput}
-                                                onChange={(e) => {
-                                                    setServerInput(e.target.value)
-                                                    setServerError(null)
-                                                }}
-                                                placeholder={t('login.server.placeholder')}
-                                                className="login-input"
-                                            />
-                                            <div className="text-[11px] text-[var(--lp-text-tertiary)]">
-                                                {t('login.server.hint')}
-                                            </div>
-                                        </div>
-
-                                        {serverError && (
-                                            <div className="login-error" role="alert">
-                                                {serverError}
-                                            </div>
-                                        )}
-
-                                        <div className="flex items-center justify-end gap-2">
-                                            {props.serverUrl && (
-                                                <Button type="button" variant="outline" onClick={handleClearServer}>
-                                                    {t('login.server.useSameOrigin')}
-                                                </Button>
-                                            )}
-                                            <Button type="submit">
-                                                {t('login.server.save')}
-                                            </Button>
-                                        </div>
-                                    </form>
-                                </DialogContent>
-                            </Dialog>
-                        </div>
-                    )}
-                </div>
-
-                {/* Footer */}
-                <div className="login-footer">
-                    {t('login.footer')} <span className="login-footer-heart">&hearts;</span> {t('login.footer.for')} &middot; {t('login.footer.copyright')} {CURRENT_YEAR} Hapi Power
-                </div>
-            </main>
+            {/* Footer */}
+            <div className="login-footer">
+                {t('login.footer')} <span className="login-footer-heart">&hearts;</span> {t('login.footer.for')} &middot; {t('login.footer.copyright')} {CURRENT_YEAR} Hapi Power
+            </div>
         </div>
     )
 }
