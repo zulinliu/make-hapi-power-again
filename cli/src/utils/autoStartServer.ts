@@ -3,9 +3,9 @@
  *
  * Automatically starts the Hapi Power hub when CLI is launched
  * if specific conditions are met:
- * 1. HAPI_POWER_API_URL is not set (using default localhost:3006)
+ * 1. HAPI_POWER_API_URL is not set (using default localhost:3016)
  * 2. cliApiToken exists in settings.json (hub was previously started)
- * 3. Port 3006 is not currently listening
+ * 3. Port 3016 is not currently listening
  */
 
 import chalk from 'chalk'
@@ -15,7 +15,7 @@ import { readSettings } from '@/persistence'
 import { spawnHappyCLI } from '@/utils/spawnHappyCLI'
 import { logger } from '@/ui/logger'
 
-const DEFAULT_SERVER_PORT = 3006
+const DEFAULT_SERVER_PORT = 3016
 const SERVER_STARTUP_TIMEOUT_MS = 10000
 const POLL_INTERVAL_MS = 200
 const PORT_CHECK_TIMEOUT_MS = 1000
@@ -90,7 +90,7 @@ async function waitForServerReady(
  * Determine if hub should be auto-started
  */
 async function shouldAutoStartServer(): Promise<boolean> {
-    // Condition 1: HAPI_POWER_API_URL not set (using default localhost:3006)
+    // Condition 1: HAPI_POWER_API_URL not set (using default localhost:3016)
     if (process.env.HAPI_POWER_API_URL) {
         logger.debug('[AUTO-START] HAPI_POWER_API_URL is set, skipping auto-start')
         return false
@@ -111,10 +111,10 @@ async function shouldAutoStartServer(): Promise<boolean> {
         return false
     }
 
-    // Condition 3: Port 3006 is not currently listening
+    // Condition 3: Port 3016 is not currently listening
     const isListening = await checkPortListening(DEFAULT_SERVER_PORT)
     if (isListening) {
-        logger.debug('[AUTO-START] Port 3006 already in use, skipping auto-start')
+        logger.debug('[AUTO-START] Port 3016 already in use, skipping auto-start')
         return false
     }
 

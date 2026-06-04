@@ -56,4 +56,4 @@
 
 ## 许可证
 
-本项目基于 AGPL-3.0 许可证，继承自上游 hapi 项目。
+This project is licensed under [AGPL-3.0](./LICENSE).

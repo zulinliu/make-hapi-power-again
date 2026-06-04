@@ -1,3 +1,5 @@
+> Part of [Hapi Power](./README.md) — AI Coding Agent Workbench
+
 # AGENTS.md
 
 AI Agent 工作指南。开始前先读本文档，需要细节时再读各包 README。

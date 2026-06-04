@@ -12,7 +12,7 @@
  * - SERVERCHAN_SENDKEY: Server酱 SendKey/AppKey for push notifications
  * - SERVERCHAN_NOTIFICATION: Enable/disable Server酱 notifications (default: true)
  * - HAPI_POWER_LISTEN_HOST: Host/IP to bind the HTTP service (default: 127.0.0.1)
- * - HAPI_POWER_LISTEN_PORT: Port for HTTP service (default: 3006)
+ * - HAPI_POWER_LISTEN_PORT: Port for HTTP service (default: 3016)
  * - HAPI_POWER_PUBLIC_URL: Public URL for external access (e.g., Telegram Mini App)
  * - CORS_ORIGINS: Comma-separated CORS origins
  * - HAPI_POWER_RELAY_API: Relay API domain for tunwg (default: YOUR_RELAY_DOMAIN)
