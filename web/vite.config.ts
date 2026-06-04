@@ -37,10 +37,6 @@ function getVendorChunkName(id: string): string | undefined {
         return 'vendor-mermaid'
     }
 
-    if (id.includes('/node_modules/react-pdf/')) {
-        return 'vendor-pdf'
-    }
-
     if (
         id.includes('/node_modules/@assistant-ui/')
         || id.includes('/node_modules/remark-gfm/')

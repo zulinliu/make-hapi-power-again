@@ -88,7 +88,6 @@ export default {
   'session.action.rename': 'Rename',
   'session.action.archive': 'Archive',
   'session.action.delete': 'Delete',
-  'session.action.copy': 'Copy',
 
   // Dialogs
   'dialog.uri.title': 'Open this link?',

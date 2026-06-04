@@ -32,8 +32,8 @@ Bun workspaces 单仓，`shared` 被 cli/hub/web 共同依赖。
     │  gemini/opencode/cursor/kimi)  ├─ EventBus 事件总线                 ├─ TanStack Query
     ├─ Socket.IO 客户端             ├─ 会话缓存                          ├─ Monaco Editor
     ├─ RPC 处理器（51个方法）        ├─ RPC 网关                          ├─ xterm.js
-    └─ Runner 守护进程              ├─ SSE 广播                          ├─ Socket.IO 客户端
-                                    ├─ 推送通知 (Web Push)               └─ Canvas 白板
+    └─ Runner 守护进程              ├─ SSE 广播                          └─ Socket.IO 客户端
+                                    ├─ 推送通知 (Web Push)
                                     └─ GitInternalAPI
 ```
 
@@ -116,13 +116,10 @@ bun run build:single-exe       # 构建单文件可执行程序
 |-----------|------|
 | `routes/` | TanStack Router 页面 |
 | `routes/sessions/` | 会话视图（chat、files、terminal） |
-| `routes/mobile/` | 移动端路由 `/m/*` |
 | `components/` | UI 组件 |
 | `components/SessionChat.tsx` | 主聊天界面 |
 | `components/AssistantChat/` | assistant-ui 集成 |
 | `components/ImagePasteDrop.tsx` | 图片粘贴/拖拽上传 |
-| `components/VoiceRecorder.tsx` | 录音转文字 |
-| `components/Whiteboard.tsx` | Canvas 白板工具 |
 | `components/git/` | Git 管理组件 |
 | `components/Editor/` | Monaco 编辑器集成 |
 | `hooks/queries/` | TanStack Query 查询钩子 |
@@ -138,7 +135,7 @@ bun run build:single-exe       # 构建单文件可执行程序
 
 | 文件 | 说明 |
 |------|------|
-| `types.ts` | 核心类型（Session、Message、Machine、FileChange、TimelineEntry） |
+| `types.ts` | 核心类型（Session、Message、Machine） |
 | `schemas.ts` | Zod 验证 Schema |
 | `socket.ts` | Socket.IO 事件类型定义 |
 | `rpcMethods.ts` | 51 个 RPC 方法名 |
@@ -147,7 +144,6 @@ bun run build:single-exe       # 构建单文件可执行程序
 | `messages.ts` | 消息解析工具 |
 | `eventBus.ts` | EventBus 类型定义 |
 | `gitInternalApi.ts` | GitInternalAPI 类型 |
-| `voice.ts` | 语音相关类型 |
 | `utils.ts` | 通用工具函数 |
 
 ## Hub API 路由总览
@@ -164,14 +160,7 @@ bun run build:single-exe       # 构建单文件可执行程序
 | permissions | `/api/sessions/:id/permissions` | 权限审批 |
 | plugins | `/api/sessions/:id/plugins` | 插件管理（session-scoped） |
 | skillManagement | `/api/sessions/:id/skills` | Skill 搜索/安装/卸载（session-scoped） |
-| changeTracking | `/api/sessions/:id` | 变更追踪、审查、上下文状态 |
-| timeline | `/api/sessions/:id` | 操作时间线、摘要、检查点 |
-| undo | `/api/sessions/:id` | 撤销预览/执行、快照列表 |
-| share | `/api/sessions/:id/shares` `/api/s/:shareId` | 会话分享（保护+公开） |
 | push | `/api/push` | Web Push 订阅 |
-| voice | `/api/voice` | 语音设置（ElevenLabs） |
-| voiceTranscription | `/api/voice/transcribe` | Whisper 转录 |
-| orchestration | `/api/orchestration/skills` | 编排 Skill |
 
 ## 常见任务
 
