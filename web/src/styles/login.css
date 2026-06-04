@@ -217,16 +217,20 @@
 }
 
 /* === Hub URL Dialog Overrides === */
+/* When login is active, override global app variables so Radix Dialog
+   (rendered in a portal outside .login-page) picks up the warm theme */
+body[data-login-active] {
+  --app-dialog-bg: var(--lp-surface);
+  --app-fg: var(--lp-text-primary);
+  --app-hint: var(--lp-text-secondary);
+  --app-border: var(--lp-border);
+}
+
 .login-dialog-content {
   border: 1px solid var(--lp-border) !important;
   border-radius: 12px !important;
   box-shadow: 0 16px 48px rgba(0,0,0,0.12) !important;
   max-width: 420px !important;
-}
-
-.login-dialog-content button[variant="outline"] {
-  border-color: var(--lp-border);
-  color: var(--lp-text-secondary);
 }
 
 /* === Animations === */

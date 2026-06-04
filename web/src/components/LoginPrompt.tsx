@@ -31,6 +31,10 @@ export function LoginPrompt(props: LoginPromptProps) {
     const [serverInput, setServerInput] = useState(props.serverUrl ?? '')
     const [serverError, setServerError] = useState<string | null>(null)
 
+    useEffect(() => {
+        document.body.dataset.loginActive = ''
+        return () => { delete document.body.dataset.loginActive }
+    }, [])
     const handleSubmit = useCallback(async (e: React.FormEvent) => {
         e.preventDefault()
 
@@ -181,15 +185,7 @@ export function LoginPrompt(props: LoginPromptProps) {
                                     Hub {props.serverUrl ? t('login.server.custom') : t('login.server.default')}
                                 </button>
                             </DialogTrigger>
-                            <DialogContent
-                                className="login-dialog-content"
-                                style={{
-                                    '--app-dialog-bg': 'var(--lp-surface)',
-                                    '--app-fg': 'var(--lp-text-primary)',
-                                    '--app-hint': 'var(--lp-text-secondary)',
-                                    '--app-border': 'var(--lp-border)',
-                                } as React.CSSProperties}
-                            >
+                            <DialogContent className="login-dialog-content">
                                 <DialogHeader>
                                     <DialogTitle>{t('login.server.title')}</DialogTitle>
                                     <DialogDescription>
