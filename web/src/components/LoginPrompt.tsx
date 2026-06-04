@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from 'react'
 import { ApiClient } from '@/api/client'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { Spinner } from '@/components/Spinner'
-import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { useTranslation } from '@/lib/use-translation'
 import type { ServerUrlResult } from '@/hooks/useServerUrl'
@@ -192,11 +191,11 @@ export function LoginPrompt(props: LoginPromptProps) {
                                         {t('login.server.description')}
                                     </DialogDescription>
                                 </DialogHeader>
-                                <form onSubmit={handleSaveServer} className="space-y-4">
+                                <form onSubmit={handleSaveServer} className="login-dialog-form">
                                     <div className="text-xs text-[var(--lp-text-tertiary)]">
                                         {t('login.server.current')} {serverSummary}
                                     </div>
-                                    <div className="space-y-2">
+                                    <div className="login-dialog-field">
                                         <label className="login-label" htmlFor="login-server-input">{t('login.server.origin')}</label>
                                         <input
                                             id="login-server-input"
@@ -220,15 +219,15 @@ export function LoginPrompt(props: LoginPromptProps) {
                                         </div>
                                     )}
 
-                                    <div className="flex items-center justify-end gap-2">
+                                    <div className="login-dialog-actions">
                                         {props.serverUrl && (
-                                            <Button type="button" variant="outline" onClick={handleClearServer}>
+                                            <button type="button" className="login-dialog-btn-secondary" onClick={handleClearServer}>
                                                 {t('login.server.useSameOrigin')}
-                                            </Button>
+                                            </button>
                                         )}
-                                        <Button type="submit">
+                                        <button type="submit" className="login-dialog-btn-primary">
                                             {t('login.server.save')}
-                                        </Button>
+                                        </button>
                                     </div>
                                 </form>
                             </DialogContent>
