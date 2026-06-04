@@ -2,6 +2,7 @@
 @import "katex/dist/katex.min.css";
 @import "./styles/tokens.css";
 @import "./styles/typography.css";
+@import "./styles/login.css";
 @config "../tailwind.config.ts";
 
 :root {
