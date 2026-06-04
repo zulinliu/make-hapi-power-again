@@ -39,14 +39,12 @@ Most AI coding tools lock you into one agent, one terminal, one machine. Hapi Po
 
 ## Screenshots
 
-<!-- TODO: Add screenshots showing desktop multi-agent view and mobile swipe-to-approve -->
-
 <p align="center">
-  <em>Desktop: Multi-agent workbench with chat, editor, and terminal</em>
+  <img src="docs/assets/screenshot-desktop.png" alt="Desktop: Multi-agent workbench" width="720">
 </p>
 
 <p align="center">
-  <em>Mobile: Swipe to approve agent changes on your phone</em>
+  <img src="docs/assets/screenshot-mobile.png" alt="Mobile: Swipe to approve changes" height="400">
 </p>
 
 ---

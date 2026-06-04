@@ -39,14 +39,12 @@
 
 ## 截图
 
-<!-- TODO: 添加桌面端多代理工作台和移动端滑动审批截图 -->
-
 <p align="center">
-  <em>桌面端：多代理工作台，聊天 + 编辑器 + 终端</em>
+  <img src="docs/assets/screenshot-desktop.png" alt="桌面端：多代理工作台" width="720">
 </p>
 
 <p align="center">
-  <em>移动端：在手机上滑动审批代理变更</em>
+  <img src="docs/assets/screenshot-mobile.png" alt="移动端：滑动审批变更" height="400">
 </p>
 
 ---
