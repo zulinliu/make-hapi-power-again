@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
 const base = process.env.VITE_BASE_URL || '/'
-const hubTarget = process.env.VITE_HUB_PROXY || 'http://127.0.0.1:3006'
+const hubTarget = process.env.VITE_HUB_PROXY || 'http://127.0.0.1:3016'
 const appVersion = readAppVersion()
 
 function readAppVersion(): string {

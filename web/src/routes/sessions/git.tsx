@@ -2,6 +2,9 @@ import { useState, useCallback } from 'react'
 import { useParams, useNavigate } from '@tanstack/react-router'
 import { useAppContext } from '@/lib/app-context'
 import { useTranslation } from '@/lib/use-translation'
+import { useToast } from '@/lib/toast-context'
+import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
+import { encodeBase64 } from '@/lib/utils'
 import { GitStatusPanel } from '@/components/git/GitStatusPanel'
 import { GitHistory } from '@/components/git/GitHistory'
 import { GitBranchManager } from '@/components/git/GitBranchManager'
@@ -10,7 +13,9 @@ import { GitRemoteManager } from '@/components/git/GitRemoteManager'
 import { GitPushDialog } from '@/components/git/GitPushDialog'
 import { GitPullDialog } from '@/components/git/GitPullDialog'
 import { GitCommitDialog } from '@/components/git/GitCommitDialog'
+import { GitFilePreview } from '@/components/git/GitFilePreview'
 import { LoadingState } from '@/components/LoadingState'
+import { SubPageLayout } from '@/components/ui/SubPageLayout'
 import { useSession } from '@/hooks/queries/useSession'
 
 type Tab = 'status' | 'history' | 'branches' | 'remotes'
@@ -26,6 +31,8 @@ export default function GitPage() {
   const { api } = useAppContext()
   const { t } = useTranslation()
   const { session, isLoading } = useSession(api, sessionId)
+  const { addToast } = useToast()
+  const { copy } = useCopyToClipboard()
   const [activeTab, setActiveTab] = useState<Tab>('status')
   const [cloneOpen, setCloneOpen] = useState(false)
   const [pushOpen, setPushOpen] = useState(false)
@@ -38,6 +45,7 @@ export default function GitPage() {
   const [currentBranch, setCurrentBranch] = useState('')
   const [remotes, setRemotes] = useState<{ name: string; url: string }[]>([])
   const [changedFiles, setChangedFiles] = useState<GitFile[]>([])
+  const [previewFile, setPreviewFile] = useState<{ path: string; status: string } | null>(null)
 
   const handleStatusLoaded = useCallback((branch: string) => {
     setCurrentBranch(branch)
@@ -50,6 +58,35 @@ export default function GitPage() {
   const handleRemotesLoaded = useCallback((remoteList: { name: string; url: string }[]) => {
     setRemotes(remoteList)
   }, [])
+
+  const handleViewDiff = useCallback((path: string) => {
+    navigate({ to: '/sessions/$sessionId/file', params: { sessionId }, search: { path: encodeBase64(path) } })
+  }, [navigate, sessionId])
+
+  const handleCopyPath = useCallback((path: string) => {
+    const basePath = session?.metadata?.path || ''
+    const fullPath = basePath ? `${basePath}/${path}` : path
+    copy(fullPath).then((ok) => {
+      if (ok) addToast({ title: t('git.context.copyPathSuccess'), body: '' })
+    })
+  }, [session?.metadata?.path, copy, addToast, t])
+
+  const handleOpenFile = useCallback((path: string) => {
+    navigate({ to: '/sessions/$sessionId/file', params: { sessionId }, search: { path: encodeBase64(path) } })
+  }, [navigate, sessionId])
+
+  const handlePreview = useCallback((path: string, status: string) => {
+    setPreviewFile({ path, status })
+  }, [])
+
+  const handleClosePreview = useCallback(() => {
+    setPreviewFile(null)
+  }, [])
+
+  const handleOpenInFileManager = useCallback((path: string) => {
+    setPreviewFile(null)
+    navigate({ to: '/sessions/$sessionId/file', params: { sessionId }, search: { path: encodeBase64(path) } })
+  }, [navigate, sessionId])
 
   const handleFetch = async () => {
     if (!api) return
@@ -78,7 +115,7 @@ export default function GitPage() {
   if (!session) {
     return (
       <div className="p-4">
-        <p className="text-sm" style={{ color: 'var(--hp-danger)' }}>{t('git.sessionNotFound')}</p>
+        <p className="text-sm text-[var(--app-danger)]">{t('git.sessionNotFound')}</p>
         <button onClick={() => navigate({ to: '/sessions' })} className="text-xs mt-2 underline">{t('git.backToSessions')}</button>
       </div>
     )
@@ -92,83 +129,60 @@ export default function GitPage() {
   ]
 
   return (
-    <div className="h-full flex flex-col" style={{ background: 'var(--hp-surface-0)' }}>
-      <div className="flex items-center gap-3 px-4 h-12 border-b shrink-0" style={{ borderColor: 'var(--hp-border)' }}>
-        <button onClick={() => navigate({ to: '/sessions/$sessionId', params: { sessionId } })}
-          className="text-sm" style={{ color: 'var(--hp-text-tertiary)' }}>←</button>
-        <h2 className="text-sm font-semibold" style={{ color: 'var(--hp-text-primary)' }}>{t('git.title')}</h2>
-        <span className="text-xs font-mono" style={{ color: 'var(--hp-text-tertiary)' }}>{sessionId.slice(0, 8)}</span>
-
-        <div className="ml-auto flex items-center gap-1">
-          <button
-            onClick={handleFetch}
-            disabled={fetching}
-            className="px-2 py-1 text-xs rounded transition-colors hover:bg-[var(--hp-surface-1)] disabled:opacity-50"
-            style={{ color: 'var(--hp-text-tertiary)' }}
-          >
-            {fetching ? t('git.fetch.fetching') : t('git.fetch')}
-          </button>
-          <button
-            onClick={() => { setPushPullError(''); setPullOpen(true) }}
-            className="px-2 py-1 text-xs rounded transition-colors hover:bg-[var(--hp-surface-1)]"
-            style={{ color: 'var(--hp-text-tertiary)' }}
-          >
-            {t('git.pull')}
-          </button>
-          <button
-            onClick={() => { setPushPullError(''); setPushOpen(true) }}
-            className="px-2 py-1 text-xs rounded transition-colors hover:bg-[var(--hp-surface-1)]"
-            style={{ color: 'var(--hp-text-tertiary)' }}
-          >
-            {t('git.push')}
-          </button>
-          <button
-            onClick={() => setCommitOpen(true)}
-            disabled={changedFiles.length === 0}
-            className="px-2 py-1 text-xs rounded transition-colors hover:bg-[var(--hp-surface-1)] disabled:opacity-50"
-            style={{ color: 'var(--hp-primary)' }}
-          >
-            {t('git.commit')}
-          </button>
-          <button
-            onClick={() => setCloneOpen(true)}
-            className="px-2 py-1 text-xs rounded transition-colors hover:bg-[var(--hp-surface-1)]"
-            style={{ color: 'var(--hp-accent)' }}
-          >
-            {t('git.clone')}
-          </button>
-        </div>
-      </div>
-
-      {(pushPullError || fetchResult) && (
-        <div className={`px-4 py-2 text-xs border-b ${fetchResult?.ok ? 'text-green-400 bg-green-500/10' : 'text-red-400 bg-red-500/10'}`} style={{ borderColor: 'var(--hp-border)' }}>
-          {pushPullError || fetchResult?.msg}
-        </div>
-      )}
-
-      <div className="flex border-b shrink-0" style={{ borderColor: 'var(--hp-border)' }}>
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className="flex-1 py-2 text-sm text-center border-b-2 transition-colors"
-            style={{
-              borderColor: activeTab === tab.id ? 'var(--hp-primary)' : 'transparent',
-              color: activeTab === tab.id ? 'var(--hp-primary)' : 'var(--hp-text-tertiary)',
-              fontWeight: activeTab === tab.id ? 500 : 400,
-            }}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="flex-1 overflow-y-auto">
-        {activeTab === 'status' && <GitStatusPanel sessionId={sessionId} onStatusLoaded={handleStatusLoaded} onFilesChanged={handleFilesChanged} />}
+    <>
+      <SubPageLayout
+        tabs={tabs}
+        activeTab={activeTab}
+        onTabChange={(id) => setActiveTab(id as Tab)}
+        toolbar={
+          <>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={handleFetch}
+                disabled={fetching}
+                className="px-3 py-1.5 text-xs rounded-md transition-colors hover:bg-[var(--app-secondary-bg)] disabled:opacity-50 text-[var(--app-hint)]"
+              >
+                {fetching ? t('git.fetch.fetching') : t('git.fetch')}
+              </button>
+              <button
+                onClick={() => { setPushPullError(''); setPullOpen(true) }}
+                className="px-3 py-1.5 text-xs rounded-md transition-colors hover:bg-[var(--app-secondary-bg)] text-[var(--app-hint)]"
+              >
+                {t('git.pull')}
+              </button>
+              <button
+                onClick={() => { setPushPullError(''); setPushOpen(true) }}
+                className="px-3 py-1.5 text-xs rounded-md transition-colors hover:bg-[var(--app-secondary-bg)] text-[var(--app-hint)]"
+              >
+                {t('git.push')}
+              </button>
+              <button
+                onClick={() => setCommitOpen(true)}
+                disabled={changedFiles.length === 0}
+                className="px-3 py-1.5 text-xs rounded-md transition-colors hover:bg-[var(--app-secondary-bg)] disabled:opacity-50 text-[var(--app-link)]"
+              >
+                {t('git.commit')}
+              </button>
+              <button
+                onClick={() => setCloneOpen(true)}
+                className="px-3 py-1.5 text-xs rounded-md transition-colors hover:bg-[var(--app-secondary-bg)] text-[var(--app-link)]"
+              >
+                {t('git.clone')}
+              </button>
+            </div>
+            {(pushPullError || fetchResult) && (
+              <div className={`text-xs mt-1 ${fetchResult?.ok ? 'text-[var(--app-success)]' : 'text-[var(--app-danger)]'}`}>
+                {pushPullError || fetchResult?.msg}
+              </div>
+            )}
+          </>
+        }
+      >
+        {activeTab === 'status' && <GitStatusPanel sessionId={sessionId} onStatusLoaded={handleStatusLoaded} onFilesChanged={handleFilesChanged} onViewDiff={handleViewDiff} onCopyPath={handleCopyPath} onOpenFile={handleOpenFile} onPreview={handlePreview} />}
         {activeTab === 'history' && <GitHistory sessionId={sessionId} />}
         {activeTab === 'branches' && <GitBranchManager sessionId={sessionId} />}
         {activeTab === 'remotes' && <GitRemoteManager sessionId={sessionId} onRemotesLoaded={handleRemotesLoaded} />}
-      </div>
+      </SubPageLayout>
 
       <GitCloneDialog
         isOpen={cloneOpen}
@@ -198,6 +212,15 @@ export default function GitPage() {
         files={changedFiles}
         onCommitComplete={() => setActiveTab('status')}
       />
-    </div>
+      {previewFile && (
+        <GitFilePreview
+          sessionId={sessionId}
+          filePath={previewFile.path}
+          fileStatus={previewFile.status}
+          onClose={handleClosePreview}
+          onOpenInFileManager={() => handleOpenInFileManager(previewFile.path)}
+        />
+      )}
+    </>
   )
 }

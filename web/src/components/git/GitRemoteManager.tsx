@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Button } from '@/components/ui/button'
 import { useAppContext } from '@/lib/app-context'
 import { useTranslation } from '@/lib/use-translation'
 
@@ -78,69 +77,70 @@ export function GitRemoteManager({ sessionId, onRemotesLoaded }: { sessionId: st
         }
     }
 
-    const inputClass = "rounded-md border border-[var(--app-border)] bg-transparent px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--app-link)]"
+    const inputClass = "rounded-md border border-[var(--app-border)] bg-[var(--app-bg)] px-3 py-1.5 text-sm text-[var(--app-fg)] focus:outline-none focus:ring-1 focus:ring-[var(--app-link)]"
 
     return (
-        <div className="space-y-4 p-4">
+        <div className="space-y-3 p-3">
             {error && (
-                <div className="rounded-md bg-red-500/10 p-2 text-sm text-red-400">
+                <div className="rounded-md bg-[var(--app-badge-error-bg)] px-3 py-2 text-sm text-[var(--app-danger)]">
                     {error}
                 </div>
             )}
 
             {loading ? (
-                <div className="text-sm" style={{ color: 'var(--app-text-muted)' }}>{t('git.remote.loading')}</div>
+                <div className="text-sm text-[var(--app-hint)]">{t('git.remote.loading')}</div>
             ) : remotes.length === 0 ? (
-                <div className="text-sm" style={{ color: 'var(--app-text-muted)' }}>{t('git.remote.empty')}</div>
+                <div className="text-sm text-[var(--app-hint)]">{t('git.remote.empty')}</div>
             ) : (
                 <div className="space-y-2">
                     {remotes.map((remote) => (
                         <div
                             key={remote.name}
-                            className="flex items-center justify-between rounded-md p-3"
-                            style={{ background: 'var(--app-subtle-bg)' }}
+                            className="flex items-center justify-between rounded-md border border-[var(--app-border)] bg-[var(--app-secondary-bg)] px-3 py-2"
                         >
                             <div className="min-w-0 flex-1">
-                                <div className="font-medium">{remote.name}</div>
-                                <div className="truncate text-sm" style={{ color: 'var(--app-text-muted)' }}>
+                                <div className="text-sm font-medium text-[var(--app-fg)]">{remote.name}</div>
+                                <div className="truncate text-xs text-[var(--app-hint)]">
                                     {remote.url}
                                 </div>
                             </div>
-                            <Button
-                                variant="outline"
-                                size="sm"
+                            <button
+                                type="button"
                                 onClick={() => handleRemove(remote.name)}
-                                className="ml-2 text-red-400 hover:text-red-300"
+                                className="ml-2 shrink-0 rounded-md px-2 py-1 text-xs text-[var(--app-danger)] hover:opacity-80"
                             >
                                 {t('git.remote.remove')}
-                            </Button>
+                            </button>
                         </div>
                     ))}
                 </div>
             )}
 
-            <div className="border-t pt-4" style={{ borderColor: 'var(--app-border)' }}>
-                <div className="mb-2 text-sm font-medium">{t('git.remote.addTitle')}</div>
-                <div className="flex gap-2">
-                    <input
-                        value={newName}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewName(e.target.value)}
-                        placeholder="origin"
-                        className={`w-32 ${inputClass}`}
-                    />
-                    <input
-                        value={newUrl}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewUrl(e.target.value)}
-                        placeholder="https://github.com/user/repo.git"
-                        className={`flex-1 ${inputClass}`}
-                    />
-                    <Button
+            <div className="border-t border-[var(--app-border)] pt-3">
+                <div className="mb-2 text-xs font-medium text-[var(--app-hint)]">{t('git.remote.addTitle')}</div>
+                <div className="flex flex-col gap-2">
+                    <div className="flex gap-2">
+                        <input
+                            value={newName}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewName(e.target.value)}
+                            placeholder="origin"
+                            className={`w-28 shrink-0 ${inputClass}`}
+                        />
+                        <input
+                            value={newUrl}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewUrl(e.target.value)}
+                            placeholder="https://github.com/user/repo.git"
+                            className={`min-w-0 flex-1 ${inputClass}`}
+                        />
+                    </div>
+                    <button
+                        type="button"
                         onClick={handleAdd}
                         disabled={!newName || !newUrl}
-                        size="sm"
+                        className="self-end px-3 py-1.5 text-xs rounded-md bg-[var(--app-link)] text-white hover:opacity-90 disabled:opacity-50"
                     >
                         {t('git.remote.add')}
-                    </Button>
+                    </button>
                 </div>
             </div>
         </div>

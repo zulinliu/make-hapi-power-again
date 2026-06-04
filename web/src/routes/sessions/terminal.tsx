@@ -3,7 +3,6 @@ import type { PointerEvent } from 'react'
 import { useParams } from '@tanstack/react-router'
 import type { Terminal } from '@xterm/xterm'
 import { useAppContext } from '@/lib/app-context'
-import { useAppGoBack } from '@/hooks/useAppGoBack'
 import { useSession } from '@/hooks/queries/useSession'
 import { useTerminalSocket } from '@/hooks/useTerminalSocket'
 import { useLongPress } from '@/hooks/useLongPress'
@@ -20,24 +19,6 @@ import {
     DialogHeader,
     DialogTitle
 } from '@/components/ui/dialog'
-function BackIcon() {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <polyline points="15 18 9 12 15 6" />
-        </svg>
-    )
-}
-
 function ConnectionIndicator(props: { status: 'idle' | 'connecting' | 'connected' | 'error' }) {
     const { t } = useTranslation()
     const isConnected = props.status === 'connected'
@@ -208,7 +189,6 @@ export default function TerminalPage() {
     const { t } = useTranslation()
     const { sessionId } = useParams({ from: '/sessions/$sessionId/terminal' })
     const { api, token, baseUrl } = useAppContext()
-    const goBack = useAppGoBack()
     const { session } = useSession(api, sessionId)
     const terminalSupported = isRemoteTerminalSupported(session?.metadata)
     const terminalId = useMemo(() => randomId(), [sessionId])
@@ -420,7 +400,6 @@ export default function TerminalPage() {
         )
     }
 
-    const subtitle = session.metadata?.path ?? sessionId
     const status = terminalState.status
     const errorMessage = !terminalSupported
         ? t('terminal.unsupportedWindows')
@@ -434,23 +413,6 @@ export default function TerminalPage() {
 
     return (
         <div className="flex h-full min-h-0 flex-col">
-            <div className="bg-[var(--app-bg)] pt-[env(safe-area-inset-top)]">
-                <div className="mx-auto w-full max-w-content flex items-center gap-2 p-3 border-b border-[var(--app-border)]">
-                    <button
-                        type="button"
-                        onClick={goBack}
-                        className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--app-hint)] transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]"
-                    >
-                        <BackIcon />
-                    </button>
-                    <div className="min-w-0 flex-1">
-                        <div className="truncate font-semibold">{t('terminal.title')}</div>
-                        <div className="truncate text-xs text-[var(--app-hint)]">{subtitle}</div>
-                    </div>
-                    <ConnectionIndicator status={status} />
-                </div>
-            </div>
-
             {session.active ? null : (
                 <div className="px-3 pt-3">
                     <div className="mx-auto w-full max-w-content rounded-md bg-[var(--app-subtle-bg)] p-3 text-sm text-[var(--app-hint)]">
@@ -479,7 +441,10 @@ export default function TerminalPage() {
                 </div>
             ) : null}
 
-            <div className="flex-1 min-h-0 overflow-hidden bg-[var(--app-bg)]">
+            <div className="flex-1 min-h-0 overflow-hidden bg-[var(--app-bg)] relative">
+                <div className="absolute top-3 right-3 z-10">
+                    <ConnectionIndicator status={status} />
+                </div>
                 <div className="mx-auto h-full w-full max-w-content p-3">
                     {terminalSupported ? (
                         <TerminalView onMount={handleTerminalMount} onResize={handleResize} className="h-full w-full" />
