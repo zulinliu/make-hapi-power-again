@@ -11,7 +11,7 @@ export default {
 
   // Login / Auth
   'login.title': 'Hapi Power',
-  'login.subtitle': '随时随地，Vibe Coding',
+  'login.subtitle': '想到做到，一气呵成',
   'login.bind.title': '绑定 Telegram',
   'login.submit': '登录',
   'login.bind.submit': '绑定',
@@ -35,8 +35,8 @@ export default {
   'login.server.required': '必须先填写服务器地址才能登录。',
   'login.server.useSameOrigin': '使用同源',
   'login.server.save': '保存',
-  'login.footer': '用',
-  'login.footer.for': '设计，Vibe Coding',
+  'login.footer': '',
+  'login.footer.for': '',
   'login.footer.copyright': '©',
 
   // Sessions page

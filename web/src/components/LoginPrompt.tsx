@@ -243,7 +243,7 @@ export function LoginPrompt(props: LoginPromptProps) {
 
             {/* Footer */}
             <div className="login-footer">
-                {t('login.footer')} <span className="login-footer-heart">&hearts;</span> {t('login.footer.for')} &middot; {t('login.footer.copyright')} {CURRENT_YEAR} Hapi Power
+                {t('login.footer.copyright')} {CURRENT_YEAR} Hapi Power
             </div>
         </div>
     )
