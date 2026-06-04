@@ -139,8 +139,8 @@ shared/   共享类型、Schema
 
 ## 许可证
 
-By contributing, you agree that:
+提交代码即表示你同意：
 
-1. Your code will be licensed under [AGPL-3.0](./LICENSE)
-2. You have the right to submit this code under that license
-3. You certify the [Developer Certificate of Origin](https://developercertificate.org/)
+1. 你的代码将以 [AGPL-3.0](./LICENSE) 许可证发布
+2. 你有权在该许可证下提交此代码
+3. 你确认遵守 [开发者证书 of Origin](https://developercertificate.org/)

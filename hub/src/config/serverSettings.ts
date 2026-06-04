@@ -183,7 +183,7 @@ export async function loadServerSettings(dataDir: string): Promise<ServerSetting
     }
 
     // listenPort: env > file > default
-    let listenPort = 3006
+    let listenPort = 3016
     if (process.env.HAPI_POWER_LISTEN_PORT) {
         const parsed = parseInt(process.env.HAPI_POWER_LISTEN_PORT, 10)
         if (!Number.isFinite(parsed) || parsed <= 0) {

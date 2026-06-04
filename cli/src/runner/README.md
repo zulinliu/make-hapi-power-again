@@ -282,7 +282,7 @@ All data is plain JSON over TLS; authentication is `CLI_API_TOKEN` (no end-to-en
 
 ### Test Environment
 - Requires `.env.integration-test`
-- Uses local hapi-power-hub (http://localhost:3006)
+- Uses local hapi-power-hub (http://localhost:3016)
 - Separate `~/.hapi-dev-test` home directory
 
 ### Key Test Scenarios

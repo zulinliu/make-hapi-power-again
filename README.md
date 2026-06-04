@@ -135,22 +135,22 @@ bun install
 bun run dev
 ```
 
-Hub runs at `http://localhost:3000`, Web UI at `http://localhost:5173`.
+Hub runs at `http://localhost:3016`, Web UI at `http://localhost:5173`.
 
 ### 2. Connect an AI Agent
 
 ```bash
 # Claude Code (default)
-bun run --cwd cli start hub
+hapi-power claude
 
 # OpenAI Codex
-bun run --cwd cli start codex
+hapi-power codex
 
 # Google Gemini
-bun run --cwd cli start gemini
+hapi-power gemini
 
-# Via E2E encrypted relay
-bun run --cwd cli start hub --relay
+# Start hub with E2E encrypted relay
+hapi-power hub --relay
 ```
 
 ### 3. Open in Browser
@@ -188,7 +188,7 @@ bun run build:single-exe
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `PORT` | Hub listen port | `3000` |
+| `HAPI_POWER_LISTEN_PORT` | Hub listen port | `3016` |
 | `HUB_TOKEN` | Hub authentication token | — |
 | `OPENAI_API_KEY` | Whisper voice transcription | — |
 | `VAPID_PUBLIC_KEY` | Web Push public key | — |
@@ -200,7 +200,7 @@ bun run build:single-exe
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `HUB_URL` | Hub address | `http://localhost:3000` |
+| `HAPI_POWER_API_URL` | Hub address | `http://localhost:3016` |
 | `CLI_API_TOKEN` | CLI authentication token | auto-generated |
 | `ANTHROPIC_API_KEY` | Claude API key | — |
 
@@ -248,8 +248,8 @@ Three-layer monorepo connected via Socket.IO and REST/SSE:
 | Backend | [Hono](https://hono.dev) + Socket.IO + better-sqlite3 |
 | Frontend | [React 19](https://react.dev) + TanStack Router + TanStack Query + Tailwind CSS |
 | Code Editor | Monaco Editor + Shiki |
-| Terminal | xterm.js + node-pty |
-| Git | isomorphic-git |
+| Terminal | xterm.js + Bun.Subprocess |
+| Git | system `git` CLI via RPC |
 | Validation | Zod |
 | Build | Vite + Bun |
 | Realtime | Socket.IO + SSE |
@@ -278,11 +278,13 @@ By contributing, you agree that your code will be licensed under AGPL-3.0 and yo
 Hapi Power is licensed under [AGPL-3.0](./LICENSE). What this means:
 
 - **Free to use** — self-host, modify, and run for any purpose
-- **Your code is yours** — using Hapi Power does not affect your project's license
+- **Your code is yours** — your own project's code is not affected by this license; using Hapi Power to build your projects does not change your project's license
 - **Share changes** — if you modify Hapi Power and offer it as a network service, you must share your modifications under the same license
 
 ---
 
 ## Acknowledgments
 
-Hapi Power is built on [hapi](https://github.com/twsxtd/hapi) by the twsxtd team. Their work on the agent communication protocol and web UI provided the foundation for this project.
+Hapi Power is a modified version of [hapi](https://github.com/twsxtd/hapi) by the twsxtd team. Their work on the agent communication protocol and web UI provided the foundation for this project.
+
+The CLI module includes code derived from [happy-cli](https://github.com/slopus/happy-cli) by Kirill Dubovitskiy, licensed under the MIT License.

@@ -57,7 +57,7 @@
 
 **可视化 Git + 文件管理** — 在浏览器中完成 commit、diff、分支管理、push、pull、clone。浏览目录树，新建、重命名、移动、复制、上传、下载、搜索文件——全部通过上下文菜单操作。
 
-**自定义模型 Provider** — 配置第三方 API 端点，自动发现可用模型，按会话或代理类型绑定 Provider。API 密钥以 AES-256-GCM 加密存储。
+**自定义模型 Provider** — 配置第三方 API 端点，自动发现可用模型，按会话绑定 Provider。API 密钥以 AES-256-GCM 加密存储。
 
 **移动端优先 PWA** — 专属移动端路由、滑动手势审批变更、只读终端、针对 iOS 深度优化 PWA 体验。随时随地用手机审批 AI 代理的代码变更。
 
@@ -135,22 +135,22 @@ bun install
 bun run dev
 ```
 
-Hub 监听 `http://localhost:3000`，Web UI 监听 `http://localhost:5173`。
+Hub 监听 `http://localhost:3016`，Web UI 监听 `http://localhost:5173`。
 
 ### 2. 连接 AI 代理
 
 ```bash
 # Claude Code（默认）
-bun run --cwd cli start hub
+hapi-power claude
 
 # OpenAI Codex
-bun run --cwd cli start codex
+hapi-power codex
 
 # Google Gemini
-bun run --cwd cli start gemini
+hapi-power gemini
 
-# 通过 E2E 加密中继连接
-bun run --cwd cli start hub --relay
+# 启动 E2E 加密中继 Hub
+hapi-power hub --relay
 ```
 
 ### 3. 打开浏览器
@@ -188,7 +188,7 @@ bun run build:single-exe
 
 | 变量 | 说明 | 默认值 |
 |------|------|--------|
-| `PORT` | Hub 监听端口 | `3000` |
+| `HAPI_POWER_LISTEN_PORT` | Hub 监听端口 | `3016` |
 | `HUB_TOKEN` | Hub 认证令牌 | — |
 | `OPENAI_API_KEY` | Whisper 语音转录 | — |
 | `VAPID_PUBLIC_KEY` | Web Push 公钥 | — |
@@ -200,7 +200,7 @@ bun run build:single-exe
 
 | 变量 | 说明 | 默认值 |
 |------|------|--------|
-| `HUB_URL` | Hub 地址 | `http://localhost:3000` |
+| `HAPI_POWER_API_URL` | Hub 地址 | `http://localhost:3016` |
 | `CLI_API_TOKEN` | CLI 认证令牌 | 自动生成 |
 | `ANTHROPIC_API_KEY` | Claude API 密钥 | — |
 
@@ -248,8 +248,8 @@ API 密钥使用 AES-256-GCM 加密，永远不会明文存储。
 | 后端 | [Hono](https://hono.dev) + Socket.IO + better-sqlite3 |
 | 前端 | [React 19](https://react.dev) + TanStack Router + TanStack Query + Tailwind CSS |
 | 代码编辑 | Monaco Editor + Shiki |
-| 终端 | xterm.js + node-pty |
-| Git | isomorphic-git |
+| 终端 | xterm.js + Bun.Subprocess |
+| Git | 系统 `git` CLI via RPC |
 | 验证 | Zod |
 | 构建 | Vite + Bun |
 | 实时通信 | Socket.IO + SSE |
@@ -278,11 +278,13 @@ API 密钥使用 AES-256-GCM 加密，永远不会明文存储。
 Hapi Power 基于 [AGPL-3.0](./LICENSE) 许可证开源：
 
 - **免费使用** — 自行部署、修改、用于任何目的
-- **你的代码归你** — 使用 Hapi Power 不影响你项目的许可证
+- **你的代码归你** — 你自己项目的代码不受此许可证影响；使用 Hapi Power 开发项目不会改变你项目的许可证
 - **共享改进** — 如果你修改了 Hapi Power 并以网络服务形式提供，需在相同许可证下共享修改
 
 ---
 
 ## 致谢
 
-Hapi Power 基于 [hapi](https://github.com/twsxtd/hapi) 项目构建，感谢 twsxtd 团队在代理通信协议和 Web UI 方面的出色工作。
+Hapi Power 是 [hapi](https://github.com/twsxtd/hapi) 项目的修改版本，感谢 twsxtd 团队在代理通信协议和 Web UI 方面的出色工作。
+
+CLI 模块包含源自 [happy-cli](https://github.com/slopus/happy-cli)（作者 Kirill Dubovitskiy，MIT 许可证）的代码。
