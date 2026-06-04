@@ -216,10 +216,6 @@
   animation: lpFadeIn 0.5s ease-out 0.7s both;
 }
 
-.login-footer-heart {
-  color: var(--lp-accent);
-}
-
 /* === Hub URL Dialog Overrides === */
 .login-dialog-content {
   border: 1px solid var(--lp-border) !important;
@@ -247,13 +243,13 @@
 /* === Responsive === */
 @media (max-width: 767px) {
   .login-page {
-    padding: 20px 20px 16px;
-    justify-content: flex-start;
-    padding-top: max(20px, env(safe-area-inset-top, 20px));
+    padding: 0 20px 16px;
+    justify-content: center;
+    padding-top: max(0px, env(safe-area-inset-top, 0px));
   }
 
   .login-brand {
-    margin-bottom: 24px;
+    margin-bottom: 32px;
   }
 
   .login-form-container {

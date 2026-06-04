@@ -11,7 +11,7 @@ export default {
 
   // Login / Auth
   'login.title': 'Hapi Power',
-  'login.subtitle': 'Vibe Coding Anytime, Anywhere',
+  'login.subtitle': 'Think it. Ship it.',
   'login.bind.title': 'Bind Telegram',
   'login.submit': 'Sign In',
   'login.bind.submit': 'Bind',
@@ -35,8 +35,8 @@ export default {
   'login.server.required': 'Hub URL required. Please set it before signing in.',
   'login.server.useSameOrigin': 'Use same origin',
   'login.server.save': 'Save hub',
-  'login.footer': 'Designed with',
-  'login.footer.for': 'for Vibe Coding',
+  'login.footer': '',
+  'login.footer.for': '',
   'login.footer.copyright': '©',
 
   // Sessions page
