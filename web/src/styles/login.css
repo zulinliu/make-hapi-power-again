@@ -1,6 +1,6 @@
 /**
  * Login Page Styles
- * "Warm Terminal" design — inspired by Claude/Anthropic design language
+ * Centered single-column layout — warm, focused, no wasted space
  * Uses --lp-* namespace to isolate from global theme
  */
 
@@ -41,108 +41,52 @@
 /* === Layout === */
 .login-page {
   display: flex;
-  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  padding: 24px;
   position: relative;
   background: var(--lp-bg);
 }
 
-/* === Left Panel (Brand) === */
-.login-brand-panel {
-  width: 45%;
-  background:
-    radial-gradient(ellipse at 30% 70%, rgba(255,255,255,0.08), transparent 60%),
-    repeating-linear-gradient(
-      45deg,
-      transparent,
-      transparent 40px,
-      rgba(255,255,255,0.02) 40px,
-      rgba(255,255,255,0.02) 41px
-    ),
-    linear-gradient(135deg, #d97757 0%, #c96442 50%, #b85540 100%);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 64px;
-  position: relative;
-  overflow: hidden;
-  border-right: 1px solid rgba(0,0,0,0.06);
-}
-
-.login-brand-panel::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-  pointer-events: none;
-}
-
-.login-brand-content {
-  margin-top: 8vh;
+/* === Brand Header === */
+.login-brand {
+  text-align: center;
+  margin-bottom: 32px;
+  animation: lpFadeSlideUp 0.5s ease-out 0.1s both;
 }
 
 .login-brand-name {
   font-family: var(--hp-font-display), Georgia, serif;
-  font-size: clamp(2.5rem, 2rem + 2vw, 3.5rem);
+  font-size: clamp(1.75rem, 1.25rem + 1.5vw, 2.5rem);
   font-weight: 600;
-  color: #ffffff;
+  color: var(--lp-accent);
   letter-spacing: -0.02em;
-  line-height: 1.1;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  animation: lpFadeSlideUp 0.6s ease-out 0.2s both;
+  line-height: 1.15;
 }
 
 .login-tagline {
   font-family: var(--hp-font-sans);
-  font-size: clamp(0.9rem, 0.8rem + 0.3vw, 1.05rem);
-  color: rgba(255,255,255,0.45);
-  margin-top: 12px;
+  font-size: clamp(0.8125rem, 0.75rem + 0.2vw, 0.9375rem);
+  color: var(--lp-text-tertiary);
+  margin-top: 6px;
   letter-spacing: 0.01em;
-  animation: lpFadeSlideUp 0.5s ease-out 0.4s both;
-}
-
-.login-terminal {
-  position: absolute;
-  bottom: 48px;
-  left: 64px;
-  font-family: var(--hp-font-mono);
-  font-size: 13px;
-  color: rgba(255,255,255,0.35);
-  line-height: 1.6;
-  animation: lpFadeIn 0.8s ease-out 0.8s both;
-}
-
-.login-terminal-cursor {
-  display: inline-block;
-  width: 8px;
-  height: 15px;
-  background: rgba(255,255,255,0.45);
-  vertical-align: text-bottom;
-  animation: lpBlink 1s step-end infinite;
-}
-
-/* === Right Panel (Form) === */
-.login-form-panel {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 48px;
-  position: relative;
-  background: var(--lp-bg);
 }
 
 /* Language Switcher */
 .login-lang {
   position: absolute;
-  top: 24px;
-  right: 24px;
-  animation: lpFadeIn 0.4s ease-out 0.9s both;
+  top: 16px;
+  right: 16px;
+  animation: lpFadeIn 0.4s ease-out 0.8s both;
 }
 
-/* Form Container */
+/* === Form Container === */
 .login-form-container {
   width: 100%;
   max-width: 400px;
+  animation: lpFadeSlideUp 0.5s ease-out 0.25s both;
 }
 
 .login-label {
@@ -153,7 +97,6 @@
   text-transform: uppercase;
   color: var(--lp-text-secondary);
   margin-bottom: 8px;
-  animation: lpFadeIn 0.4s ease-out 0.5s both;
 }
 
 .login-input {
@@ -168,7 +111,6 @@
   border-radius: 8px;
   outline: none;
   transition: border-color 150ms ease-out, box-shadow 150ms ease-out;
-  animation: lpFadeSlideUp 0.4s ease-out 0.6s both;
 }
 
 .login-input::placeholder {
@@ -214,7 +156,6 @@
   letter-spacing: 0.01em;
   cursor: pointer;
   transition: all 150ms ease-out;
-  animation: lpFadeSlideUp 0.4s ease-out 0.75s both;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -242,8 +183,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 24px;
-  animation: lpFadeIn 0.4s ease-out 0.9s both;
+  margin-top: 20px;
+  animation: lpFadeIn 0.4s ease-out 0.6s both;
 }
 
 .login-link {
@@ -266,15 +207,13 @@
 
 /* Footer */
 .login-footer {
-  position: absolute;
-  bottom: 28px;
-  left: 0;
-  right: 0;
+  margin-top: auto;
+  padding-top: 32px;
   text-align: center;
   font-family: var(--hp-font-sans);
   font-size: 12px;
-  color: var(--lp-text-secondary);
-  animation: lpFadeIn 0.6s ease-out 1s both;
+  color: var(--lp-text-tertiary);
+  animation: lpFadeIn 0.5s ease-out 0.7s both;
 }
 
 .login-footer-heart {
@@ -305,52 +244,20 @@
   to { opacity: 1; }
 }
 
-@keyframes lpBlink {
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0; }
-}
-
 /* === Responsive === */
 @media (max-width: 767px) {
   .login-page {
-    flex-direction: column;
+    padding: 20px 20px 16px;
+    justify-content: flex-start;
+    padding-top: max(20px, env(safe-area-inset-top, 20px));
   }
 
-  .login-brand-panel {
-    width: 100%;
-    min-height: 28vh;
-    padding: 28px 24px;
-    border-right: none;
-    border-bottom: 1px solid rgba(0,0,0,0.06);
-  }
-
-  .login-brand-content {
-    margin-top: 1vh;
-  }
-
-  .login-brand-name {
-    font-size: clamp(1.75rem, 1.25rem + 3vw, 2.25rem);
-  }
-
-  .login-tagline {
-    margin-top: 8px;
-  }
-
-  .login-terminal {
-    display: none;
-  }
-
-  .login-form-panel {
-    flex: 1;
-    padding: 28px 20px 16px;
+  .login-brand {
+    margin-bottom: 24px;
   }
 
   .login-form-container {
     max-width: 100%;
-  }
-
-  .login-label {
-    margin-bottom: 6px;
   }
 
   .login-input {
@@ -375,15 +282,11 @@
   }
 
   .login-footer {
-    position: relative;
-    bottom: auto;
-    margin-top: auto;
-    padding-top: 16px;
+    padding-top: 24px;
     padding-bottom: env(safe-area-inset-bottom, 8px);
     font-size: 11px;
   }
 
-  /* Dialog safe area on mobile */
   .login-dialog-content {
     max-width: calc(100vw - 32px) !important;
     max-height: calc(85dvh - env(safe-area-inset-bottom, 0px)) !important;
@@ -392,17 +295,12 @@
 }
 
 @media (max-width: 400px) {
-  .login-brand-panel {
-    min-height: 22vh;
-    padding: 20px 16px;
+  .login-page {
+    padding: 16px 16px 12px;
   }
 
-  .login-form-panel {
-    padding: 20px 16px 12px;
-  }
-
-  .login-brand-name {
-    font-size: clamp(1.5rem, 1.1rem + 3vw, 1.75rem);
+  .login-brand {
+    margin-bottom: 20px;
   }
 }
 
