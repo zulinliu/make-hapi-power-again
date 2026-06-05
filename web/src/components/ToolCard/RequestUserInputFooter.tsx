@@ -200,7 +200,7 @@ export function RequestUserInputFooter(props: {
             </div>
 
             {error ? (
-                <div className="mt-2 text-xs text-red-600">
+                <div className="mt-2 text-xs text-[var(--hp-danger)]">
                     {error}
                 </div>
             ) : null}

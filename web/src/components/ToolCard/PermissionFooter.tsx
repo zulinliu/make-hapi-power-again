@@ -68,14 +68,14 @@ function PermissionRowButton(props: {
     return (
         <button
             type="button"
-            className={`flex w-full items-center justify-between gap-3 rounded-[20px] bg-[var(--app-tool-card-bg)] px-3 py-2 text-left transition-colors hover:bg-[var(--app-tool-card-hover-bg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--app-link)] disabled:pointer-events-none disabled:opacity-50 ${
+            className={`flex w-full items-center justify-between gap-3 rounded-[var(--hp-radius-md)] bg-[var(--hp-surface-1)] px-3 py-2 text-left transition-colors hover:bg-[var(--hp-surface-2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--hp-primary)] disabled:pointer-events-none disabled:opacity-50 ${
                 props.tone === 'allow'
-                    ? 'text-[var(--app-badge-success-text)]'
+                    ? 'text-[var(--hp-success)]'
                     : props.tone === 'deny'
-                        ? 'text-[var(--app-badge-error-text)]'
+                        ? 'text-[var(--hp-danger)]'
                         : props.tone === 'muted'
-                            ? 'text-[var(--app-tool-card-muted-action-fg)]'
-                            : 'text-[var(--app-fg)]'
+                            ? 'text-[var(--hp-text-secondary)]'
+                            : 'text-[var(--hp-text-primary)]'
             }`}
             disabled={props.disabled}
             aria-busy={props.loading === true}
@@ -206,18 +206,18 @@ export function PermissionFooter(props: {
         if (!permission.reason) return null
 
         return (
-            <div className="mt-2 rounded-xl border border-[var(--app-badge-error-border)] bg-[var(--app-badge-error-bg)] px-3 py-2 text-xs text-[var(--app-badge-error-text)]">
+            <div className="mt-2 rounded-[var(--hp-radius-md)] border border-[var(--hp-danger)] bg-[var(--hp-danger-subtle)] px-3 py-2 text-xs text-[var(--hp-danger)]">
                 {permission.reason}
             </div>
         )
     }
 
     return (
-        <div className="rounded-2xl border border-[var(--app-border)] bg-[var(--app-bg)] p-3">
-            <div className="text-xs font-medium text-[var(--app-hint)]">{summary}</div>
+        <div className="rounded-[var(--hp-radius-md)] border border-[var(--hp-border)] bg-[var(--hp-surface-1)] p-3">
+            <div className="text-xs font-medium text-[var(--hp-text-tertiary)]">{summary}</div>
 
             {error ? (
-                <div className="mt-2 rounded-xl border border-[var(--app-badge-error-border)] bg-[var(--app-badge-error-bg)] px-3 py-2 text-xs text-[var(--app-badge-error-text)]">
+                <div className="mt-2 rounded-[var(--hp-radius-md)] border border-[var(--hp-danger)] bg-[var(--hp-danger-subtle)] px-3 py-2 text-xs text-[var(--hp-danger)]">
                     {error}
                 </div>
             ) : null}

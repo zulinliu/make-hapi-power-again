@@ -40,19 +40,19 @@ function SessionsEmptyState(props: {
 
     return (
         <div className="flex flex-col items-center justify-center gap-4 px-6 py-12 text-center">
-            <div className="text-xl font-semibold text-[var(--app-fg)]">
+            <div className="text-xl font-semibold text-[--hp-text-primary]">
                 Welcome to Hapi Power
             </div>
-            <div className="max-w-md text-sm text-[var(--app-hint)]">
+            <div className="max-w-md text-sm text-[--hp-text-tertiary]">
                 Your AI-powered development workstation. Clone a repo, code with AI, review and push.
             </div>
 
             <div className="flex gap-4 mt-4">
                 {steps.map((step, i) => (
-                    <div key={i} className="flex flex-col items-center gap-2 w-36 p-3 rounded-lg bg-[var(--app-secondary-bg)]">
+                    <div key={i} className="flex flex-col items-center gap-2 w-36 p-3 rounded-lg bg-[--hp-surface-2]">
                         <div className="text-2xl">{step.icon}</div>
-                        <div className="text-sm font-medium text-[var(--app-fg)]">{step.label}</div>
-                        <div className="text-xs text-[var(--app-hint)]">{step.desc}</div>
+                        <div className="text-sm font-medium text-[--hp-text-primary]">{step.label}</div>
+                        <div className="text-xs text-[--hp-text-tertiary]">{step.desc}</div>
                     </div>
                 ))}
             </div>
@@ -61,7 +61,7 @@ function SessionsEmptyState(props: {
                 <button
                     type="button"
                     onClick={props.onNewSession}
-                    className="px-4 py-1.5 text-sm rounded-lg bg-[var(--app-button)] text-[var(--app-button-text)] font-medium hover:opacity-90 transition-opacity"
+                    className="px-4 py-1.5 text-sm rounded-lg bg-[--hp-primary] text-[--hp-primary-text] font-medium hover:bg-[--hp-primary-hover] transition-colors"
                 >
                     {t('sessions.empty.startSession')}
                 </button>
@@ -69,7 +69,7 @@ function SessionsEmptyState(props: {
                     <button
                         type="button"
                         onClick={props.onBrowse}
-                        className="px-4 py-1.5 text-sm rounded-lg border border-[var(--app-border)] text-[var(--app-fg)] hover:bg-[var(--app-subtle-bg)] transition-colors"
+                        className="px-4 py-1.5 text-sm rounded-lg border border-[--hp-border] text-[--hp-text-primary] hover:bg-[--hp-surface-1] transition-colors"
                     >
                         {t('sessions.empty.browse')}
                     </button>
@@ -252,7 +252,7 @@ function CopyPathButton({ path, className }: { path: string; className?: string 
     return (
         <button
             type="button"
-            className={`shrink-0 p-0.5 rounded transition-colors ${copied ? 'text-[var(--app-badge-success-text)]' : 'text-[var(--app-hint)] hover:text-[var(--app-fg)]'} ${className ?? ''}`}
+            className={`shrink-0 p-0.5 rounded transition-colors ${copied ? 'text-[--hp-success]' : 'text-[--hp-text-tertiary] hover:text-[--hp-text-primary]'} ${className ?? ''}`}
             title={copied ? 'Copied!' : `Copy: ${path}`}
             onClick={handleClick}
         >
@@ -462,7 +462,7 @@ function SessionListSearch(props: {
     const { t } = useTranslation()
     return (
         <div className="relative px-3 pb-2">
-            <div className="pointer-events-none absolute inset-y-0 left-5 flex items-center pb-2 text-[var(--app-hint)]">
+            <div className="pointer-events-none absolute inset-y-0 left-5 flex items-center pb-2 text-[--hp-text-tertiary]">
                 <SearchIcon className="h-3.5 w-3.5" />
             </div>
             <input
@@ -470,13 +470,13 @@ function SessionListSearch(props: {
                 value={props.value}
                 onChange={(event) => props.onChange(event.target.value)}
                 placeholder={t('sessions.search.placeholder')}
-                className="w-full appearance-none rounded-lg border border-[var(--app-border)] bg-[var(--app-bg)] py-1.5 pl-8 pr-8 text-sm text-[var(--app-fg)] outline-none transition-colors placeholder:text-[var(--app-hint)] focus:border-[var(--app-link)] [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden"
+                className="w-full appearance-none rounded-[--hp-radius-sm] border border-[--hp-border] bg-[--hp-surface-0] py-1.5 pl-8 pr-8 text-sm text-[--hp-text-primary] outline-none transition-colors placeholder:text-[--hp-text-tertiary] focus:border-[--hp-primary] focus:shadow-[--hp-shadow-focus] [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden"
             />
             {props.value ? (
                 <button
                     type="button"
                     onClick={() => props.onChange('')}
-                    className="absolute inset-y-0 right-5 flex items-center pb-2 rounded p-0.5 text-[var(--app-hint)] hover:text-[var(--app-fg)]"
+                    className="absolute inset-y-0 right-5 flex items-center pb-2 rounded p-0.5 text-[--hp-text-tertiary] hover:text-[--hp-text-primary]"
                     title={t('sessions.search.clear')}
                 >
                     <XIcon className="h-3.5 w-3.5" />
@@ -528,9 +528,10 @@ function SessionItem(props: {
     api: ApiClient | null
     selected?: boolean
     showDetailedStatus?: boolean
+    animationDelay?: number
 }) {
     const { t } = useTranslation()
-    const { session: s, onSelect, showPath = true, api, selected = false, showDetailedStatus = false } = props
+    const { session: s, onSelect, showPath = true, api, selected = false, showDetailedStatus = false, animationDelay } = props
     const { haptic } = usePlatform()
     const [menuOpen, setMenuOpen] = useState(false)
     const [menuAnchorPoint, setMenuAnchorPoint] = useState<{ x: number; y: number }>({ x: 0, y: 0 })
@@ -544,7 +545,7 @@ function SessionItem(props: {
         s.metadata?.flavor ?? null
     )
 
-    const longPressHandlers = useLongPress({
+    const { isLongPressed, ...longPressHandlers } = useLongPress({
         onLongPress: (point) => {
             haptic.impact('medium')
             setMenuAnchorPoint(point)
@@ -578,18 +579,22 @@ function SessionItem(props: {
             <button
                 type="button"
                 {...longPressHandlers}
-                className={`session-list-item flex w-full flex-col gap-1 px-2.5 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--app-link)] select-none rounded-lg ${selected ? 'bg-[var(--app-secondary-bg)]' : ''}`}
-                style={{ WebkitTouchCallout: 'none' }}
+                className={`session-list-item flex w-full flex-col gap-1 px-2.5 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--hp-primary] select-none rounded-lg ${selected ? 'bg-[--hp-primary-subtle] border-l-2 border-l-[--hp-primary]' : ''} ${animationDelay != null ? 'animate-fade-in-up' : ''}`}
+                style={{
+                    WebkitTouchCallout: 'none',
+                    ...(animationDelay != null ? { animationDelay: `${animationDelay}ms` } : {}),
+                    ...(isLongPressed ? { transform: 'scale(0.98)', transition: 'transform var(--hp-duration-fast, 0.15s)' } : {})
+                }}
                 aria-current={selected ? 'page' : undefined}
             >
                 <div className={`flex items-center justify-between gap-3 ${!s.active ? 'opacity-50' : ''}`}>
                     <div className="flex items-center gap-2 min-w-0">
                         <AgentFlavorIcon flavor={s.metadata?.flavor} className="h-4 w-4 shrink-0" />
-                        <div className={`truncate text-sm font-medium ${s.active ? 'text-[var(--app-fg)]' : 'text-[var(--app-hint)]'}`}>
+                        <div className={`truncate text-sm font-medium ${s.active ? 'text-[--hp-text-primary]' : 'text-[--hp-text-tertiary]'}`}>
                             {sessionName}
                         </div>
                         {s.active && s.thinking ? (
-                            <LoaderIcon className="h-3.5 w-3.5 shrink-0 text-[var(--app-hint)] animate-spin-slow" />
+                            <LoaderIcon className="h-3.5 w-3.5 shrink-0 text-[--hp-text-tertiary] animate-spin-slow" />
                         ) : attention ? (
                             <SessionAttentionIndicator
                                 attention={attention}
@@ -598,29 +603,29 @@ function SessionItem(props: {
                         ) : null}
                         {showDetailedStatus && s.futureScheduledMessageCount > 0 ? (
                             <span title={scheduledLabel} aria-label={scheduledLabel} className="inline-flex shrink-0">
-                                <ScheduleIcon className="h-3.5 w-3.5 text-[var(--app-hint)]" />
+                                <ScheduleIcon className="h-3.5 w-3.5 text-[--hp-text-tertiary]" />
                             </span>
                         ) : null}
                     </div>
                     <div className="flex items-center gap-2 shrink-0 text-xs">
                         {todoProgress ? (
-                            <span className="flex items-center gap-1 text-[var(--app-hint)]">
+                            <span className="flex items-center gap-1 text-[--hp-text-tertiary]">
                                 <BulbIcon className="h-3 w-3" />
                                 {todoProgress.completed}/{todoProgress.total}
                             </span>
                         ) : null}
                         {!attention && s.pendingRequestsCount > 0 ? (
-                            <span className="text-[var(--app-badge-warning-text)]">
+                            <span className="text-[--hp-warning]">
                                 {t('session.item.pending')} {s.pendingRequestsCount}
                             </span>
                         ) : null}
-                        <span className="text-[var(--app-hint)]">
+                        <span className="text-[--hp-text-tertiary]">
                             {formatRelativeTime(s.updatedAt, t)}
                         </span>
                     </div>
                 </div>
                 {showPath ? (
-                    <div className="truncate text-xs text-[var(--app-hint)]">
+                    <div className="truncate text-xs text-[--hp-text-tertiary]">
                         {s.metadata?.path ?? s.id}
                     </div>
                 ) : null}
@@ -850,7 +855,7 @@ export function SessionList(props: {
         <div className="mx-auto w-full max-w-content flex flex-col">
             {renderHeader ? (
                 <div className="flex items-center justify-between px-3 py-1">
-                    <div className="text-xs text-[var(--app-hint)]">
+                    <div className="text-xs text-[--hp-text-tertiary]">
                         {isSearching
                             ? t('sessions.search.count', { n: visibleSessions.length, total: allSessions.length })
                             : t('sessions.count', { n: props.sessions.length, m: allGroups.length })}
@@ -858,7 +863,7 @@ export function SessionList(props: {
                     <button
                         type="button"
                         onClick={props.onNewSession}
-                        className="session-list-new-button p-1.5 rounded-full text-[var(--app-link)] transition-colors"
+                        className="session-list-new-button p-1.5 rounded-full text-[--hp-primary] transition-colors"
                         title={t('sessions.new')}
                     >
                         <PlusIcon className="h-5 w-5" />
@@ -878,7 +883,7 @@ export function SessionList(props: {
             )}
 
             {props.sessions.length > 0 && isSearching && visibleSessions.length === 0 ? (
-                <div className="px-4 py-8 text-center text-sm text-[var(--app-hint)]">
+                <div className="px-4 py-8 text-center text-sm text-[--hp-text-tertiary]">
                     {t('sessions.search.noResults')}
                 </div>
             ) : null}
@@ -892,12 +897,12 @@ export function SessionList(props: {
                             <button
                                 type="button"
                                 onClick={() => toggleMachine(mg)}
-                                className="flex w-full items-center gap-2 px-1 py-1.5 text-left rounded-lg transition-colors hover:bg-[var(--app-subtle-bg)] select-none"
+                                className="flex w-full items-center gap-2 px-1 py-1.5 text-left rounded-lg transition-colors hover:bg-[--hp-surface-1] select-none"
                             >
-                                <ChevronIcon className="h-4 w-4 text-[var(--app-hint)] shrink-0" collapsed={machineCollapsed} />
-                                <MachineIcon className="h-4 w-4 text-[var(--app-hint)] shrink-0" />
+                                <ChevronIcon className="h-4 w-4 text-[--hp-text-tertiary] shrink-0" collapsed={machineCollapsed} />
+                                <MachineIcon className="h-4 w-4 text-[--hp-text-tertiary] shrink-0" />
                                 <span className="text-sm font-semibold truncate flex-1">{mg.label}</span>
-                                <span className="text-[11px] tabular-nums text-[var(--app-hint)] shrink-0">({mg.totalSessions})</span>
+                                <span className="text-[11px] tabular-nums text-[--hp-text-tertiary] shrink-0">({mg.totalSessions})</span>
                             </button>
 
                             {/* Level 2: Projects */}
@@ -913,11 +918,11 @@ export function SessionList(props: {
                                         return (
                                             <div key={group.key}>
                                                 <div
-                                                    className="group/project sticky top-0 z-10 flex items-center gap-2 px-1 py-1.5 text-left rounded-lg transition-colors hover:bg-[var(--app-subtle-bg)] cursor-pointer min-w-0 w-full select-none"
+                                                    className="group/project sticky top-0 z-10 flex items-center gap-2 px-1 py-1.5 text-left rounded-lg transition-colors hover:bg-[--hp-surface-1] cursor-pointer min-w-0 w-full select-none"
                                                     onClick={() => toggleGroup(group.key, isCollapsed)}
                                                     title={group.directory}
                                                 >
-                                                    <ChevronIcon className="h-3.5 w-3.5 text-[var(--app-hint)] shrink-0" collapsed={isCollapsed} />
+                                                    <ChevronIcon className="h-3.5 w-3.5 text-[--hp-text-tertiary] shrink-0" collapsed={isCollapsed} />
                                                     <span className="font-medium text-sm truncate flex-1">
                                                         {group.displayName}
                                                     </span>
@@ -932,14 +937,14 @@ export function SessionList(props: {
                                                                     directory: group.directory
                                                                 })
                                                             }}
-                                                            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[var(--app-hint)] opacity-70 transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-link)] hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--app-link)]"
+                                                            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[--hp-text-tertiary] opacity-70 transition-colors hover:bg-[--hp-surface-1] hover:text-[--hp-primary] hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--hp-primary]"
                                                             title={t('sessions.group.new')}
                                                             aria-label={t('sessions.group.new')}
                                                         >
                                                             <PlusIcon className="h-3.5 w-3.5" />
                                                         </button>
                                                     ) : null}
-                                                    <span className="text-[11px] tabular-nums text-[var(--app-hint)] shrink-0">
+                                                    <span className="text-[11px] tabular-nums text-[--hp-text-tertiary] shrink-0">
                                                         ({group.sessions.length})
                                                     </span>
                                                 </div>
@@ -948,7 +953,7 @@ export function SessionList(props: {
                                                 <div className="collapsible-panel" data-open={!isCollapsed || undefined}>
                                                     <div className="collapsible-inner">
                                                     <div className="flex flex-col gap-0.5 ml-3 pl-1 pr-1 py-1">
-                                                        {visibleGroupSessions.map((s) => (
+                                                        {visibleGroupSessions.map((s, sessionIndex) => (
                                                             <SessionItem
                                                                 key={s.id}
                                                                 session={s}
@@ -957,6 +962,7 @@ export function SessionList(props: {
                                                                 api={api}
                                                                 selected={s.id === selectedSessionId}
                                                                 showDetailedStatus={showDetailedStatus}
+                                                                animationDelay={sessionIndex < 10 ? sessionIndex * 60 : undefined}
                                                             />
                                                         ))}
                                                         {!isSearching && group.sessions.length > sessionPreviewLimit && (sessionGroupExpanded || hiddenSessionCount > 0) ? (
@@ -964,8 +970,8 @@ export function SessionList(props: {
                                                                 type="button"
                                                                 onClick={() => toggleSessionGroup(group)}
                                                                 className={cn(
-                                                                    'mx-2 my-1 rounded-md px-2 py-1 text-left text-xs text-[var(--app-hint)] transition-colors hover:bg-[var(--app-subtle-bg)] hover:text-[var(--app-fg)]',
-                                                                    hiddenSessionCount > 0 && 'border border-dashed border-[var(--app-border)]'
+                                                                    'mx-2 my-1 rounded-md px-2 py-1 text-left text-xs text-[--hp-text-tertiary] transition-colors hover:bg-[--hp-surface-1] hover:text-[--hp-text-primary]',
+                                                                    hiddenSessionCount > 0 && 'border border-dashed border-[--hp-border]'
                                                                 )}
                                                             >
                                                                 {sessionGroupExpanded

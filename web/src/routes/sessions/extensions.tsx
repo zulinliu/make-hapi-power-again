@@ -207,12 +207,12 @@ export default function ExtensionsPage() {
             onTabChange={(id) => setActiveTab(id as Tab)}
         >
             {error && (
-                <div className="mx-3 mt-2 rounded-lg px-3 py-2 text-sm text-[var(--app-danger)] bg-[var(--app-badge-error-bg)]">
+                <div className="mx-3 mt-2 rounded-[var(--hp-radius-lg)] px-3 py-2 text-sm text-[var(--hp-danger)] bg-[var(--hp-danger-subtle)]">
                     {error}
                 </div>
             )}
             {successMsg && (
-                <div className="mx-3 mt-2 rounded-lg px-3 py-2 text-sm text-[var(--app-success)] bg-[var(--app-success-subtle)]">
+                <div className="mx-3 mt-2 rounded-[var(--hp-radius-lg)] px-3 py-2 text-sm text-[var(--hp-success)] bg-[var(--hp-success-subtle)]">
                     {successMsg}
                 </div>
             )}
@@ -220,17 +220,17 @@ export default function ExtensionsPage() {
             {activeTab === 'skills' && (
                 <div className="flex flex-col">
                     {/* Skill sub-tabs */}
-                    <div className="flex border-b border-[var(--app-border)]">
+                    <div className="flex border-b border-[var(--hp-border)]">
                         <button
                             type="button"
                             onClick={() => setSkillSubTab('installed')}
                             className="relative flex-1 px-4 py-2 text-xs font-medium transition-colors"
                         >
-                            <span className={skillSubTab === 'installed' ? 'text-[var(--app-fg)]' : 'text-[var(--app-hint)] hover:text-[var(--app-fg)]'}>
+                            <span className={skillSubTab === 'installed' ? 'text-[var(--hp-text-primary)]' : 'text-[var(--hp-text-tertiary)] hover:text-[var(--hp-text-primary)]'}>
                                 {t('extensions.installedSkills')} ({installedSkills.length})
                             </span>
                             <span className={`absolute bottom-0 left-[10%] h-0.5 w-4/5 rounded-full transition-colors duration-150 ${
-                                skillSubTab === 'installed' ? 'bg-[var(--app-link)]' : 'bg-transparent'
+                                skillSubTab === 'installed' ? 'bg-[var(--hp-primary)]' : 'bg-transparent'
                             }`} />
                         </button>
                         <button
@@ -238,14 +238,14 @@ export default function ExtensionsPage() {
                             onClick={() => setSkillSubTab('online')}
                             className="relative flex-1 px-4 py-2 text-xs font-medium transition-colors"
                         >
-                            <span className={skillSubTab === 'online' ? 'text-[var(--app-fg)]' : 'text-[var(--app-hint)] hover:text-[var(--app-fg)]'}>
+                            <span className={skillSubTab === 'online' ? 'text-[var(--hp-text-primary)]' : 'text-[var(--hp-text-tertiary)] hover:text-[var(--hp-text-primary)]'}>
                                 <span className="inline-flex items-center gap-1.5">
                                     <CloudDownloadIcon />
                                     {t('extensions.onlineInstall')}
                                 </span>
                             </span>
                             <span className={`absolute bottom-0 left-[10%] h-0.5 w-4/5 rounded-full transition-colors duration-150 ${
-                                skillSubTab === 'online' ? 'bg-[var(--app-link)]' : 'bg-transparent'
+                                skillSubTab === 'online' ? 'bg-[var(--hp-primary)]' : 'bg-transparent'
                             }`} />
                         </button>
                     </div>
@@ -256,7 +256,7 @@ export default function ExtensionsPage() {
                             {installedSkills.length > 0 && (
                                 <div className="flex gap-2">
                                     <div className="relative flex-1">
-                                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--app-hint)]">
+                                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--hp-text-tertiary)]">
                                             <SearchIcon />
                                         </div>
                                         <input
@@ -265,7 +265,7 @@ export default function ExtensionsPage() {
                                             onChange={e => setInstalledFilter(e.target.value)}
                                             placeholder={t('extensions.filterInstalled')}
                                             enterKeyHint="search"
-                                            className="w-full rounded-md border border-[var(--app-border)] bg-[var(--app-secondary-bg)] py-2 pl-9 pr-3 text-sm text-[var(--app-fg)] placeholder:text-[var(--app-hint)] focus:outline-none focus:ring-1 focus:ring-[var(--app-link)]"
+                                            className="w-full rounded-[var(--hp-radius-sm)] border border-[var(--hp-border)] bg-[var(--hp-surface-1)] py-2 pl-9 pr-3 text-sm text-[var(--hp-text-primary)] placeholder:text-[var(--hp-text-tertiary)] focus:outline-none focus:ring-1 focus:ring-[var(--hp-primary)]"
                                             onKeyDown={e => {
                                                 if (e.key === 'Enter') setInstalledFilterTrigger(installedFilter.trim())
                                             }}
@@ -274,7 +274,7 @@ export default function ExtensionsPage() {
                                     <button
                                         type="button"
                                         onClick={() => setInstalledFilterTrigger(installedFilter.trim())}
-                                        className="shrink-0 rounded-md bg-[var(--app-link)] px-3 py-2 text-sm text-white hover:opacity-90 disabled:opacity-50 transition-opacity"
+                                        className="shrink-0 rounded-[var(--hp-radius-sm)] bg-[var(--hp-primary)] px-3 py-2 text-sm text-[var(--hp-primary-text)] hover:opacity-90 disabled:opacity-50 transition-opacity"
                                     >
                                         {t('extensions.search')}
                                     </button>
@@ -283,20 +283,20 @@ export default function ExtensionsPage() {
                             {filteredInstalled.length === 0 ? (
                                 installedSkills.length === 0 ? (
                                     <div className="py-12 text-center">
-                                        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[var(--app-secondary-bg)] mb-3">
+                                        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[var(--hp-surface-1)] mb-3">
                                             <PuzzleIcon />
                                         </div>
-                                        <div className="text-sm text-[var(--app-hint)]">{t('extensions.noSkills')}</div>
+                                        <div className="text-sm text-[var(--hp-text-tertiary)]">{t('extensions.noSkills')}</div>
                                         <button
                                             type="button"
                                             onClick={() => setSkillSubTab('online')}
-                                            className="mt-3 text-sm text-[var(--app-link)] hover:underline"
+                                            className="mt-3 text-sm text-[var(--hp-primary)] hover:underline"
                                         >
                                             {t('extensions.goOnlineInstall')}
                                         </button>
                                     </div>
                                 ) : (
-                                    <div className="py-6 text-center text-sm text-[var(--app-hint)]">
+                                    <div className="py-6 text-center text-sm text-[var(--hp-text-tertiary)]">
                                         {t('extensions.noFilterResults')}
                                     </div>
                                 )
@@ -305,19 +305,19 @@ export default function ExtensionsPage() {
                                     {filteredInstalled.map(skill => (
                                         <div
                                             key={skill.name}
-                                            className="flex items-center justify-between rounded-lg border border-[var(--app-border)] bg-[var(--app-secondary-bg)] px-3 py-2.5"
+                                            className="flex items-center justify-between rounded-[var(--hp-radius-md)] border border-[var(--hp-border)] bg-[var(--hp-surface-1)] px-3 py-2.5"
                                         >
                                             <div className="min-w-0 flex-1">
-                                                <div className="text-sm font-medium text-[var(--app-fg)] truncate">{skill.name}</div>
+                                                <div className="text-sm font-medium text-[var(--hp-text-primary)] truncate">{skill.name}</div>
                                                 {skill.description && (
-                                                    <div className="text-xs text-[var(--app-hint)] truncate mt-0.5">{skill.description}</div>
+                                                    <div className="text-xs text-[var(--hp-text-tertiary)] truncate mt-0.5">{skill.description}</div>
                                                 )}
                                             </div>
                                             <button
                                                 type="button"
                                                 onClick={() => handleUninstallSkill(skill.name)}
                                                 disabled={installing === skill.name}
-                                                className="ml-2 shrink-0 inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs transition-colors disabled:opacity-50 text-[var(--app-danger)]"
+                                                className="ml-2 shrink-0 inline-flex items-center gap-1 rounded-[var(--hp-radius-sm)] px-2 py-1 text-xs transition-colors disabled:opacity-50 text-[var(--hp-danger)]"
                                             >
                                                 {installing === skill.name ? '...' : <><TrashIcon /> {t('extensions.remove')}</>}
                                             </button>
@@ -331,10 +331,10 @@ export default function ExtensionsPage() {
                     {/* Online install tab */}
                     {skillSubTab === 'online' && (
                         <div className="p-3 space-y-3">
-                            <div className="rounded-lg border border-[var(--app-border)] bg-[var(--app-secondary-bg)] p-3 space-y-2">
+                            <div className="rounded-[var(--hp-radius-md)] border border-[var(--hp-border)] bg-[var(--hp-surface-1)] p-3 space-y-2">
                                 <div className="flex gap-2">
                                     <div className="relative flex-1">
-                                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--app-hint)]">
+                                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--hp-text-tertiary)]">
                                             <SearchIcon />
                                         </div>
                                         <input
@@ -343,7 +343,7 @@ export default function ExtensionsPage() {
                                             onChange={e => setSkillQuery(e.target.value)}
                                             placeholder={t('extensions.searchOnlinePlaceholder')}
                                             enterKeyHint="search"
-                                            className="w-full rounded-md border border-[var(--app-border)] bg-[var(--app-bg)] py-2 pl-9 pr-3 text-sm text-[var(--app-fg)] placeholder:text-[var(--app-hint)] focus:outline-none focus:ring-1 focus:ring-[var(--app-link)]"
+                                            className="w-full rounded-[var(--hp-radius-sm)] border border-[var(--hp-border)] bg-[var(--hp-surface-0)] py-2 pl-9 pr-3 text-sm text-[var(--hp-text-primary)] placeholder:text-[var(--hp-text-tertiary)] focus:outline-none focus:ring-1 focus:ring-[var(--hp-primary)]"
                                             onKeyDown={e => {
                                                 if (e.key === 'Enter' && skillQuery.trim().length >= 2) {
                                                     setSkillSearchTrigger(skillQuery.trim())
@@ -355,7 +355,7 @@ export default function ExtensionsPage() {
                                         type="button"
                                         disabled={skillQuery.trim().length < 2 || searchLoading}
                                         onClick={() => setSkillSearchTrigger(skillQuery.trim())}
-                                        className="shrink-0 rounded-md bg-[var(--app-link)] px-3 py-2 text-sm text-white hover:opacity-90 disabled:opacity-50 transition-opacity"
+                                        className="shrink-0 rounded-[var(--hp-radius-sm)] bg-[var(--hp-primary)] px-3 py-2 text-sm text-[var(--hp-primary-text)] hover:opacity-90 disabled:opacity-50 transition-opacity"
                                     >
                                         {searchLoading ? '...' : t('extensions.search')}
                                     </button>
@@ -365,34 +365,34 @@ export default function ExtensionsPage() {
                                 {skillSearchTrigger.length >= 2 && (
                                     <div className="space-y-1 pt-1">
                                         {searchLoading ? (
-                                            <div className="text-sm text-[var(--app-hint)] py-3 text-center">{t('extensions.searching')}</div>
+                                            <div className="text-sm text-[var(--hp-text-tertiary)] py-3 text-center">{t('extensions.searching')}</div>
                                         ) : searchError ? (
-                                            <div className="text-sm py-3 text-center text-[var(--app-danger)]">{t('extensions.searchError')}</div>
+                                            <div className="text-sm py-3 text-center text-[var(--hp-danger)]">{t('extensions.searchError')}</div>
                                         ) : searchResults.length === 0 ? (
-                                            <div className="text-sm text-[var(--app-hint)] py-3 text-center">{t('extensions.noResults')}</div>
+                                            <div className="text-sm text-[var(--hp-text-tertiary)] py-3 text-center">{t('extensions.noResults')}</div>
                                         ) : (
                                             <>
-                                                <div className="text-xs text-[var(--app-hint)] pb-1">{t('extensions.foundCount', { count: searchResults.length })}</div>
+                                                <div className="text-xs text-[var(--hp-text-tertiary)] pb-1">{t('extensions.foundCount', { count: searchResults.length })}</div>
                                                 {searchResults.map(skill => {
                                                     const isInstalled = installedNames.has(skill.name.toLowerCase())
                                                     return (
                                                         <div
                                                             key={`${skill.repo}/${skill.name}`}
-                                                            className="flex items-center justify-between rounded-lg border border-[var(--app-border)] bg-[var(--app-bg)] px-3 py-2"
+                                                            className="flex items-center justify-between rounded-[var(--hp-radius-md)] border border-[var(--hp-border)] bg-[var(--hp-surface-0)] px-3 py-2"
                                                         >
                                                             <div className="min-w-0 flex-1">
                                                                 <div className="flex items-center gap-1.5">
-                                                                    <span className="text-sm font-medium text-[var(--app-fg)] truncate">{skill.name}</span>
+                                                                    <span className="text-sm font-medium text-[var(--hp-text-primary)] truncate">{skill.name}</span>
                                                                     {isInstalled && (
-                                                                        <span className="shrink-0 inline-flex items-center gap-0.5 text-xs text-[var(--app-success)]">
+                                                                        <span className="shrink-0 inline-flex items-center gap-0.5 text-xs text-[var(--hp-success)]">
                                                                             <CheckIcon />
                                                                         </span>
                                                                     )}
                                                                 </div>
-                                                                <div className="text-xs text-[var(--app-hint)] truncate">{skill.repo}{skill.stars ? ` · ${(skill.stars / 1000).toFixed(skill.stars >= 1000 ? 1 : 0)}k` : ''}</div>
+                                                                <div className="text-xs text-[var(--hp-text-tertiary)] truncate">{skill.repo}{skill.stars ? ` · ${(skill.stars / 1000).toFixed(skill.stars >= 1000 ? 1 : 0)}k` : ''}</div>
                                                             </div>
                                                             {isInstalled ? (
-                                                                <span className="ml-2 shrink-0 rounded-md px-2 py-1 text-xs text-[var(--app-success)]">
+                                                                <span className="ml-2 shrink-0 rounded-[var(--hp-radius-sm)] px-2 py-1 text-xs text-[var(--hp-success)]">
                                                                     {t('extensions.installed')}
                                                                 </span>
                                                             ) : (
@@ -400,7 +400,7 @@ export default function ExtensionsPage() {
                                                                     type="button"
                                                                     onClick={() => handleInstallSkill(skill)}
                                                                     disabled={installing === skill.name}
-                                                                    className="ml-2 shrink-0 rounded-md bg-[var(--app-link)] px-2.5 py-1 text-xs text-white hover:opacity-90 disabled:opacity-50"
+                                                                    className="ml-2 shrink-0 rounded-[var(--hp-radius-sm)] bg-[var(--hp-primary)] px-2.5 py-1 text-xs text-[var(--hp-primary-text)] hover:opacity-90 disabled:opacity-50"
                                                                 >
                                                                     {installing === skill.name ? '...' : t('extensions.install')}
                                                                 </button>
@@ -421,8 +421,8 @@ export default function ExtensionsPage() {
             {activeTab === 'plugins' && (
                 <div className="p-3 space-y-3">
                     {/* Install Plugin Form */}
-                    <div className="rounded-lg border border-[var(--app-border)] bg-[var(--app-secondary-bg)] p-3 space-y-2">
-                        <h3 className="text-xs font-semibold text-[var(--app-hint)] uppercase tracking-wider">
+                    <div className="rounded-[var(--hp-radius-md)] border border-[var(--hp-border)] bg-[var(--hp-surface-1)] p-3 space-y-2">
+                        <h3 className="text-xs font-semibold text-[var(--hp-text-tertiary)] uppercase tracking-wider">
                             {t('extensions.installPlugin')}
                         </h3>
                         <input
@@ -430,57 +430,57 @@ export default function ExtensionsPage() {
                             value={pluginIdInput}
                             onChange={e => setPluginIdInput(e.target.value)}
                             placeholder={t('extensions.pluginId')}
-                            className="w-full rounded-md border border-[var(--app-border)] bg-[var(--app-bg)] py-1.5 px-3 text-sm text-[var(--app-fg)] placeholder:text-[var(--app-hint)] focus:outline-none focus:ring-1 focus:ring-[var(--app-link)]"
+                            className="w-full rounded-[var(--hp-radius-sm)] border border-[var(--hp-border)] bg-[var(--hp-surface-0)] py-1.5 px-3 text-sm text-[var(--hp-text-primary)] placeholder:text-[var(--hp-text-tertiary)] focus:outline-none focus:ring-1 focus:ring-[var(--hp-primary)]"
                         />
                         <input
                             type="text"
                             value={pluginSourceInput}
                             onChange={e => setPluginSourceInput(e.target.value)}
                             placeholder={t('extensions.pluginSource')}
-                            className="w-full rounded-md border border-[var(--app-border)] bg-[var(--app-bg)] py-1.5 px-3 text-sm text-[var(--app-fg)] placeholder:text-[var(--app-hint)] focus:outline-none focus:ring-1 focus:ring-[var(--app-link)]"
+                            className="w-full rounded-[var(--hp-radius-sm)] border border-[var(--hp-border)] bg-[var(--hp-surface-0)] py-1.5 px-3 text-sm text-[var(--hp-text-primary)] placeholder:text-[var(--hp-text-tertiary)] focus:outline-none focus:ring-1 focus:ring-[var(--hp-primary)]"
                         />
                         <button
                             type="button"
                             onClick={handleInstallPlugin}
                             disabled={!pluginIdInput.trim() || installing === pluginIdInput}
-                            className="rounded-md bg-[var(--app-link)] px-3 py-1.5 text-sm text-white hover:opacity-90 disabled:opacity-50"
+                            className="rounded-[var(--hp-radius-sm)] bg-[var(--hp-primary)] px-3 py-1.5 text-sm text-[var(--hp-primary-text)] hover:opacity-90 disabled:opacity-50"
                         >
                             {installing === pluginIdInput ? t('extensions.installing') : t('extensions.pluginInstallBtn')}
                         </button>
                     </div>
 
                     {pluginsLoading ? (
-                        <div className="text-sm text-[var(--app-hint)] py-4 text-center">{t('extensions.loading')}</div>
+                        <div className="text-sm text-[var(--hp-text-tertiary)] py-4 text-center">{t('extensions.loading')}</div>
                     ) : plugins.length === 0 ? (
                         <div className="py-8 text-center">
                             <PuzzleIcon />
-                            <div className="mt-2 text-sm text-[var(--app-hint)]">{t('extensions.noPlugins')}</div>
+                            <div className="mt-2 text-sm text-[var(--hp-text-tertiary)]">{t('extensions.noPlugins')}</div>
                         </div>
                     ) : (
                         plugins.map(plugin => (
                             <div
                                 key={plugin.id}
-                                className="rounded-lg border border-[var(--app-border)] bg-[var(--app-secondary-bg)] px-3 py-2"
+                                className="rounded-[var(--hp-radius-md)] border border-[var(--hp-border)] bg-[var(--hp-surface-1)] px-3 py-2"
                             >
                                 <div className="flex items-center justify-between">
                                     <div className="min-w-0 flex-1">
                                         <div className="flex items-center gap-2">
-                                            <span className="text-sm font-medium text-[var(--app-fg)] truncate">{plugin.name}</span>
-                                            <span className="text-xs text-[var(--app-hint)]">v{plugin.version}</span>
+                                            <span className="text-sm font-medium text-[var(--hp-text-primary)] truncate">{plugin.name}</span>
+                                            <span className="text-xs text-[var(--hp-text-tertiary)]">v{plugin.version}</span>
                                             <span className="text-xs px-1.5 py-0.5 rounded-full" style={{
-                                                background: plugin.enabled ? 'var(--app-success-subtle)' : 'var(--app-subtle-bg)',
-                                                color: plugin.enabled ? 'var(--app-success)' : 'var(--app-hint)',
+                                                background: plugin.enabled ? 'var(--hp-success-subtle)' : 'var(--hp-surface-1)',
+                                                color: plugin.enabled ? 'var(--hp-success)' : 'var(--hp-text-tertiary)',
                                             }}>
                                                 {plugin.enabled ? t('extensions.active') : t('extensions.inactive')}
                                             </span>
                                         </div>
                                         {plugin.description && (
-                                            <div className="text-xs text-[var(--app-hint)] mt-0.5">{plugin.description}</div>
+                                            <div className="text-xs text-[var(--hp-text-tertiary)] mt-0.5">{plugin.description}</div>
                                         )}
                                         {plugin.permissions.length > 0 && (
                                             <div className="flex flex-wrap gap-1 mt-1">
                                                 {plugin.permissions.map(p => (
-                                                    <span key={p} className="text-xs px-1.5 py-0.5 rounded bg-[var(--app-bg)] text-[var(--app-hint)]">{p}</span>
+                                                    <span key={p} className="text-xs px-1.5 py-0.5 rounded bg-[var(--hp-surface-0)] text-[var(--hp-text-tertiary)]">{p}</span>
                                                 ))}
                                             </div>
                                         )}
@@ -488,7 +488,7 @@ export default function ExtensionsPage() {
                                     <button
                                         type="button"
                                         onClick={() => handleUninstallPlugin(plugin.id)}
-                                        className="ml-2 shrink-0 rounded-md px-2 py-1 text-xs text-[var(--app-danger)] hover:opacity-80"
+                                        className="ml-2 shrink-0 rounded-[var(--hp-radius-sm)] px-2 py-1 text-xs text-[var(--hp-danger)] hover:opacity-80"
                                     >
                                         {t('extensions.remove')}
                                     </button>

@@ -31,13 +31,13 @@ export function formatTaskChildLabel(
 
 export function TaskStateIcon(props: { state: ToolCallBlock['tool']['state'] }): React.JSX.Element {
     if (props.state === 'completed') {
-        return <span className="text-emerald-600">✓</span>
+        return <span className="text-[var(--hp-success)]">✓</span>
     }
     if (props.state === 'error') {
-        return <span className="text-red-600">✕</span>
+        return <span className="text-[var(--hp-danger)]">✕</span>
     }
     if (props.state === 'pending') {
-        return <span className="text-amber-600">🔐</span>
+        return <span className="text-[var(--hp-warning)]">🔐</span>
     }
-    return <span className="text-amber-600 animate-pulse">●</span>
+    return <span className="text-[var(--hp-warning)] animate-pulse">●</span>
 }

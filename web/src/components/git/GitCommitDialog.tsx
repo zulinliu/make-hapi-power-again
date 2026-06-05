@@ -105,7 +105,7 @@ export function GitCommitDialog({
                         {files.map((file) => (
                             <label
                                 key={file.path}
-                                className="flex items-center gap-2 text-sm py-1 px-2 rounded cursor-pointer hover:bg-[var(--app-secondary-bg)]"
+                                className="flex items-center gap-2 text-sm py-1 px-2 rounded-[var(--hp-radius-sm)] cursor-pointer hover:bg-[var(--hp-surface-1)]"
                             >
                                 <input
                                     type="checkbox"
@@ -115,21 +115,21 @@ export function GitCommitDialog({
                                     className="rounded"
                                 />
                                 <span
-                                    className="text-xs font-mono font-bold px-1.5 py-0.5 rounded"
+                                    className="text-xs font-mono font-bold px-1.5 py-0.5 rounded-[var(--hp-radius-xs)]"
                                     style={{
-                                        color: file.status === 'M' ? 'var(--app-warning)' :
-                                            file.status === 'A' ? 'var(--app-success)' :
-                                                file.status === 'D' ? 'var(--app-danger)' :
-                                                    file.status === '?' ? 'var(--app-hint)' : 'var(--app-link)',
-                                        background: file.status === 'M' ? 'var(--app-warning-subtle)' :
-                                            file.status === 'A' ? 'var(--app-success-subtle)' :
-                                                file.status === 'D' ? 'var(--app-badge-error-bg)' :
-                                                    file.status === '?' ? 'var(--app-subtle-bg)' : 'var(--app-primary-subtle)',
+                                        color: file.status === 'M' ? 'var(--hp-warning)' :
+                                            file.status === 'A' ? 'var(--hp-success)' :
+                                                file.status === 'D' ? 'var(--hp-danger)' :
+                                                    file.status === '?' ? 'var(--hp-text-tertiary)' : 'var(--hp-primary)',
+                                        background: file.status === 'M' ? 'var(--hp-warning-subtle)' :
+                                            file.status === 'A' ? 'var(--hp-success-subtle)' :
+                                                file.status === 'D' ? 'var(--hp-danger-subtle)' :
+                                                    file.status === '?' ? 'var(--hp-surface-1)' : 'var(--hp-primary-subtle)',
                                     }}
                                 >
                                     {file.status}
                                 </span>
-                                <span className="font-mono text-xs truncate text-[var(--app-fg)]">
+                                <span className="font-mono text-xs truncate text-[var(--hp-text-primary)]">
                                     {file.path}
                                 </span>
                             </label>
@@ -142,26 +142,26 @@ export function GitCommitDialog({
                         placeholder={t('git.commit.messagePlaceholder')}
                         disabled={phase === 'committing'}
                         rows={3}
-                        className="w-full rounded-md border border-[var(--app-border)] bg-transparent px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--app-link)] resize-none"
+                        className="w-full rounded-[var(--hp-radius-sm)] border border-[var(--hp-border)] bg-transparent px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--hp-primary)] resize-none min-h-[80px]"
                     />
 
                     {phase === 'committing' && (
-                        <div className="rounded-md p-3 text-sm" style={{ background: 'var(--app-subtle-bg)' }}>
+                        <div className="rounded-[var(--hp-radius-sm)] p-3 text-sm bg-[var(--hp-surface-1)]">
                             <div className="flex items-center gap-2">
-                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--app-accent)] border-t-transparent" />
+                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--hp-primary)] border-t-transparent" />
                                 <span>{t('git.commit.committing')}</span>
                             </div>
                         </div>
                     )}
 
                     {phase === 'done' && (
-                        <div className="rounded-md bg-green-500/10 p-3 text-sm text-green-400">
+                        <div className="rounded-[var(--hp-radius-sm)] bg-[var(--hp-success-subtle)] p-3 text-sm text-[var(--hp-success)]">
                             {t('git.commit.success')}
                         </div>
                     )}
 
                     {phase === 'error' && (
-                        <div className="rounded-md bg-red-500/10 p-3 text-sm text-red-400">
+                        <div className="rounded-[var(--hp-radius-sm)] bg-[var(--hp-danger-subtle)] p-3 text-sm text-[var(--hp-danger)]">
                             {error}
                         </div>
                     )}

@@ -177,19 +177,19 @@ function SessionsPage() {
     return (
         <div className="flex h-full min-h-0">
             <div
-                className={`${isSessionsIndex ? 'flex' : 'hidden lg:flex'} w-full shrink-0 flex-col bg-[var(--app-bg)]`}
+                className={`${isSessionsIndex ? 'flex' : 'hidden lg:flex'} w-full shrink-0 flex-col bg-[--hp-surface-0]`}
                 style={{ '--sidebar-w': `${sidebar.width}px` } as React.CSSProperties}
             >
-                <div className="bg-[var(--app-bg)] pt-[env(safe-area-inset-top)]">
+                <div className="bg-[--hp-surface-0] pt-[env(safe-area-inset-top)]">
                     <div className="mx-auto w-full max-w-content flex items-center justify-between px-3 py-2">
-                        <div className="text-xs text-[var(--app-hint)]">
+                        <div className="text-xs text-[--hp-text-tertiary]">
                             {t('sessions.count', { n: sessions.length, m: projectCount })}
                         </div>
                         <div className="flex items-center gap-2">
                             <button
                                 type="button"
                                 onClick={() => navigate({ to: '/browse' })}
-                                className="p-1.5 rounded-full text-[var(--app-hint)] hover:text-[var(--app-fg)] hover:bg-[var(--app-subtle-bg)] transition-colors"
+                                className="p-2.5 rounded-full text-[--hp-text-tertiary] hover:text-[--hp-text-primary] hover:bg-[--hp-surface-1] transition-colors"
                                 title={t('browse.nav')}
                             >
                                 <FolderOpenIcon className="h-5 w-5" />
@@ -197,7 +197,7 @@ function SessionsPage() {
                             <button
                                 type="button"
                                 onClick={() => navigate({ to: '/settings' })}
-                                className="p-1.5 rounded-full text-[var(--app-hint)] hover:text-[var(--app-fg)] hover:bg-[var(--app-subtle-bg)] transition-colors"
+                                className="p-2.5 rounded-full text-[--hp-text-tertiary] hover:text-[--hp-text-primary] hover:bg-[--hp-surface-1] transition-colors"
                                 title={t('settings.title')}
                             >
                                 <SettingsIcon className="h-5 w-5" />
@@ -205,7 +205,7 @@ function SessionsPage() {
                             <button
                                 type="button"
                                 onClick={() => navigate({ to: '/sessions/new' })}
-                                className="session-list-new-button p-1.5 rounded-full text-[var(--app-link)] transition-colors"
+                                className="session-list-new-button p-2.5 rounded-full text-[--hp-primary] transition-colors"
                                 title={t('sessions.new')}
                             >
                                 <PlusIcon className="h-5 w-5" />
@@ -217,7 +217,7 @@ function SessionsPage() {
                 <div className="app-scroll-y flex-1 min-h-0 desktop-scrollbar-left">
                     {error ? (
                         <div className="mx-auto w-full max-w-content px-3 py-2">
-                            <div className="text-sm text-red-600">{error}</div>
+                            <div className="text-sm text-[var(--hp-danger)]">{error}</div>
                         </div>
                     ) : null}
                     <SessionList
@@ -246,7 +246,7 @@ function SessionsPage() {
                 onPointerDown={sidebar.onPointerDown}
             />
 
-            <main className={`${isSessionsIndex ? 'hidden lg:flex' : 'flex'} min-w-0 flex-1 flex-col bg-[var(--app-bg)]`}>
+            <main id="main-content" className={`${isSessionsIndex ? 'hidden lg:flex' : 'flex'} min-w-0 flex-1 flex-col bg-[--hp-canvas]`}>
                 <div className="flex-1 min-h-0">
                     <Outlet />
                 </div>
@@ -378,20 +378,23 @@ function SessionPage(props: { outlineOpen?: boolean; setOutlineOpen?: (open: boo
         if (sessionError) {
             return (
                 <div className="flex h-full flex-col items-center justify-center gap-3 p-4 text-center">
-                    <div className="text-sm font-medium text-[var(--app-fg)]">Session unavailable</div>
-                    <div className="max-w-md text-xs text-[var(--app-hint)]">{sessionError}</div>
+                    <svg className="h-10 w-10 text-[var(--hp-warning)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                    </svg>
+                    <div className="text-sm font-medium text-[var(--hp-text-primary)]">Session unavailable</div>
+                    <div className="max-w-md text-xs text-[var(--hp-text-tertiary)]">{sessionError}</div>
                     <div className="flex gap-2">
                         <button
                             type="button"
                             onClick={() => navigate({ to: '/sessions', replace: true })}
-                            className="rounded-md border border-[var(--app-border)] px-3 py-1.5 text-sm text-[var(--app-fg)] hover:bg-[var(--app-secondary-bg)]"
+                            className="rounded-[var(--hp-radius-sm)] border border-[var(--hp-border)] px-3 py-1.5 text-sm text-[var(--hp-text-primary)] hover:bg-[var(--hp-surface-1)]"
                         >
                             Back to sessions
                         </button>
                         <button
                             type="button"
                             onClick={() => { void refetchSession() }}
-                            className="rounded-md bg-[var(--app-link)] px-3 py-1.5 text-sm text-white"
+                            className="rounded-[var(--hp-radius-sm)] bg-[var(--hp-primary)] px-3 py-1.5 text-sm text-[var(--hp-primary-text)] hover:bg-[var(--hp-primary-hover)]"
                         >
                             Retry
                         </button>
@@ -450,13 +453,30 @@ function SessionDetailRoute() {
         if (!sessionNotFound) {
             return
         }
-        navigate({ to: '/sessions', replace: true })
+        const timer = setTimeout(() => {
+            navigate({ to: '/sessions', replace: true })
+        }, 3000)
+        return () => clearTimeout(timer)
     }, [navigate, sessionNotFound])
 
     if (sessionNotFound) {
         return (
-            <div className="flex-1 flex items-center justify-center p-4">
-                <LoadingState label="Session not found. Returning to sessions…" className="text-sm" />
+            <div className="flex-1 flex flex-col items-center justify-center gap-3 p-4 text-center">
+                <svg className="h-12 w-12 text-[var(--hp-warning)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                </svg>
+                <div className="text-base font-semibold text-[var(--hp-text-primary)]">Session not found</div>
+                <div className="text-sm text-[var(--hp-text-tertiary)]">
+                    This session may have been deleted or is no longer available.
+                </div>
+                <button
+                    type="button"
+                    onClick={() => navigate({ to: '/sessions', replace: true })}
+                    className="mt-2 rounded-[var(--hp-radius-sm)] bg-[var(--hp-primary)] px-4 py-2 text-sm font-medium text-[var(--hp-primary-text)] hover:bg-[var(--hp-primary-hover)] transition-colors"
+                >
+                    Return to sessions
+                </button>
+                <div className="text-xs text-[var(--hp-text-tertiary)]">Redirecting in 3 seconds…</div>
             </div>
         )
     }
@@ -522,18 +542,18 @@ function NewSessionPage() {
 
     return (
         <div className="flex h-full min-h-0 flex-col">
-            <div className="flex items-center gap-2 border-b border-[var(--app-border)] bg-[var(--app-bg)] p-3 pt-[calc(0.75rem+env(safe-area-inset-top))]">
+            <div className="flex items-center gap-2 border-b border-[var(--hp-border)] bg-[var(--hp-surface-0)] p-3 pt-[calc(0.75rem+env(safe-area-inset-top))]">
                 {!isTelegramApp() && (
                     <button
                         type="button"
                         onClick={goBack}
                         aria-label="Go back"
-                        className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--app-hint)] transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]"
+                        className="flex h-11 w-11 items-center justify-center rounded-full text-[var(--hp-text-tertiary)] transition-colors hover:bg-[var(--hp-surface-1)] hover:text-[var(--hp-text-primary)]"
                     >
                         <BackIcon />
                     </button>
                 )}
-                <div className="flex-1 font-semibold">{t('newSession.title')}</div>
+                <div className="flex-1 font-semibold text-[var(--hp-text-primary)]">{t('newSession.title')}</div>
             </div>
 
             <div
@@ -541,7 +561,7 @@ function NewSessionPage() {
                 style={{ paddingBottom: 'calc(var(--app-floating-bottom-offset, 0px) + env(safe-area-inset-bottom))' }}
             >
                 {machinesError ? (
-                    <div className="p-3 text-sm text-red-600">
+                    <div className="p-3 text-sm text-[var(--hp-danger)]">
                         {machinesError}
                     </div>
                 ) : null}
@@ -578,18 +598,18 @@ function BrowsePage() {
 
     return (
         <div className="flex h-full min-h-0 flex-col">
-            <div className="flex items-center gap-2 border-b border-[var(--app-border)] bg-[var(--app-bg)] p-3 pt-[calc(0.75rem+env(safe-area-inset-top))]">
+            <div className="flex items-center gap-2 border-b border-[var(--hp-border)] bg-[var(--hp-surface-0)] p-3 pt-[calc(0.75rem+env(safe-area-inset-top))]">
                 {!isTelegramApp() && (
                     <button
                         type="button"
                         onClick={goBack}
                         aria-label="Go back"
-                        className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--app-hint)] transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]"
+                        className="flex h-11 w-11 items-center justify-center rounded-full text-[var(--hp-text-tertiary)] transition-colors hover:bg-[var(--hp-surface-1)] hover:text-[var(--hp-text-primary)]"
                     >
                         <BackIcon />
                     </button>
                 )}
-                <div className="flex-1 font-semibold">{t('browse.title')}</div>
+                <div className="flex-1 font-semibold text-[var(--hp-text-primary)]">{t('browse.title')}</div>
             </div>
 
             <div className="flex-1 min-h-0">

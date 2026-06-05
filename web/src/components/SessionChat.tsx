@@ -525,7 +525,7 @@ export function SessionChat(props: {
 
                     {codexCollaborationModeSupported && codexModelsState.error ? (
                         <div className="px-3 pb-2">
-                            <div className="mx-auto w-full max-w-content rounded-md bg-[var(--app-subtle-bg)] p-3 text-sm text-red-600">
+                            <div className="mx-auto w-full max-w-content rounded-md bg-[var(--app-subtle-bg)] p-3 text-sm text-[var(--hp-danger)]">
                                 {t('session.codexModelsLoadFailed')}: {codexModelsState.error}
                             </div>
                         </div>

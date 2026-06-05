@@ -23,7 +23,13 @@ export function SubPageLayout({
   return (
     <div className="flex h-full min-h-0 flex-col">
       {toolbar && (
-        <div className="border-b border-[var(--app-border)] bg-[var(--app-bg)] px-3 py-2 shrink-0 overflow-x-auto">
+        <div className="shrink-0 overflow-x-auto"
+          style={{
+            borderBottom: '1px solid var(--app-border)',
+            background: 'var(--app-bg)',
+            padding: 'var(--hp-space-2) var(--hp-space-3)',
+          }}
+        >
           <div className="mx-auto w-full max-w-content">
             {toolbar}
           </div>
@@ -32,7 +38,11 @@ export function SubPageLayout({
 
       {tabs && tabs.length > 0 && (
         <div
-          className="flex border-b border-[var(--app-border)] bg-[var(--app-bg)] shrink-0"
+          className="flex shrink-0"
+          style={{
+            borderBottom: '1px solid var(--app-border)',
+            background: 'var(--app-bg)',
+          }}
           role="tablist"
         >
           <div className="mx-auto w-full max-w-content">
@@ -46,23 +56,24 @@ export function SubPageLayout({
                     role="tab"
                     aria-selected={isActive}
                     onClick={() => onTabChange?.(tab.id)}
-                    className="relative flex-1 py-3 text-center text-sm font-semibold transition-colors whitespace-nowrap"
+                    className="relative flex-1 text-center text-sm font-semibold transition-colors whitespace-nowrap"
+                    style={{ paddingTop: 'var(--hp-space-3)', paddingBottom: 'var(--hp-space-3)' }}
                   >
                     <span
-                      className={
-                        isActive
-                          ? 'text-[var(--app-fg)]'
-                          : 'text-[var(--app-hint)]'
-                      }
+                      style={{
+                        color: isActive ? 'var(--app-fg)' : 'var(--app-hint)',
+                      }}
                     >
                       {tab.label}
                     </span>
                     <span
-                      className={`absolute bottom-0 left-[10%] h-0.5 w-4/5 rounded-full transition-colors duration-150 ${
-                        isActive
-                          ? 'bg-[var(--app-link)]'
-                          : 'bg-transparent'
-                      }`}
+                      className="absolute bottom-0 left-[10%] w-4/5 transition-colors"
+                      style={{
+                        height: 2,
+                        borderRadius: 'var(--hp-radius-full)',
+                        background: isActive ? 'var(--hp-primary)' : 'transparent',
+                        transitionDuration: 'var(--hp-duration-fast)',
+                      }}
                     />
                   </button>
                 )

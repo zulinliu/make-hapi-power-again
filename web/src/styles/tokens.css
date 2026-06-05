@@ -1,57 +1,69 @@
 /**
- * Hapi Power Design Tokens
- * Cursor + Linear 融合风格
+ * Hapi Power Design Tokens v2.0
+ * "精密工具" 设计方向
+ * 主色: 深青墨 (Ink Teal) — 远离AI紫蓝同质化
+ * 强调: 琥珀金 (Amber) — 深色背景上醒目的CTA
+ * 中性色: 暖灰调 — 传递工具品质感
  * 色彩系统基于 oklch 实现感知均匀
  */
 
 :root {
-  /* === 语义色彩 === */
-  --hp-primary: oklch(55% 0.18 260);
-  --hp-primary-hover: oklch(50% 0.20 260);
-  --hp-primary-subtle: oklch(55% 0.08 260 / 0.12);
+  /* === 品牌色 === */
+  --hp-primary: oklch(42% 0.14 200);
+  --hp-primary-hover: oklch(38% 0.16 200);
+  --hp-primary-subtle: oklch(42% 0.06 200 / 0.12);
   --hp-primary-text: oklch(100% 0 0);
 
-  --hp-success: oklch(62% 0.19 145);
-  --hp-success-subtle: oklch(62% 0.08 145 / 0.12);
-  --hp-warning: oklch(72% 0.17 70);
-  --hp-warning-subtle: oklch(72% 0.08 70 / 0.12);
-  --hp-danger: oklch(58% 0.22 25);
-  --hp-danger-subtle: oklch(58% 0.10 25 / 0.12);
+  /* === 强调色 === */
+  --hp-accent: oklch(72% 0.16 75);
 
-  /* === 表面层次 (Surface Layers) === */
-  --hp-canvas: oklch(98% 0.002 260);
+  /* === 语义色 === */
+  --hp-success: oklch(65% 0.16 155);
+  --hp-success-subtle: oklch(65% 0.08 155 / 0.10);
+  --hp-warning: oklch(75% 0.15 80);
+  --hp-warning-subtle: oklch(75% 0.08 80 / 0.10);
+  --hp-danger: oklch(60% 0.20 22);
+  --hp-danger-subtle: oklch(60% 0.10 22 / 0.10);
+  --hp-info: oklch(65% 0.12 230);
+  --hp-info-subtle: oklch(65% 0.06 230 / 0.10);
+
+  /* === 表面层次 (暖灰调) === */
+  --hp-canvas: oklch(97.5% 0.005 75);
   --hp-surface-0: oklch(100% 0 0);
-  --hp-surface-1: oklch(99% 0.002 260);
-  --hp-surface-2: oklch(97% 0.003 260);
-  --hp-surface-3: oklch(95% 0.005 260);
+  --hp-surface-1: oklch(99% 0.002 75);
+  --hp-surface-2: oklch(97% 0.003 75);
+  --hp-surface-3: oklch(95% 0.005 75);
 
   /* === 文本 === */
-  --hp-text-primary: oklch(18% 0.01 260);
-  --hp-text-secondary: oklch(45% 0.01 260);
-  --hp-text-tertiary: oklch(62% 0.01 260);
-  --hp-text-disabled: oklch(75% 0.01 260);
+  --hp-text-primary: oklch(15% 0.01 75);
+  --hp-text-secondary: oklch(42% 0.01 75);
+  --hp-text-tertiary: oklch(52% 0.01 75);
+  --hp-text-disabled: oklch(75% 0.01 75);
   --hp-text-inverse: oklch(100% 0 0);
 
   /* === 边框与分割 === */
-  --hp-border: oklch(80% 0.005 260 / 0.25);
-  --hp-border-hover: oklch(65% 0.01 260 / 0.4);
-  --hp-divider: oklch(85% 0.003 260 / 0.2);
+  --hp-border: oklch(80% 0.005 75 / 0.25);
+  --hp-border-hover: oklch(65% 0.01 75 / 0.4);
+  --hp-divider: oklch(85% 0.003 75 / 0.2);
 
   /* === 阴影 === */
-  --hp-shadow-xs: 0 1px 2px oklch(0% 0 0 / 0.04);
-  --hp-shadow-sm: 0 1px 3px oklch(0% 0 0 / 0.06), 0 1px 2px oklch(0% 0 0 / 0.04);
-  --hp-shadow-md: 0 4px 6px -1px oklch(0% 0 0 / 0.06), 0 2px 4px -2px oklch(0% 0 0 / 0.04);
-  --hp-shadow-lg: 0 10px 15px -3px oklch(0% 0 0 / 0.08), 0 4px 6px -4px oklch(0% 0 0 / 0.04);
-  --hp-shadow-focus: 0 0 0 2px oklch(55% 0.18 260 / 0.3);
+  --hp-shadow-xs: 0 1px 2px oklch(15% 0.01 75 / 0.04);
+  --hp-shadow-sm: 0 2px 8px oklch(15% 0.01 75 / 0.06);
+  --hp-shadow-md: 0 4px 16px oklch(15% 0.01 75 / 0.10);
+  --hp-shadow-lg: 0 8px 32px oklch(15% 0.01 75 / 0.15);
+  --hp-shadow-xl: 0 16px 48px oklch(15% 0.01 75 / 0.25);
+  --hp-shadow-focus: 0 0 0 2px oklch(52% 0.12 200 / 0.3);
 
   /* === 圆角 === */
+  --hp-radius-xs: 4px;
   --hp-radius-sm: 6px;
-  --hp-radius-md: 8px;
-  --hp-radius-lg: 12px;
-  --hp-radius-xl: 16px;
+  --hp-radius-md: 10px;
+  --hp-radius-lg: 14px;
+  --hp-radius-xl: 20px;
   --hp-radius-full: 9999px;
 
   /* === 间距 === */
+  --hp-space-0_5: 2px;
   --hp-space-1: 4px;
   --hp-space-2: 8px;
   --hp-space-3: 12px;
@@ -63,38 +75,53 @@
   --hp-space-12: 48px;
 
   /* === 过渡 === */
+  --hp-duration-instant: 60ms;
   --hp-duration-fast: 120ms;
   --hp-duration-normal: 200ms;
   --hp-duration-slow: 300ms;
+  --hp-duration-slower: 500ms;
   --hp-ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --hp-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --hp-ease-out: cubic-bezier(0, 0, 0.2, 1);
   --hp-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --hp-ease-overlay: cubic-bezier(0.16, 1, 0.3, 1);
 
   /* === 布局 === */
   --hp-sidebar-width: 260px;
   --hp-sidebar-collapsed-width: 56px;
   --hp-header-height: 48px;
-  --hp-status-bar-height: 24px;
+  --hp-mobile-header-height: 56px;
+  --hp-status-bar-height: 28px;
+  --hp-content-max-w: 960px;
 }
 
 [data-theme="dark"] {
-  --hp-canvas: oklch(14% 0.005 260);
-  --hp-surface-0: oklch(17% 0.005 260);
-  --hp-surface-1: oklch(20% 0.006 260);
-  --hp-surface-2: oklch(24% 0.008 260);
-  --hp-surface-3: oklch(28% 0.010 260);
+  --hp-primary: oklch(72% 0.12 200);
+  --hp-primary-hover: oklch(68% 0.14 200);
+  --hp-primary-subtle: oklch(72% 0.06 200 / 0.14);
+  --hp-primary-text: oklch(100% 0 0);
 
-  --hp-text-primary: oklch(95% 0.005 260);
-  --hp-text-secondary: oklch(72% 0.008 260);
-  --hp-text-tertiary: oklch(55% 0.008 260);
-  --hp-text-disabled: oklch(42% 0.005 260);
+  --hp-accent: oklch(75% 0.16 75);
 
-  --hp-border: oklch(40% 0.008 260 / 0.35);
-  --hp-border-hover: oklch(55% 0.01 260 / 0.5);
-  --hp-divider: oklch(35% 0.005 260 / 0.3);
+  --hp-canvas: oklch(12% 0.008 200);
+  --hp-surface-0: oklch(15% 0.008 200);
+  --hp-surface-1: oklch(18% 0.008 200);
+  --hp-surface-2: oklch(22% 0.010 200);
+  --hp-surface-3: oklch(26% 0.012 200);
+
+  --hp-text-primary: oklch(95% 0.005 200);
+  --hp-text-secondary: oklch(70% 0.008 200);
+  --hp-text-tertiary: oklch(52% 0.008 200);
+  --hp-text-disabled: oklch(40% 0.005 200);
+
+  --hp-border: oklch(38% 0.008 200 / 0.35);
+  --hp-border-hover: oklch(52% 0.01 200 / 0.5);
+  --hp-divider: oklch(32% 0.005 200 / 0.3);
 
   --hp-shadow-xs: 0 1px 2px oklch(0% 0 0 / 0.2);
-  --hp-shadow-sm: 0 1px 3px oklch(0% 0 0 / 0.3), 0 1px 2px oklch(0% 0 0 / 0.2);
-  --hp-shadow-md: 0 4px 6px -1px oklch(0% 0 0 / 0.3), 0 2px 4px -2px oklch(0% 0 0 / 0.2);
-  --hp-shadow-lg: 0 10px 15px -3px oklch(0% 0 0 / 0.4), 0 4px 6px -4px oklch(0% 0 0 / 0.2);
-  --hp-shadow-focus: 0 0 0 2px oklch(65% 0.18 260 / 0.4);
+  --hp-shadow-sm: 0 2px 8px oklch(0% 0 0 / 0.3);
+  --hp-shadow-md: 0 4px 16px oklch(0% 0 0 / 0.4);
+  --hp-shadow-lg: 0 8px 32px oklch(0% 0 0 / 0.5);
+  --hp-shadow-xl: 0 16px 48px oklch(0% 0 0 / 0.6);
+  --hp-shadow-focus: 0 0 0 2px oklch(72% 0.12 200 / 0.4);
 }

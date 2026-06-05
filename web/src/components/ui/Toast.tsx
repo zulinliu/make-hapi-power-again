@@ -3,11 +3,14 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
 const toastVariants = cva(
-    'pointer-events-auto w-full max-w-sm rounded-lg border border-[var(--app-border)] bg-[var(--app-bg)] text-[var(--app-fg)] shadow-lg',
+    'pointer-events-auto w-full max-w-sm rounded-[var(--hp-radius-md,10px)] bg-[var(--hp-surface-0)] text-[var(--hp-text-primary)] shadow-[var(--hp-shadow-lg)] border-l-[3px] animate-fade-in-up',
     {
         variants: {
             variant: {
-                default: 'border-[var(--app-border)] bg-[var(--app-bg)]'
+                default: 'border-[var(--hp-border)] border-l-[var(--hp-primary)]',
+                success: 'border-[var(--hp-border)] border-l-[var(--hp-success)]',
+                error: 'border-[var(--hp-border)] border-l-[var(--hp-danger)]',
+                info: 'border-[var(--hp-border)] border-l-[var(--hp-info)]'
             }
         },
         defaultVariants: {
@@ -34,12 +37,12 @@ export function Toast({ title, body, onClose, className, variant, ...props }: To
             <div className="flex items-start gap-3 p-3">
                 <div className="min-w-0 flex-1">
                     <div className="text-sm font-semibold leading-5">{title}</div>
-                    <div className="mt-1 text-xs text-[var(--app-fg)] opacity-70">{body}</div>
+                    <div className="mt-1 text-xs text-[var(--hp-text-secondary)]">{body}</div>
                 </div>
                 {onClose ? (
                     <button
                         type="button"
-                        className="text-xs text-[var(--app-hint)] hover:text-[var(--app-fg)]"
+                        className="text-xs text-[var(--hp-text-tertiary)] hover:text-[var(--hp-text-primary)] transition-colors duration-[var(--hp-duration-fast,120ms)]"
                         onClick={handleClose}
                         aria-label="Dismiss"
                     >

@@ -1,27 +1,27 @@
 const FLAVOR_BADGES: Record<string, { label: string; colors: string }> = {
     claude: {
         label: 'Cl',
-        colors: 'bg-[#d97706] text-white',
+        colors: 'bg-[var(--app-flavor-claude)] text-white',
     },
     codex: {
         label: 'Cx',
-        colors: 'bg-[#111827] text-white',
+        colors: 'bg-[var(--app-flavor-codex)] text-white',
     },
     cursor: {
         label: 'Cu',
-        colors: 'bg-[#0f766e] text-white',
+        colors: 'bg-[var(--app-flavor-cursor)] text-white',
     },
     gemini: {
         label: 'Gm',
-        colors: 'bg-[#2563eb] text-white',
+        colors: 'bg-[var(--app-flavor-gemini)] text-white',
     },
     kimi: {
         label: 'Km',
-        colors: 'bg-[#7c3aed] text-white',
+        colors: 'bg-[var(--app-flavor-kimi)] text-white',
     },
     opencode: {
         label: 'Op',
-        colors: 'bg-[#15803d] text-white',
+        colors: 'bg-[var(--app-flavor-opencode)] text-white',
     },
 }
 

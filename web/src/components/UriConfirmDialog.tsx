@@ -41,14 +41,19 @@ export function UriConfirmDialog(props: UriConfirmDialogProps) {
                 <DialogHeader>
                     <DialogTitle>{t('dialog.uri.title')}</DialogTitle>
                 </DialogHeader>
-                <DialogDescription className="mt-2">
-                    {t('dialog.uri.description')}
+                <DialogDescription className="mt-2 flex items-start gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 shrink-0 mt-0.5 text-[var(--hp-warning)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+                        <line x1="12" y1="9" x2="12" y2="13" />
+                        <line x1="12" y1="17" x2="12.01" y2="17" />
+                    </svg>
+                    <span>{t('dialog.uri.description')}</span>
                 </DialogDescription>
 
                 {/* URI display with scheme emphasis */}
-                <div className="mt-3 rounded-lg border border-[var(--app-border)] bg-[var(--app-subtle-bg)] px-3 py-2 font-mono text-sm break-all">
-                    <span className="font-semibold text-[var(--app-link)]">{schemePrefix}</span>
-                    <span className="text-[var(--app-fg)]">{urlRemainder}</span>
+                <div className="mt-3 rounded-lg border border-[var(--hp-border)] bg-[var(--hp-surface-1)] px-3 py-2 font-mono text-sm break-all">
+                    <span className="font-semibold text-[var(--hp-primary)]">{schemePrefix}</span>
+                    <span className="text-[var(--hp-text-secondary)]">{urlRemainder}</span>
                 </div>
 
                 <div className="mt-4 flex gap-2 justify-end flex-wrap">
@@ -61,16 +66,16 @@ export function UriConfirmDialog(props: UriConfirmDialogProps) {
                     </Button>
                     <Button
                         type="button"
-                        variant="outline"
-                        onClick={onOpen}
-                    >
-                        {t('dialog.uri.open')}
-                    </Button>
-                    <Button
-                        type="button"
+                        variant="secondary"
                         onClick={() => onAlwaysAllow(scheme)}
                     >
                         {t('dialog.uri.alwaysAllow', { scheme })}
+                    </Button>
+                    <Button
+                        type="button"
+                        onClick={onOpen}
+                    >
+                        {t('dialog.uri.open')}
                     </Button>
                 </div>
             </DialogContent>

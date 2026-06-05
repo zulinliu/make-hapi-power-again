@@ -93,12 +93,12 @@ export function ImagePasteDrop({ sessionId, onImageUploaded, children }: ImagePa
         >
             {children}
             {isDragging && (
-                <div className="absolute inset-0 z-50 flex items-center justify-center bg-[var(--app-bg)]/80 backdrop-blur-sm border-2 border-dashed border-blue-500 rounded-lg">
+                <div className="absolute inset-0 z-50 flex items-center justify-center bg-[var(--app-bg)]/80 backdrop-blur-sm border-2 border-dashed border-[var(--hp-primary)] rounded-lg">
                     <div className="text-center">
                         <div className="text-3xl mb-2 opacity-50">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="mx-auto text-blue-500"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="mx-auto text-[var(--hp-primary)]"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg>
                         </div>
-                        <div className="text-sm text-blue-500 font-medium">松开以上传图片</div>
+                        <div className="text-sm text-[var(--hp-primary)] font-medium">松开以上传图片</div>
                     </div>
                 </div>
             )}

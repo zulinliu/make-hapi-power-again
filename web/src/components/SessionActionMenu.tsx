@@ -270,7 +270,7 @@ export function SessionActionMenu(props: SessionActionMenuProps) {
                     <button
                         type="button"
                         role="menuitem"
-                        className={`${baseItemClassName} text-red-500 hover:bg-red-500/10`}
+                        className={`${baseItemClassName} text-[var(--hp-danger)] hover:bg-[var(--hp-danger)]/10`}
                         onClick={() => handleAction(onArchive)}
                     >
                         <ArchiveIcon />
@@ -280,7 +280,7 @@ export function SessionActionMenu(props: SessionActionMenuProps) {
                     <button
                         type="button"
                         role="menuitem"
-                        className={`${baseItemClassName} text-red-500 hover:bg-red-500/10`}
+                        className={`${baseItemClassName} text-[var(--hp-danger)] hover:bg-[var(--hp-danger)]/10`}
                         onClick={() => handleAction(onDelete)}
                     >
                         <TrashIcon />

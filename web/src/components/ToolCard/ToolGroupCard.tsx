@@ -30,13 +30,13 @@ function SummaryBadge(props: { className: string; text: string }) {
 function RowStatusBadge(props: { block: ToolCallBlock }) {
     const { t } = useTranslation()
     if (props.block.tool.state === 'error') {
-        return <SummaryBadge className="bg-red-500/10 text-red-600" text={t('toolGroup.rowStatus.error')} />
+        return <SummaryBadge className="bg-[var(--hp-danger)]/10 text-[var(--hp-danger)]" text={t('toolGroup.rowStatus.error')} />
     }
     if (props.block.tool.state === 'running') {
-        return <SummaryBadge className="bg-sky-500/10 text-sky-600" text={t('toolGroup.rowStatus.running')} />
+        return <SummaryBadge className="bg-[var(--hp-info)]/10 text-[var(--hp-info)]" text={t('toolGroup.rowStatus.running')} />
     }
     if (props.block.tool.state === 'pending') {
-        return <SummaryBadge className="bg-amber-500/10 text-amber-700" text={t('toolGroup.rowStatus.pending')} />
+        return <SummaryBadge className="bg-[var(--hp-warning)]/10 text-[var(--hp-warning)]" text={t('toolGroup.rowStatus.pending')} />
     }
     return null
 }
@@ -255,19 +255,19 @@ export function ToolGroupCard(props: {
                             />
                             {props.block.summary.runningCount > 0 ? (
                                 <SummaryBadge
-                                    className="bg-sky-500/10 text-sky-600"
+                                    className="bg-[var(--hp-info)]/10 text-[var(--hp-info)]"
                                     text={t('toolGroup.badge.running', { n: props.block.summary.runningCount })}
                                 />
                             ) : null}
                             {props.block.summary.pendingCount > 0 ? (
                                 <SummaryBadge
-                                    className="bg-amber-500/10 text-amber-700"
+                                    className="bg-[var(--hp-warning)]/10 text-[var(--hp-warning)]"
                                     text={t('toolGroup.badge.pending', { n: props.block.summary.pendingCount })}
                                 />
                             ) : null}
                             {props.block.summary.errorCount > 0 ? (
                                 <SummaryBadge
-                                    className="bg-red-500/10 text-red-600"
+                                    className="bg-[var(--hp-danger)]/10 text-[var(--hp-danger)]"
                                     text={t('toolGroup.badge.error', { n: props.block.summary.errorCount })}
                                 />
                             ) : null}

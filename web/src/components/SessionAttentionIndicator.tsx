@@ -2,9 +2,9 @@ import type { SessionAttention } from '@/lib/sessionAttention'
 import { getSessionAttentionLabelKey } from '@/lib/sessionAttention'
 
 const ATTENTION_DOT_CLASS: Record<SessionAttention['kind'], string> = {
-    permission: 'bg-amber-500 animate-pulse',
-    input: 'bg-blue-500',
-    background: 'bg-blue-400',
+    permission: 'bg-[var(--hp-warning)] animate-pulse',
+    input: 'bg-[var(--hp-info)]',
+    background: 'bg-[var(--hp-info)]',
     unread: 'bg-[var(--app-link)]'
 }
 
