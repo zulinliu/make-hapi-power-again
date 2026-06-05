@@ -153,11 +153,11 @@ function UnifiedButton(props: {
 
     if (hasText) {
         icon = <SendIcon />
-        className = 'bg-[var(--app-fg)] text-[var(--app-bg)]'
+        className = 'bg-[var(--hp-primary)] text-[var(--hp-text-inverse)]'
         ariaLabel = t('composer.send')
     } else {
         icon = <SendIcon />
-        className = 'bg-[var(--app-border)] text-[var(--app-hint)]'
+        className = 'bg-[var(--hp-surface-2)] text-[var(--hp-text-disabled)]'
         ariaLabel = t('composer.send')
     }
 
@@ -218,7 +218,7 @@ export function ComposerButtons(props: {
                     aria-label={t('composer.attach')}
                     title={t('composer.attach')}
                     disabled={props.controlsDisabled || hasSchedule}
-                    className="flex h-10 w-10 items-center justify-center rounded-full text-[var(--app-fg)]/60 transition-colors hover:bg-[var(--app-bg)] hover:text-[var(--app-fg)] disabled:cursor-not-allowed disabled:opacity-50 sm:h-8 sm:w-8"
+                    className="flex h-10 w-10 items-center justify-center rounded-full text-[var(--hp-text-tertiary)] transition-colors hover:bg-[var(--hp-surface-2)] hover:text-[var(--hp-text-primary)] disabled:cursor-not-allowed disabled:opacity-50 sm:h-8 sm:w-8"
                 >
                     <AttachmentIcon />
                 </ComposerPrimitive.AddAttachment>
@@ -228,7 +228,7 @@ export function ComposerButtons(props: {
                         type="button"
                         aria-label={t('composer.settings')}
                         title={t('composer.settings')}
-                        className="settings-button flex h-10 w-10 items-center justify-center rounded-full text-[var(--app-fg)]/60 transition-colors hover:bg-[var(--app-bg)] hover:text-[var(--app-fg)] sm:h-8 sm:w-8"
+                        className="settings-button flex h-10 w-10 items-center justify-center rounded-full text-[var(--hp-text-tertiary)] transition-colors hover:bg-[var(--hp-surface-2)] hover:text-[var(--hp-text-primary)] sm:h-8 sm:w-8"
                         onClick={props.onSettingsToggle}
                         disabled={props.controlsDisabled}
                     >
@@ -241,7 +241,7 @@ export function ComposerButtons(props: {
                         type="button"
                         aria-label={props.terminalLabel}
                         title={props.terminalLabel}
-                        className="flex h-10 w-10 items-center justify-center rounded-full text-[var(--app-fg)]/60 transition-colors hover:bg-[var(--app-bg)] hover:text-emerald-500 disabled:cursor-not-allowed disabled:opacity-50 sm:h-8 sm:w-8"
+                        className="flex h-10 w-10 items-center justify-center rounded-full text-[var(--hp-text-tertiary)] transition-colors hover:bg-[var(--hp-surface-2)] hover:text-[var(--hp-success)] disabled:cursor-not-allowed disabled:opacity-50 sm:h-8 sm:w-8"
                         onClick={props.onTerminal}
                         disabled={props.terminalDisabled}
                     >
@@ -255,7 +255,7 @@ export function ComposerButtons(props: {
                         aria-label={t('composer.abort')}
                         title={t('composer.abort')}
                         disabled={props.abortDisabled}
-                        className="flex h-10 w-10 items-center justify-center rounded-full text-[var(--app-fg)]/60 transition-colors hover:bg-[var(--app-bg)] hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-50 sm:h-8 sm:w-8"
+                        className="flex h-10 w-10 items-center justify-center rounded-full text-[var(--hp-text-tertiary)] transition-colors hover:bg-[var(--hp-surface-2)] hover:text-[var(--hp-danger)] disabled:cursor-not-allowed disabled:opacity-50 sm:h-8 sm:w-8"
                         onClick={props.onAbort}
                     >
                         <AbortIcon spinning={props.isAborting} />
@@ -268,7 +268,7 @@ export function ComposerButtons(props: {
                         aria-label={t('composer.switchRemote')}
                         title={t('composer.switchRemote')}
                         disabled={props.switchDisabled}
-                        className="flex h-10 w-10 items-center justify-center rounded-full text-[var(--app-fg)]/60 transition-colors hover:bg-[var(--app-bg)] hover:text-blue-500 disabled:cursor-not-allowed disabled:opacity-50 sm:h-8 sm:w-8 hidden sm:flex"
+                        className="flex h-10 w-10 items-center justify-center rounded-full text-[var(--hp-text-tertiary)] transition-colors hover:bg-[var(--hp-surface-2)] hover:text-[var(--hp-info)] disabled:cursor-not-allowed disabled:opacity-50 sm:h-8 sm:w-8 hidden sm:flex"
                         onClick={props.onSwitch}
                     >
                         <SwitchToRemoteIcon />
@@ -293,8 +293,8 @@ export function ComposerButtons(props: {
                             }}
                             className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50 sm:h-8 sm:w-8 ${
                                 hasSchedule
-                                    ? 'bg-blue-500 text-white hover:bg-blue-600'
-                                    : 'text-[var(--app-fg)]/60 hover:bg-[var(--app-bg)] hover:text-[var(--app-fg)]'
+                                    ? 'bg-[var(--hp-primary)] text-[var(--hp-text-inverse)] hover:bg-[var(--hp-primary-hover)]'
+                                    : 'text-[var(--hp-text-tertiary)] hover:bg-[var(--hp-surface-2)] hover:text-[var(--hp-text-primary)]'
                             }`}
                         >
                             <ScheduleIcon className="h-[18px] w-[18px]" />
