@@ -165,7 +165,9 @@ export function SessionHeader(props: {
     const handleMenuExtensions = () => { setMenuOpen(false); navigate({ to: `${basePath}/extensions` }) }
     const handleMenuOutline = () => { setMenuOpen(false); props.onToggleOutline?.() }
 
-    const iconBtnClass = 'flex h-10 w-10 items-center justify-center rounded-full transition-colors sm:h-8 sm:w-8'
+    const ghostBtnClass = 'flex h-10 w-10 items-center justify-center rounded-lg transition-colors duration-[var(--hp-duration-fast)] sm:h-8 sm:w-8 text-[var(--hp-text-secondary)] hover:bg-[var(--hp-surface-1)] hover:text-[var(--hp-text-primary)]'
+    const activeTabClass = 'text-[var(--hp-primary)]'
+    const inactiveTabClass = 'text-[var(--hp-text-secondary)]'
 
     // In Telegram, don't render header (Telegram provides its own)
     if (isTelegramApp()) {
@@ -174,13 +176,13 @@ export function SessionHeader(props: {
 
     return (
         <>
-            <div className={`bg-[var(--app-bg)] pt-[env(safe-area-inset-top)] ${props.isSubPage ? 'border-b border-[var(--app-border)]' : ''}`}>
-                <div className="mx-auto w-full max-w-content flex items-center gap-2 p-3">
+            <div className={`bg-[var(--hp-surface-0)] pt-[env(safe-area-inset-top)] border-b border-[var(--hp-divider)]`}>
+                <div className="mx-auto w-full max-w-content flex items-center gap-2 px-2 py-1.5 sm:px-3 sm:py-2 h-[var(--hp-mobile-header-height)] sm:h-[var(--hp-header-height)]">
                     {/* Back button */}
                     <button
                         type="button"
                         onClick={props.onBack}
-                        className={`${iconBtnClass} text-[var(--app-hint)] hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]`}
+                        className={ghostBtnClass}
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <polyline points="15 18 9 12 15 6" />
@@ -189,10 +191,10 @@ export function SessionHeader(props: {
 
                     {/* Session info */}
                     <div className="min-w-0 flex-1">
-                        <div className="truncate text-sm font-semibold leading-tight sm:text-base">
+                        <div className="truncate text-sm font-medium leading-tight text-[var(--hp-text-primary)] sm:text-base">
                             {title}
                         </div>
-                        <div className="flex items-center gap-1.5 text-xs leading-tight text-[var(--app-hint)] sm:gap-3">
+                        <div className="flex items-center gap-1.5 text-xs leading-tight text-[var(--hp-text-tertiary)] sm:gap-3">
                             <span className="inline-flex shrink-0 items-center gap-1">
                                 <AgentFlavorIcon flavor={session.metadata?.flavor} className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                                 <span className="max-w-[4rem] truncate">{session.metadata?.flavor?.trim() || 'unknown'}</span>
@@ -214,7 +216,7 @@ export function SessionHeader(props: {
                     <button
                         type="button"
                         onClick={handleFilesClick}
-                        className={`${iconBtnClass} ${isFilesActive ? 'text-[var(--app-link)]' : 'text-[var(--app-hint)]'} hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]`}
+                        className={`${ghostBtnClass} ${isFilesActive ? activeTabClass : inactiveTabClass}`}
                         title={t('session.title')}
                     >
                         <FilesIcon />
@@ -224,7 +226,7 @@ export function SessionHeader(props: {
                     <button
                         type="button"
                         onClick={handleGitClick}
-                        className={`${iconBtnClass} ${isGitActive ? 'text-[var(--app-link)]' : 'text-[var(--app-hint)]'} hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)] hidden lg:flex`}
+                        className={`${ghostBtnClass} ${isGitActive ? activeTabClass : inactiveTabClass} hidden lg:flex`}
                         title="Git"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -236,7 +238,7 @@ export function SessionHeader(props: {
                     <button
                         type="button"
                         onClick={handleExtensionsClick}
-                        className={`${iconBtnClass} ${isExtensionsActive ? 'text-[var(--app-link)]' : 'text-[var(--app-hint)]'} hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)] hidden lg:flex`}
+                        className={`${ghostBtnClass} ${isExtensionsActive ? activeTabClass : inactiveTabClass} hidden lg:flex`}
                         title={t('session.extensions') ?? 'Extensions'}
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -249,7 +251,7 @@ export function SessionHeader(props: {
                         <button
                             type="button"
                             onClick={props.onToggleOutline}
-                            className={`${iconBtnClass} text-[var(--app-hint)] hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)] hidden lg:flex`}
+                            className={`${ghostBtnClass} hidden lg:flex`}
                             title={t('session.outline.open')}
                             aria-label={t('session.outline.open')}
                         >
@@ -266,7 +268,7 @@ export function SessionHeader(props: {
                         aria-haspopup="menu"
                         aria-expanded={menuOpen}
                         aria-controls={menuOpen ? menuId : undefined}
-                        className={`${iconBtnClass} text-[var(--app-hint)] hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]`}
+                        className={ghostBtnClass}
                         title={t('session.more')}
                     >
                         <MoreVerticalIcon />
