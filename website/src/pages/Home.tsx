@@ -68,7 +68,7 @@ export default function Home() {
                 <div className="absolute -inset-1 bg-gradient-to-r from-primary to-secondary rounded-[2.5rem] blur opacity-30 animate-pulse"></div>
                 <img 
                   src="/images/hero-illustration.webp" 
-                  alt="Vibe Coding Illustration" 
+                  alt="Hapi Power Illustration" 
                   className="relative rounded-[2rem] border-4 border-border shadow-hard-lg bg-card transform transition-transform hover:scale-[1.02] duration-500"
                 />
                 

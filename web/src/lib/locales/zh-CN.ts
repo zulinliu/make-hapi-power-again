@@ -11,9 +11,9 @@ export default {
 
   // Login / Auth
   'login.title': 'Hapi Power',
-  'login.subtitle': '想到做到，一气呵成',
-  'login.brand.headline': '你的 AI 编程伙伴',
-  'login.brand.description': 'Hapi Power 连接强大的 AI 智能体，理解你的代码库、编写代码、交付功能——一个界面搞定一切。',
+  'login.subtitle': '随时AI，编程自在',
+  'login.brand.headline': '一个工作台，驾驭所有 AI 编程 Agent',
+  'login.brand.description': 'Hapi Power 是你的 AI 编程工作台 — 在一个界面中编排 Claude、Codex、Gemini 等所有 AI 编程 Agent。随时AI，编程自在。',
   'login.brand.feature1': '多智能体编排：Claude、Codex、Gemini 等',
   'login.brand.feature2': '安全的令牌认证，端到端加密',
   'login.brand.feature3': '内置终端、文件编辑器和 Git 集成',

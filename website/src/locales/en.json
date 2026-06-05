@@ -8,8 +8,8 @@
   },
   "hero": {
     "version": "{{version}} is now available",
-    "title": "Vibe Coding <br/> <span class=\"text-primary\">Anytime, Anywhere.</span>",
-    "subtitle": "Go for a hike, grab a coffee, or just relax. Your AI agents work in the background. We'll notify you via your favorite messaging app only when they need a nod.",
+    "title": "Code free, <br/> <span class=\"text-primary\">powered by AI.</span>",
+    "subtitle": "One workbench for every AI coding agent. Orchestrate Claude, Codex, Gemini, and more from a single interface. Go for a hike, grab a coffee, or just relax — your AI agents work in the background, and we notify you only when they need a nod.",
     "startBtn": "Start Your Freedom",
     "githubBtn": "View on GitHub",
     "notification": {
@@ -20,7 +20,7 @@
   "showcase": {
     "handoff": "Seamless Handoff",
     "title": "Start on Desktop. <br class=\"hidden md:block\" /> <span class=\"text-primary\">Continue Anywhere. Switch Back Anytime.</span>",
-    "subtitle": "Your session lives on your machine. Your phone is just a window. Work locally with native Claude Code or Codex, switch to remote when away, double-space to switch back instantly.",
+    "subtitle": "Your session lives on your machine. Your phone is just a window. Work locally with native Claude Code or Codex, switch to remote when away, double-space to switch back instantly. One workbench for every AI coding agent.",
     "localCore": {
       "title": "Local Core",
       "desc": "Heavy lifting happens on your powerful desktop machine. No cloud limits."
@@ -61,8 +61,8 @@
     }
   },
   "lifestyle": {
-    "title": "The \"Vibe Coding\" Lifestyle",
-    "subtitle": "Hapi Power isn't just a tool; it's a declaration of independence from your desk.",
+    "title": "Code Free, Powered by AI",
+    "subtitle": "Hapi Power is the AI coding workbench — not just a tool, but your declaration of independence from the desk.",
     "cards": {
       "explore": {
         "title": "Go Explore",
@@ -104,8 +104,8 @@
       "desc": "Open the PWA or Mini App. You now have full control over your local dev environment."
     },
     "step3": {
-      "title": "3. Vibe Code",
-      "desc": "Let agents do the heavy lifting. Approve changes, run commands, and enjoy your freedom."
+      "title": "3. Code Free",
+      "desc": "Let agents do the heavy lifting. Approve changes, run commands, and enjoy your freedom — powered by AI."
     }
   },
   "installation": {
@@ -119,15 +119,15 @@
     }
   },
   "cta": {
-    "title": "Ready to Vibe?",
-    "subtitle": "Join the revolution. Stop watching progress bars and start enjoying your life.",
+    "title": "Ready to Code Free?",
+    "subtitle": "One workbench for every AI coding agent. Stop watching progress bars and start enjoying your life.",
     "btn": "Get Started Now"
   },
   "footer": {
-    "desc": "Vibe Coding Anytime, Anywhere. <br/> The local-first AI agent platform for developers who love freedom.",
+    "desc": "Code free, powered by AI. <br/> The AI coding workbench — one workbench for every AI coding agent.",
     "product": "Product",
     "community": "Community",
     "copyright": "© {{year}} Hapi Power Team. Open source under AGPL License.",
-    "designedWith": "Designed with <span class=\"text-red-500\">♥</span> for Vibe Coding."
+    "designedWith": "Designed with <span class=\"text-red-500\">♥</span> for AI coding."
   }
 }

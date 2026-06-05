@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -44,106 +43,93 @@
 }
 
 :root {
-  /* Cozy Maker Workshop Theme - Light Mode */
-  /* Primary: Soft but vibrant Coral/Orange for that "Happy" vibe */
-  --primary: oklch(0.65 0.2 30); 
+  /* Electric Orange Theme - Light Mode */
+  --primary: oklch(0.68 0.18 55);
   --primary-foreground: oklch(0.98 0 0);
-  
-  /* Background: Creamy/Warm White */
-  --background: oklch(0.98 0.01 85);
-  --foreground: oklch(0.2 0.02 85); /* Soft Black */
-  
-  /* Card: White with a slight warmth */
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.2 0.02 85);
-  
-  /* Popover */
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.2 0.02 85);
-  
-  /* Secondary: Mint Green for accents */
-  --secondary: oklch(0.9 0.1 150);
-  --secondary-foreground: oklch(0.25 0.05 150);
-  
-  /* Muted: Warm Grey */
-  --muted: oklch(0.92 0.01 85);
-  --muted-foreground: oklch(0.5 0.02 85);
-  
-  /* Accent: Soft Lavender */
-  --accent: oklch(0.92 0.05 300);
-  --accent-foreground: oklch(0.3 0.1 300);
-  
-  /* Destructive: Soft Red */
-  --destructive: oklch(0.65 0.2 20);
-  --destructive-foreground: oklch(0.98 0 0);
-  
-  /* Border: Darker for Neo-Brutalist feel */
-  --border: oklch(0.2 0.02 85);
-  --input: oklch(0.2 0.02 85);
-  --ring: oklch(0.65 0.2 30);
-  
-  /* Radius: Larger for friendly feel */
-  --radius: 1rem;
-  
-  /* Chart Colors */
-  --chart-1: oklch(0.65 0.2 30);
-  --chart-2: oklch(0.7 0.15 150);
-  --chart-3: oklch(0.7 0.15 250);
-  --chart-4: oklch(0.8 0.15 85);
-  --chart-5: oklch(0.6 0.1 300);
 
-  --sidebar: oklch(0.98 0.01 85);
-  --sidebar-foreground: oklch(0.2 0.02 85);
-  --sidebar-primary: oklch(0.65 0.2 30);
+  --background: oklch(0.99 0.003 75);
+  --foreground: oklch(0.13 0.02 55);
+
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.13 0.02 55);
+
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.13 0.02 55);
+
+  --secondary: oklch(0.96 0.01 55);
+  --secondary-foreground: oklch(0.13 0.02 55);
+
+  --muted: oklch(0.94 0.008 55);
+  --muted-foreground: oklch(0.40 0.01 55);
+
+  --accent: oklch(0.78 0.14 85);
+  --accent-foreground: oklch(0.13 0.02 55);
+
+  --destructive: oklch(0.60 0.20 22);
+  --destructive-foreground: oklch(0.98 0 0);
+
+  --border: oklch(0.80 0.005 55 / 0.4);
+  --input: oklch(0.80 0.005 55 / 0.4);
+  --ring: oklch(0.68 0.18 55);
+
+  --radius: 0.75rem;
+
+  --chart-1: oklch(0.68 0.18 55);
+  --chart-2: oklch(0.65 0.16 155);
+  --chart-3: oklch(0.78 0.14 85);
+  --chart-4: oklch(0.72 0.16 75);
+  --chart-5: oklch(0.60 0.20 22);
+
+  --sidebar: oklch(0.99 0.003 75);
+  --sidebar-foreground: oklch(0.13 0.02 55);
+  --sidebar-primary: oklch(0.68 0.18 55);
   --sidebar-primary-foreground: oklch(0.98 0 0);
-  --sidebar-accent: oklch(0.92 0.05 300);
-  --sidebar-accent-foreground: oklch(0.3 0.1 300);
-  --sidebar-border: oklch(0.2 0.02 85);
-  --sidebar-ring: oklch(0.65 0.2 30);
-  
-  /* Custom Fonts */
-  --font-sans: "Nunito", sans-serif;
-  --font-mono: "Space Mono", monospace;
+  --sidebar-accent: oklch(0.96 0.01 55);
+  --sidebar-accent-foreground: oklch(0.13 0.02 55);
+  --sidebar-border: oklch(0.80 0.005 55 / 0.4);
+  --sidebar-ring: oklch(0.68 0.18 55);
+
+  --font-sans: 'Geist Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
 .dark {
-  /* Cyberpunk Neon Palette */
-  --primary: oklch(0.7 0.2 145); /* Neon Green */
-  --primary-foreground: oklch(0.1 0.1 145);
-  
-  --background: oklch(0.12 0.02 260); /* Deep Void Blue */
-  --foreground: oklch(0.92 0.01 260);
-  
-  --card: oklch(0.15 0.03 260);
-  --card-foreground: oklch(0.92 0.01 260);
-  
-  --popover: oklch(0.15 0.03 260);
-  --popover-foreground: oklch(0.92 0.01 260);
-  
-  --secondary: oklch(0.25 0.05 260);
-  --secondary-foreground: oklch(0.92 0.01 260);
-  
-  --muted: oklch(0.2 0.03 260);
-  --muted-foreground: oklch(0.6 0.05 260);
-  
-  --accent: oklch(0.25 0.05 260);
-  --accent-foreground: oklch(0.92 0.01 260);
-  
-  --destructive: oklch(0.6 0.2 20);
+  --primary: oklch(0.72 0.16 55);
+  --primary-foreground: oklch(0.98 0 0);
+
+  --background: oklch(0.13 0.015 55);
+  --foreground: oklch(0.95 0.005 55);
+
+  --card: oklch(0.15 0.012 55);
+  --card-foreground: oklch(0.95 0.005 55);
+
+  --popover: oklch(0.15 0.012 55);
+  --popover-foreground: oklch(0.95 0.005 55);
+
+  --secondary: oklch(0.22 0.01 55);
+  --secondary-foreground: oklch(0.95 0.005 55);
+
+  --muted: oklch(0.20 0.008 55);
+  --muted-foreground: oklch(0.70 0.008 55);
+
+  --accent: oklch(0.22 0.01 55);
+  --accent-foreground: oklch(0.95 0.005 55);
+
+  --destructive: oklch(0.60 0.20 22);
   --destructive-foreground: oklch(0.98 0 0);
-  
-  --border: oklch(0.3 0.05 260);
-  --input: oklch(0.3 0.05 260);
-  --ring: oklch(0.7 0.2 145);
-  
-  --sidebar: oklch(0.12 0.02 260);
-  --sidebar-foreground: oklch(0.92 0.01 260);
-  --sidebar-primary: oklch(0.7 0.2 145);
-  --sidebar-primary-foreground: oklch(0.1 0.1 145);
-  --sidebar-accent: oklch(0.25 0.05 260);
-  --sidebar-accent-foreground: oklch(0.92 0.01 260);
-  --sidebar-border: oklch(0.3 0.05 260);
-  --sidebar-ring: oklch(0.7 0.2 145);
+
+  --border: oklch(0.38 0.008 55 / 0.5);
+  --input: oklch(0.38 0.008 55 / 0.5);
+  --ring: oklch(0.72 0.16 55);
+
+  --sidebar: oklch(0.13 0.015 55);
+  --sidebar-foreground: oklch(0.95 0.005 55);
+  --sidebar-primary: oklch(0.72 0.16 55);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent: oklch(0.22 0.01 55);
+  --sidebar-accent-foreground: oklch(0.95 0.005 55);
+  --sidebar-border: oklch(0.38 0.008 55 / 0.5);
+  --sidebar-ring: oklch(0.72 0.16 55);
 }
 
 @layer base {
@@ -173,19 +159,6 @@
 }
 
 @layer components {
-  /**
-   * Custom container utility that centers content and adds responsive padding.
-   *
-   * This overrides Tailwind's default container behavior to:
-   * - Auto-center content (mx-auto)
-   * - Add responsive horizontal padding
-   * - Set max-width for large screens
-   *
-   * Usage: <div className="container">...</div>
-   *
-   * For custom widths, use max-w-* utilities directly:
-   * <div className="max-w-6xl mx-auto px-4">...</div>
-   */
   .container {
     width: 100%;
     margin-left: auto;
@@ -193,44 +166,19 @@
     padding-left: 1.5rem;
     padding-right: 1.5rem;
   }
-  
-  /* Neo-Brutalist Shadow Utility */
-  .shadow-hard {
-    box-shadow: 4px 4px 0px 0px var(--color-border);
-  }
-  .shadow-hard-sm {
-    box-shadow: 2px 2px 0px 0px var(--color-border);
-  }
-  .shadow-hard-lg {
-    box-shadow: 8px 8px 0px 0px var(--color-border);
-  }
-  
-  /* Card Hover Effect */
-  .hover-lift {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-  .hover-lift:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: 6px 6px 0px 0px var(--color-border);
-  }
-
-  .flex {
-    min-height: 0;
-    min-width: 0;
-  }
 
   @media (min-width: 640px) {
     .container {
-      padding-left: 1.5rem; /* 24px - tablet padding */
+      padding-left: 1.5rem;
       padding-right: 1.5rem;
     }
   }
 
   @media (min-width: 1024px) {
     .container {
-      padding-left: 2rem; /* 32px - desktop padding */
+      padding-left: 2rem;
       padding-right: 2rem;
-      max-width: 1280px; /* Standard content width */
+      max-width: 1280px;
     }
   }
 }

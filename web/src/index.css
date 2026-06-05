@@ -108,9 +108,9 @@
     --app-primary-subtle: var(--hp-primary-subtle);
 
     /* === 其他 === */
-    --app-link-muted: oklch(52% 0.12 200 / 0.15);
-    --app-scrollbar-thumb: oklch(60% 0.01 200 / 0.25);
-    --app-scrollbar-thumb-hover: oklch(60% 0.01 200 / 0.40);
+    --app-link-muted: oklch(52% 0.12 55 / 0.15);
+    --app-scrollbar-thumb: oklch(60% 0.01 55 / 0.25);
+    --app-scrollbar-thumb-hover: oklch(60% 0.01 55 / 0.40);
 
     /* === Agent Flavor 品牌色 === */
     --app-flavor-claude: oklch(68% 0.15 70);

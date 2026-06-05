@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <strong>One workbench for every AI coding agent.</strong>
+  <strong>随时AI，编程自在 — 一个工作台，驾驭所有 AI 编程 Agent。</strong>
 </p>
 
 <p align="center">
@@ -29,7 +29,7 @@
 
 大多数 AI 编码工具把你锁定在一个代理、一个终端、一台机器上。Hapi Power 提供统一工作台，让你在 Claude Code、Codex、Gemini 等代理间自由切换——随时随地，任意设备。
 
-**在手机上 vibe coding。** 滑动屏幕审批 AI 代理的代码变更，监控终端输出，通过或驳回文件编辑——全部在手机上完成，无需电脑。
+**在手机上编程。** 滑动屏幕审批 AI 代理的代码变更，监控终端输出，通过或驳回文件编辑——全部在手机上完成，无需电脑。
 
 **浏览器中的完整开发套件。** 可视化 Git 管理、全功能文件操作、Monaco 代码编辑器、自定义模型 Provider 支持（API 密钥加密存储）。与 AI 代理协作编码所需的一切，一个地方搞定。
 
@@ -155,7 +155,7 @@ hapi-power hub --relay
 
 ### 3. 打开浏览器
 
-桌面端访问 `http://localhost:5173`，或在手机上打开同一地址，随时随地 vibe coding。
+桌面端访问 `http://localhost:5173`，或在手机上打开同一地址，随时随地编程。
 
 ### 4. 构建单文件可执行程序
 

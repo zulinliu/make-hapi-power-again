@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <strong>One workbench for every AI coding agent.</strong>
+  <strong>随时AI，编程自在 — One workbench for every AI coding agent.</strong>
 </p>
 
 <p align="center">
@@ -29,7 +29,7 @@
 
 Most AI coding tools lock you into one agent, one terminal, one machine. Hapi Power gives you a unified workbench where you can switch between Claude Code, Codex, Gemini, and more — anytime, anywhere, on any device.
 
-**Vibe code on your phone.** Review AI agent changes with a swipe, monitor terminal output, and approve or reject file edits — all from your phone. No laptop needed.
+**Code on your phone.** Review AI agent changes with a swipe, monitor terminal output, and approve or reject file edits — all from your phone. No laptop needed.
 
 **A complete development toolkit in the browser.** Visual Git management, full file operations, Monaco code editor, and custom model provider support with encrypted API keys. Everything you need to code with AI agents, in one place.
 
@@ -155,7 +155,7 @@ hapi-power hub --relay
 
 ### 3. Open in Browser
 
-Visit `http://localhost:5173` on your desktop, or open it on your phone for mobile vibe coding.
+Visit `http://localhost:5173` on your desktop, or open it on your phone for coding on mobile.
 
 ### 4. Build Single Binary
 

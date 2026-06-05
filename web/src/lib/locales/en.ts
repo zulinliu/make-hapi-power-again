@@ -11,9 +11,9 @@ export default {
 
   // Login / Auth
   'login.title': 'Hapi Power',
-  'login.subtitle': 'Think it. Ship it.',
-  'login.brand.headline': 'Your AI coding companion',
-  'login.brand.description': 'Hapi Power connects you to powerful AI agents that understand your codebase, write code, and ship features — all from a single interface.',
+  'login.subtitle': 'Code free, powered by AI',
+  'login.brand.headline': 'One workbench for every AI coding agent',
+  'login.brand.description': 'Hapi Power is the AI coding workbench — orchestrate Claude, Codex, Gemini, and more from a single interface. Code free, powered by AI.',
   'login.brand.feature1': 'Multi-agent orchestration with Claude, Codex, Gemini, and more',
   'login.brand.feature2': 'Secure token-based authentication with end-to-end encryption',
   'login.brand.feature3': 'Full terminal, file editor, and Git integration built-in',
