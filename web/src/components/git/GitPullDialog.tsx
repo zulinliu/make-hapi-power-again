@@ -80,7 +80,7 @@ export function GitPullDialog({
     }
 
     const inputClass =
-        'w-full rounded-md border border-[var(--app-border)] bg-transparent px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--app-link)]'
+        'w-full rounded-[var(--hp-radius-sm)] border border-[var(--hp-border)] bg-transparent px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--hp-primary)]'
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
@@ -94,7 +94,7 @@ export function GitPullDialog({
 
                 <div className="space-y-3">
                     <div>
-                        <label className="text-sm font-medium" style={{ color: 'var(--app-text-muted)' }}>
+                        <label className="text-sm font-medium text-[var(--hp-text-secondary)]">
                             {t('git.pull.remote')}
                         </label>
                         <select
@@ -115,7 +115,7 @@ export function GitPullDialog({
                     </div>
 
                     <div>
-                        <label className="text-sm font-medium" style={{ color: 'var(--app-text-muted)' }}>
+                        <label className="text-sm font-medium text-[var(--hp-text-secondary)]">
                             {t('git.pull.branch')}
                         </label>
                         <input
@@ -128,23 +128,23 @@ export function GitPullDialog({
                     </div>
 
                     {phase === 'pulling' && (
-                        <div className="rounded-md p-3 text-sm" style={{ background: 'var(--app-subtle-bg)' }}>
+                        <div className="rounded-[var(--hp-radius-sm)] p-3 text-sm bg-[var(--hp-surface-1)]">
                             <div className="flex items-center gap-2">
-                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--app-accent)] border-t-transparent" />
+                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--hp-primary)] border-t-transparent" />
                                 <span>{t('git.pull.pulling')}</span>
                             </div>
                         </div>
                     )}
 
                     {phase === 'done' && (
-                        <div className="rounded-md bg-green-500/10 p-3 text-sm text-green-400">
+                        <div className="rounded-[var(--hp-radius-sm)] bg-[var(--hp-success-subtle)] p-3 text-sm text-[var(--hp-success)]">
                             {t('git.pull.success')}
                             {result && <pre className="mt-1 text-xs opacity-70">{result}</pre>}
                         </div>
                     )}
 
                     {phase === 'error' && (
-                        <div className="rounded-md bg-red-500/10 p-3 text-sm text-red-400">
+                        <div className="rounded-[var(--hp-radius-sm)] bg-[var(--hp-danger-subtle)] p-3 text-sm text-[var(--hp-danger)]">
                             {error}
                         </div>
                     )}
