@@ -12,6 +12,11 @@ export default {
   // Login / Auth
   'login.title': 'Hapi Power',
   'login.subtitle': '想到做到，一气呵成',
+  'login.brand.headline': '你的 AI 编程伙伴',
+  'login.brand.description': 'Hapi Power 连接强大的 AI 智能体，理解你的代码库、编写代码、交付功能——一个界面搞定一切。',
+  'login.brand.feature1': '多智能体编排：Claude、Codex、Gemini 等',
+  'login.brand.feature2': '安全的令牌认证，端到端加密',
+  'login.brand.feature3': '内置终端、文件编辑器和 Git 集成',
   'login.bind.title': '绑定 Telegram',
   'login.submit': '登录',
   'login.bind.submit': '绑定',
@@ -74,6 +79,10 @@ export default {
 
   // Session header
   'session.title': '文件',
+  'session.back': '返回',
+  'session.navigation': '会话导航',
+  'session.files': '文件',
+  'session.git': 'Git',
   'session.more': '更多操作',
   'session.tools': '工具',
   'session.extensions': '扩展',
@@ -83,6 +92,12 @@ export default {
   'session.outline.loadOlder': '加载更早',
   'session.outline.empty': '已加载消息中暂无大纲项',
   'session.outline.kind.user': '用户',
+
+  'session.unavailable': '会话不可用',
+  'session.notFound': '未找到会话',
+  'session.notFoundDesc': '该会话可能已被删除或不再可用。',
+  'session.returnToSessions': '返回会话列表',
+  'session.redirecting': '3 秒后跳转…',
 
   // Session actions
   'session.action.rename': '重命名',
@@ -202,6 +217,7 @@ export default {
 
   // Code block
   'code.copy': '复制',
+  'code.copied': '已复制',
   'code.truncated': '预览已截断 — 打开详情查看完整输出',
 
   // Diff view
@@ -246,6 +262,9 @@ export default {
   'file.page.imagePreviewAlt': '{name} 图片预览',
   'file.page.empty': '文件为空。',
   'file.page.noChanges': '没有可显示的变更。',
+  'file.page.loadingDiff': '正在加载差异...',
+  'file.page.modified': '已修改',
+  'file.page.readOnly': '只读预览',
   'file.error.readFailed': '读取文件失败。',
   'file.error.readFailedWithDetail': '读取文件失败：{error}',
   'file.error.diffUnavailable': 'Diff 不可用。',
@@ -699,5 +718,6 @@ export default {
   'file.upload.success': '文件上传成功',
   'file.upload.error': '上传失败',
   'file.upload.tooLarge': '文件过大（最大 5MB）',
+  'file.upload.remove': '移除附件',
 
 } as const

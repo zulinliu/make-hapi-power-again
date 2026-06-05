@@ -32,13 +32,13 @@ export function DirectorySection(props: {
 
     return (
         <div className="flex flex-col gap-1.5 px-3 py-3">
-            <label className="text-xs font-medium uppercase tracking-wider text-[var(--hp-text-tertiary)]">
+            <label className="text-xs font-medium uppercase tracking-wider text-(--hp-text-tertiary)">
                 {t('newSession.directory')}
             </label>
             <div className="flex items-start gap-2">
                 <div className="relative flex-1 min-w-0">
                     <div className="relative">
-                        <FolderIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--hp-text-tertiary)] pointer-events-none" />
+                        <FolderIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-(--hp-text-tertiary) pointer-events-none" />
                         <input
                             type="text"
                             placeholder={t('newSession.placeholder')}
@@ -48,7 +48,7 @@ export function DirectorySection(props: {
                             onFocus={props.onDirectoryFocus}
                             onBlur={props.onDirectoryBlur}
                             disabled={props.isDisabled}
-                            className="w-full rounded-[var(--hp-radius-sm,6px)] border border-[var(--hp-border)] bg-[var(--hp-surface-0)] p-2 pl-8 text-sm text-[var(--hp-text-primary)] placeholder:text-[var(--hp-text-tertiary)] focus:outline-none focus:ring-2 focus:ring-[var(--hp-primary)] focus:border-transparent disabled:opacity-50 transition-colors"
+                            className="w-full rounded-[var(--hp-radius-sm,6px)] border border-(--hp-border) bg-(--hp-surface-0) p-2 pl-8 text-sm text-(--hp-text-primary) placeholder:text-(--hp-text-tertiary) focus:outline-none focus:ring-2 focus:ring-(--hp-primary) focus:border-transparent disabled:opacity-50 transition-colors"
                         />
                     </div>
                     {props.suggestions.length > 0 && (
@@ -68,7 +68,7 @@ export function DirectorySection(props: {
                         type="button"
                         onClick={props.onChooseFolder}
                         disabled={props.isDisabled}
-                        className="shrink-0 flex items-center gap-1 rounded-[var(--hp-radius-sm,6px)] border border-[var(--hp-border)] bg-[var(--hp-surface-1)] px-2 py-2 text-xs text-[var(--hp-text-secondary)] hover:bg-[var(--hp-surface-2)] hover:text-[var(--hp-text-primary)] transition-colors disabled:opacity-50"
+                        className="shrink-0 flex items-center gap-1 rounded-[var(--hp-radius-sm,6px)] border border-(--hp-border) bg-(--hp-surface-1) px-2 py-2 text-xs text-(--hp-text-secondary) hover:bg-(--hp-surface-2) hover:text-(--hp-text-primary) transition-colors disabled:opacity-50"
                         title={t('newSession.browse')}
                     >
                         <FolderIcon className="h-3.5 w-3.5" />
@@ -79,7 +79,7 @@ export function DirectorySection(props: {
 
             {props.recentPaths.length > 0 && (
                 <div className="flex flex-col gap-1 mt-1">
-                    <span className="text-xs text-[var(--hp-text-tertiary)]">{t('newSession.recent')}:</span>
+                    <span className="text-xs text-(--hp-text-tertiary)">{t('newSession.recent')}:</span>
                     <div className="flex flex-wrap gap-1">
                         {props.recentPaths.map((path) => (
                             <button
@@ -87,7 +87,7 @@ export function DirectorySection(props: {
                                 type="button"
                                 onClick={() => props.onPathClick(path)}
                                 disabled={props.isDisabled}
-                                className="rounded-[var(--hp-radius-sm,6px)] bg-[var(--hp-surface-1)] px-2 py-1 text-xs text-[var(--hp-text-secondary)] hover:bg-[var(--hp-surface-2)] hover:text-[var(--hp-text-primary)] transition-colors truncate max-w-[200px] disabled:opacity-50"
+                                className="rounded-[var(--hp-radius-sm,6px)] bg-(--hp-surface-1) px-2 py-1 text-xs text-(--hp-text-secondary) hover:bg-(--hp-surface-2) hover:text-(--hp-text-primary) transition-colors truncate max-w-[200px] disabled:opacity-50"
                                 title={path}
                             >
                                 {path}
@@ -101,8 +101,8 @@ export function DirectorySection(props: {
                 <div
                     className={`mt-1 rounded-[var(--hp-radius-sm,6px)] px-2 py-1 text-xs ${
                         props.statusTone === 'error'
-                            ? 'bg-[var(--hp-danger-subtle)] text-[var(--hp-danger)]'
-                            : 'bg-[var(--hp-warning-subtle)] text-[var(--hp-text-tertiary)]'
+                            ? 'bg-(--hp-danger-subtle) text-(--hp-danger)'
+                            : 'bg-(--hp-warning-subtle) text-(--hp-text-tertiary)'
                     }`}
                 >
                     {props.statusMessage}

@@ -1,5 +1,6 @@
 import { AttachmentPrimitive, useThreadComposerAttachment } from '@assistant-ui/react'
 import { Spinner } from '@/components/Spinner'
+import { useTranslation } from '@/lib/use-translation'
 
 function ErrorIcon() {
     return (
@@ -31,6 +32,7 @@ function RemoveIcon() {
 }
 
 export function AttachmentItem() {
+    const { t } = useTranslation()
     const { name, status } = useThreadComposerAttachment()
     const isUploading = status.type === 'running'
     const isError = status.type === 'incomplete'
@@ -39,16 +41,16 @@ export function AttachmentItem() {
         <AttachmentPrimitive.Root className="flex items-center gap-2 rounded-lg bg-[var(--app-subtle-bg)] px-3 py-2 text-base text-[var(--app-fg)]">
             {isUploading ? <Spinner size="sm" label={null} className="text-[var(--app-hint)]" /> : null}
             {isError ? (
-                <span className="text-[var(--hp-danger)]">
+                <span className="text-(--hp-danger)">
                     <ErrorIcon />
                 </span>
             ) : null}
-            <span className={`max-w-[150px] truncate ${isError ? 'text-[var(--hp-danger)] line-through' : ''}`}>{name}</span>
-            {isError ? <span className="text-xs text-[var(--hp-danger)] whitespace-nowrap">Upload failed</span> : null}
+            <span className={`max-w-[150px] truncate ${isError ? 'text-(--hp-danger) line-through' : ''}`}>{name}</span>
+            {isError ? <span className="text-xs text-(--hp-danger) whitespace-nowrap">{t('file.upload.error')}</span> : null}
             <AttachmentPrimitive.Remove
                 className="ml-auto flex h-5 w-5 items-center justify-center rounded text-[var(--app-hint)] transition-colors hover:text-[var(--app-fg)]"
-                aria-label="Remove attachment"
-                title="Remove attachment"
+                aria-label={t('file.upload.remove')}
+                title={t('file.upload.remove')}
             >
                 <RemoveIcon />
             </AttachmentPrimitive.Remove>

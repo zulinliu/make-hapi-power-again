@@ -14,7 +14,7 @@ export const FloatingOverlay = memo(function FloatingOverlay(props: FloatingOver
 
     return (
         <div
-            className="overflow-hidden rounded-[var(--hp-radius-md)] border border-[var(--hp-border)] bg-[var(--hp-surface-0)] shadow-[var(--hp-shadow-lg)]"
+            className="overflow-hidden rounded-(--hp-radius-md) border border-(--hp-border) bg-(--hp-surface-0) shadow-(--hp-shadow-lg)"
             style={{ maxHeight }}
         >
             <div className="overflow-y-auto" style={{ maxHeight }}>

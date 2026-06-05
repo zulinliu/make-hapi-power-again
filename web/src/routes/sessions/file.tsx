@@ -168,18 +168,18 @@ export default function FilePage() {
 
     return (
         <div className="flex h-full min-h-0 flex-col">
-            <div className="bg-[var(--hp-surface-0)]">
-                <div className="mx-auto w-full max-w-content px-3 py-2 flex items-center gap-2 border-b border-[var(--hp-divider)]">
+            <div className="bg-(--hp-surface-0)">
+                <div className="mx-auto w-full max-w-content px-3 py-2 flex items-center gap-2 border-b border-(--hp-divider)">
                     <FileIcon fileName={fileName} size={20} />
-                    <span className="min-w-0 flex-1 truncate text-xs text-[var(--hp-text-tertiary)]">{filePath || t('file.page.unknownPath')}</span>
+                    <span className="min-w-0 flex-1 truncate text-xs text-(--hp-text-tertiary)">{filePath || t('file.page.unknownPath')}</span>
                     <button type="button" onClick={() => copyPath(filePath)}
-                        className="shrink-0 rounded p-1 text-[var(--hp-text-tertiary)] hover:bg-[var(--hp-surface-1)] hover:text-[var(--hp-text-primary)] transition-colors"
+                        className="shrink-0 rounded p-1 text-(--hp-text-tertiary) hover:bg-(--hp-surface-1) hover:text-(--hp-text-primary) transition-colors"
                         title={t('file.page.copyPath')}>
                         {pathCopied ? <CheckIcon className="h-3.5 w-3.5" /> : <CopyIcon className="h-3.5 w-3.5" />}
                     </button>
                     {fileContentResult?.success && fileContentResult.content && (
                         <button type="button" onClick={handleDownload}
-                            className="shrink-0 rounded p-1 text-[var(--hp-text-tertiary)] hover:bg-[var(--hp-surface-1)] hover:text-[var(--hp-text-primary)] transition-colors"
+                            className="shrink-0 rounded p-1 text-(--hp-text-tertiary) hover:bg-(--hp-surface-1) hover:text-(--hp-text-primary) transition-colors"
                             title={t('file.page.download')}>
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" x2="12" y1="15" y2="3" />
@@ -190,21 +190,21 @@ export default function FilePage() {
             </div>
 
             {(diffContent || isMarkdown) ? (
-                <div className="bg-[var(--hp-surface-0)]">
-                    <div className="mx-auto w-full max-w-content px-3 py-2 flex items-center gap-2 border-b border-[var(--hp-divider)]">
+                <div className="bg-(--hp-surface-0)">
+                    <div className="mx-auto w-full max-w-content px-3 py-2 flex items-center gap-2 border-b border-(--hp-divider)">
                         {isMarkdown && (
                             <button type="button" onClick={() => setDisplayMode('preview')}
-                                className={`rounded px-3 py-1 text-xs font-semibold ${displayMode === 'preview' ? 'bg-[var(--hp-primary)] text-[var(--hp-primary-text)]' : 'bg-[var(--hp-surface-1)] text-[var(--hp-text-tertiary)]'}`}>
+                                className={`rounded px-3 py-1 text-xs font-semibold ${displayMode === 'preview' ? 'bg-(--hp-primary) text-(--hp-primary-text)' : 'bg-(--hp-surface-1) text-(--hp-text-tertiary)'}`}>
                                 {t('file.preview.mode.preview')}
                             </button>
                         )}
                         <button type="button" onClick={() => setDisplayMode('edit')}
-                            className={`rounded px-3 py-1 text-xs font-semibold ${displayMode === 'edit' ? 'bg-[var(--hp-primary)] text-[var(--hp-primary-text)]' : 'bg-[var(--hp-surface-1)] text-[var(--hp-text-tertiary)]'}`}>
+                            className={`rounded px-3 py-1 text-xs font-semibold ${displayMode === 'edit' ? 'bg-(--hp-primary) text-(--hp-primary-text)' : 'bg-(--hp-surface-1) text-(--hp-text-tertiary)'}`}>
                             {t('file.preview.mode.edit')}
                         </button>
                         {diffContent && (
                             <button type="button" onClick={() => setDisplayMode('diff')}
-                                className={`rounded px-3 py-1 text-xs font-semibold ${displayMode === 'diff' ? 'bg-[var(--hp-primary)] text-[var(--hp-primary-text)]' : 'bg-[var(--hp-surface-1)] text-[var(--hp-text-tertiary)]'}`}>
+                                className={`rounded px-3 py-1 text-xs font-semibold ${displayMode === 'diff' ? 'bg-(--hp-primary) text-(--hp-primary-text)' : 'bg-(--hp-surface-1) text-(--hp-text-tertiary)'}`}>
                                 {t('file.preview.mode.diff')}
                             </button>
                         )}
@@ -214,19 +214,19 @@ export default function FilePage() {
 
             <div className="flex-1 min-h-0">
                 {diffErrorMessage ? (
-                    <div className="p-4 sm:p-6"><div className="mb-3 rounded-md bg-[var(--hp-warning-subtle)] p-2 text-xs text-[var(--hp-text-secondary)]">{diffErrorMessage}</div></div>
+                    <div className="p-4 sm:p-6"><div className="mb-3 rounded-md bg-(--hp-warning-subtle) p-2 text-xs text-(--hp-text-secondary)">{diffErrorMessage}</div></div>
                 ) : missingPath ? (
-                    <div className="p-4 sm:p-6 text-sm text-[var(--hp-text-tertiary)]">{t('file.page.missingPath')}</div>
+                    <div className="p-4 sm:p-6 text-sm text-(--hp-text-tertiary)">{t('file.page.missingPath')}</div>
                 ) : loading ? (
                     <FileContentSkeleton label={t('loading.file')} />
                 ) : fileErrorMessage ? (
-                    <div className="p-4 sm:p-6 text-sm text-[var(--hp-text-tertiary)]">{fileErrorMessage}</div>
+                    <div className="p-4 sm:p-6 text-sm text-(--hp-text-tertiary)">{fileErrorMessage}</div>
                 ) : displayMode === 'preview' && isMarkdown && decodedContent ? (
                     <div className="app-scroll-y h-full p-4 sm:p-6 lg:p-8">
                         <MarkdownFilePreview content={decodedContent} />
                     </div>
                 ) : displayMode === 'diff' && diffContent && decodedContent ? (
-                    <Suspense fallback={<FileContentSkeleton label="Loading diff..." />}>
+                    <Suspense fallback={<FileContentSkeleton label={t('file.page.loadingDiff')} />}>
                         <DiffView
                             original={decodedContent.replace(
                                 new RegExp(`^\\+.*$`, 'gm'), ''
@@ -242,25 +242,25 @@ export default function FilePage() {
                                 label={t('file.page.imagePreviewAlt', { name: fileName })} />
                         </div>
                     ) : binaryFile ? (
-                        <div className="p-4 sm:p-6 text-sm text-[var(--hp-text-tertiary)]">{t('file.page.binary')}</div>
+                        <div className="p-4 sm:p-6 text-sm text-(--hp-text-tertiary)">{t('file.page.binary')}</div>
                     ) : (
                         <div className="flex flex-col h-full">
                             <div className="flex items-center gap-2 px-3 py-1.5 border-b shrink-0"
                                 style={{ borderColor: 'var(--hp-divider)', background: 'var(--hp-surface-0)' }}>
                                 <div className="flex-1 text-xs" style={{ color: 'var(--hp-text-tertiary)' }}>
                                     {localContent !== decodedContent ? (
-                                        <span className="text-[var(--hp-warning)]">Modified</span>
+                                        <span className="text-(--hp-warning)">{t('file.page.modified')}</span>
                                     ) : (
-                                        <span>Read-only preview</span>
+                                        <span>{t('file.page.readOnly')}</span>
                                     )}
                                 </div>
                                 <button type="button" onClick={() => copyContent(localContent)}
-                                    className="rounded p-1 text-[var(--hp-text-tertiary)] hover:bg-[var(--hp-surface-1)] transition-colors"
+                                    className="rounded p-1 text-(--hp-text-tertiary) hover:bg-(--hp-surface-1) transition-colors"
                                     title={t('file.page.copyContent')}>
                                     {contentCopied ? <CheckIcon className="h-3.5 w-3.5" /> : <CopyIcon className="h-3.5 w-3.5" />}
                                 </button>
                                 <button type="button" onClick={handleDownload}
-                                    className="rounded p-1 text-[var(--hp-text-tertiary)] hover:bg-[var(--hp-surface-1)] transition-colors"
+                                    className="rounded p-1 text-(--hp-text-tertiary) hover:bg-(--hp-surface-1) transition-colors"
                                     title={t('file.page.download')}>
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" x2="12" y1="15" y2="3" />
@@ -270,7 +270,7 @@ export default function FilePage() {
                                     <button type="button" onClick={() => handleSave(localContent)}
                                         className="px-3 py-1 rounded text-xs font-semibold transition-colors"
                                         style={{ background: 'var(--hp-primary)', color: 'var(--hp-primary-text)' }}>
-                                        Save
+                                        {t('button.save')}
                                     </button>
                                 )}
                             </div>
@@ -289,7 +289,7 @@ export default function FilePage() {
                         </div>
                     )
                 ) : (
-                    <div className="p-4 sm:p-6 text-sm text-[var(--hp-text-tertiary)]">{t('file.page.noChanges')}</div>
+                    <div className="p-4 sm:p-6 text-sm text-(--hp-text-tertiary)">{t('file.page.noChanges')}</div>
                 )}
             </div>
         </div>

@@ -1,24 +1,24 @@
 /**
  * Hapi Power Typography
- * DM Sans (UI) + Source Serif 4 (Display) + JetBrains Mono (Code)
+ * Geist Sans (UI) + Geist Mono (Code) + Source Serif 4 (Display)
  * 响应式排版基于 clamp()
  */
 
 /* === 字体引入 === */
 @font-face {
-  font-family: 'Inter';
+  font-family: 'Geist Sans';
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
-  src: url('https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfAZ9hjQ.woff2') format('woff2');
+  src: url('/fonts/Geist-Variable.woff2') format('woff2');
 }
 
 @font-face {
-  font-family: 'JetBrains Mono';
+  font-family: 'Geist Mono';
   font-style: normal;
-  font-weight: 400 700;
+  font-weight: 100 900;
   font-display: swap;
-  src: url('https://fonts.gstatic.com/s/jetbrainsmono/v20/tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKxjPVmUsaaDhw.woff2') format('woff2');
+  src: url('/fonts/GeistMono-Variable.woff2') format('woff2');
 }
 
 @font-face {
@@ -29,18 +29,10 @@
   src: url('https://fonts.gstatic.com/s/sourceserif4/v8EFw8TUnJCRWJ7q6GMWLEdXj.woff2') format('woff2');
 }
 
-@font-face {
-  font-family: 'DM Sans';
-  font-style: normal;
-  font-weight: 300 700;
-  font-display: swap;
-  src: url('https://fonts.gstatic.com/s/dmsans/v15/rP2YtY9yV00s8NghHVQ.woff2') format('woff2');
-}
-
 /* === 排版令牌 === */
 :root {
-  --hp-font-sans: 'DM Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  --hp-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --hp-font-sans: 'Geist Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --hp-font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --hp-font-display: 'Source Serif 4', Georgia, 'Times New Roman', serif;
 
   --hp-text-xs: clamp(0.6875rem, 0.65rem + 0.15vw, 0.75rem);

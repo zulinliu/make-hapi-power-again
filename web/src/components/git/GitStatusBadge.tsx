@@ -19,7 +19,7 @@ export function GitStatusBadge({ status }: { status: string }) {
 
   return (
     <span
-      className="text-xs font-mono font-bold px-1.5 py-0.5 rounded-[var(--hp-radius-xs)]"
+      className="text-xs font-mono font-bold px-1.5 py-0.5 rounded-(--hp-radius-xs)"
       style={{ color, background: bg }}
     >
       {status}

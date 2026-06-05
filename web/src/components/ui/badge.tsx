@@ -7,12 +7,12 @@ const badgeVariants = cva(
     {
         variants: {
             variant: {
-                default: 'border-[var(--hp-border)] bg-[var(--hp-surface-1)] text-[var(--hp-text-primary)]',
-                warning: 'border-[var(--app-badge-warning-border)] bg-[var(--hp-warning-subtle)] text-[var(--hp-warning)]',
-                success: 'border-[var(--app-badge-success-border)] bg-[var(--hp-success-subtle)] text-[var(--hp-success)]',
-                destructive: 'border-[var(--app-badge-error-border)] bg-[var(--hp-danger-subtle)] text-[var(--hp-danger)]',
-                subtle: 'border-[var(--hp-border)] bg-[var(--hp-surface-1)] text-[var(--hp-text-secondary)]',
-                info: 'border-[var(--hp-info-subtle)] bg-[var(--hp-info-subtle)] text-[var(--hp-info)]'
+                default: 'border-(--hp-border) bg-(--hp-surface-1) text-(--hp-text-primary)',
+                warning: 'border-[var(--app-badge-warning-border)] bg-(--hp-warning-subtle) text-(--hp-warning)',
+                success: 'border-[var(--app-badge-success-border)] bg-(--hp-success-subtle) text-(--hp-success)',
+                destructive: 'border-[var(--app-badge-error-border)] bg-(--hp-danger-subtle) text-(--hp-danger)',
+                subtle: 'border-(--hp-border) bg-(--hp-surface-1) text-(--hp-text-secondary)',
+                info: 'border-(--hp-info-subtle) bg-(--hp-info-subtle) text-(--hp-info)'
             }
         },
         defaultVariants: {

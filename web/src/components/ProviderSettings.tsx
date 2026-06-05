@@ -47,9 +47,9 @@ function ProviderForm({
             className="flex flex-col gap-3"
         >
             <div>
-                <label className="block text-xs text-[var(--hp-text-tertiary)] mb-1">{t('settings.providers.name')}</label>
+                <label className="block text-xs text-(--hp-text-tertiary) mb-1">{t('settings.providers.name')}</label>
                 <input
-                    className="w-full rounded-[var(--hp-radius-md)] border border-[var(--hp-border)] bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--hp-primary)] focus:ring-1 focus:ring-[var(--hp-primary)]"
+                    className="w-full rounded-(--hp-radius-md) border border-(--hp-border) bg-transparent px-3 py-2.5 text-sm outline-none focus:border-(--hp-primary) focus:ring-1 focus:ring-(--hp-primary)"
                     value={form.name}
                     onChange={e => update('name', e.target.value)}
                     placeholder={t('settings.providers.namePlaceholder')}
@@ -58,9 +58,9 @@ function ProviderForm({
                 />
             </div>
             <div>
-                <label className="block text-xs text-[var(--hp-text-tertiary)] mb-1">{t('settings.providers.baseUrl')}</label>
+                <label className="block text-xs text-(--hp-text-tertiary) mb-1">{t('settings.providers.baseUrl')}</label>
                 <input
-                    className="w-full rounded-[var(--hp-radius-md)] border border-[var(--hp-border)] bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--hp-primary)] focus:ring-1 focus:ring-[var(--hp-primary)] font-mono"
+                    className="w-full rounded-(--hp-radius-md) border border-(--hp-border) bg-transparent px-3 py-2.5 text-sm outline-none focus:border-(--hp-primary) focus:ring-1 focus:ring-(--hp-primary) font-mono"
                     value={form.baseUrl}
                     onChange={e => update('baseUrl', e.target.value)}
                     placeholder={t('settings.providers.baseUrlPlaceholder')}
@@ -69,10 +69,10 @@ function ProviderForm({
                 />
             </div>
             <div>
-                <label className="block text-xs text-[var(--hp-text-tertiary)] mb-1">{t('settings.providers.apiKey')}</label>
+                <label className="block text-xs text-(--hp-text-tertiary) mb-1">{t('settings.providers.apiKey')}</label>
                 <input
                     type="password"
-                    className="w-full rounded-[var(--hp-radius-md)] border border-[var(--hp-border)] bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--hp-primary)] focus:ring-1 focus:ring-[var(--hp-primary)] font-mono"
+                    className="w-full rounded-(--hp-radius-md) border border-(--hp-border) bg-transparent px-3 py-2.5 text-sm outline-none focus:border-(--hp-primary) focus:ring-1 focus:ring-(--hp-primary) font-mono"
                     value={form.apiKey}
                     onChange={e => update('apiKey', e.target.value)}
                     placeholder={t('settings.providers.apiKeyPlaceholder')}
@@ -81,9 +81,9 @@ function ProviderForm({
                 />
             </div>
             <div>
-                <label className="block text-xs text-[var(--hp-text-tertiary)] mb-1">{t('settings.providers.notes')}</label>
+                <label className="block text-xs text-(--hp-text-tertiary) mb-1">{t('settings.providers.notes')}</label>
                 <input
-                    className="w-full rounded-[var(--hp-radius-md)] border border-[var(--hp-border)] bg-transparent px-3 py-2.5 text-sm outline-none focus:border-[var(--hp-primary)] focus:ring-1 focus:ring-[var(--hp-primary)]"
+                    className="w-full rounded-(--hp-radius-md) border border-(--hp-border) bg-transparent px-3 py-2.5 text-sm outline-none focus:border-(--hp-primary) focus:ring-1 focus:ring-(--hp-primary)"
                     value={form.notes}
                     onChange={e => update('notes', e.target.value)}
                     placeholder={t('settings.providers.notesPlaceholder')}
@@ -94,14 +94,14 @@ function ProviderForm({
                 <button
                     type="button"
                     onClick={onCancel}
-                    className="min-h-[44px] rounded-[var(--hp-radius-md)] px-4 py-2 text-sm text-[var(--hp-text-tertiary)] hover:bg-[var(--hp-surface-1)] transition-colors"
+                    className="min-h-[44px] rounded-(--hp-radius-md) px-4 py-2 text-sm text-(--hp-text-tertiary) hover:bg-(--hp-surface-1) transition-colors"
                 >
                     {t('settings.providers.cancel')}
                 </button>
                 <button
                     type="submit"
                     disabled={isPending}
-                    className="min-h-[44px] rounded-[var(--hp-radius-md)] bg-[var(--hp-primary)] px-4 py-2 text-sm text-[var(--hp-primary-text)] hover:bg-[var(--hp-primary-hover)] disabled:opacity-50 transition-colors"
+                    className="min-h-[44px] rounded-(--hp-radius-md) bg-(--hp-primary) px-4 py-2 text-sm text-(--hp-primary-text) hover:bg-(--hp-primary-hover) disabled:opacity-50 transition-colors"
                 >
                     {isPending ? '...' : submitLabel}
                 </button>
@@ -139,16 +139,16 @@ function ProviderRow({
     const unassignedFlavors = AGENT_FLAVORS.filter(f => !assignedFlavors.includes(f))
 
     return (
-        <div className="border-b border-[var(--hp-border)] last:border-b-0">
+        <div className="border-b border-(--hp-border) last:border-b-0">
             <button
-                className="flex w-full items-center justify-between px-3 py-3 text-left min-h-[44px] hover:bg-[var(--hp-surface-1)] transition-colors"
+                className="flex w-full items-center justify-between px-3 py-3 text-left min-h-[44px] hover:bg-(--hp-surface-1) transition-colors"
                 onClick={() => setExpanded(!expanded)}
             >
                 <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-medium text-[var(--hp-text-primary)]">{provider.name}</div>
-                    <div className="truncate text-xs text-[var(--hp-text-tertiary)] font-mono">{provider.baseUrl}</div>
+                    <div className="truncate text-sm font-medium text-(--hp-text-primary)">{provider.name}</div>
+                    <div className="truncate text-xs text-(--hp-text-tertiary) font-mono">{provider.baseUrl}</div>
                 </div>
-                <svg className={`h-4 w-4 shrink-0 text-[var(--hp-text-tertiary)] transition-transform ${expanded ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className={`h-4 w-4 shrink-0 text-(--hp-text-tertiary) transition-transform ${expanded ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
             </button>
@@ -156,20 +156,20 @@ function ProviderRow({
             {expanded && (
                 <div className="px-3 pb-3 space-y-3">
                     {provider.notes && (
-                        <div className="text-xs text-[var(--hp-text-tertiary)]">{provider.notes}</div>
+                        <div className="text-xs text-(--hp-text-tertiary)">{provider.notes}</div>
                     )}
 
                     {assignedFlavors.length > 0 && (
                         <div>
-                            <div className="text-xs font-semibold text-[var(--hp-text-tertiary)] mb-1">{t('settings.providers.assignments')}</div>
+                            <div className="text-xs font-semibold text-(--hp-text-tertiary) mb-1">{t('settings.providers.assignments')}</div>
                             <div className="flex flex-wrap gap-1">
                                 {provider.assignments.map((a: ProviderAssignment) => (
-                                    <span key={a.agentFlavor} className="inline-flex items-center gap-1 rounded-full bg-[var(--hp-primary-subtle)] px-2.5 py-1 text-xs">
+                                    <span key={a.agentFlavor} className="inline-flex items-center gap-1 rounded-full bg-(--hp-primary-subtle) px-2.5 py-1 text-xs">
                                         {capitalize(a.agentFlavor)}
-                                        {a.isDefault && <span className="text-[var(--hp-primary)]">*</span>}
+                                        {a.isDefault && <span className="text-(--hp-primary)">*</span>}
                                         <button
                                             onClick={() => onUnassign(provider.id, a.agentFlavor)}
-                                            className="min-h-[32px] min-w-[32px] inline-flex items-center justify-center text-[var(--hp-text-tertiary)] hover:text-[var(--hp-danger)]"
+                                            className="min-h-[32px] min-w-[32px] inline-flex items-center justify-center text-(--hp-text-tertiary) hover:text-(--hp-danger)"
                                             title={t('settings.providers.unassign')}
                                         >
                                             x
@@ -186,7 +186,7 @@ function ProviderRow({
                                 <button
                                     key={flavor}
                                     onClick={() => onAssign(provider.id, flavor, false)}
-                                    className="min-h-[36px] rounded-full border border-dashed border-[var(--hp-border)] px-3 py-1 text-xs text-[var(--hp-text-tertiary)] hover:border-[var(--hp-primary)] hover:text-[var(--hp-primary)] transition-colors"
+                                    className="min-h-[36px] rounded-full border border-dashed border-(--hp-border) px-3 py-1 text-xs text-(--hp-text-tertiary) hover:border-(--hp-primary) hover:text-(--hp-primary) transition-colors"
                                 >
                                     + {capitalize(flavor)}
                                 </button>
@@ -198,36 +198,36 @@ function ProviderRow({
                         <button
                             onClick={handleDiscover}
                             disabled={discovering || isLoading}
-                            className="min-h-[44px] rounded-[var(--hp-radius-md)] border border-[var(--hp-border)] px-3 py-2 text-xs hover:bg-[var(--hp-surface-1)] disabled:opacity-50 transition-colors"
+                            className="min-h-[44px] rounded-(--hp-radius-md) border border-(--hp-border) px-3 py-2 text-xs hover:bg-(--hp-surface-1) disabled:opacity-50 transition-colors"
                         >
                             {discovering || isLoading ? t('settings.providers.discovering') : t('settings.providers.discoverModels')}
                         </button>
                         <button
                             onClick={() => onEdit(provider)}
-                            className="min-h-[44px] rounded-[var(--hp-radius-md)] border border-[var(--hp-border)] px-3 py-2 text-xs hover:bg-[var(--hp-surface-1)] transition-colors"
+                            className="min-h-[44px] rounded-(--hp-radius-md) border border-(--hp-border) px-3 py-2 text-xs hover:bg-(--hp-surface-1) transition-colors"
                         >
                             {t('settings.providers.edit')}
                         </button>
                         <button
                             onClick={() => onDeleteClick(provider.id)}
-                            className="min-h-[44px] rounded-[var(--hp-radius-md)] border border-[var(--hp-border)] px-3 py-2 text-xs text-[var(--hp-danger)] hover:bg-[var(--hp-danger-subtle)] transition-colors"
+                            className="min-h-[44px] rounded-(--hp-radius-md) border border-(--hp-border) px-3 py-2 text-xs text-(--hp-danger) hover:bg-(--hp-danger-subtle) transition-colors"
                         >
                             {t('settings.providers.delete')}
                         </button>
                     </div>
 
                     {error && (
-                        <div className="text-xs text-[var(--hp-danger)]">
+                        <div className="text-xs text-(--hp-danger)">
                             {t('settings.providers.discoveryError', { error: error })}
                         </div>
                     )}
                     {models.length > 0 && (
-                        <div className="text-xs text-[var(--hp-text-tertiary)]">
+                        <div className="text-xs text-(--hp-text-tertiary)">
                             {t('settings.providers.modelsFound', { count: String(models.length) })}
                         </div>
                     )}
                     {!isLoading && !error && models.length === 0 && discovering === false && (
-                        <div className="text-xs text-[var(--hp-text-tertiary)]">{t('settings.providers.noModels')}</div>
+                        <div className="text-xs text-(--hp-text-tertiary)">{t('settings.providers.noModels')}</div>
                     )}
                 </div>
             )}
@@ -273,20 +273,20 @@ export function ProviderSettings() {
     }, [deleteTarget, deleteProvider])
 
     return (
-        <div className="border-b border-[var(--hp-border)]">
-            <div className="px-3 py-2 text-xs font-semibold text-[var(--hp-text-tertiary)] uppercase tracking-wide">
+        <div className="border-b border-(--hp-border)">
+            <div className="px-3 py-2 text-xs font-semibold text-(--hp-text-tertiary) uppercase tracking-wide">
                 {t('settings.providers.title')}
             </div>
 
             <div className="px-3 py-2">
                 {isLoading ? (
-                    <div className="text-xs text-[var(--hp-text-tertiary)]">Loading...</div>
+                    <div className="text-xs text-(--hp-text-tertiary)">Loading...</div>
                 ) : error ? (
-                    <div className="text-xs text-[var(--hp-danger)]">{error}</div>
+                    <div className="text-xs text-(--hp-danger)">{error}</div>
                 ) : providers.length === 0 ? (
-                    <div className="text-xs text-[var(--hp-text-tertiary)]">{t('settings.providers.empty')}</div>
+                    <div className="text-xs text-(--hp-text-tertiary)">{t('settings.providers.empty')}</div>
                 ) : (
-                    <div className="rounded-[var(--hp-radius-lg)] border border-[var(--hp-border)] overflow-hidden">
+                    <div className="rounded-(--hp-radius-lg) border border-(--hp-border) overflow-hidden">
                         {providers.map(p => (
                             <ProviderRow
                                 key={p.id}
@@ -304,7 +304,7 @@ export function ProviderSettings() {
             <div className="px-3 pb-3">
                 <button
                     onClick={() => setShowAdd(true)}
-                    className="min-h-[44px] rounded-[var(--hp-radius-md)] border border-dashed border-[var(--hp-border)] w-full px-3 py-2 text-xs text-[var(--hp-text-tertiary)] hover:border-[var(--hp-primary)] hover:text-[var(--hp-primary)] transition-colors"
+                    className="min-h-[44px] rounded-(--hp-radius-md) border border-dashed border-(--hp-border) w-full px-3 py-2 text-xs text-(--hp-text-tertiary) hover:border-(--hp-primary) hover:text-(--hp-primary) transition-colors"
                 >
                     + {t('settings.providers.add')}
                 </button>

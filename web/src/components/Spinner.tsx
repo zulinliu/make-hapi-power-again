@@ -25,7 +25,7 @@ export function Spinner({
 
     return (
         <svg
-            className={cn(sizeClasses[size], 'animate-spin text-[var(--hp-primary)]', className)}
+            className={cn(sizeClasses[size], 'animate-spin text-(--hp-primary)', className)}
             viewBox="0 0 24 24"
             fill="none"
             {...accessibilityProps}

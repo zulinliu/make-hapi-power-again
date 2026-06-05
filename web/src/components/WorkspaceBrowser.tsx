@@ -270,12 +270,12 @@ export function WorkspaceBrowser(props: {
 
     const machineSelector = (
         <div className="flex items-center gap-2">
-            <MachineIcon className="h-4 w-4 text-[var(--hp-text-tertiary)] shrink-0" />
+            <MachineIcon className="h-4 w-4 text-(--hp-text-tertiary) shrink-0" />
             <select
                 value={machineId ?? ''}
                 onChange={e => setMachineId(e.target.value || null)}
                 disabled={machinesLoading}
-                className="flex-1 bg-transparent text-sm text-[var(--hp-text-primary)] outline-none"
+                className="flex-1 bg-transparent text-sm text-(--hp-text-primary) outline-none"
             >
                 {machines.map(m => (
                     <option key={m.id} value={m.id}>
@@ -293,11 +293,11 @@ export function WorkspaceBrowser(props: {
     // No machines connected
     if (machines.length === 0 && !machinesLoading) {
         return (
-            <div className="flex flex-col h-full bg-[var(--hp-surface-0)]">
-                <div className="px-3 py-2 border-b border-[var(--hp-divider)]">{machineSelector}</div>
+            <div className="flex flex-col h-full bg-(--hp-surface-0)">
+                <div className="px-3 py-2 border-b border-(--hp-divider)">{machineSelector}</div>
                 <div className="flex-1 flex flex-col items-center justify-center gap-3 px-6 text-center">
-                    <FolderIcon className="h-10 w-10 text-[var(--hp-text-tertiary)] opacity-50" />
-                    <div className="text-sm text-[var(--hp-text-tertiary)]">{t('browse.noMachinesConnected')}</div>
+                    <FolderIcon className="h-10 w-10 text-(--hp-text-tertiary) opacity-50" />
+                    <div className="text-sm text-(--hp-text-tertiary)">{t('browse.noMachinesConnected')}</div>
                 </div>
             </div>
         )
@@ -307,15 +307,15 @@ export function WorkspaceBrowser(props: {
     // Browsing is opt-in, triggered by `--workspace-root`.
     if (selectedMachine && workspaceRoots.length === 0) {
         return (
-            <div className="flex flex-col h-full bg-[var(--hp-surface-0)]">
-                <div className="px-3 py-2 border-b border-[var(--hp-divider)]">{machineSelector}</div>
+            <div className="flex flex-col h-full bg-(--hp-surface-0)">
+                <div className="px-3 py-2 border-b border-(--hp-divider)">{machineSelector}</div>
                 <div className="flex-1 flex flex-col items-center justify-center gap-3 px-6 text-center">
-                    <div className="text-sm text-[var(--hp-text-primary)] font-medium">{t('browse.noRootTitle')}</div>
-                    <div className="max-w-md text-sm text-[var(--hp-text-tertiary)]">{t('browse.noRootHint')}</div>
-                    <code className="px-3 py-1.5 text-xs rounded-[var(--hp-radius-sm,6px)] bg-[var(--hp-surface-1)] text-[var(--hp-text-primary)]">
+                    <div className="text-sm text-(--hp-text-primary) font-medium">{t('browse.noRootTitle')}</div>
+                    <div className="max-w-md text-sm text-(--hp-text-tertiary)">{t('browse.noRootHint')}</div>
+                    <code className="px-3 py-1.5 text-xs rounded-[var(--hp-radius-sm,6px)] bg-(--hp-surface-1) text-(--hp-text-primary)">
                         hapi-power runner start --workspace-root /path/a --workspace-root /path/b
                     </code>
-                    <div className="text-xs text-[var(--hp-text-tertiary)] mt-2">
+                    <div className="text-xs text-(--hp-text-tertiary) mt-2">
                         {t('browse.noRootFooter')}
                     </div>
                 </div>
@@ -324,8 +324,8 @@ export function WorkspaceBrowser(props: {
     }
 
     return (
-        <div className="flex flex-col h-full bg-[var(--hp-surface-0)]">
-            <div className="px-3 py-2 border-b border-[var(--hp-divider)]">
+        <div className="flex flex-col h-full bg-(--hp-surface-0)">
+            <div className="px-3 py-2 border-b border-(--hp-divider)">
                 {machineSelector}
 
                 {workspaceRoots.length > 1 && (
@@ -333,7 +333,7 @@ export function WorkspaceBrowser(props: {
                         <select
                             value={selectedRoot ?? ''}
                             onChange={(e) => setSelectedRoot(e.target.value || null)}
-                            className="w-full bg-transparent text-xs text-[var(--hp-text-tertiary)] outline-none"
+                            className="w-full bg-transparent text-xs text-(--hp-text-tertiary) outline-none"
                         >
                             {workspaceRoots.map((root) => (
                                 <option key={root} value={root}>
@@ -350,18 +350,19 @@ export function WorkspaceBrowser(props: {
                             type="button"
                             onClick={handleGoUp}
                             disabled={atRoot}
-                            className="shrink-0 p-0.5 rounded-[var(--hp-radius-xs,4px)] hover:bg-[var(--hp-surface-1)] text-[var(--hp-text-tertiary)] hover:text-[var(--hp-text-primary)] transition-colors disabled:opacity-30"
+                            className="shrink-0 p-0.5 rounded-[var(--hp-radius-xs,4px)] hover:bg-(--hp-surface-1) text-(--hp-text-tertiary) hover:text-(--hp-text-primary) transition-colors disabled:opacity-30"
                             title={t('browse.goUp')}
+                            aria-label={t('browse.goUp')}
                         >
                             <ChevronLeftIcon className="h-4 w-4" />
                         </button>
                         {breadcrumbs.map((crumb, i) => (
                             <span key={crumb.path} className="flex items-center gap-1 shrink-0">
-                                {i > 0 && <span className="text-[var(--hp-text-tertiary)]">/</span>}
+                                {i > 0 && <span className="text-(--hp-text-tertiary)">/</span>}
                                 <button
                                     type="button"
                                     onClick={() => void loadDirectory(crumb.path)}
-                                    className={`hover:underline transition-colors ${i === breadcrumbs.length - 1 ? 'text-[var(--hp-text-primary)] font-medium' : 'text-[var(--hp-text-tertiary)] hover:text-[var(--hp-text-secondary)]'}`}
+                                    className={`hover:underline transition-colors ${i === breadcrumbs.length - 1 ? 'text-(--hp-text-primary) font-medium' : 'text-(--hp-text-tertiary) hover:text-(--hp-text-secondary)'}`}
                                 >
                                     {crumb.label}
                                 </button>
@@ -371,7 +372,7 @@ export function WorkspaceBrowser(props: {
                             type="button"
                             onClick={handleRefresh}
                             disabled={isLoading}
-                            className="ml-auto shrink-0 p-0.5 rounded-[var(--hp-radius-xs,4px)] hover:bg-[var(--hp-surface-1)] text-[var(--hp-text-tertiary)] hover:text-[var(--hp-text-primary)] transition-colors"
+                            className="ml-auto shrink-0 p-0.5 rounded-[var(--hp-radius-xs,4px)] hover:bg-(--hp-surface-1) text-(--hp-text-tertiary) hover:text-(--hp-text-primary) transition-colors"
                             title={t('browse.refresh')}
                         >
                             <RefreshIcon className={`h-3.5 w-3.5 ${isLoading ? 'animate-spin' : ''}`} />
@@ -381,16 +382,16 @@ export function WorkspaceBrowser(props: {
             </div>
 
             {error && (
-                <div className="px-3 py-2 text-sm text-[var(--hp-danger)]">{error}</div>
+                <div className="px-3 py-2 text-sm text-(--hp-danger)">{error}</div>
             )}
 
             <div className="flex-1 app-scroll-y">
                 {isLoading && entries.length === 0 ? (
-                    <div className="flex items-center justify-center py-8 text-sm text-[var(--hp-text-tertiary)]">{t('loading')}</div>
+                    <div className="flex items-center justify-center py-8 text-sm text-(--hp-text-tertiary)">{t('loading')}</div>
                 ) : directories.length === 0 ? (
                     <div className="flex flex-col items-center justify-center gap-2 py-8">
-                        <FolderIcon className="h-8 w-8 text-[var(--hp-text-tertiary)] opacity-50" />
-                        <div className="text-sm text-[var(--hp-text-tertiary)]">{t('browse.empty')}</div>
+                        <FolderIcon className="h-8 w-8 text-(--hp-text-tertiary) opacity-50" />
+                        <div className="text-sm text-(--hp-text-tertiary)">{t('browse.empty')}</div>
                     </div>
                 ) : (
                     <div className="flex flex-col px-2 py-1">
@@ -399,16 +400,16 @@ export function WorkspaceBrowser(props: {
                                 key={entry.name}
                                 type="button"
                                 onClick={() => handleEntryClick(entry)}
-                                className="flex items-center gap-2 px-2 py-2 rounded-[var(--hp-radius-md,8px)] text-left hover:bg-[var(--hp-surface-1)] transition-colors w-full"
+                                className="flex items-center gap-2 px-2 py-2 rounded-[var(--hp-radius-md,8px)] text-left hover:bg-(--hp-surface-1) transition-colors w-full"
                             >
                                 {entry.isGitRepo ? (
-                                    <GitIcon className="h-4 w-4 text-[var(--hp-warning)] shrink-0" />
+                                    <GitIcon className="h-4 w-4 text-(--hp-warning) shrink-0" />
                                 ) : (
-                                    <FolderIcon className="h-4 w-4 text-[var(--hp-text-tertiary)] shrink-0" />
+                                    <FolderIcon className="h-4 w-4 text-(--hp-text-tertiary) shrink-0" />
                                 )}
-                                <span className="flex-1 text-sm text-[var(--hp-text-primary)] truncate">{entry.name}</span>
+                                <span className="flex-1 text-sm text-(--hp-text-primary) truncate">{entry.name}</span>
                                 {entry.isGitRepo && (
-                                    <span className="text-[10px] px-1.5 py-0.5 rounded-[var(--hp-radius-xs,4px)] bg-[var(--hp-warning-subtle)] text-[var(--hp-warning)] font-medium shrink-0">git</span>
+                                    <span className="text-[10px] px-1.5 py-0.5 rounded-[var(--hp-radius-xs,4px)] bg-(--hp-warning-subtle) text-(--hp-warning) font-medium shrink-0">git</span>
                                 )}
                             </button>
                         ))}
@@ -417,16 +418,16 @@ export function WorkspaceBrowser(props: {
             </div>
 
             {currentPath && (
-                <div className="px-3 py-2 border-t border-[var(--hp-divider)]">
+                <div className="px-3 py-2 border-t border-(--hp-divider)">
                     <div className="flex items-center gap-2">
-                        <div className="flex-1 text-xs text-[var(--hp-text-tertiary)] truncate" title={currentPath}>
+                        <div className="flex-1 text-xs text-(--hp-text-tertiary) truncate" title={currentPath}>
                             {currentPath}
                         </div>
                         <button
                             type="button"
                             onClick={handleStartSession}
                             disabled={!machineId || !currentPath}
-                            className="px-4 py-1.5 text-sm rounded-[var(--hp-radius-sm,6px)] bg-[var(--hp-primary)] text-[var(--hp-primary-text)] font-medium disabled:opacity-50 transition-colors hover:opacity-90"
+                            className="px-4 py-1.5 text-sm rounded-[var(--hp-radius-sm,6px)] bg-(--hp-primary) text-(--hp-primary-text) font-medium disabled:opacity-50 transition-colors hover:opacity-90"
                         >
                             {t('browse.startSession')}
                         </button>
