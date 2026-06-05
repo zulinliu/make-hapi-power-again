@@ -25,10 +25,10 @@ function ConnectionIndicator(props: { status: 'idle' | 'connecting' | 'connected
     const isConnecting = props.status === 'connecting'
     const label = isConnected ? t('terminal.status.connected') : isConnecting ? t('terminal.status.connecting') : t('terminal.status.offline')
     const colorClass = isConnected
-        ? 'bg-[--hp-success]'
+        ? 'bg-(--hp-success)'
         : isConnecting
-          ? 'bg-[--hp-warning] animate-pulse'
-          : 'bg-[--hp-text-tertiary]'
+          ? 'bg-(--hp-warning) animate-pulse'
+          : 'bg-(--hp-text-tertiary)'
 
     return (
         <div className="flex items-center" aria-label={label} title={label} role="status">
@@ -174,8 +174,8 @@ function QuickKeyButton(props: {
             onPointerDown={handlePointerDown}
             disabled={disabled}
             aria-pressed={modifier ? isActive : undefined}
-            className={`flex-1 border-l border-[--hp-border] px-2 py-1.5 text-xs font-medium text-[--hp-text-primary] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--hp-primary] focus-visible:ring-inset disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent first:border-l-0 active:bg-[--hp-surface-1] sm:px-3 sm:text-sm ${
-                isActive ? 'bg-[--hp-primary] text-[--hp-surface-0]' : 'hover:bg-[--hp-surface-1]'
+            className={`flex-1 border-l border-(--hp-border) px-2 py-1.5 text-xs font-medium text-(--hp-text-primary) transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--hp-primary) focus-visible:ring-inset disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent first:border-l-0 active:bg-(--hp-surface-1) sm:px-3 sm:text-sm ${
+                isActive ? 'bg-(--hp-primary) text-(--hp-surface-0)' : 'hover:bg-(--hp-surface-1)'
             }`}
             aria-label={input.description}
             title={popupDescription ? `${input.description} (long press: ${popupDescription})` : input.description}
@@ -415,7 +415,7 @@ export default function TerminalPage() {
         <div className="flex h-full min-h-0 flex-col">
             {session.active ? null : (
                 <div className="px-3 pt-3">
-                    <div className="mx-auto w-full max-w-content rounded-[--hp-radius-sm] bg-[--hp-surface-1] p-3 text-sm text-[--hp-text-tertiary]">
+                    <div className="mx-auto w-full max-w-content rounded-(--hp-radius-sm) bg-(--hp-surface-1) p-3 text-sm text-(--hp-text-tertiary)">
                         {t('terminal.sessionInactive')}
                     </div>
                 </div>
@@ -423,7 +423,7 @@ export default function TerminalPage() {
 
             {errorMessage ? (
                 <div className="mx-auto w-full max-w-content px-3 pt-3">
-                    <div className="rounded-[--hp-radius-sm] border border-[--hp-danger] bg-[--hp-danger-subtle] p-3 text-xs text-[--hp-danger]">
+                    <div className="rounded-(--hp-radius-sm) border border-(--hp-danger) bg-(--hp-danger-subtle) p-3 text-xs text-(--hp-danger)">
                         {errorMessage}
                     </div>
                 </div>
@@ -431,7 +431,7 @@ export default function TerminalPage() {
 
             {exitInfo ? (
                 <div className="mx-auto w-full max-w-content px-3 pt-3">
-                    <div className="rounded-[--hp-radius-sm] border border-[--hp-border] bg-[--hp-surface-1] p-3 text-xs text-[--hp-text-tertiary]">
+                    <div className="rounded-(--hp-radius-sm) border border-(--hp-border) bg-(--hp-surface-1) p-3 text-xs text-(--hp-text-tertiary)">
                         {exitInfo.code !== null
                             ? t('terminal.exitedWithCode', { code: exitInfo.code })
                             : exitInfo.signal
@@ -441,7 +441,7 @@ export default function TerminalPage() {
                 </div>
             ) : null}
 
-            <div className="flex-1 min-h-0 overflow-hidden bg-[--hp-surface-0] relative">
+            <div className="flex-1 min-h-0 overflow-hidden bg-(--hp-surface-0) relative">
                 <div className="absolute top-3 right-3 z-10">
                     <ConnectionIndicator status={status} />
                 </div>
@@ -449,14 +449,14 @@ export default function TerminalPage() {
                     {terminalSupported ? (
                         <TerminalView onMount={handleTerminalMount} onResize={handleResize} className="h-full w-full" />
                     ) : (
-                        <div className="flex h-full items-center justify-center rounded-[--hp-radius-sm] border border-[--hp-border] bg-[--hp-surface-1] p-4 text-sm text-[--hp-text-tertiary]">
+                        <div className="flex h-full items-center justify-center rounded-(--hp-radius-sm) border border-(--hp-border) bg-(--hp-surface-1) p-4 text-sm text-(--hp-text-tertiary)">
                             {t('terminal.unsupportedWindows')}
                         </div>
                     )}
                 </div>
             </div>
 
-            <div className="bg-[--hp-surface-0] border-t border-[--hp-border] pb-[env(safe-area-inset-bottom)]">
+            <div className="bg-(--hp-surface-0) border-t border-(--hp-border) pb-[env(safe-area-inset-bottom)]">
                 <div className="mx-auto w-full max-w-content px-3">
                     <div className="flex flex-col gap-2 py-2">
                         <button
@@ -465,14 +465,14 @@ export default function TerminalPage() {
                                 void handlePasteAction()
                             }}
                             disabled={quickInputDisabled}
-                            className="w-full rounded-[--hp-radius-sm] border border-[--hp-border] bg-[--hp-surface-1] px-3 py-2 text-sm font-medium text-[--hp-text-primary] transition-colors hover:bg-[--hp-surface-1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--hp-primary] disabled:cursor-not-allowed disabled:opacity-50"
+                            className="w-full rounded-(--hp-radius-sm) border border-(--hp-border) bg-(--hp-surface-1) px-3 py-2 text-sm font-medium text-(--hp-text-primary) transition-colors hover:bg-(--hp-surface-1) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--hp-primary) disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             {t('button.paste')}
                         </button>
                         {QUICK_INPUT_ROWS.map((row, rowIndex) => (
                             <div
                                 key={`terminal-quick-row-${rowIndex}`}
-                                className="flex items-stretch overflow-hidden rounded-[--hp-radius-sm] bg-[--hp-surface-1]"
+                                className="flex items-stretch overflow-hidden rounded-(--hp-radius-sm) bg-(--hp-surface-1)"
                             >
                                 {row.map((input) => {
                                     const modifier = input.modifier
@@ -516,7 +516,7 @@ export default function TerminalPage() {
                         value={manualPasteText}
                         onChange={(event) => setManualPasteText(event.target.value)}
                         placeholder={t('terminal.paste.placeholder')}
-                        className="mt-2 min-h-32 w-full resize-y rounded-[--hp-radius-sm] border border-[--hp-border] bg-[--hp-surface-0] p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--hp-primary]"
+                        className="mt-2 min-h-32 w-full resize-y rounded-(--hp-radius-sm) border border-(--hp-border) bg-(--hp-surface-0) p-2 text-sm focus:outline-none focus:ring-2 focus:ring-(--hp-primary)"
                         autoCapitalize="none"
                         autoCorrect="off"
                     />

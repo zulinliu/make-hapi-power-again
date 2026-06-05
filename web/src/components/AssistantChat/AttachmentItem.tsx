@@ -41,12 +41,12 @@ export function AttachmentItem() {
         <AttachmentPrimitive.Root className="flex items-center gap-2 rounded-lg bg-[var(--app-subtle-bg)] px-3 py-2 text-base text-[var(--app-fg)]">
             {isUploading ? <Spinner size="sm" label={null} className="text-[var(--app-hint)]" /> : null}
             {isError ? (
-                <span className="text-[--hp-danger]">
+                <span className="text-(--hp-danger)">
                     <ErrorIcon />
                 </span>
             ) : null}
-            <span className={`max-w-[150px] truncate ${isError ? 'text-[--hp-danger] line-through' : ''}`}>{name}</span>
-            {isError ? <span className="text-xs text-[--hp-danger] whitespace-nowrap">{t('file.upload.error')}</span> : null}
+            <span className={`max-w-[150px] truncate ${isError ? 'text-(--hp-danger) line-through' : ''}`}>{name}</span>
+            {isError ? <span className="text-xs text-(--hp-danger) whitespace-nowrap">{t('file.upload.error')}</span> : null}
             <AttachmentPrimitive.Remove
                 className="ml-auto flex h-5 w-5 items-center justify-center rounded text-[var(--app-hint)] transition-colors hover:text-[var(--app-fg)]"
                 aria-label={t('file.upload.remove')}

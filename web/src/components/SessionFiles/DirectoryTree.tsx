@@ -43,8 +43,8 @@ function DirectorySkeleton(props: { depth: number; rows?: number }) {
                 <div key={`dir-skel-${props.depth}-${index}`}
                     className="flex items-center gap-3 px-3 py-2"
                     style={{ paddingLeft: indent }}>
-                    <div className="h-5 w-5 rounded bg-[--hp-surface-1]" />
-                    <div className="h-3 w-40 rounded bg-[--hp-surface-1]" />
+                    <div className="h-5 w-5 rounded bg-(--hp-surface-1)" />
+                    <div className="h-3 w-40 rounded bg-(--hp-surface-1)" />
                 </div>
             ))}
         </div>
@@ -54,7 +54,7 @@ function DirectorySkeleton(props: { depth: number; rows?: number }) {
 function DirectoryErrorRow(props: { depth: number; message: string }) {
     const indent = 12 + props.depth * 14
     return (
-        <div className="px-3 py-2 text-xs text-[--hp-text-secondary] bg-[--hp-warning-subtle]"
+        <div className="px-3 py-2 text-xs text-(--hp-text-secondary) bg-(--hp-warning-subtle)"
             style={{ paddingLeft: indent }}>
             {props.message}
         </div>
@@ -75,19 +75,19 @@ function FileNode({ filePath, fileName, depth, onOpenFile, onContextMenu }: File
 
     return (
         <div
-            className="flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-[--hp-surface-1] transition-colors cursor-pointer"
+            className="flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-(--hp-surface-1) transition-colors cursor-pointer"
             style={{ paddingLeft: indent, minHeight: 44 }}
             onClick={() => onOpenFile(filePath)}
         >
             <span className="h-4 w-4 shrink-0" />
             <FileIcon fileName={fileName} size={22} />
             <div className="min-w-0 flex-1">
-                <div className="truncate font-medium text-[--hp-text-primary]">{fileName}</div>
+                <div className="truncate font-medium text-(--hp-text-primary)">{fileName}</div>
             </div>
             <button
                 ref={moreRef}
                 type="button"
-                className="shrink-0 flex items-center justify-center w-8 h-8 rounded-full text-[--hp-text-tertiary] hover:bg-[--hp-surface-1] hover:text-[--hp-text-primary] transition-colors"
+                className="shrink-0 flex items-center justify-center w-8 h-8 rounded-full text-(--hp-text-tertiary) hover:bg-(--hp-surface-1) hover:text-(--hp-text-primary) transition-colors"
                 onClick={(e) => {
                     e.stopPropagation()
                     const rect = moreRef.current?.getBoundingClientRect()
@@ -129,19 +129,19 @@ function DirectoryNode(props: {
     return (
         <div>
             <div
-                className="flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-[--hp-surface-1] transition-colors cursor-pointer"
+                className="flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-(--hp-surface-1) transition-colors cursor-pointer"
                 style={{ paddingLeft: indent, minHeight: 44 }}
                 onClick={() => props.onToggle(props.path)}
             >
-                <ChevronIcon collapsed={!isExpanded} className="text-[--hp-text-tertiary] shrink-0" />
-                <FolderIcon className="text-[--hp-primary] shrink-0" />
+                <ChevronIcon collapsed={!isExpanded} className="text-(--hp-text-tertiary) shrink-0" />
+                <FolderIcon className="text-(--hp-primary) shrink-0" />
                 <div className="min-w-0 flex-1">
-                    <div className="truncate font-medium text-[--hp-text-primary]">{props.label}</div>
+                    <div className="truncate font-medium text-(--hp-text-primary)">{props.label}</div>
                 </div>
                 <button
                     ref={moreRef}
                     type="button"
-                    className="shrink-0 flex items-center justify-center w-8 h-8 rounded-full text-[--hp-text-tertiary] hover:bg-[--hp-surface-1] hover:text-[--hp-text-primary] transition-colors"
+                    className="shrink-0 flex items-center justify-center w-8 h-8 rounded-full text-(--hp-text-tertiary) hover:bg-(--hp-surface-1) hover:text-(--hp-text-primary) transition-colors"
                     onClick={(e) => {
                         e.stopPropagation()
                         const rect = moreRef.current?.getBoundingClientRect()
@@ -194,7 +194,7 @@ function DirectoryNode(props: {
                         })}
 
                         {directories.length === 0 && files.length === 0 ? (
-                            <div className="px-3 py-2 text-sm text-[--hp-text-tertiary]"
+                            <div className="px-3 py-2 text-sm text-(--hp-text-tertiary)"
                                 style={{ paddingLeft: childIndent }}>
                                 {t('files.directories.empty')}
                             </div>
@@ -230,7 +230,7 @@ export function DirectoryTree(props: {
     const handleContextMenu = props.onContextMenu ?? (() => {})
 
     return (
-        <div className="border-t border-[--hp-divider]">
+        <div className="border-t border-(--hp-divider)">
             <DirectoryNode
                 api={props.api}
                 sessionId={props.sessionId}

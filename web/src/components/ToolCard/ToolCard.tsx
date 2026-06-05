@@ -59,7 +59,7 @@ function ElapsedView(props: { from: number; active: boolean }) {
     if (!Number.isFinite(elapsed)) return null
 
     return (
-        <span className="font-mono text-xs text-[--hp-text-tertiary]">
+        <span className="font-mono text-xs text-(--hp-text-tertiary)">
             {elapsed.toFixed(1)}s
         </span>
     )
@@ -94,7 +94,7 @@ function renderTaskSummary(
             <div className="flex flex-col gap-1">
                 {visible.map((child) => (
                     <div key={child.id} className="flex items-center gap-2">
-                        <div className="min-w-0 flex-1 font-mono text-xs text-[--hp-text-tertiary]">
+                        <div className="min-w-0 flex-1 font-mono text-xs text-(--hp-text-tertiary)">
                             <span className="mr-2 inline-block w-4 text-center align-middle">
                                 <TaskStateIcon state={child.tool.state} />
                             </span>
@@ -105,7 +105,7 @@ function renderTaskSummary(
                     </div>
                 ))}
                 {remaining > 0 ? (
-                    <div className="text-xs text-[--hp-text-tertiary] italic">
+                    <div className="text-xs text-(--hp-text-tertiary) italic">
                         (+{remaining} more)
                     </div>
                 ) : null}
@@ -173,10 +173,10 @@ export function ToolStatusIcon(props: { state: ToolCallBlock['tool']['state'] })
 }
 
 export function toolStatusColorClass(state: ToolCallBlock['tool']['state']): string {
-    if (state === 'completed') return 'text-[--hp-success]'
-    if (state === 'error') return 'text-[--hp-danger]'
-    if (state === 'pending') return 'text-[--hp-warning]'
-    return 'text-[--hp-text-tertiary]'
+    if (state === 'completed') return 'text-(--hp-success)'
+    if (state === 'error') return 'text-(--hp-danger)'
+    if (state === 'pending') return 'text-(--hp-warning)'
+    return 'text-(--hp-text-tertiary)'
 }
 
 function DetailsIcon() {
@@ -226,7 +226,7 @@ export function ToolDetailDialogContent(props: {
     return (
         <div className="mt-3 flex max-h-[75vh] flex-col gap-4 overflow-auto">
             <div>
-                <div className="mb-1 text-xs font-medium text-[--hp-text-tertiary]">
+                <div className="mb-1 text-xs font-medium text-(--hp-text-tertiary)">
                     {isQuestionToolWithAnswers ? t('tool.questionsAnswers') : t('tool.input')}
                 </div>
                 {FullToolView ? (
@@ -238,7 +238,7 @@ export function ToolDetailDialogContent(props: {
             <TraceSection block={props.block} metadata={props.metadata} />
             {!isQuestionToolWithAnswers ? (
                 <div>
-                    <div className="mb-1 text-xs font-medium text-[--hp-text-tertiary]">{t('tool.result')}</div>
+                    <div className="mb-1 text-xs font-medium text-(--hp-text-tertiary)">{t('tool.result')}</div>
                     <ResultToolView block={props.block} metadata={props.metadata} surface="dialog" />
                 </div>
             ) : null}
@@ -304,11 +304,11 @@ function ToolCardInner(props: ToolCardProps) {
         <div className="flex items-center justify-between gap-3">
             <div className="min-w-0 flex flex-1 flex-col gap-1">
                 <div className="min-w-0 flex items-center gap-2">
-                    <div className="shrink-0 flex h-3.5 w-3.5 items-center justify-center text-[--hp-primary] leading-none">
+                    <div className="shrink-0 flex h-3.5 w-3.5 items-center justify-center text-(--hp-primary) leading-none">
                         {presentation.icon}
                     </div>
                     <CardTitle className={cn(
-                        'min-w-0 text-sm font-medium leading-tight text-[--hp-text-primary]',
+                        'min-w-0 text-sm font-medium leading-tight text-(--hp-text-primary)',
                         isCodexAgentCard ? 'truncate whitespace-nowrap' : 'break-words'
                     )}>
                         {toolTitle}
@@ -317,7 +317,7 @@ function ToolCardInner(props: ToolCardProps) {
 
                 {subtitle ? (
                     <CardDescription className={cn(
-                        'font-mono text-xs text-[--hp-text-secondary]',
+                        'font-mono text-xs text-(--hp-text-secondary)',
                         isCodexAgentCard || useCompactTerminalCard ? 'truncate whitespace-nowrap' : 'break-all'
                     )}>
                         {truncate(subtitle, 160)}
@@ -326,14 +326,14 @@ function ToolCardInner(props: ToolCardProps) {
             </div>
 
             <div className={cn(
-                'flex shrink-0 items-center gap-2 self-center text-[--hp-text-tertiary]',
+                'flex shrink-0 items-center gap-2 self-center text-(--hp-text-tertiary)',
                 subtitle ? '-translate-y-0.5' : null
             )}>
                 <ElapsedView from={runningFrom} active={props.block.tool.state === 'running'} />
                 <span className={stateColor}>
                     <ToolStatusIcon state={props.block.tool.state} />
                 </span>
-                <span className="text-[--hp-text-tertiary]">
+                <span className="text-(--hp-text-tertiary)">
                     <DetailsIcon />
                 </span>
             </div>
@@ -342,9 +342,9 @@ function ToolCardInner(props: ToolCardProps) {
 
     return (
         <Card className={cn(
-            'overflow-hidden rounded-[--hp-radius-md] bg-[--hp-surface-1] shadow-none hover:bg-[--hp-surface-2] transition-colors',
-            props.block.tool.state === 'running' && 'border-t-2 border-t-[--hp-primary]',
-            props.block.tool.state === 'error' && 'bg-[--hp-danger-subtle]'
+            'overflow-hidden rounded-(--hp-radius-md) bg-(--hp-surface-1) shadow-none hover:bg-(--hp-surface-2) transition-colors',
+            props.block.tool.state === 'running' && 'border-t-2 border-t-(--hp-primary)',
+            props.block.tool.state === 'error' && 'bg-(--hp-danger-subtle)'
         )}>
             <CardHeader className={cn('space-y-0 p-3', subtitle ? 'pb-2' : null)}>
                 <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
@@ -352,7 +352,7 @@ function ToolCardInner(props: ToolCardProps) {
                         <button
                             type="button"
                             className={cn(
-                                'w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[--hp-primary]',
+                                'w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-(--hp-primary)',
                                 suppressFocusRing && 'focus-visible:ring-0'
                             )}
                             onPointerDown={onTriggerPointerDown}
@@ -382,7 +382,7 @@ function ToolCardInner(props: ToolCardProps) {
                     {showInline ? (
                         CompactToolView ? (
                             <div
-                                className="mt-3 cursor-pointer rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[--hp-primary]"
+                                className="mt-3 cursor-pointer rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-(--hp-primary)"
                                 role="button"
                                 tabIndex={0}
                                 onClick={openDetailsFromInlinePreview}
@@ -393,23 +393,23 @@ function ToolCardInner(props: ToolCardProps) {
                         ) : (
                             <div className="mt-3 flex flex-col gap-3">
                                 <div
-                                    className="cursor-pointer rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[--hp-primary]"
+                                    className="cursor-pointer rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-(--hp-primary)"
                                     role="button"
                                     tabIndex={0}
                                     onClick={openDetailsFromInlinePreview}
                                     onKeyDown={openDetailsFromInlinePreviewKeyDown}
                                 >
-                                    <div className="mb-1 text-xs font-medium text-[--hp-text-tertiary]">{t('tool.input')}</div>
+                                    <div className="mb-1 text-xs font-medium text-(--hp-text-tertiary)">{t('tool.input')}</div>
                                     {renderToolInput(props.block, 'inline')}
                                 </div>
                                 <div
-                                    className="cursor-pointer rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[--hp-primary]"
+                                    className="cursor-pointer rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-(--hp-primary)"
                                     role="button"
                                     tabIndex={0}
                                     onClick={openDetailsFromInlinePreview}
                                     onKeyDown={openDetailsFromInlinePreviewKeyDown}
                                 >
-                                    <div className="mb-1 text-xs font-medium text-[--hp-text-tertiary]">{t('tool.result')}</div>
+                                    <div className="mb-1 text-xs font-medium text-(--hp-text-tertiary)">{t('tool.result')}</div>
                                     <ResultToolView block={props.block} metadata={props.metadata} surface="inline" />
                                 </div>
                             </div>

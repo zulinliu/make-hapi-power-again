@@ -140,10 +140,10 @@ function LineChanges(props: { added: number; removed: number }) {
     return (
         <span className="flex items-center gap-1 text-[11px] font-mono">
             {props.added ? (
-                <span className="text-[--hp-success]">+{props.added}</span>
+                <span className="text-(--hp-success)">+{props.added}</span>
             ) : null}
             {props.removed ? (
-                <span className="text-[--hp-danger]">-{props.removed}</span>
+                <span className="text-(--hp-danger)">-{props.removed}</span>
             ) : null}
         </span>
     )
@@ -161,12 +161,12 @@ function GitFileRow(props: {
         <button
             type="button"
             onClick={props.onOpen}
-            className={`flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-[--hp-surface-1] transition-colors ${props.showDivider ? 'border-b border-[--hp-divider]' : ''}`}
+            className={`flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-(--hp-surface-1) transition-colors ${props.showDivider ? 'border-b border-(--hp-divider)' : ''}`}
         >
             <FileIcon fileName={props.file.fileName} size={22} />
             <div className="min-w-0 flex-1">
-                <div className="truncate font-medium text-[--hp-text-primary]">{props.file.fileName}</div>
-                <div className="truncate text-xs text-[--hp-text-tertiary]">{subtitle}</div>
+                <div className="truncate font-medium text-(--hp-text-primary)">{props.file.fileName}</div>
+                <div className="truncate text-xs text-(--hp-text-tertiary)">{subtitle}</div>
             </div>
             <div className="flex items-center gap-2">
                 <LineChanges added={props.file.linesAdded} removed={props.file.linesRemoved} />
@@ -185,18 +185,18 @@ function SearchResultRow(props: {
     const subtitle = getProjectRootLabel(props.file.filePath, t)
     const icon = props.file.fileType === 'file'
         ? <FileIcon fileName={props.file.fileName} size={22} />
-        : <FolderIcon className="text-[--hp-primary]" />
+        : <FolderIcon className="text-(--hp-primary)" />
 
     return (
         <button
             type="button"
             onClick={props.onOpen}
-            className={`flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-[--hp-surface-1] transition-colors ${props.showDivider ? 'border-b border-[--hp-divider]' : ''}`}
+            className={`flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-(--hp-surface-1) transition-colors ${props.showDivider ? 'border-b border-(--hp-divider)' : ''}`}
         >
             {icon}
             <div className="min-w-0 flex-1">
-                <div className="truncate font-medium text-[--hp-text-primary]">{props.file.fileName}</div>
-                <div className="truncate text-xs text-[--hp-text-tertiary]">{subtitle}</div>
+                <div className="truncate font-medium text-(--hp-text-primary)">{props.file.fileName}</div>
+                <div className="truncate text-xs text-(--hp-text-tertiary)">{subtitle}</div>
             </div>
         </button>
     )
@@ -212,10 +212,10 @@ function FileListSkeleton(props: { label: string; rows?: number }) {
             <span className="sr-only">{props.label}</span>
             {Array.from({ length: rows }).map((_, index) => (
                 <div key={`skeleton-row-${index}`} className="flex items-center gap-3">
-                    <div className="h-6 w-6 rounded bg-[--hp-surface-1]" />
+                    <div className="h-6 w-6 rounded bg-(--hp-surface-1)" />
                     <div className="flex-1 space-y-2">
-                        <div className={`h-3 ${titleWidths[index % titleWidths.length]} rounded bg-[--hp-surface-1]`} />
-                        <div className={`h-2 ${subtitleWidths[index % subtitleWidths.length]} rounded bg-[--hp-surface-1]`} />
+                        <div className={`h-3 ${titleWidths[index % titleWidths.length]} rounded bg-(--hp-surface-1)`} />
+                        <div className={`h-2 ${subtitleWidths[index % subtitleWidths.length]} rounded bg-(--hp-surface-1)`} />
                     </div>
                 </div>
             ))}
@@ -476,14 +476,14 @@ export default function FilesPage() {
             toolbar={
                 <div className="flex items-center gap-2">
                     <div className="relative flex-1">
-                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[--hp-text-tertiary]">
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-(--hp-text-tertiary)">
                             <SearchIcon />
                         </div>
                         <input
                             value={searchQuery}
                             onChange={(event) => setSearchQuery(event.target.value)}
                             placeholder={t('files.page.searchPlaceholder')}
-                            className="w-full rounded-[--hp-radius-sm,6px] border border-[--hp-border] bg-[--hp-canvas] py-2 pl-9 pr-3 text-sm text-[--hp-text-primary] placeholder:text-[--hp-text-tertiary] focus:outline-none focus:ring-2 focus:ring-[--hp-primary]"
+                            className="w-full rounded-[var(--hp-radius-sm,6px)] border border-(--hp-border) bg-(--hp-canvas) py-2 pl-9 pr-3 text-sm text-(--hp-text-primary) placeholder:text-(--hp-text-tertiary) focus:outline-none focus:ring-2 focus:ring-(--hp-primary)"
                             autoCapitalize="none"
                             autoCorrect="off"
                         />
@@ -491,7 +491,7 @@ export default function FilesPage() {
                     <button
                         type="button"
                         onClick={handleRefresh}
-                        className="flex h-8 w-8 items-center justify-center rounded-full text-[--hp-text-secondary] transition-colors hover:bg-[--hp-surface-1] hover:text-[--hp-text-primary]"
+                        className="flex h-8 w-8 items-center justify-center rounded-full text-(--hp-text-secondary) transition-colors hover:bg-(--hp-surface-1) hover:text-(--hp-text-primary)"
                         title={t('files.page.refresh')}
                     >
                         <RefreshIcon />
@@ -500,12 +500,12 @@ export default function FilesPage() {
             }
         >
             {!gitLoading && gitStatus && !searchQuery && activeTab === 'changes' ? (
-                <div className="px-3 py-2 border-b border-[--hp-divider]">
+                <div className="px-3 py-2 border-b border-(--hp-divider)">
                     <div className="flex items-center gap-2 text-sm">
-                        <GitBranchIcon className="text-[--hp-text-tertiary]" />
-                        <span className="font-semibold text-[--hp-text-primary]">{branchLabel}</span>
+                        <GitBranchIcon className="text-(--hp-text-tertiary)" />
+                        <span className="font-semibold text-(--hp-text-primary)">{branchLabel}</span>
                     </div>
-                    <div className="text-xs text-[--hp-text-tertiary]">
+                    <div className="text-xs text-(--hp-text-tertiary)">
                         {t('files.branch.summary', {
                             staged: gitStatus.totalStaged,
                             unstaged: gitStatus.totalUnstaged,
@@ -515,7 +515,7 @@ export default function FilesPage() {
             ) : null}
 
             {showGitErrorBanner && activeTab === 'changes' ? (
-                <div className="border-b border-[--hp-divider] bg-[--hp-warning-subtle] px-3 py-2 text-xs text-[--hp-text-secondary]">
+                <div className="border-b border-(--hp-divider) bg-(--hp-warning-subtle) px-3 py-2 text-xs text-(--hp-text-secondary)">
                     {gitErrorMessage}
                 </div>
             ) : null}
@@ -523,13 +523,13 @@ export default function FilesPage() {
                 searchResults.isLoading ? (
                     <FileListSkeleton label={t('loading.files')} />
                 ) : searchResults.error ? (
-                    <div className="p-6 text-sm text-[--hp-text-tertiary]">{searchErrorMessage}</div>
+                    <div className="p-6 text-sm text-(--hp-text-tertiary)">{searchErrorMessage}</div>
                 ) : searchResults.files.length === 0 ? (
-                    <div className="p-6 text-sm text-[--hp-text-tertiary]">
+                    <div className="p-6 text-sm text-(--hp-text-tertiary)">
                         {t('files.search.empty')}
                     </div>
                 ) : (
-                    <div className="border-t border-[--hp-divider]">
+                    <div className="border-t border-(--hp-divider)">
                         {searchResults.files.map((file, index) => (
                             <SearchResultRow
                                 key={`${file.fullPath}-${index}`}
@@ -562,7 +562,7 @@ export default function FilesPage() {
                 <div>
                     {gitStatus?.stagedFiles.length ? (
                         <div>
-                            <div className="border-b border-[--hp-divider] px-3 py-2 text-xs font-semibold text-[--hp-success]">
+                            <div className="border-b border-(--hp-divider) px-3 py-2 text-xs font-semibold text-(--hp-success)">
                                 {t('files.changes.section.staged', { n: gitStatus.stagedFiles.length })}
                             </div>
                             {gitStatus.stagedFiles.map((file, index) => (
@@ -578,7 +578,7 @@ export default function FilesPage() {
 
                     {gitStatus?.unstagedFiles.length ? (
                         <div>
-                            <div className="border-b border-[--hp-divider] px-3 py-2 text-xs font-semibold text-[--hp-warning]">
+                            <div className="border-b border-(--hp-divider) px-3 py-2 text-xs font-semibold text-(--hp-warning)">
                                 {t('files.changes.section.unstaged', { n: gitStatus.unstagedFiles.length })}
                             </div>
                             {gitStatus.unstagedFiles.map((file, index) => (
@@ -593,13 +593,13 @@ export default function FilesPage() {
                     ) : null}
 
                     {!gitStatus ? (
-                        <div className="p-6 text-sm text-[--hp-text-tertiary]">
+                        <div className="p-6 text-sm text-(--hp-text-tertiary)">
                             {t('files.changes.empty.unavailable')}
                         </div>
                     ) : null}
 
                     {gitStatus && gitStatus.stagedFiles.length === 0 && gitStatus.unstagedFiles.length === 0 ? (
-                        <div className="p-6 text-sm text-[--hp-text-tertiary]">
+                        <div className="p-6 text-sm text-(--hp-text-tertiary)">
                             {t('files.changes.empty.none')}
                         </div>
                     ) : null}

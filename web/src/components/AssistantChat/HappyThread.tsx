@@ -702,7 +702,7 @@ export function HappyThread(props: {
                             ) : (
                                 <>
                                     {props.messagesWarning ? (
-                                        <div className="mb-3 rounded-md bg-[--hp-warning-subtle] p-2 text-xs">
+                                        <div className="mb-3 rounded-md bg-(--hp-warning-subtle) p-2 text-xs">
                                             {props.messagesWarning}
                                         </div>
                                     ) : null}
@@ -737,7 +737,7 @@ export function HappyThread(props: {
                                     ) : null}
 
                                     {import.meta.env.DEV && props.normalizedMessagesCount === 0 && props.rawMessagesCount > 0 ? (
-                                        <div className="mb-2 rounded-md bg-[--hp-warning-subtle] p-2 text-xs">
+                                        <div className="mb-2 rounded-md bg-(--hp-warning-subtle) p-2 text-xs">
                                             Message normalization returned 0 items for {props.rawMessagesCount} messages (see `web/src/chat/normalize.ts`).
                                         </div>
                                     ) : null}

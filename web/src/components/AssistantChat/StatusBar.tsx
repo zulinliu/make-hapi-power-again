@@ -32,9 +32,9 @@ const VIBING_MESSAGES = [
 
 const PERMISSION_TONE_CLASSES: Record<PermissionModeTone, string> = {
     neutral: 'text-[var(--app-hint)]',
-    info: 'text-[--hp-info]',
-    warning: 'text-[--hp-warning]',
-    danger: 'text-[--hp-danger]'
+    info: 'text-(--hp-info)',
+    warning: 'text-(--hp-warning)',
+    danger: 'text-(--hp-danger)'
 }
 
 function getConnectionStatus(
@@ -49,8 +49,8 @@ function getConnectionStatus(
     if (!active) {
         return {
             text: t('misc.offline'),
-            color: 'text-[--hp-text-tertiary]',
-            dotColor: 'bg-[--hp-text-tertiary]',
+            color: 'text-(--hp-text-tertiary)',
+            dotColor: 'bg-(--hp-text-tertiary)',
             isPulsing: false
         }
     }
@@ -58,8 +58,8 @@ function getConnectionStatus(
     if (hasPermissions) {
         return {
             text: t('misc.permissionRequired'),
-            color: 'text-[--hp-warning]',
-            dotColor: 'bg-[--hp-warning]',
+            color: 'text-(--hp-warning)',
+            dotColor: 'bg-(--hp-warning)',
             isPulsing: true
         }
     }
@@ -68,8 +68,8 @@ function getConnectionStatus(
         const vibingMessage = VIBING_MESSAGES[Math.floor(Math.random() * VIBING_MESSAGES.length)].toLowerCase() + '…'
         return {
             text: vibingMessage,
-            color: 'text-[--hp-info]',
-            dotColor: 'bg-[--hp-info]',
+            color: 'text-(--hp-info)',
+            dotColor: 'bg-(--hp-info)',
             isPulsing: true
         }
     }
@@ -77,16 +77,16 @@ function getConnectionStatus(
     if (backgroundTaskCount > 0) {
         return {
             text: `${backgroundTaskCount} background task${backgroundTaskCount > 1 ? 's' : ''} running`,
-            color: 'text-[--hp-info]',
-            dotColor: 'bg-[--hp-info]',
+            color: 'text-(--hp-info)',
+            dotColor: 'bg-(--hp-info)',
             isPulsing: true
         }
     }
 
     return {
         text: t('misc.online'),
-        color: 'text-[--hp-success]',
-        dotColor: 'bg-[--hp-success]',
+        color: 'text-(--hp-success)',
+        dotColor: 'bg-(--hp-success)',
         isPulsing: false
     }
 }
@@ -97,9 +97,9 @@ function getContextWarning(contextSize: number, maxContextSize: number, t: (key:
 
     const percent = Math.round(percentageRemaining)
     if (percentageRemaining <= 5) {
-        return { text: t('misc.percentLeft', { percent }), color: 'text-[--hp-danger]' }
+        return { text: t('misc.percentLeft', { percent }), color: 'text-(--hp-danger)' }
     } else if (percentageRemaining <= 10) {
-        return { text: t('misc.percentLeft', { percent }), color: 'text-[--hp-warning]' }
+        return { text: t('misc.percentLeft', { percent }), color: 'text-(--hp-warning)' }
     } else {
         return { text: t('misc.percentLeft', { percent }), color: 'text-[var(--app-hint)]' }
     }
@@ -239,7 +239,7 @@ export function StatusBar(props: {
                     </span>
                 ) : null}
                 {codexFastMode ? (
-                    <span className="whitespace-nowrap text-xs text-[--hp-success]">
+                    <span className="whitespace-nowrap text-xs text-(--hp-success)">
                         fast
                     </span>
                 ) : null}
@@ -249,7 +249,7 @@ export function StatusBar(props: {
                     </span>
                 ) : null}
                 {collaborationModeLabel ? (
-                    <span className="whitespace-nowrap text-xs text-[--hp-info]">
+                    <span className="whitespace-nowrap text-xs text-(--hp-info)">
                         {collaborationModeLabel}
                     </span>
                 ) : null}

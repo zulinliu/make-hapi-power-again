@@ -407,7 +407,7 @@ export function NewSession(props: {
     const canCreate = Boolean(machineId && trimmedDirectory && !isFormDisabled && !missingWorktreeDirectory)
 
     return (
-        <div className="flex flex-col divide-y divide-[--hp-divider] bg-[--hp-surface-0]">
+        <div className="flex flex-col divide-y divide-(--hp-divider) bg-(--hp-surface-0)">
             <MachineSelector
                 machines={props.machines}
                 machineId={machineId}
@@ -416,7 +416,7 @@ export function NewSession(props: {
                 onChange={handleMachineChange}
             />
             {runnerSpawnError ? (
-                <div className="px-3 py-2 text-xs text-[--hp-danger]">
+                <div className="px-3 py-2 text-xs text-(--hp-danger)">
                     Runner last spawn error: {runnerSpawnError}
                 </div>
             ) : null}
@@ -511,7 +511,7 @@ export function NewSession(props: {
             />
 
             {(error ?? spawnError) ? (
-                <div className="px-3 py-2 text-sm text-[--hp-danger]">
+                <div className="px-3 py-2 text-sm text-(--hp-danger)">
                     {error ?? spawnError}
                 </div>
             ) : null}

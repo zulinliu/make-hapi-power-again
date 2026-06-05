@@ -3,14 +3,14 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
 const toastVariants = cva(
-    'pointer-events-auto w-full max-w-sm rounded-[--hp-radius-md,10px] bg-[--hp-surface-0] text-[--hp-text-primary] shadow-[--hp-shadow-lg] border-l-[3px] animate-fade-in-up',
+    'pointer-events-auto w-full max-w-sm rounded-[var(--hp-radius-md,10px)] bg-(--hp-surface-0) text-(--hp-text-primary) shadow-(--hp-shadow-lg) border-l-[3px] animate-fade-in-up',
     {
         variants: {
             variant: {
-                default: 'border-[--hp-border] border-l-[--hp-primary]',
-                success: 'border-[--hp-border] border-l-[--hp-success]',
-                error: 'border-[--hp-border] border-l-[--hp-danger]',
-                info: 'border-[--hp-border] border-l-[--hp-info]'
+                default: 'border-(--hp-border) border-l-(--hp-primary)',
+                success: 'border-(--hp-border) border-l-(--hp-success)',
+                error: 'border-(--hp-border) border-l-(--hp-danger)',
+                info: 'border-(--hp-border) border-l-(--hp-info)'
             }
         },
         defaultVariants: {
@@ -37,12 +37,12 @@ export function Toast({ title, body, onClose, className, variant, ...props }: To
             <div className="flex items-start gap-3 p-3">
                 <div className="min-w-0 flex-1">
                     <div className="text-sm font-semibold leading-5">{title}</div>
-                    <div className="mt-1 text-xs text-[--hp-text-secondary]">{body}</div>
+                    <div className="mt-1 text-xs text-(--hp-text-secondary)">{body}</div>
                 </div>
                 {onClose ? (
                     <button
                         type="button"
-                        className="text-xs text-[--hp-text-tertiary] hover:text-[--hp-text-primary] transition-colors duration-[--hp-duration-fast,120ms]"
+                        className="text-xs text-(--hp-text-tertiary) hover:text-(--hp-text-primary) transition-colors duration-[var(--hp-duration-fast,120ms)]"
                         onClick={handleClose}
                         aria-label="Dismiss"
                     >

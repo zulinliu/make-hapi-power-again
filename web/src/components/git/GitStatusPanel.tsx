@@ -59,14 +59,14 @@ export function GitStatusPanel({ sessionId, onStatusLoaded, onFilesChanged, onVi
   useEffect(() => { refresh() }, [refresh])
 
   if (loading && !status) {
-    return <div className="p-4 text-sm text-[--hp-text-tertiary]">{t('git.status.loading')}</div>
+    return <div className="p-4 text-sm text-(--hp-text-tertiary)">{t('git.status.loading')}</div>
   }
 
   if (error) {
     return (
       <div className="p-4">
-        <p className="text-sm text-[--hp-danger]">{error}</p>
-        <button onClick={refresh} className="text-xs mt-2 underline text-[--hp-primary]">{t('git.status.retry')}</button>
+        <p className="text-sm text-(--hp-danger)">{error}</p>
+        <button onClick={refresh} className="text-xs mt-2 underline text-(--hp-primary)">{t('git.status.retry')}</button>
       </div>
     )
   }
@@ -76,20 +76,20 @@ export function GitStatusPanel({ sessionId, onStatusLoaded, onFilesChanged, onVi
   return (
     <div className="p-4 space-y-3">
       <div className="flex items-center gap-2">
-        <span className="text-xs font-mono px-2 py-0.5 rounded-[--hp-radius-xs] text-[--hp-primary] bg-[--hp-primary-subtle]">
+        <span className="text-xs font-mono px-2 py-0.5 rounded-(--hp-radius-xs) text-(--hp-primary) bg-(--hp-primary-subtle)">
           {status.branch}
         </span>
         {(status.ahead > 0 || status.behind > 0) && (
-          <span className="text-xs text-[--hp-text-tertiary]">
+          <span className="text-xs text-(--hp-text-tertiary)">
             {status.ahead > 0 && `↑${status.ahead}`}
             {status.behind > 0 && `↓${status.behind}`}
           </span>
         )}
-        <button onClick={refresh} className="ml-auto text-xs text-[--hp-text-tertiary]" title="Refresh">↻</button>
+        <button onClick={refresh} className="ml-auto text-xs text-(--hp-text-tertiary)" title="Refresh">↻</button>
       </div>
 
       {status.files.length === 0 ? (
-        <p className="text-sm text-[--hp-text-tertiary]">{t('git.status.clean')}</p>
+        <p className="text-sm text-(--hp-text-tertiary)">{t('git.status.clean')}</p>
       ) : (
         <div className="space-y-1">
           {status.files.map((file) => (
@@ -168,19 +168,19 @@ function GitFileRow({ file, onViewDiff, onCopyPath, onOpenFile, onPreview }: {
       <div
         {...handlers}
         onClick={() => { if (!longPressJustFiredRef.current) onPreview?.(file.path, file.status) }}
-        className="flex items-center gap-2 text-sm py-2 px-2 rounded-[--hp-radius-sm] bg-[--hp-surface-0] cursor-pointer hover:bg-[--hp-surface-1] active:bg-[--hp-surface-1] transition-colors min-h-[44px]"
+        className="flex items-center gap-2 text-sm py-2 px-2 rounded-(--hp-radius-sm) bg-(--hp-surface-0) cursor-pointer hover:bg-(--hp-surface-1) active:bg-(--hp-surface-1) transition-colors min-h-[44px]"
         tabIndex={0}
         role="button"
         aria-label={`${file.path} ${file.status}`}
       >
         <GitStatusBadge status={file.status} />
-        <span className="font-mono text-xs truncate flex-1 text-[--hp-text-primary]">
+        <span className="font-mono text-xs truncate flex-1 text-(--hp-text-primary)">
           {file.path}
         </span>
         <button
           ref={moreBtnRef}
           onClick={(e) => { e.stopPropagation(); handleMoreClick() }}
-          className="w-8 h-8 flex items-center justify-center text-[--hp-text-tertiary] hover:text-[--hp-text-primary] text-sm leading-none rounded-full hover:bg-[--hp-surface-1] transition-colors"
+          className="w-8 h-8 flex items-center justify-center text-(--hp-text-tertiary) hover:text-(--hp-text-primary) text-sm leading-none rounded-full hover:bg-(--hp-surface-1) transition-colors"
         >
           ···
         </button>

@@ -165,9 +165,9 @@ export function SessionHeader(props: {
     const handleMenuExtensions = () => { setMenuOpen(false); navigate({ to: `${basePath}/extensions` }) }
     const handleMenuOutline = () => { setMenuOpen(false); props.onToggleOutline?.() }
 
-    const ghostBtnClass = 'flex h-11 w-11 items-center justify-center rounded-lg transition-colors duration-[--hp-duration-fast] sm:h-8 sm:w-8 text-[--hp-text-secondary] hover:bg-[--hp-surface-1] hover:text-[--hp-text-primary]'
-    const activeTabClass = 'text-[--hp-primary]'
-    const inactiveTabClass = 'text-[--hp-text-secondary]'
+    const ghostBtnClass = 'flex h-11 w-11 items-center justify-center rounded-lg transition-colors duration-(--hp-duration-fast) sm:h-8 sm:w-8 text-(--hp-text-secondary) hover:bg-(--hp-surface-1) hover:text-(--hp-text-primary)'
+    const activeTabClass = 'text-(--hp-primary)'
+    const inactiveTabClass = 'text-(--hp-text-secondary)'
 
     // In Telegram, don't render header (Telegram provides its own)
     if (isTelegramApp()) {
@@ -176,8 +176,8 @@ export function SessionHeader(props: {
 
     return (
         <>
-            <header className={`bg-[--hp-surface-0] pt-[env(safe-area-inset-top)] border-b border-[--hp-divider]`}>
-                <div className="mx-auto w-full max-w-content flex items-center gap-2 px-2 py-1.5 sm:px-3 sm:py-2 h-[--hp-mobile-header-height] sm:h-[--hp-header-height]">
+            <header className={`bg-(--hp-surface-0) pt-[env(safe-area-inset-top)] border-b border-(--hp-divider)`}>
+                <div className="mx-auto w-full max-w-content flex items-center gap-2 px-2 py-1.5 sm:px-3 sm:py-2 h-(--hp-mobile-header-height) sm:h-(--hp-header-height)">
                     {/* Back button */}
                     <button
                         type="button"
@@ -192,10 +192,10 @@ export function SessionHeader(props: {
 
                     {/* Session info */}
                     <div className="min-w-0 flex-1">
-                        <div className="truncate text-sm font-medium leading-tight text-[--hp-text-primary] sm:text-base">
+                        <div className="truncate text-sm font-medium leading-tight text-(--hp-text-primary) sm:text-base">
                             {title}
                         </div>
-                        <div className="flex items-center gap-1.5 text-xs leading-tight text-[--hp-text-tertiary] sm:gap-3">
+                        <div className="flex items-center gap-1.5 text-xs leading-tight text-(--hp-text-tertiary) sm:gap-3">
                             <span className="inline-flex shrink-0 items-center gap-1">
                                 <AgentFlavorIcon flavor={session.metadata?.flavor} className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                                 <span className="max-w-[4rem] truncate">{session.metadata?.flavor?.trim() || 'unknown'}</span>

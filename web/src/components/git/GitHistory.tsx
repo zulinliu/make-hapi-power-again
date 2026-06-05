@@ -36,29 +36,29 @@ export function GitHistory({ sessionId }: { sessionId: string }) {
   useEffect(() => { loadHistory() }, [loadHistory])
 
   if (loading && commits.length === 0) {
-    return <div className="p-4 text-sm text-[--hp-text-tertiary]">{t('git.history.loading')}</div>
+    return <div className="p-4 text-sm text-(--hp-text-tertiary)">{t('git.history.loading')}</div>
   }
 
   if (error) {
-    return <div className="p-4 text-sm text-[--hp-danger]">{error}</div>
+    return <div className="p-4 text-sm text-(--hp-danger)">{error}</div>
   }
 
   if (commits.length === 0) {
-    return <div className="p-4 text-sm text-[--hp-text-tertiary]">{t('git.history.empty')}</div>
+    return <div className="p-4 text-sm text-(--hp-text-tertiary)">{t('git.history.empty')}</div>
   }
 
   return (
-    <div className="divide-y border-[--hp-border]">
+    <div className="divide-y border-(--hp-border)">
       {commits.map((commit, i) => (
-        <div key={commit.hash} className={`flex items-start gap-3 px-4 py-2 ${i % 2 === 0 ? 'bg-[--hp-surface-0]' : 'bg-[--hp-surface-1]'}`}>
-          <code className="text-xs font-mono shrink-0 mt-0.5 text-[--hp-primary]">
+        <div key={commit.hash} className={`flex items-start gap-3 px-4 py-2 ${i % 2 === 0 ? 'bg-(--hp-surface-0)' : 'bg-(--hp-surface-1)'}`}>
+          <code className="text-xs font-mono shrink-0 mt-0.5 text-(--hp-primary)">
             {commit.hash.slice(0, 7)}
           </code>
           <div className="flex-1 min-w-0">
-            <p className="text-sm truncate text-[--hp-text-primary]">{commit.message}</p>
+            <p className="text-sm truncate text-(--hp-text-primary)">{commit.message}</p>
           </div>
           {commit.refs && (
-            <span className="text-xs px-1.5 py-0.5 rounded-[--hp-radius-xs] shrink-0 bg-[--hp-surface-1] text-[--hp-text-secondary]">
+            <span className="text-xs px-1.5 py-0.5 rounded-(--hp-radius-xs) shrink-0 bg-(--hp-surface-1) text-(--hp-text-secondary)">
               {commit.refs}
             </span>
           )}

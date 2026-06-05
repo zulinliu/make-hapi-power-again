@@ -80,7 +80,7 @@ export function ConfirmDialog(props: ConfirmDialogProps) {
                 </DialogHeader>
 
                 {error && (
-                    <div className="mt-3 rounded-[--hp-radius-sm] px-3 py-2 text-sm"
+                    <div className="mt-3 rounded-(--hp-radius-sm) px-3 py-2 text-sm"
                         style={{ color: 'var(--hp-danger)', background: 'var(--hp-danger-subtle)' }}>
                         {error}
                     </div>

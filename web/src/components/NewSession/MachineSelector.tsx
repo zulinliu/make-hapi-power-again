@@ -18,14 +18,14 @@ export function MachineSelector(props: {
 
     return (
         <div className="flex flex-col gap-1.5 px-3 py-3">
-            <label className="text-xs font-medium uppercase tracking-wider text-[--hp-text-tertiary]">
+            <label className="text-xs font-medium uppercase tracking-wider text-(--hp-text-tertiary)">
                 {t('newSession.machine')}
             </label>
             <select
                 value={props.machineId ?? ''}
                 onChange={(e) => props.onChange(e.target.value)}
                 disabled={props.isDisabled}
-                className="w-full rounded-[--hp-radius-sm,6px] border border-[--hp-border] bg-[--hp-surface-0] p-2 text-sm text-[--hp-text-primary] focus:outline-none focus:ring-2 focus:ring-[--hp-primary] focus:border-transparent disabled:opacity-50 transition-colors"
+                className="w-full rounded-[var(--hp-radius-sm,6px)] border border-(--hp-border) bg-(--hp-surface-0) p-2 text-sm text-(--hp-text-primary) focus:outline-none focus:ring-2 focus:ring-(--hp-primary) focus:border-transparent disabled:opacity-50 transition-colors"
             >
                 {props.isLoading && (
                     <option value="">{t('loading.machines')}</option>

@@ -75,13 +75,13 @@ export function HappyAssistantMessage() {
             >
                 <CliOutputBlock text={cliText} />
                 <div className="mt-1 flex items-center gap-2">
-                    <MessageTimestamp className="text-xs leading-none text-[--hp-text-tertiary]" />
+                    <MessageTimestamp className="text-xs leading-none text-(--hp-text-tertiary)" />
                     {hasMetadata && (
                         <button
                             type="button"
                             onClick={() => setShowMetadata((open) => !open)}
                             aria-expanded={showMetadata}
-                            className="text-xs text-[--hp-text-tertiary] underline-offset-2 hover:text-[--hp-text-primary] hover:underline"
+                            className="text-xs text-(--hp-text-tertiary) underline-offset-2 hover:text-(--hp-text-primary) hover:underline"
                         >
                             {showMetadata ? 'Hide info' : 'Show info'}
                         </button>
@@ -110,13 +110,13 @@ export function HappyAssistantMessage() {
                     <div className="min-w-0 flex-1">
                         <CodexReviewCard review={codexReview} />
                         <div className="mt-1 flex items-center gap-2">
-                            <MessageTimestamp className="text-xs leading-none text-[--hp-text-tertiary]" />
+                            <MessageTimestamp className="text-xs leading-none text-(--hp-text-tertiary)" />
                             {hasMetadata && (
                                 <button
                                     type="button"
                                     onClick={() => setShowMetadata((open) => !open)}
                                     aria-expanded={showMetadata}
-                                    className="text-xs text-[--hp-text-tertiary] underline-offset-2 hover:text-[--hp-text-primary] hover:underline"
+                                    className="text-xs text-(--hp-text-tertiary) underline-offset-2 hover:text-(--hp-text-primary) hover:underline"
                                 >
                                     {showMetadata ? 'Hide info' : 'Show info'}
                                 </button>
@@ -137,12 +137,12 @@ export function HappyAssistantMessage() {
                             <button
                                 type="button"
                                 title="Copy"
-                                className="p-0.5 rounded hover:bg-[--hp-surface-2] transition-colors"
+                                className="p-0.5 rounded hover:bg-(--hp-surface-2) transition-colors"
                                 onClick={() => copy(copyText)}
                             >
                                 {copied
-                                    ? <CheckIcon className="h-3.5 w-3.5 text-[--hp-success]" />
-                                    : <CopyIcon className="h-3.5 w-3.5 text-[--hp-text-tertiary]" />}
+                                    ? <CheckIcon className="h-3.5 w-3.5 text-(--hp-success)" />
+                                    : <CopyIcon className="h-3.5 w-3.5 text-(--hp-text-tertiary)" />}
                             </button>
                         </div>
                     ) : null}
@@ -160,13 +160,13 @@ export function HappyAssistantMessage() {
                 <div className="min-w-0">
                     <MessagePrimitive.Content components={MESSAGE_PART_COMPONENTS} />
                     <div className="mt-1 flex items-center gap-2">
-                        <MessageTimestamp className="text-xs leading-none text-[--hp-text-tertiary]" />
+                        <MessageTimestamp className="text-xs leading-none text-(--hp-text-tertiary)" />
                         {hasMetadata && (
                             <button
                                 type="button"
                                 onClick={() => setShowMetadata((open) => !open)}
                                 aria-expanded={showMetadata}
-                                className="text-xs text-[--hp-text-tertiary] underline-offset-2 hover:text-[--hp-text-primary] hover:underline"
+                                className="text-xs text-(--hp-text-tertiary) underline-offset-2 hover:text-(--hp-text-primary) hover:underline"
                             >
                                 {showMetadata ? 'Hide info' : 'Show info'}
                             </button>
@@ -195,13 +195,13 @@ export function HappyAssistantMessage() {
                 <div className="min-w-0 flex-1">
                     <MessagePrimitive.Content components={MESSAGE_PART_COMPONENTS} />
                     <div className="mt-1 flex items-center gap-2">
-                        <MessageTimestamp className="text-xs leading-none text-[--hp-text-tertiary]" />
+                        <MessageTimestamp className="text-xs leading-none text-(--hp-text-tertiary)" />
                         {hasMetadata && (
                             <button
                                 type="button"
                                 onClick={() => setShowMetadata((open) => !open)}
                                 aria-expanded={showMetadata}
-                                className="text-xs text-[--hp-text-tertiary] underline-offset-2 hover:text-[--hp-text-primary] hover:underline"
+                                className="text-xs text-(--hp-text-tertiary) underline-offset-2 hover:text-(--hp-text-primary) hover:underline"
                             >
                                 {showMetadata ? 'Hide info' : 'Show info'}
                             </button>
@@ -222,12 +222,12 @@ export function HappyAssistantMessage() {
                         <button
                             type="button"
                             title="Copy"
-                            className="p-0.5 rounded hover:bg-[--hp-surface-2] transition-colors"
+                            className="p-0.5 rounded hover:bg-(--hp-surface-2) transition-colors"
                             onClick={() => copy(copyText)}
                         >
                             {copied
-                                ? <CheckIcon className="h-3.5 w-3.5 text-[--hp-success]" />
-                                : <CopyIcon className="h-3.5 w-3.5 text-[--hp-text-tertiary]" />}
+                                ? <CheckIcon className="h-3.5 w-3.5 text-(--hp-success)" />
+                                : <CopyIcon className="h-3.5 w-3.5 text-(--hp-text-tertiary)" />}
                         </button>
                     </div>
                 ) : null}

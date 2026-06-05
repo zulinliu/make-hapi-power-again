@@ -71,7 +71,7 @@ export function GitCloneDialog({ isOpen, onClose, sessionId, onCloneComplete }: 
         onClose()
     }
 
-    const inputClass = "w-full rounded-[--hp-radius-sm] border border-[--hp-border] bg-transparent px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[--hp-primary]"
+    const inputClass = "w-full rounded-(--hp-radius-sm) border border-(--hp-border) bg-transparent px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-(--hp-primary)"
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
@@ -85,7 +85,7 @@ export function GitCloneDialog({ isOpen, onClose, sessionId, onCloneComplete }: 
 
                 <div className="space-y-3">
                     <div>
-                        <label className="text-sm font-medium text-[--hp-text-secondary]">
+                        <label className="text-sm font-medium text-(--hp-text-secondary)">
                             {t('git.clone.url')}
                         </label>
                         <input
@@ -98,7 +98,7 @@ export function GitCloneDialog({ isOpen, onClose, sessionId, onCloneComplete }: 
                     </div>
 
                     <div>
-                        <label className="text-sm font-medium text-[--hp-text-secondary]">
+                        <label className="text-sm font-medium text-(--hp-text-secondary)">
                             {t('git.clone.targetDir')}
                         </label>
                         <input
@@ -111,7 +111,7 @@ export function GitCloneDialog({ isOpen, onClose, sessionId, onCloneComplete }: 
                     </div>
 
                     <div>
-                        <label className="text-sm font-medium text-[--hp-text-secondary]">
+                        <label className="text-sm font-medium text-(--hp-text-secondary)">
                             {t('git.clone.branch')}
                         </label>
                         <input
@@ -124,22 +124,22 @@ export function GitCloneDialog({ isOpen, onClose, sessionId, onCloneComplete }: 
                     </div>
 
                     {phase === 'cloning' && (
-                        <div className="rounded-[--hp-radius-sm] p-3 text-sm bg-[--hp-surface-1]">
+                        <div className="rounded-(--hp-radius-sm) p-3 text-sm bg-(--hp-surface-1)">
                             <div className="flex items-center gap-2">
-                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-[--hp-primary] border-t-transparent" />
+                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-(--hp-primary) border-t-transparent" />
                                 <span>{progress}</span>
                             </div>
                         </div>
                     )}
 
                     {phase === 'done' && (
-                        <div className="rounded-[--hp-radius-sm] bg-[--hp-success-subtle] p-3 text-sm text-[--hp-success]">
+                        <div className="rounded-(--hp-radius-sm) bg-(--hp-success-subtle) p-3 text-sm text-(--hp-success)">
                             {t('git.clone.success')}
                         </div>
                     )}
 
                     {phase === 'error' && (
-                        <div className="rounded-[--hp-radius-sm] bg-[--hp-danger-subtle] p-3 text-sm text-[--hp-danger]">
+                        <div className="rounded-(--hp-radius-sm) bg-(--hp-danger-subtle) p-3 text-sm text-(--hp-danger)">
                             {error}
                         </div>
                     )}

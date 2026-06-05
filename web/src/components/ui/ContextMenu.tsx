@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react'
+import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react'
 
 export interface ContextMenuItem {
     label: string
@@ -20,10 +20,10 @@ export function ContextMenu({ x, y, items, onClose }: ContextMenuProps) {
     const menuRef = useRef<HTMLDivElement>(null)
     const [position, setPosition] = useState({ x, y })
     const [focusedIndex, setFocusedIndex] = useState(-1)
-    const enabledIndices = items.reduce<number[]>((acc, item, i) => {
+    const enabledIndices = useMemo(() => items.reduce<number[]>((acc, item, i) => {
         if (!item.disabled) acc.push(i)
         return acc
-    }, [])
+    }, []), [items])
 
     useEffect(() => {
         if (!menuRef.current) return

@@ -14,7 +14,7 @@ export function SessionTypeSelector(props: {
 
     return (
         <div className="flex flex-col gap-1.5 px-3 py-3">
-            <label className="text-xs font-medium uppercase tracking-wider text-[--hp-text-tertiary]">
+            <label className="text-xs font-medium uppercase tracking-wider text-(--hp-text-tertiary)">
                 {t('newSession.type')}
             </label>
             <div className="flex flex-col gap-1.5">
@@ -30,7 +30,7 @@ export function SessionTypeSelector(props: {
                                     checked={props.sessionType === 'worktree'}
                                     onChange={() => props.onSessionTypeChange('worktree')}
                                     disabled={props.isDisabled}
-                                    className="accent-[--hp-primary]"
+                                    className="accent-(--hp-primary)"
                                 />
                                 <div className="flex-1">
                                     <div className="min-h-[34px] flex items-center">
@@ -42,17 +42,17 @@ export function SessionTypeSelector(props: {
                                                 value={props.worktreeName}
                                                 onChange={(e) => props.onWorktreeNameChange(e.target.value)}
                                                 disabled={props.isDisabled}
-                                                className="w-full rounded-[--hp-radius-sm,6px] border border-[--hp-border] bg-[--hp-surface-0] px-2 py-1 text-sm text-[--hp-text-primary] placeholder:text-[--hp-text-tertiary] focus:outline-none focus:ring-2 focus:ring-[--hp-primary] focus:border-transparent disabled:opacity-60 transition-colors"
+                                                className="w-full rounded-[var(--hp-radius-sm,6px)] border border-(--hp-border) bg-(--hp-surface-0) px-2 py-1 text-sm text-(--hp-text-primary) placeholder:text-(--hp-text-tertiary) focus:outline-none focus:ring-2 focus:ring-(--hp-primary) focus:border-transparent disabled:opacity-60 transition-colors"
                                             />
                                         ) : (
                                             <>
                                                 <label
                                                     htmlFor="session-type-worktree"
-                                                    className="text-sm capitalize cursor-pointer text-[--hp-text-primary]"
+                                                    className="text-sm capitalize cursor-pointer text-(--hp-text-primary)"
                                                 >
                                                     {t('newSession.type.worktree')}
                                                 </label>
-                                                <span className="ml-2 text-xs text-[--hp-text-tertiary]">
+                                                <span className="ml-2 text-xs text-(--hp-text-tertiary)">
                                                     {t('newSession.type.worktree.desc')}
                                                 </span>
                                             </>
@@ -70,10 +70,10 @@ export function SessionTypeSelector(props: {
                                     checked={props.sessionType === 'simple'}
                                     onChange={() => props.onSessionTypeChange('simple')}
                                     disabled={props.isDisabled}
-                                    className="accent-[--hp-primary]"
+                                    className="accent-(--hp-primary)"
                                 />
-                                <span className="text-sm capitalize text-[--hp-text-primary]">{t('newSession.type.simple')}</span>
-                                <span className="text-xs text-[--hp-text-tertiary]">
+                                <span className="text-sm capitalize text-(--hp-text-primary)">{t('newSession.type.simple')}</span>
+                                <span className="text-xs text-(--hp-text-tertiary)">
                                     {t('newSession.type.simple.desc')}
                                 </span>
                             </label>

@@ -407,10 +407,10 @@ function AppInner() {
         return (
             <div className="p-4 space-y-3">
                 <div className="text-base font-semibold">{t('login.title')}</div>
-                <div className="text-sm text-[--hp-danger]">
+                <div className="text-sm text-(--hp-danger)">
                     {authError ?? t('login.error.authFailed')}
                 </div>
-                <div className="text-xs text-[--hp-text-tertiary]">
+                <div className="text-xs text-(--hp-text-tertiary)">
                     Open this page from Telegram using the bot's "Open App" button (not "Open in browser").
                 </div>
             </div>
@@ -419,7 +419,7 @@ function AppInner() {
 
     return (
         <AppContextProvider value={{ api, token, baseUrl }}>
-            <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[9999] focus:px-4 focus:py-2 focus:rounded-[--hp-radius-sm] focus:bg-[--hp-primary] focus:text-[--hp-primary-text]">
+            <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[9999] focus:px-4 focus:py-2 focus:rounded-(--hp-radius-sm) focus:bg-(--hp-primary) focus:text-(--hp-primary-text)">
                 Skip to content
             </a>
             <SyncingBanner isSyncing={isSyncing} />

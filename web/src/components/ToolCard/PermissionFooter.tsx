@@ -68,14 +68,14 @@ function PermissionRowButton(props: {
     return (
         <button
             type="button"
-            className={`flex w-full items-center justify-between gap-3 rounded-[--hp-radius-md] bg-[--hp-surface-1] px-3 py-2 text-left transition-colors hover:bg-[--hp-surface-2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--hp-primary] disabled:pointer-events-none disabled:opacity-50 ${
+            className={`flex w-full items-center justify-between gap-3 rounded-(--hp-radius-md) bg-(--hp-surface-1) px-3 py-2 text-left transition-colors hover:bg-(--hp-surface-2) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--hp-primary) disabled:pointer-events-none disabled:opacity-50 ${
                 props.tone === 'allow'
-                    ? 'text-[--hp-success]'
+                    ? 'text-(--hp-success)'
                     : props.tone === 'deny'
-                        ? 'text-[--hp-danger]'
+                        ? 'text-(--hp-danger)'
                         : props.tone === 'muted'
-                            ? 'text-[--hp-text-secondary]'
-                            : 'text-[--hp-text-primary]'
+                            ? 'text-(--hp-text-secondary)'
+                            : 'text-(--hp-text-primary)'
             }`}
             disabled={props.disabled}
             aria-busy={props.loading === true}
@@ -206,18 +206,18 @@ export function PermissionFooter(props: {
         if (!permission.reason) return null
 
         return (
-            <div className="mt-2 rounded-[--hp-radius-md] border border-[--hp-danger] bg-[--hp-danger-subtle] px-3 py-2 text-xs text-[--hp-danger]">
+            <div className="mt-2 rounded-(--hp-radius-md) border border-(--hp-danger) bg-(--hp-danger-subtle) px-3 py-2 text-xs text-(--hp-danger)">
                 {permission.reason}
             </div>
         )
     }
 
     return (
-        <div className="rounded-[--hp-radius-md] border border-[--hp-border] bg-[--hp-surface-1] p-3">
-            <div className="text-xs font-medium text-[--hp-text-tertiary]">{summary}</div>
+        <div className="rounded-(--hp-radius-md) border border-(--hp-border) bg-(--hp-surface-1) p-3">
+            <div className="text-xs font-medium text-(--hp-text-tertiary)">{summary}</div>
 
             {error ? (
-                <div className="mt-2 rounded-[--hp-radius-md] border border-[--hp-danger] bg-[--hp-danger-subtle] px-3 py-2 text-xs text-[--hp-danger]">
+                <div className="mt-2 rounded-(--hp-radius-md) border border-(--hp-danger) bg-(--hp-danger-subtle) px-3 py-2 text-xs text-(--hp-danger)">
                     {error}
                 </div>
             ) : null}

@@ -90,7 +90,7 @@ export function GitPushDialog({
     }
 
     const inputClass =
-        'w-full rounded-[--hp-radius-sm] border border-[--hp-border] bg-transparent px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[--hp-primary]'
+        'w-full rounded-(--hp-radius-sm) border border-(--hp-border) bg-transparent px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-(--hp-primary)'
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
@@ -104,7 +104,7 @@ export function GitPushDialog({
 
                 <div className="space-y-3">
                     <div>
-                        <label className="text-sm font-medium text-[--hp-text-secondary]">
+                        <label className="text-sm font-medium text-(--hp-text-secondary)">
                             {t('git.push.remote')}
                         </label>
                         <select
@@ -125,7 +125,7 @@ export function GitPushDialog({
                     </div>
 
                     <div>
-                        <label className="text-sm font-medium text-[--hp-text-secondary]">
+                        <label className="text-sm font-medium text-(--hp-text-secondary)">
                             {t('git.push.branch')}
                         </label>
                         <input
@@ -146,7 +146,7 @@ export function GitPushDialog({
                                 disabled={phase === 'pushing'}
                                 className="rounded"
                             />
-                            <span className="text-[--hp-text-secondary]">{t('git.push.setUpstream')}</span>
+                            <span className="text-(--hp-text-secondary)">{t('git.push.setUpstream')}</span>
                         </label>
                         <label className="flex items-center gap-2 text-sm">
                             <input
@@ -159,12 +159,12 @@ export function GitPushDialog({
                                 disabled={phase === 'pushing'}
                                 className="rounded"
                             />
-                            <span className="text-[--hp-danger]">{t('git.push.force')}</span>
+                            <span className="text-(--hp-danger)">{t('git.push.force')}</span>
                         </label>
                     </div>
 
                     {forcePush && (
-                        <div className="rounded-[--hp-radius-sm] bg-[--hp-danger-subtle] p-3 text-sm">
+                        <div className="rounded-(--hp-radius-sm) bg-(--hp-danger-subtle) p-3 text-sm">
                             <label className="flex items-center gap-2">
                                 <input
                                     type="checkbox"
@@ -172,7 +172,7 @@ export function GitPushDialog({
                                     onChange={(e) => setConfirmForce(e.target.checked)}
                                     className="rounded"
                                 />
-                                <span className="text-[--hp-danger]">
+                                <span className="text-(--hp-danger)">
                                     {t('git.push.forceConfirm')}
                                 </span>
                             </label>
@@ -180,23 +180,23 @@ export function GitPushDialog({
                     )}
 
                     {phase === 'pushing' && (
-                        <div className="rounded-[--hp-radius-sm] p-3 text-sm bg-[--hp-surface-1]">
+                        <div className="rounded-(--hp-radius-sm) p-3 text-sm bg-(--hp-surface-1)">
                             <div className="flex items-center gap-2">
-                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-[--hp-primary] border-t-transparent" />
+                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-(--hp-primary) border-t-transparent" />
                                 <span>{t('git.push.pushing')}</span>
                             </div>
                         </div>
                     )}
 
                     {phase === 'done' && (
-                        <div className="rounded-[--hp-radius-sm] bg-[--hp-success-subtle] p-3 text-sm text-[--hp-success]">
+                        <div className="rounded-(--hp-radius-sm) bg-(--hp-success-subtle) p-3 text-sm text-(--hp-success)">
                             {t('git.push.success')}
                             {result && <pre className="mt-1 text-xs opacity-70">{result}</pre>}
                         </div>
                     )}
 
                     {phase === 'error' && (
-                        <div className="rounded-[--hp-radius-sm] bg-[--hp-danger-subtle] p-3 text-sm text-[--hp-danger]">
+                        <div className="rounded-(--hp-radius-sm) bg-(--hp-danger-subtle) p-3 text-sm text-(--hp-danger)">
                             {error}
                         </div>
                     )}

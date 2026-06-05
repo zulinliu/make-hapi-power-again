@@ -349,7 +349,7 @@ export function ScheduleTimePicker({ onSchedule, onClose, anchorRef, pendingSche
                                     onClick={() => handlePresetClick(preset)}
                                     className={`rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
                                         isSelected
-                                            ? 'border-[--hp-primary] bg-[--hp-primary] text-[--hp-primary-text]'
+                                            ? 'border-(--hp-primary) bg-(--hp-primary) text-(--hp-primary-text)'
                                             : 'border-[var(--app-border)] text-[var(--app-fg)] hover:bg-[var(--app-secondary-bg)] hover:border-[var(--app-link)]'
                                     }`}
                                 >
@@ -370,7 +370,7 @@ export function ScheduleTimePicker({ onSchedule, onClose, anchorRef, pendingSche
                             className="w-full rounded-lg border border-[var(--app-border)] bg-[var(--app-bg)] px-3 py-2 text-sm text-[var(--app-fg)] focus:outline-none focus:ring-1 focus:ring-[var(--app-link)]"
                         />
                         {specificError ? (
-                            <p className="text-xs text-[--hp-danger]">{specificError}</p>
+                            <p className="text-xs text-(--hp-danger)">{specificError}</p>
                         ) : (
                             <p className="break-words text-xs text-[var(--app-hint)]">
                                 {t('composer.scheduleSpecificHint')}
@@ -380,7 +380,7 @@ export function ScheduleTimePicker({ onSchedule, onClose, anchorRef, pendingSche
                             type="button"
                             disabled={!specificValue}
                             onClick={handleSpecificSubmit}
-                            className="w-full rounded-lg bg-[--hp-primary] px-3 py-2 text-sm font-medium text-[--hp-primary-text] transition-colors hover:bg-[--hp-primary-hover] disabled:cursor-not-allowed disabled:opacity-40"
+                            className="w-full rounded-lg bg-(--hp-primary) px-3 py-2 text-sm font-medium text-(--hp-primary-text) transition-colors hover:bg-(--hp-primary-hover) disabled:cursor-not-allowed disabled:opacity-40"
                         >
                             {t('composer.scheduleSend')}
                         </button>
