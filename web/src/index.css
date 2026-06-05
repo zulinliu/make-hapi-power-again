@@ -5,202 +5,121 @@
 @import "./styles/login.css";
 @config "../tailwind.config.ts";
 
+/* ===================================================
+   App-level CSS Variables
+   --app-* 语义别名层 → 引用 --hp-* 设计令牌
+   保留 Telegram --tg-theme-* 回退链
+   =================================================== */
+
 :root {
-    --app-bg: var(--tg-theme-bg-color, #ffffff);
-    --app-fg: var(--tg-theme-text-color, #1a1a2e);
-    --app-hint: var(--tg-theme-hint-color, #6b7280);
-    --app-link: var(--tg-theme-link-color, #1a1a2e);
-    --app-button: var(--tg-theme-button-color, #1a1a2e);
-    --app-button-text: var(--tg-theme-button-text-color, #ffffff);
-    --app-banner-bg: var(--tg-theme-button-color, #1a1a2e);
-    --app-banner-text: var(--tg-theme-button-text-color, #ffffff);
-    --app-secondary-bg: var(--tg-theme-secondary-bg-color, #f4f4f8);
+    /* === 基础层 (引用 hp 令牌 + TG 回退) === */
+    --app-bg: var(--tg-theme-bg-color, var(--hp-canvas));
+    --app-fg: var(--tg-theme-text-color, var(--hp-text-primary));
+    --app-hint: var(--tg-theme-hint-color, var(--hp-text-tertiary));
+    --app-link: var(--tg-theme-link-color, var(--hp-text-primary));
+    --app-button: var(--tg-theme-button-color, var(--hp-primary));
+    --app-button-text: var(--tg-theme-button-text-color, var(--hp-primary-text));
+    --app-banner-bg: var(--tg-theme-button-color, var(--hp-primary));
+    --app-banner-text: var(--tg-theme-button-text-color, var(--hp-primary-text));
+    --app-secondary-bg: var(--tg-theme-secondary-bg-color, var(--hp-surface-1));
+    --app-dialog-bg: var(--hp-surface-0);
 
-    --app-accent: var(--app-button);
-    --app-hover: var(--app-subtle-bg);
-    --app-danger: #DA3633;
-    --app-text-muted: var(--app-hint);
+    /* === 语义层 === */
+    --app-accent: var(--hp-primary);
+    --app-hover: var(--hp-surface-1);
+    --app-danger: var(--hp-danger);
+    --app-success: var(--hp-success);
+    --app-warning: var(--hp-warning);
+    --app-text-muted: var(--hp-text-tertiary);
+    --app-text-secondary: var(--hp-text-secondary);
+    --app-subtle-bg: var(--hp-surface-1);
+    --app-border: var(--hp-border);
+    --app-divider: var(--hp-divider);
 
-    --app-dialog-bg: #ffffff;
-    --app-chat-user-bg: #f4f4f8;
-    --app-chat-user-surface-bg: var(--app-chat-user-bg);
-    --app-chat-user-fg: #1a1a2e;
-    --app-chat-user-chip-bg: rgba(34, 197, 94, 0.12);
-    --app-chat-user-chip-fg: #15803d;
-    --app-tool-card-bg: #f4f4f8;
-    --app-tool-group-bg: var(--app-tool-card-bg);
-    --app-tool-card-hover-bg: rgba(0, 0, 0, 0.04);
-    --app-tool-card-accent: #1a1a2e;
-    --app-tool-card-muted-action-fg: #9ca3af;
-    --app-tool-card-subtitle: #6b7280;
-    --app-code-header-bg: #f4f4f8;
-    --app-code-header-fg: #6b7280;
-    --app-code-copy-hover-bg: rgba(0, 0, 0, 0.04);
-    --app-inline-code-border: transparent;
-    --app-inline-code-fg: #1a1a2e;
-    --app-md-quote-bg: #f4f4f8;
-    --app-md-quote-border: #d1d5db;
-    --app-md-quote-fg: #6b7280;
-    --app-md-table-bg: #f4f4f8;
-    --app-md-table-head-bg: #e8e8ee;
-    --app-reasoning-bg: #f4f4f8;
-    --app-mermaid-node-fill: #f8f9fb;
-    --app-mermaid-node-border: #c7d2fe;
-    --app-mermaid-cluster-fill: #eef2ff;
-    --app-mermaid-text: #1a1a2e;
-    --app-link-muted: rgba(26, 26, 46, 0.15);
-    --app-scrollbar-thumb: rgba(107, 114, 128, 0.28);
-    --app-scrollbar-thumb-hover: rgba(107, 114, 128, 0.42);
+    /* === 聊天色彩 === */
+    --app-chat-user-bg: var(--hp-primary-subtle);
+    --app-chat-user-surface-bg: var(--hp-surface-2);
+    --app-chat-user-fg: var(--hp-text-primary);
+    --app-chat-user-chip-bg: var(--hp-success-subtle);
+    --app-chat-user-chip-fg: var(--hp-success);
 
-    /* Theme-aware colors (light mode defaults) */
-    --app-border: #e2e4e9;
-    --app-divider: #e2e4e9;
-    --app-subtle-bg: rgba(0, 0, 0, 0.03);
-    --app-code-bg: #f4f4f8;
-    --app-inline-code-bg: #e8e8ee;
+    /* === 工具卡片 === */
+    --app-tool-card-bg: var(--hp-surface-1);
+    --app-tool-group-bg: var(--hp-surface-1);
+    --app-tool-card-hover-bg: var(--hp-surface-2);
+    --app-tool-card-accent: var(--hp-primary);
+    --app-tool-card-muted-action-fg: var(--hp-text-tertiary);
+    --app-tool-card-subtitle: var(--hp-text-secondary);
 
-    /* Diff colors (light) */
-    --app-diff-added-bg: rgba(35, 134, 54, 0.1);
-    --app-diff-added-text: #1a1a2e;
-    --app-diff-removed-bg: rgba(218, 54, 51, 0.1);
-    --app-diff-removed-text: #1a1a2e;
+    /* === 代码 === */
+    --app-code-bg: var(--hp-surface-1);
+    --app-code-header-bg: var(--hp-surface-2);
+    --app-code-header-fg: var(--hp-text-secondary);
+    --app-code-copy-hover-bg: var(--hp-surface-2);
+    --app-inline-code-bg: var(--hp-surface-2);
+    --app-inline-code-border: var(--hp-border);
+    --app-inline-code-fg: var(--hp-text-primary);
 
-    /* Git status colors (light) */
-    --app-git-staged-color: #238636;
-    --app-git-unstaged-color: #D29922;
-    --app-git-deleted-color: #DA3633;
-    --app-git-renamed-color: #2563eb;
-    --app-git-untracked-color: #8B949E;
+    /* === Markdown === */
+    --app-md-quote-bg: var(--hp-surface-1);
+    --app-md-quote-border: var(--hp-border);
+    --app-md-quote-fg: var(--hp-text-secondary);
+    --app-md-table-bg: var(--hp-surface-1);
+    --app-md-table-head-bg: var(--hp-surface-2);
+    --app-reasoning-bg: var(--hp-surface-1);
 
-    /* Badge colors (light) */
-    --app-badge-warning-bg: rgba(210, 153, 34, 0.12);
-    --app-badge-warning-text: #9a6c00;
-    --app-badge-warning-border: rgba(210, 153, 34, 0.25);
-    --app-badge-success-bg: rgba(35, 134, 54, 0.12);
-    --app-badge-success-text: #1a7f37;
-    --app-badge-success-border: rgba(35, 134, 54, 0.25);
-    --app-badge-error-bg: rgba(218, 54, 51, 0.12);
-    --app-badge-error-text: #a11d1d;
-    --app-badge-error-border: rgba(218, 54, 51, 0.25);
+    /* === Mermaid === */
+    --app-mermaid-node-fill: var(--hp-surface-1);
+    --app-mermaid-node-border: var(--hp-border);
+    --app-mermaid-cluster-fill: var(--hp-primary-subtle);
+    --app-mermaid-text: var(--hp-text-primary);
 
-    /* Semantic status colors (light) */
-    --app-success: #238636;
-    --app-success-subtle: rgba(35, 134, 54, 0.12);
-    --app-warning: #D29922;
-    --app-warning-subtle: rgba(210, 153, 34, 0.12);
-    --app-primary-subtle: rgba(26, 26, 46, 0.08);
-    --app-text-secondary: #4b5563;
+    /* === 差异颜色 === */
+    --app-diff-added-bg: var(--hp-success-subtle);
+    --app-diff-added-text: var(--hp-text-primary);
+    --app-diff-removed-bg: var(--hp-danger-subtle);
+    --app-diff-removed-text: var(--hp-text-primary);
 
+    /* === Git 状态色 === */
+    --app-git-staged-color: var(--hp-success);
+    --app-git-unstaged-color: var(--hp-warning);
+    --app-git-deleted-color: var(--hp-danger);
+    --app-git-renamed-color: var(--hp-info);
+    --app-git-untracked-color: var(--hp-text-tertiary);
+
+    /* === 徽章 === */
+    --app-badge-warning-bg: var(--hp-warning-subtle);
+    --app-badge-warning-text: var(--hp-warning);
+    --app-badge-warning-border: oklch(75% 0.15 80 / 0.25);
+    --app-badge-success-bg: var(--hp-success-subtle);
+    --app-badge-success-text: var(--hp-success);
+    --app-badge-success-border: oklch(65% 0.16 155 / 0.25);
+    --app-badge-error-bg: var(--hp-danger-subtle);
+    --app-badge-error-text: var(--hp-danger);
+    --app-badge-error-border: oklch(60% 0.20 22 / 0.25);
+
+    /* === 语义状态 === */
+    --app-success: var(--hp-success);
+    --app-success-subtle: var(--hp-success-subtle);
+    --app-warning: var(--hp-warning);
+    --app-warning-subtle: var(--hp-warning-subtle);
+    --app-primary-subtle: var(--hp-primary-subtle);
+
+    /* === 其他 === */
+    --app-link-muted: oklch(52% 0.12 200 / 0.15);
+    --app-scrollbar-thumb: oklch(60% 0.01 200 / 0.25);
+    --app-scrollbar-thumb-hover: oklch(60% 0.01 200 / 0.40);
+
+    /* === 运行时变量 === */
     --app-font-scale: 1;
     --app-chat-font-size: 0.9375rem;
     --app-chat-line-height: 1.75rem;
     --app-message-action-size: 1.125rem;
 }
 
-[data-theme="dark"] {
-    /* === Background Layers: Canvas → Surface → Elevated === */
-    --app-bg: var(--tg-theme-bg-color, #0A0A0B);
-    --app-secondary-bg: var(--tg-theme-secondary-bg-color, #141416);
-    --app-dialog-bg: #1C1C1F;
-
-    --app-accent: var(--app-button);
-    --app-hover: var(--app-subtle-bg);
-    --app-danger: #f85149;
-    --app-text-muted: var(--app-hint);
-
-    /* === Foreground === */
-    --app-fg: var(--tg-theme-text-color, #E6EDF3);
-    --app-hint: var(--tg-theme-hint-color, #8B949E);
-    --app-link: var(--tg-theme-link-color, #E6EDF3);
-
-    /* === Buttons === */
-    --app-button: var(--tg-theme-button-color, #E6EDF3);
-    --app-button-text: var(--tg-theme-button-text-color, #0A0A0B);
-
-    /* === Banner === */
-    --app-banner-bg: var(--tg-theme-button-color, #1C1C1F);
-    --app-banner-text: var(--tg-theme-button-text-color, #E6EDF3);
-
-    /* === Chat === */
-    --app-chat-user-bg: #141416;
-    --app-chat-user-surface-bg: #1C1C1F;
-    --app-chat-user-fg: #E6EDF3;
-    --app-chat-user-chip-bg: rgba(34, 197, 94, 0.12);
-    --app-chat-user-chip-fg: #4ade80;
-
-    /* === Tool Cards === */
-    --app-tool-card-bg: #141416;
-    --app-tool-group-bg: #141416;
-    --app-tool-card-hover-bg: rgba(255, 255, 255, 0.04);
-    --app-tool-card-accent: #E6EDF3;
-    --app-tool-card-muted-action-fg: #8B949E;
-    --app-tool-card-subtitle: #8B949E;
-
-    /* === Code === */
-    --app-code-header-bg: #1C1C1F;
-    --app-code-header-fg: #8B949E;
-    --app-code-copy-hover-bg: rgba(255, 255, 255, 0.06);
-    --app-code-bg: #141416;
-    --app-inline-code-bg: #1C1C1F;
-    --app-inline-code-border: #30363D;
-    --app-inline-code-fg: #E6EDF3;
-
-    /* === Markdown === */
-    --app-md-quote-bg: #141416;
-    --app-md-quote-border: #30363D;
-    --app-md-quote-fg: #8B949E;
-    --app-md-table-bg: #141416;
-    --app-md-table-head-bg: #1C1C1F;
-    --app-reasoning-bg: #141416;
-
-    /* === Mermaid === */
-    --app-mermaid-node-fill: #1C1C1F;
-    --app-mermaid-node-border: #30363D;
-    --app-mermaid-cluster-fill: #141416;
-    --app-mermaid-text: #E6EDF3;
-
-    /* === Misc === */
-    --app-link-muted: rgba(255, 255, 255, 0.2);
-    --app-scrollbar-thumb: rgba(139, 148, 158, 0.25);
-    --app-scrollbar-thumb-hover: rgba(139, 148, 158, 0.4);
-
-    /* === Semantic surfaces === */
-    --app-border: #30363D;
-    --app-divider: #30363D;
-    --app-subtle-bg: rgba(255, 255, 255, 0.04);
-
-    /* === Diff colors (dark) === */
-    --app-diff-added-bg: rgba(35, 134, 54, 0.15);
-    --app-diff-added-text: #E6EDF3;
-    --app-diff-removed-bg: rgba(218, 54, 51, 0.15);
-    --app-diff-removed-text: #E6EDF3;
-
-    /* === Git status colors (dark) === */
-    --app-git-staged-color: #238636;
-    --app-git-unstaged-color: #D29922;
-    --app-git-deleted-color: #DA3633;
-    --app-git-renamed-color: #58A6FF;
-    --app-git-untracked-color: #8B949E;
-
-    /* === Badge colors (dark) === */
-    --app-badge-warning-bg: rgba(210, 153, 34, 0.15);
-    --app-badge-warning-text: #D29922;
-    --app-badge-warning-border: rgba(210, 153, 34, 0.3);
-    --app-badge-success-bg: rgba(35, 134, 54, 0.15);
-    --app-badge-success-text: #238636;
-    --app-badge-success-border: rgba(35, 134, 54, 0.3);
-    --app-badge-error-bg: rgba(218, 54, 51, 0.15);
-    --app-badge-error-text: #DA3633;
-    --app-badge-error-border: rgba(218, 54, 51, 0.3);
-
-    /* Semantic status colors (dark) */
-    --app-success: #3fb950;
-    --app-success-subtle: rgba(63, 185, 80, 0.15);
-    --app-warning: #D29922;
-    --app-warning-subtle: rgba(210, 153, 34, 0.15);
-    --app-primary-subtle: rgba(230, 237, 243, 0.08);
-    --app-text-secondary: #8B949E;
-}
+/* 暗色模式: --hp-* 在 tokens.css [data-theme="dark"] 中覆盖 */
+/* --app-* 通过 var(--hp-*) 自动跟随，无需重复定义 */
+/* 但 Telegram TG 变量在暗色模式下也需要调整 */
 
 html {
     font-size: calc(100% * var(--app-font-scale, 1));
@@ -307,7 +226,7 @@ body {
 .collapsible-panel {
     display: grid;
     grid-template-rows: 0fr;
-    transition: grid-template-rows 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: grid-template-rows var(--hp-duration-normal, 0.25s) var(--hp-ease-default, cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .collapsible-panel[data-open] {
@@ -317,7 +236,7 @@ body {
 .collapsible-panel > .collapsible-inner {
     overflow: hidden;
     opacity: 0;
-    transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: opacity var(--hp-duration-normal, 0.2s) var(--hp-ease-default, cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .collapsible-panel[data-open] > .collapsible-inner {
@@ -352,12 +271,12 @@ body {
     width: 4px;
     cursor: col-resize;
     background: var(--app-divider);
-    transition: background-color 0.15s;
+    transition: background-color var(--hp-duration-fast, 0.15s);
 }
 
 .sidebar-resize-handle:hover,
 .sidebar-resize-handle[data-dragging] {
-    background: var(--app-link);
+    background: var(--hp-primary);
 }
 
 .sidebar-resize-handle[data-dragging] {
@@ -375,7 +294,7 @@ body {
 
 /* Markdown styles */
 .markdown-content a { color: var(--app-link); text-decoration: underline; }
-.markdown-content code { background: var(--app-inline-code-bg); padding: 0.1em 0.3em; border-radius: 4px; font-size: 0.9em; }
+.markdown-content code { background: var(--app-inline-code-bg); padding: 0.1em 0.3em; border-radius: var(--hp-radius-xs, 4px); font-size: 0.9em; }
 .markdown-content blockquote { border-left: 3px solid var(--app-hint); padding-left: 0.75rem; margin: 0.5rem 0; opacity: 0.85; }
 .markdown-content ul, .markdown-content ol { padding-left: 1.5rem; margin: 0.5rem 0; }
 .markdown-content table { border-collapse: collapse; width: 100%; }
@@ -503,14 +422,14 @@ html[data-theme="dark"] .shiki span {
 
 /* Ultrathink rainbow sparkle effect - per-letter wave animation */
 @keyframes rainbow-wave {
-  0% { color: #ff5555; }      /* red */
-  14% { color: #ffaa00; }     /* orange */
-  28% { color: #ffff55; }     /* yellow */
-  42% { color: #55ff55; }     /* green */
-  57% { color: #55ffff; }     /* cyan */
-  71% { color: #5555ff; }     /* blue */
-  85% { color: #ff55ff; }     /* magenta/pink */
-  100% { color: #ff5555; }    /* red */
+  0% { color: #ff5555; }
+  14% { color: #ffaa00; }
+  28% { color: #ffff55; }
+  42% { color: #55ff55; }
+  57% { color: #55ffff; }
+  71% { color: #5555ff; }
+  85% { color: #ff55ff; }
+  100% { color: #ff5555; }
 }
 
 @keyframes sparkle-wave {
@@ -594,6 +513,73 @@ html[data-theme="dark"] .shiki span {
 
 .animate-bounce-in {
   animation: bounce-in 0.3s ease-out;
+}
+
+/* Redesign v2 animations */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in-down {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slide-in-right {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slide-out-right {
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.animate-fade-in { animation: fade-in var(--hp-duration-normal) var(--hp-ease-default); }
+.animate-fade-in-up { animation: fade-in-up var(--hp-duration-normal) var(--hp-ease-default); }
+.animate-scale-in { animation: scale-in var(--hp-duration-normal) var(--hp-ease-overlay); }
+
+.skeleton-shimmer {
+    background: linear-gradient(90deg, var(--hp-surface-1) 25%, var(--hp-surface-2) 50%, var(--hp-surface-1) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* Stagger delays */
+.stagger-1 { animation-delay: 80ms; }
+.stagger-2 { animation-delay: 160ms; }
+.stagger-3 { animation-delay: 240ms; }
+.stagger-4 { animation-delay: 320ms; }
+.stagger-5 { animation-delay: 400ms; }
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 100ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 100ms !important;
+  }
 }
 
 /* Prevent iOS auto-zoom on input focus (font-size < 16px triggers zoom) */
