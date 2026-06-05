@@ -78,7 +78,7 @@ export function extractUpdatePlanChecklist(input: unknown, result: unknown): Che
 }
 
 function checklistTone(item: ChecklistItem): string {
-    if (item.status === 'completed') return 'text-[var(--hp-success)] line-through'
+    if (item.status === 'completed') return 'text-[--hp-success] line-through'
     if (item.status === 'in_progress') return 'text-[var(--app-link)]'
     return 'text-[var(--app-hint)]'
 }

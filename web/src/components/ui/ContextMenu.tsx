@@ -19,6 +19,11 @@ interface ContextMenuProps {
 export function ContextMenu({ x, y, items, onClose }: ContextMenuProps) {
     const menuRef = useRef<HTMLDivElement>(null)
     const [position, setPosition] = useState({ x, y })
+    const [focusedIndex, setFocusedIndex] = useState(-1)
+    const enabledIndices = items.reduce<number[]>((acc, item, i) => {
+        if (!item.disabled) acc.push(i)
+        return acc
+    }, [])
 
     useEffect(() => {
         if (!menuRef.current) return
@@ -38,6 +43,19 @@ export function ContextMenu({ x, y, items, onClose }: ContextMenuProps) {
         setPosition({ x: adjustedX, y: adjustedY })
     }, [x, y])
 
+    // Auto-focus first enabled item on mount
+    useEffect(() => {
+        if (enabledIndices.length > 0) {
+            setFocusedIndex(enabledIndices[0])
+        }
+    }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+    useEffect(() => {
+        if (focusedIndex < 0) return
+        const items = menuRef.current?.querySelectorAll<HTMLButtonElement>('[role="menuitem"]')
+        items?.[focusedIndex]?.focus()
+    }, [focusedIndex])
+
     const handleClickOutside = useCallback((e: MouseEvent) => {
         if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
             onClose()
@@ -45,26 +63,59 @@ export function ContextMenu({ x, y, items, onClose }: ContextMenuProps) {
     }, [onClose])
 
     useEffect(() => {
-        // Delay binding to avoid immediate dismissal when triggered by touch
         const timer = setTimeout(() => {
             document.addEventListener('mousedown', handleClickOutside)
             document.addEventListener('touchstart', handleClickOutside as unknown as EventListener)
         }, 100)
-        const handleEsc = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') onClose()
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                onClose()
+                return
+            }
+            if (e.key === 'ArrowDown') {
+                e.preventDefault()
+                const currentPos = enabledIndices.indexOf(focusedIndex)
+                const nextPos = currentPos < enabledIndices.length - 1 ? currentPos + 1 : 0
+                setFocusedIndex(enabledIndices[nextPos])
+                return
+            }
+            if (e.key === 'ArrowUp') {
+                e.preventDefault()
+                const currentPos = enabledIndices.indexOf(focusedIndex)
+                const prevPos = currentPos > 0 ? currentPos - 1 : enabledIndices.length - 1
+                setFocusedIndex(enabledIndices[prevPos])
+                return
+            }
+            if (e.key === 'Home') {
+                e.preventDefault()
+                setFocusedIndex(enabledIndices[0])
+                return
+            }
+            if (e.key === 'End') {
+                e.preventDefault()
+                setFocusedIndex(enabledIndices[enabledIndices.length - 1])
+                return
+            }
+            if (e.key === 'Tab') {
+                e.preventDefault()
+                onClose()
+                return
+            }
         }
-        document.addEventListener('keydown', handleEsc)
+        document.addEventListener('keydown', handleKeyDown)
         return () => {
             clearTimeout(timer)
             document.removeEventListener('mousedown', handleClickOutside)
             document.removeEventListener('touchstart', handleClickOutside as unknown as EventListener)
-            document.removeEventListener('keydown', handleEsc)
+            document.removeEventListener('keydown', handleKeyDown)
         }
-    }, [handleClickOutside, onClose])
+    }, [handleClickOutside, onClose, focusedIndex, enabledIndices])
 
     return (
         <div
             ref={menuRef}
+            role="menu"
+            aria-label="Context menu"
             className="fixed z-50 min-w-[180px] py-1 animate-fade-in-up"
             style={{
                 left: position.x,
@@ -78,30 +129,32 @@ export function ContextMenu({ x, y, items, onClose }: ContextMenuProps) {
             {items.map((item, index) => (
                 <React.Fragment key={index}>
                     {item.dividerBefore && (
-                        <div className="my-1 mx-2" style={{ height: 1, background: 'var(--hp-divider)' }} />
+                        <div role="separator" className="my-1 mx-2" style={{ height: 1, background: 'var(--hp-divider)' }} />
                     )}
                     <button
                         type="button"
+                        role="menuitem"
+                        tabIndex={focusedIndex === index ? 0 : -1}
                         disabled={item.disabled}
+                        aria-disabled={item.disabled || undefined}
                         className="flex w-full items-center gap-2 px-3 text-sm text-left transition-colors disabled:opacity-50 sm:py-2 py-3"
                         style={{
                             color: item.danger ? 'var(--hp-danger)' : 'var(--app-fg)',
-                            minHeight: 36,
+                            minHeight: 44,
+                            background: focusedIndex === index && !item.disabled ? 'var(--hp-surface-1)' : 'transparent',
                         }}
                         onClick={() => {
                             item.onClick()
                             onClose()
                         }}
-                        onMouseEnter={(e) => {
-                            if (!item.disabled) {
-                                e.currentTarget.style.background = 'var(--hp-surface-1)'
-                            }
+                        onMouseEnter={() => {
+                            if (!item.disabled) setFocusedIndex(index)
                         }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.background = 'transparent'
+                        onMouseLeave={() => {
+                            setFocusedIndex(-1)
                         }}
                     >
-                        {item.icon && <span className="w-4 text-center">{item.icon}</span>}
+                        {item.icon && <span className="w-4 text-center" aria-hidden="true">{item.icon}</span>}
                         <span>{item.label}</span>
                     </button>
                 </React.Fragment>

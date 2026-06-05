@@ -281,7 +281,7 @@ export function HappyToolMessage(props: ToolCallMessagePartProps) {
                             Tool: {props.toolName}
                         </div>
                         {props.isError ? (
-                            <span className="text-[var(--hp-danger)]">Error</span>
+                            <span className="text-[--hp-danger]">Error</span>
                         ) : null}
                         {props.status.type === 'running' && !hasResult ? (
                             <span className="text-[var(--app-hint)]">Running…</span>

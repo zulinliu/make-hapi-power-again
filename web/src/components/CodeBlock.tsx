@@ -84,6 +84,7 @@ export function CodeBlock(props: {
                         }}
                         className="shrink-0 rounded-md p-1 text-[var(--app-code-header-fg)] transition-colors hover:bg-[var(--app-code-copy-hover-bg)] hover:text-[var(--app-fg)]"
                         title={t('code.copy')}
+                        aria-label={copied ? t('code.copied') : t('code.copy')}
                     >
                         {copied ? <CheckIcon className="h-3.5 w-3.5" /> : <CopyIcon className="h-3.5 w-3.5" />}
                     </button>

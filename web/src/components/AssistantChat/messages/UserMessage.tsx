@@ -64,13 +64,13 @@ export function HappyUserMessage() {
                 <div className="ml-auto w-full max-w-[92%]">
                     <CliOutputBlock text={cliText} />
                     <div className="mt-1 flex items-center justify-end gap-2">
-                        <MessageTimestamp className="text-xs leading-none text-[var(--hp-text-tertiary)]" />
+                        <MessageTimestamp className="text-xs leading-none text-[--hp-text-tertiary]" />
                         {hasMetadata && (
                             <button
                                 type="button"
                                 onClick={() => setShowMetadata((open) => !open)}
                                 aria-expanded={showMetadata}
-                                className="text-xs text-[var(--hp-text-tertiary)] underline-offset-2 hover:text-[var(--hp-text-primary)] hover:underline"
+                                className="text-xs text-[--hp-text-tertiary] underline-offset-2 hover:text-[--hp-text-primary] hover:underline"
                             >
                                 {showMetadata ? 'Hide info' : 'Show info'}
                             </button>
@@ -104,12 +104,12 @@ export function HappyUserMessage() {
                                 <button
                                     type="button"
                                     title="Copy"
-                                    className="rounded-md p-0.5 opacity-60 transition-[opacity,background-color] hover:bg-[var(--hp-surface-2)] sm:opacity-0 sm:group-hover/msg:opacity-100"
+                                    className="rounded-md p-0.5 opacity-60 transition-[opacity,background-color] hover:bg-[--hp-surface-2] sm:opacity-0 sm:group-hover/msg:opacity-100"
                                     onClick={() => copy(text)}
                                 >
                                     {copied
-                                        ? <CheckIcon className="h-3.5 w-3.5 text-[var(--hp-success)]" />
-                                        : <CopyIcon className="h-3.5 w-3.5 text-[var(--hp-text-tertiary)]" />}
+                                        ? <CheckIcon className="h-3.5 w-3.5 text-[--hp-success]" />
+                                        : <CopyIcon className="h-3.5 w-3.5 text-[--hp-text-tertiary]" />}
                                 </button>
                             )}
                             {showStatus ? <MessageStatusIndicator status={status} onRetry={onRetry} /> : null}
@@ -117,13 +117,13 @@ export function HappyUserMessage() {
                     )}
                 </div>
                 <div className="flex justify-end items-center gap-2">
-                    <MessageTimestamp className="text-xs leading-none text-[var(--hp-text-tertiary)]" />
+                    <MessageTimestamp className="text-xs leading-none text-[--hp-text-tertiary]" />
                     {hasMetadata && (
                         <button
                             type="button"
                             onClick={() => setShowMetadata((open) => !open)}
                             aria-expanded={showMetadata}
-                            className="text-xs text-[var(--hp-text-tertiary)] underline-offset-2 hover:text-[var(--hp-text-primary)] hover:underline"
+                            className="text-xs text-[--hp-text-tertiary] underline-offset-2 hover:text-[--hp-text-primary] hover:underline"
                         >
                             {showMetadata ? 'Hide info' : 'Show info'}
                         </button>

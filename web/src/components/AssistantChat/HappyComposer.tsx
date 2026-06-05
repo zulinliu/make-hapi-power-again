@@ -531,7 +531,7 @@ export function HappyComposer(props: {
                     <FloatingOverlay maxHeight={320}>
                         {showCollaborationSettings ? (
                             <div className="py-2">
-                                <div className="px-3 pb-1 text-xs font-semibold text-[var(--hp-text-tertiary)]">
+                                <div className="px-3 pb-1 text-xs font-semibold text-[--hp-text-tertiary]">
                                     {t('misc.collaborationMode')}
                                 </div>
                                 {collaborationModeOptions.map((option) => (
@@ -542,7 +542,7 @@ export function HappyComposer(props: {
                                         className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors ${
                                             controlsDisabled
                                                 ? 'cursor-not-allowed opacity-50'
-                                                : 'cursor-pointer hover:bg-[var(--hp-surface-2)]'
+                                                : 'cursor-pointer hover:bg-[--hp-surface-2]'
                                         }`}
                                         onClick={() => handleCollaborationChange(option.mode)}
                                         onMouseDown={(e) => e.preventDefault()}
@@ -550,15 +550,15 @@ export function HappyComposer(props: {
                                         <div
                                             className={`flex h-4 w-4 items-center justify-center rounded-full border-2 ${
                                                 collaborationMode === option.mode
-                                                    ? 'border-[var(--hp-primary)]'
-                                                    : 'border-[var(--hp-text-tertiary)]'
+                                                    ? 'border-[--hp-primary]'
+                                                    : 'border-[--hp-text-tertiary]'
                                             }`}
                                         >
                                             {collaborationMode === option.mode && (
-                                                <div className="h-2 w-2 rounded-full bg-[var(--hp-primary)]" />
+                                                <div className="h-2 w-2 rounded-full bg-[--hp-primary]" />
                                             )}
                                         </div>
-                                        <span className={collaborationMode === option.mode ? 'text-[var(--hp-primary)]' : ''}>
+                                        <span className={collaborationMode === option.mode ? 'text-[--hp-primary]' : ''}>
                                             {option.label}
                                         </span>
                                     </button>
@@ -567,12 +567,12 @@ export function HappyComposer(props: {
                         ) : null}
 
                         {showCollaborationSettings && (showPermissionSettings || showModelSettings || showModelReasoningEffortSettings || showEffortSettings) ? (
-                            <div className="mx-3 h-px bg-[var(--hp-divider)]" />
+                            <div className="mx-3 h-px bg-[--hp-divider]" />
                         ) : null}
 
                         {showPermissionSettings ? (
                             <div className="py-2">
-                                <div className="px-3 pb-1 text-xs font-semibold text-[var(--hp-text-tertiary)]">
+                                <div className="px-3 pb-1 text-xs font-semibold text-[--hp-text-tertiary]">
                                     {t('misc.permissionMode')}
                                 </div>
                                 {permissionModeOptions.map((option) => (
@@ -583,7 +583,7 @@ export function HappyComposer(props: {
                                         className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors ${
                                             controlsDisabled
                                                 ? 'cursor-not-allowed opacity-50'
-                                                : 'cursor-pointer hover:bg-[var(--hp-surface-2)]'
+                                                : 'cursor-pointer hover:bg-[--hp-surface-2]'
                                         }`}
                                         onClick={() => handlePermissionChange(option.mode)}
                                         onMouseDown={(e) => e.preventDefault()}
@@ -591,15 +591,15 @@ export function HappyComposer(props: {
                                         <div
                                             className={`flex h-4 w-4 items-center justify-center rounded-full border-2 ${
                                                 permissionMode === option.mode
-                                                    ? 'border-[var(--hp-primary)]'
-                                                    : 'border-[var(--hp-text-tertiary)]'
+                                                    ? 'border-[--hp-primary]'
+                                                    : 'border-[--hp-text-tertiary]'
                                             }`}
                                         >
                                             {permissionMode === option.mode && (
-                                                <div className="h-2 w-2 rounded-full bg-[var(--hp-primary)]" />
+                                                <div className="h-2 w-2 rounded-full bg-[--hp-primary]" />
                                             )}
                                         </div>
-                                        <span className={permissionMode === option.mode ? 'text-[var(--hp-primary)]' : ''}>
+                                        <span className={permissionMode === option.mode ? 'text-[--hp-primary]' : ''}>
                                             {option.label}
                                         </span>
                                     </button>
@@ -608,12 +608,12 @@ export function HappyComposer(props: {
                         ) : null}
 
                         {(showCollaborationSettings || showPermissionSettings) && (showModelSettings || showModelReasoningEffortSettings || showEffortSettings) ? (
-                            <div className="mx-3 h-px bg-[var(--hp-divider)]" />
+                            <div className="mx-3 h-px bg-[--hp-divider]" />
                         ) : null}
 
                         {showModelSettings ? (
                             <div className="py-2">
-                                <div className="px-3 pb-1 text-xs font-semibold text-[var(--hp-text-tertiary)]">
+                                <div className="px-3 pb-1 text-xs font-semibold text-[--hp-text-tertiary]">
                                     {t('misc.model')}
                                 </div>
                                 {modelOptions.map((option) => (
@@ -624,7 +624,7 @@ export function HappyComposer(props: {
                                         className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors ${
                                             controlsDisabled
                                                 ? 'cursor-not-allowed opacity-50'
-                                                : 'cursor-pointer hover:bg-[var(--hp-surface-2)]'
+                                                : 'cursor-pointer hover:bg-[--hp-surface-2]'
                                         }`}
                                         onClick={() => handleModelChange(option.value, option.providerId)}
                                         onMouseDown={(e) => e.preventDefault()}
@@ -632,15 +632,15 @@ export function HappyComposer(props: {
                                         <div
                                             className={`flex h-4 w-4 items-center justify-center rounded-full border-2 ${
                                                 model === option.value
-                                                    ? 'border-[var(--hp-primary)]'
-                                                    : 'border-[var(--hp-text-tertiary)]'
+                                                    ? 'border-[--hp-primary]'
+                                                    : 'border-[--hp-text-tertiary]'
                                             }`}
                                         >
                                             {model === option.value && (
-                                                <div className="h-2 w-2 rounded-full bg-[var(--hp-primary)]" />
+                                                <div className="h-2 w-2 rounded-full bg-[--hp-primary]" />
                                             )}
                                         </div>
-                                        <span className={model === option.value ? 'text-[var(--hp-primary)]' : ''}>
+                                        <span className={model === option.value ? 'text-[--hp-primary]' : ''}>
                                             {option.label}
                                         </span>
                                     </button>
@@ -649,12 +649,12 @@ export function HappyComposer(props: {
                         ) : null}
 
                         {(showModelSettings || showModelReasoningEffortSettings) && showEffortSettings ? (
-                            <div className="mx-3 h-px bg-[var(--hp-divider)]" />
+                            <div className="mx-3 h-px bg-[--hp-divider]" />
                         ) : null}
 
                         {showModelReasoningEffortSettings ? (
                             <div className="py-2">
-                                <div className="px-3 pb-1 text-xs font-semibold text-[var(--hp-text-tertiary)]">
+                                <div className="px-3 pb-1 text-xs font-semibold text-[--hp-text-tertiary]">
                                     {t('misc.reasoningEffort')}
                                 </div>
                                 {codexReasoningEffortOptions.map((option) => (
@@ -665,7 +665,7 @@ export function HappyComposer(props: {
                                         className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors ${
                                             controlsDisabled
                                                 ? 'cursor-not-allowed opacity-50'
-                                                : 'cursor-pointer hover:bg-[var(--hp-surface-2)]'
+                                                : 'cursor-pointer hover:bg-[--hp-surface-2]'
                                         }`}
                                         onClick={() => handleModelReasoningEffortChange(option.value)}
                                         onMouseDown={(e) => e.preventDefault()}
@@ -673,15 +673,15 @@ export function HappyComposer(props: {
                                         <div
                                             className={`flex h-4 w-4 items-center justify-center rounded-full border-2 ${
                                                 modelReasoningEffort === option.value
-                                                    ? 'border-[var(--hp-primary)]'
-                                                    : 'border-[var(--hp-text-tertiary)]'
+                                                    ? 'border-[--hp-primary]'
+                                                    : 'border-[--hp-text-tertiary]'
                                             }`}
                                         >
                                             {modelReasoningEffort === option.value && (
-                                                <div className="h-2 w-2 rounded-full bg-[var(--hp-primary)]" />
+                                                <div className="h-2 w-2 rounded-full bg-[--hp-primary]" />
                                             )}
                                         </div>
-                                        <span className={modelReasoningEffort === option.value ? 'text-[var(--hp-primary)]' : ''}>
+                                        <span className={modelReasoningEffort === option.value ? 'text-[--hp-primary]' : ''}>
                                             {option.label}
                                         </span>
                                     </button>
@@ -690,12 +690,12 @@ export function HappyComposer(props: {
                         ) : null}
 
                         {showModelReasoningEffortSettings && showEffortSettings ? (
-                            <div className="mx-3 h-px bg-[var(--hp-divider)]" />
+                            <div className="mx-3 h-px bg-[--hp-divider]" />
                         ) : null}
 
                         {showEffortSettings ? (
                             <div className="py-2">
-                                <div className="px-3 pb-1 text-xs font-semibold text-[var(--hp-text-tertiary)]">
+                                <div className="px-3 pb-1 text-xs font-semibold text-[--hp-text-tertiary]">
                                     {t('misc.effort')}
                                 </div>
                                 {claudeEffortOptions.map((option) => (
@@ -706,7 +706,7 @@ export function HappyComposer(props: {
                                         className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors ${
                                             controlsDisabled
                                                 ? 'cursor-not-allowed opacity-50'
-                                                : 'cursor-pointer hover:bg-[var(--hp-surface-2)]'
+                                                : 'cursor-pointer hover:bg-[--hp-surface-2]'
                                         }`}
                                         onClick={() => handleEffortChange(option.value)}
                                         onMouseDown={(e) => e.preventDefault()}
@@ -714,15 +714,15 @@ export function HappyComposer(props: {
                                         <div
                                             className={`flex h-4 w-4 items-center justify-center rounded-full border-2 ${
                                                 effort === option.value
-                                                    ? 'border-[var(--hp-primary)]'
-                                                    : 'border-[var(--hp-text-tertiary)]'
+                                                    ? 'border-[--hp-primary]'
+                                                    : 'border-[--hp-text-tertiary]'
                                             }`}
                                         >
                                             {effort === option.value && (
-                                                <div className="h-2 w-2 rounded-full bg-[var(--hp-primary)]" />
+                                                <div className="h-2 w-2 rounded-full bg-[--hp-primary]" />
                                             )}
                                         </div>
-                                        <span className={effort === option.value ? 'text-[var(--hp-primary)]' : ''}>
+                                        <span className={effort === option.value ? 'text-[--hp-primary]' : ''}>
                                             {option.label}
                                         </span>
                                     </button>
@@ -779,7 +779,7 @@ export function HappyComposer(props: {
     ])
 
     return (
-        <div className={`px-3 ${isIOSPWA ? '' : 'pb-3'} pt-2 bg-[var(--hp-surface-0)]`} style={bottomStyle}>
+        <div className={`px-3 ${isIOSPWA ? '' : 'pb-3'} pt-2 bg-[--hp-surface-0]`} style={bottomStyle}>
             <div className="mx-auto w-full max-w-content">
                 <ComposerPrimitive.Root className="relative" onSubmit={handleSubmit}>
                     {overlays}
@@ -800,7 +800,7 @@ export function HappyComposer(props: {
                         agentFlavor={agentFlavor}
                     />
 
-                    <div className="overflow-hidden rounded-[var(--hp-radius-md)] border border-[var(--hp-border)] bg-[var(--hp-surface-1)] focus-within:ring-2 focus-within:ring-[var(--hp-primary)] transition-shadow">
+                    <div className="overflow-hidden rounded-[--hp-radius-md] border border-[--hp-border] bg-[--hp-surface-1] focus-within:ring-2 focus-within:ring-[--hp-primary] transition-shadow">
                         {attachments.length > 0 ? (
                             <div className="flex flex-wrap gap-2 px-4 pt-3">
                                 <ComposerPrimitive.Attachments components={{ Attachment: AttachmentItem }} />
@@ -820,7 +820,7 @@ export function HappyComposer(props: {
                                 onSelect={handleSelect}
                                 onKeyDown={handleKeyDown}
                                 onPaste={handlePaste}
-                                className="flex-1 resize-none bg-transparent text-base leading-snug text-[var(--hp-text-primary)] placeholder-[var(--hp-text-tertiary)] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                                className="flex-1 resize-none bg-transparent text-base leading-snug text-[--hp-text-primary] placeholder-[--hp-text-tertiary] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                             />
                         </div>
 

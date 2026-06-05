@@ -11,7 +11,7 @@ export function AgentSelector(props: {
 
     return (
         <div className="flex flex-col gap-2 px-3 py-3">
-            <label className="text-xs font-medium uppercase tracking-wider text-[var(--hp-text-tertiary)]">
+            <label className="text-xs font-medium uppercase tracking-wider text-[--hp-text-tertiary]">
                 {t('newSession.agent')}
             </label>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -26,10 +26,10 @@ export function AgentSelector(props: {
                             className={`
                                 flex items-center justify-center gap-2 px-3 py-2.5
                                 text-sm capitalize font-medium transition-all duration-150
-                                rounded-[var(--hp-radius-md,8px)] border
+                                rounded-[--hp-radius-md,8px] border
                                 ${isSelected
-                                    ? 'border-[var(--hp-primary)] bg-[var(--hp-primary-subtle)] text-[var(--hp-primary)]'
-                                    : 'border-[var(--hp-border)] bg-[var(--hp-surface-1)] text-[var(--hp-text-secondary)] hover:bg-[var(--hp-surface-2)] hover:text-[var(--hp-text-primary)]'
+                                    ? 'border-[--hp-primary] bg-[--hp-primary-subtle] text-[--hp-primary]'
+                                    : 'border-[--hp-border] bg-[--hp-surface-1] text-[--hp-text-secondary] hover:bg-[--hp-surface-2] hover:text-[--hp-text-primary]'
                                 }
                                 disabled:opacity-50 disabled:cursor-not-allowed
                             `}

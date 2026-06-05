@@ -7,7 +7,7 @@ const LEADING_DIRECTIVE_REGEX = /^([$\/][a-z0-9][\w-]*)(?=\s|$)/i
 
 export function getUserBubbleClassName(status?: MessageStatus) {
     return cn(
-        'happy-user-bubble happy-chat-text ml-auto w-fit min-w-0 max-w-[85%] md:max-w-[85%] rounded-[var(--hp-radius-md)] bg-[var(--hp-primary-subtle)] px-4 py-2.5 text-[var(--hp-text-primary)] shadow-none',
+        'happy-user-bubble happy-chat-text ml-auto w-fit min-w-0 max-w-[85%] md:max-w-[85%] rounded-[--hp-radius-md] bg-[--hp-primary-subtle] px-4 py-2.5 text-[--hp-text-primary] shadow-none',
         status === 'queued' && 'opacity-60'
     )
 }
@@ -47,7 +47,7 @@ export function DirectiveChip(props: { value: string }) {
     return (
         <span
             className={cn(
-                'inline-flex items-center justify-center gap-[0.2rem] whitespace-nowrap rounded-full border-0 bg-[var(--hp-surface-2)] px-2 py-px align-middle text-sm font-normal leading-[1.4] text-[var(--hp-text-secondary)] shadow-none'
+                'inline-flex items-center justify-center gap-[0.2rem] whitespace-nowrap rounded-full border-0 bg-[--hp-surface-2] px-2 py-px align-middle text-sm font-normal leading-[1.4] text-[--hp-text-secondary] shadow-none'
             )}
             title={props.value}
             aria-label={props.value}

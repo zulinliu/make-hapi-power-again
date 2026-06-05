@@ -155,17 +155,17 @@ function SessionPreviewLimitControl(props: {
 
     return (
         <div className="flex w-full items-center justify-between gap-3 px-3 py-3">
-            <label htmlFor="session-preview-limit" className="text-[var(--hp-text-primary)]">
+            <label htmlFor="session-preview-limit" className="text-[--hp-text-primary]">
                 {props.label}
             </label>
-            <div className="flex h-9 shrink-0 items-center rounded-[var(--hp-radius-sm)] border border-[var(--hp-border)] bg-[var(--hp-surface-0)] shadow-[var(--hp-shadow-xs)]">
+            <div className="flex h-9 shrink-0 items-center rounded-[--hp-radius-sm] border border-[--hp-border] bg-[--hp-surface-0] shadow-[--hp-shadow-xs]">
                 <button
                     type="button"
                     onClick={() => step(-1)}
                     disabled={props.value <= MIN_SESSION_PREVIEW_LIMIT}
                     aria-label={props.decreaseLabel}
                     title={props.decreaseLabel}
-                    className="flex h-8 w-8 items-center justify-center rounded-l-[var(--hp-radius-sm)] text-[var(--hp-text-tertiary)] transition-colors hover:bg-[var(--hp-surface-1)] hover:text-[var(--hp-text-primary)] disabled:cursor-not-allowed disabled:opacity-40"
+                    className="flex h-8 w-8 items-center justify-center rounded-l-[--hp-radius-sm] text-[--hp-text-tertiary] transition-colors hover:bg-[--hp-surface-1] hover:text-[--hp-text-primary] disabled:cursor-not-allowed disabled:opacity-40"
                 >
                     <MinusIcon className="h-3.5 w-3.5" />
                 </button>
@@ -190,7 +190,7 @@ function SessionPreviewLimitControl(props: {
                             event.currentTarget.blur()
                         }
                     }}
-                    className="h-8 w-14 border-x border-[var(--hp-border)] bg-transparent text-center text-sm font-medium tabular-nums text-[var(--hp-text-primary)] outline-none focus:bg-[var(--hp-surface-1)]"
+                    className="h-8 w-14 border-x border-[--hp-border] bg-transparent text-center text-sm font-medium tabular-nums text-[--hp-text-primary] outline-none focus:bg-[--hp-surface-1]"
                 />
                 <button
                     type="button"
@@ -198,7 +198,7 @@ function SessionPreviewLimitControl(props: {
                     disabled={props.value >= MAX_SESSION_PREVIEW_LIMIT}
                     aria-label={props.increaseLabel}
                     title={props.increaseLabel}
-                    className="flex h-8 w-8 items-center justify-center rounded-r-[var(--hp-radius-sm)] text-[var(--hp-text-tertiary)] transition-colors hover:bg-[var(--hp-surface-1)] hover:text-[var(--hp-text-primary)] disabled:cursor-not-allowed disabled:opacity-40"
+                    className="flex h-8 w-8 items-center justify-center rounded-r-[--hp-radius-sm] text-[--hp-text-tertiary] transition-colors hover:bg-[--hp-surface-1] hover:text-[--hp-text-primary] disabled:cursor-not-allowed disabled:opacity-40"
                 >
                     <PlusIcon className="h-3.5 w-3.5" />
                 </button>
@@ -219,8 +219,8 @@ function ChatSurfaceColorControl(props: {
     const isCustomSelected = props.preference.startsWith('custom:')
 
     return (
-        <div className="border-t border-[var(--hp-divider)] px-3 py-3">
-            <div className="mb-2 text-[var(--hp-text-primary)]">{props.label}</div>
+        <div className="border-t border-[--hp-divider] px-3 py-3">
+            <div className="mb-2 text-[--hp-text-primary]">{props.label}</div>
             <div className="flex flex-wrap gap-2">
                 {presetOptions.map((option) => {
                     const selected = props.preference === toPresetChatSurfaceColorPreference(option.value)
@@ -230,10 +230,10 @@ function ChatSurfaceColorControl(props: {
                             key={option.value}
                             type="button"
                             onClick={() => props.onPresetChange(option.value)}
-                            className={`inline-flex items-center gap-2 rounded-[var(--hp-radius-md)] border px-3 py-1.5 text-sm transition-colors ${
+                            className={`inline-flex items-center gap-2 rounded-[--hp-radius-md] border px-3 py-1.5 text-sm transition-colors ${
                                 selected
-                                    ? 'border-[var(--hp-primary)] bg-[var(--hp-surface-1)] text-[var(--hp-primary)]'
-                                    : 'border-[var(--hp-border)] bg-[var(--hp-surface-0)] text-[var(--hp-text-primary)] hover:bg-[var(--hp-surface-1)]'
+                                    ? 'border-[--hp-primary] bg-[--hp-surface-1] text-[--hp-primary]'
+                                    : 'border-[--hp-border] bg-[--hp-surface-0] text-[--hp-text-primary] hover:bg-[--hp-surface-1]'
                             }`}
                         >
                             <span className="h-2.5 w-2.5 rounded-full opacity-80" style={{ backgroundColor: swatchColor }} />
@@ -243,12 +243,12 @@ function ChatSurfaceColorControl(props: {
                 })}
             </div>
             <div className="mt-3 flex items-center justify-between gap-3">
-                <span className="text-sm text-[var(--hp-text-tertiary)]">{props.t('settings.chat.surfaceColor.custom')}</span>
+                <span className="text-sm text-[--hp-text-tertiary]">{props.t('settings.chat.surfaceColor.custom')}</span>
                 <label
-                    className={`inline-flex items-center rounded-[var(--hp-radius-md)] border px-2 py-1 transition-colors ${
+                    className={`inline-flex items-center rounded-[--hp-radius-md] border px-2 py-1 transition-colors ${
                         isCustomSelected
-                            ? 'border-[var(--hp-primary)] bg-[var(--hp-surface-1)]'
-                            : 'border-[var(--hp-border)] bg-[var(--hp-surface-0)]'
+                            ? 'border-[--hp-primary] bg-[--hp-surface-1]'
+                            : 'border-[--hp-border] bg-[--hp-surface-0]'
                     }`}
                 >
                     <input
@@ -399,36 +399,36 @@ export default function SettingsPage() {
 
     return (
         <div className="flex h-full min-h-0 flex-col">
-            <div className="bg-[var(--hp-surface-0)] pt-[env(safe-area-inset-top)]">
-                <div className="mx-auto w-full max-w-content flex items-center gap-2 p-3 border-b border-[var(--hp-divider)]">
+            <div className="bg-[--hp-surface-0] pt-[env(safe-area-inset-top)]">
+                <div className="mx-auto w-full max-w-content flex items-center gap-2 p-3 border-b border-[--hp-divider]">
                     <button
                         type="button"
                         onClick={goBack}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--hp-text-secondary)] transition-colors hover:bg-[var(--hp-surface-1)] hover:text-[var(--hp-text-primary)]"
+                        className="flex h-8 w-8 items-center justify-center rounded-lg text-[--hp-text-secondary] transition-colors hover:bg-[--hp-surface-1] hover:text-[--hp-text-primary]"
                     >
                         <BackIcon />
                     </button>
-                    <div className="flex-1 font-medium text-[var(--hp-text-primary)]">{t('settings.title')}</div>
+                    <div className="flex-1 font-medium text-[--hp-text-primary]">{t('settings.title')}</div>
                 </div>
             </div>
 
             <div className="app-scroll-y flex-1 min-h-0">
                 <div className="mx-auto w-full max-w-content">
                     {/* Language section */}
-                    <div className="border-b border-[var(--hp-divider)]">
-                        <div className="px-3 py-2 text-xs font-medium text-[var(--hp-text-tertiary)] uppercase tracking-wider">
+                    <div className="border-b border-[--hp-divider]">
+                        <div className="px-3 py-2 text-xs font-medium text-[--hp-text-tertiary] uppercase tracking-wider">
                             {t('settings.language.title')}
                         </div>
                         <div ref={containerRef} className="relative">
                             <button
                                 type="button"
                                 onClick={() => setIsOpen(!isOpen)}
-                                className="flex w-full items-center justify-between px-3 py-3 text-left transition-colors hover:bg-[var(--hp-surface-1)]"
+                                className="flex w-full items-center justify-between px-3 py-3 text-left transition-colors hover:bg-[--hp-surface-1]"
                                 aria-expanded={isOpen}
                                 aria-haspopup="listbox"
                             >
-                                <span className="text-[var(--hp-text-primary)]">{t('settings.language.label')}</span>
-                                <span className="flex items-center gap-1 text-[var(--hp-text-tertiary)]">
+                                <span className="text-[--hp-text-primary]">{t('settings.language.label')}</span>
+                                <span className="flex items-center gap-1 text-[--hp-text-tertiary]">
                                     <span>{currentLocale?.nativeLabel}</span>
                                     <ChevronDownIcon className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} />
                                 </span>
@@ -436,7 +436,7 @@ export default function SettingsPage() {
 
                             {isOpen && (
                                 <div
-                                    className="absolute right-3 top-full mt-1 min-w-[160px] rounded-[var(--hp-radius-md)] border border-[var(--hp-border)] bg-[var(--hp-surface-0)] shadow-[var(--hp-shadow-md)] overflow-hidden z-50"
+                                    className="absolute right-3 top-full mt-1 min-w-[160px] rounded-[--hp-radius-md] border border-[--hp-border] bg-[--hp-surface-0] shadow-[--hp-shadow-md] overflow-hidden z-50"
                                     role="listbox"
                                     aria-label={t('settings.language.title')}
                                 >
@@ -451,13 +451,13 @@ export default function SettingsPage() {
                                                 onClick={() => handleLocaleChange(loc.value)}
                                                 className={`flex items-center justify-between w-full px-3 py-2 text-base text-left transition-colors ${
                                                     isSelected
-                                                        ? 'text-[var(--hp-primary)] bg-[var(--hp-surface-1)]'
-                                                        : 'text-[var(--hp-text-primary)] hover:bg-[var(--hp-surface-1)]'
+                                                        ? 'text-[--hp-primary] bg-[--hp-surface-1]'
+                                                        : 'text-[--hp-text-primary] hover:bg-[--hp-surface-1]'
                                                 }`}
                                             >
                                                 <span>{loc.nativeLabel}</span>
                                                 {isSelected && (
-                                                    <span className="ml-2 text-[var(--hp-primary)]">
+                                                    <span className="ml-2 text-[--hp-primary]">
                                                         <CheckIcon />
                                                     </span>
                                                 )}
@@ -470,20 +470,20 @@ export default function SettingsPage() {
                     </div>
 
                     {/* Display section */}
-                    <div className="border-b border-[var(--hp-divider)]">
-                        <div className="px-3 py-2 text-xs font-medium text-[var(--hp-text-tertiary)] uppercase tracking-wider">
+                    <div className="border-b border-[--hp-divider]">
+                        <div className="px-3 py-2 text-xs font-medium text-[--hp-text-tertiary] uppercase tracking-wider">
                             {t('settings.display.title')}
                         </div>
                         <div ref={appearanceContainerRef} className="relative">
                             <button
                                 type="button"
                                 onClick={() => setIsAppearanceOpen(!isAppearanceOpen)}
-                                className="flex w-full items-center justify-between px-3 py-3 text-left transition-colors hover:bg-[var(--hp-surface-1)]"
+                                className="flex w-full items-center justify-between px-3 py-3 text-left transition-colors hover:bg-[--hp-surface-1]"
                                 aria-expanded={isAppearanceOpen}
                                 aria-haspopup="listbox"
                             >
-                                <span className="text-[var(--hp-text-primary)]">{t('settings.display.appearance')}</span>
-                                <span className="flex items-center gap-1 text-[var(--hp-text-tertiary)]">
+                                <span className="text-[--hp-text-primary]">{t('settings.display.appearance')}</span>
+                                <span className="flex items-center gap-1 text-[--hp-text-tertiary]">
                                     <span>{t(currentAppearanceLabel)}</span>
                                     <ChevronDownIcon className={`transition-transform ${isAppearanceOpen ? 'rotate-180' : ''}`} />
                                 </span>
@@ -491,7 +491,7 @@ export default function SettingsPage() {
 
                             {isAppearanceOpen && (
                                 <div
-                                    className="absolute right-3 top-full mt-1 min-w-[160px] rounded-[var(--hp-radius-md)] border border-[var(--hp-border)] bg-[var(--hp-surface-0)] shadow-[var(--hp-shadow-md)] overflow-hidden z-50"
+                                    className="absolute right-3 top-full mt-1 min-w-[160px] rounded-[--hp-radius-md] border border-[--hp-border] bg-[--hp-surface-0] shadow-[--hp-shadow-md] overflow-hidden z-50"
                                     role="listbox"
                                     aria-label={t('settings.display.appearance')}
                                 >
@@ -506,13 +506,13 @@ export default function SettingsPage() {
                                                 onClick={() => handleAppearanceChange(opt.value)}
                                                 className={`flex items-center justify-between w-full px-3 py-2 text-base text-left transition-colors ${
                                                     isSelected
-                                                        ? 'text-[var(--hp-primary)] bg-[var(--hp-surface-1)]'
-                                                        : 'text-[var(--hp-text-primary)] hover:bg-[var(--hp-surface-1)]'
+                                                        ? 'text-[--hp-primary] bg-[--hp-surface-1]'
+                                                        : 'text-[--hp-text-primary] hover:bg-[--hp-surface-1]'
                                                 }`}
                                             >
                                                 <span>{t(opt.labelKey)}</span>
                                                 {isSelected && (
-                                                    <span className="ml-2 text-[var(--hp-primary)]">
+                                                    <span className="ml-2 text-[--hp-primary]">
                                                         <CheckIcon />
                                                     </span>
                                                 )}
@@ -526,12 +526,12 @@ export default function SettingsPage() {
                             <button
                                 type="button"
                                 onClick={() => setIsFontOpen(!isFontOpen)}
-                                className="flex w-full items-center justify-between px-3 py-3 text-left transition-colors hover:bg-[var(--hp-surface-1)]"
+                                className="flex w-full items-center justify-between px-3 py-3 text-left transition-colors hover:bg-[--hp-surface-1]"
                                 aria-expanded={isFontOpen}
                                 aria-haspopup="listbox"
                             >
-                                <span className="text-[var(--hp-text-primary)]">{t('settings.display.fontSize')}</span>
-                                <span className="flex items-center gap-1 text-[var(--hp-text-tertiary)]">
+                                <span className="text-[--hp-text-primary]">{t('settings.display.fontSize')}</span>
+                                <span className="flex items-center gap-1 text-[--hp-text-tertiary]">
                                     <span>{currentFontScaleLabel}</span>
                                     <ChevronDownIcon className={`transition-transform ${isFontOpen ? 'rotate-180' : ''}`} />
                                 </span>
@@ -539,7 +539,7 @@ export default function SettingsPage() {
 
                             {isFontOpen && (
                                 <div
-                                    className="absolute right-3 top-full mt-1 min-w-[140px] rounded-[var(--hp-radius-md)] border border-[var(--hp-border)] bg-[var(--hp-surface-0)] shadow-[var(--hp-shadow-md)] overflow-hidden z-50"
+                                    className="absolute right-3 top-full mt-1 min-w-[140px] rounded-[--hp-radius-md] border border-[--hp-border] bg-[--hp-surface-0] shadow-[--hp-shadow-md] overflow-hidden z-50"
                                     role="listbox"
                                     aria-label={t('settings.display.fontSize')}
                                 >
@@ -554,13 +554,13 @@ export default function SettingsPage() {
                                                 onClick={() => handleFontScaleChange(opt.value)}
                                                 className={`flex items-center justify-between w-full px-3 py-2 text-base text-left transition-colors ${
                                                     isSelected
-                                                        ? 'text-[var(--hp-primary)] bg-[var(--hp-surface-1)]'
-                                                        : 'text-[var(--hp-text-primary)] hover:bg-[var(--hp-surface-1)]'
+                                                        ? 'text-[--hp-primary] bg-[--hp-surface-1]'
+                                                        : 'text-[--hp-text-primary] hover:bg-[--hp-surface-1]'
                                                 }`}
                                             >
                                                 <span>{opt.label}</span>
                                                 {isSelected && (
-                                                    <span className="ml-2 text-[var(--hp-primary)]">
+                                                    <span className="ml-2 text-[--hp-primary]">
                                                         <CheckIcon />
                                                     </span>
                                                 )}
@@ -574,12 +574,12 @@ export default function SettingsPage() {
                             <button
                                 type="button"
                                 onClick={() => setIsTerminalFontOpen(!isTerminalFontOpen)}
-                                className="flex w-full items-center justify-between px-3 py-3 text-left transition-colors hover:bg-[var(--hp-surface-1)]"
+                                className="flex w-full items-center justify-between px-3 py-3 text-left transition-colors hover:bg-[--hp-surface-1]"
                                 aria-expanded={isTerminalFontOpen}
                                 aria-haspopup="listbox"
                             >
-                                <span className="text-[var(--hp-text-primary)]">{t('settings.display.terminalFontSize')}</span>
-                                <span className="flex items-center gap-1 text-[var(--hp-text-tertiary)]">
+                                <span className="text-[--hp-text-primary]">{t('settings.display.terminalFontSize')}</span>
+                                <span className="flex items-center gap-1 text-[--hp-text-tertiary]">
                                     <span>{currentTerminalFontSizeLabel}</span>
                                     <ChevronDownIcon className={`transition-transform ${isTerminalFontOpen ? 'rotate-180' : ''}`} />
                                 </span>
@@ -587,7 +587,7 @@ export default function SettingsPage() {
 
                             {isTerminalFontOpen && (
                                 <div
-                                    className="absolute right-3 top-full mt-1 min-w-[140px] rounded-[var(--hp-radius-md)] border border-[var(--hp-border)] bg-[var(--hp-surface-0)] shadow-[var(--hp-shadow-md)] overflow-hidden z-50"
+                                    className="absolute right-3 top-full mt-1 min-w-[140px] rounded-[--hp-radius-md] border border-[--hp-border] bg-[--hp-surface-0] shadow-[--hp-shadow-md] overflow-hidden z-50"
                                     role="listbox"
                                     aria-label={t('settings.display.terminalFontSize')}
                                 >
@@ -602,13 +602,13 @@ export default function SettingsPage() {
                                                 onClick={() => handleTerminalFontSizeChange(opt.value)}
                                                 className={`flex items-center justify-between w-full px-3 py-2 text-base text-left transition-colors ${
                                                     isSelected
-                                                        ? 'text-[var(--hp-primary)] bg-[var(--hp-surface-1)]'
-                                                        : 'text-[var(--hp-text-primary)] hover:bg-[var(--hp-surface-1)]'
+                                                        ? 'text-[--hp-primary] bg-[--hp-surface-1]'
+                                                        : 'text-[--hp-text-primary] hover:bg-[--hp-surface-1]'
                                                 }`}
                                             >
                                                 <span>{opt.label}</span>
                                                 {isSelected && (
-                                                    <span className="ml-2 text-[var(--hp-primary)]">
+                                                    <span className="ml-2 text-[--hp-primary]">
                                                         <CheckIcon />
                                                     </span>
                                                 )}
@@ -629,12 +629,12 @@ export default function SettingsPage() {
                             <button
                                 type="button"
                                 onClick={() => setIsSessionListStatusOpen(!isSessionListStatusOpen)}
-                                className="flex w-full items-center justify-between px-3 py-3 text-left transition-colors hover:bg-[var(--hp-surface-1)]"
+                                className="flex w-full items-center justify-between px-3 py-3 text-left transition-colors hover:bg-[--hp-surface-1]"
                                 aria-expanded={isSessionListStatusOpen}
                                 aria-haspopup="listbox"
                             >
-                                <span className="text-[var(--hp-text-primary)]">{t('settings.display.sessionListStatus')}</span>
-                                <span className="flex items-center gap-1 text-[var(--hp-text-tertiary)]">
+                                <span className="text-[--hp-text-primary]">{t('settings.display.sessionListStatus')}</span>
+                                <span className="flex items-center gap-1 text-[--hp-text-tertiary]">
                                     <span>{t(currentSessionListStatusModeLabel)}</span>
                                     <ChevronDownIcon className={`transition-transform ${isSessionListStatusOpen ? 'rotate-180' : ''}`} />
                                 </span>
@@ -642,7 +642,7 @@ export default function SettingsPage() {
 
                             {isSessionListStatusOpen && (
                                 <div
-                                    className="absolute right-3 top-full mt-1 min-w-[220px] rounded-[var(--hp-radius-md)] border border-[var(--hp-border)] bg-[var(--hp-surface-0)] shadow-[var(--hp-shadow-md)] overflow-hidden z-50"
+                                    className="absolute right-3 top-full mt-1 min-w-[220px] rounded-[--hp-radius-md] border border-[--hp-border] bg-[--hp-surface-0] shadow-[--hp-shadow-md] overflow-hidden z-50"
                                     role="listbox"
                                     aria-label={t('settings.display.sessionListStatus')}
                                 >
@@ -657,13 +657,13 @@ export default function SettingsPage() {
                                                 onClick={() => handleSessionListStatusModeChange(opt.value)}
                                                 className={`flex items-center justify-between w-full px-3 py-2 text-base text-left transition-colors ${
                                                     isSelected
-                                                        ? 'text-[var(--hp-primary)] bg-[var(--hp-surface-1)]'
-                                                        : 'text-[var(--hp-text-primary)] hover:bg-[var(--hp-surface-1)]'
+                                                        ? 'text-[--hp-primary] bg-[--hp-surface-1]'
+                                                        : 'text-[--hp-text-primary] hover:bg-[--hp-surface-1]'
                                                 }`}
                                             >
                                                 <span>{t(opt.labelKey)}</span>
                                                 {isSelected && (
-                                                    <span className="ml-2 text-[var(--hp-primary)]">
+                                                    <span className="ml-2 text-[--hp-primary]">
                                                         <CheckIcon />
                                                     </span>
                                                 )}
@@ -674,27 +674,27 @@ export default function SettingsPage() {
                             )}
                         </div>
                         {sessionListStatusMode === 'detailed' ? (
-                            <div className="px-3 pb-3 text-xs text-[var(--hp-text-tertiary)]">
+                            <div className="px-3 pb-3 text-xs text-[--hp-text-tertiary]">
                                 {t('settings.display.sessionListStatus.detailedDescription')}
                             </div>
                         ) : null}
                     </div>
 
                     {/* Chat section */}
-                    <div className="border-b border-[var(--hp-divider)]">
-                        <div className="px-3 py-2 text-xs font-medium text-[var(--hp-text-tertiary)] uppercase tracking-wider">
+                    <div className="border-b border-[--hp-divider]">
+                        <div className="px-3 py-2 text-xs font-medium text-[--hp-text-tertiary] uppercase tracking-wider">
                             {t('settings.chat.title')}
                         </div>
                         <div ref={chatContainerRef} className="relative">
                             <button
                                 type="button"
                                 onClick={() => setIsChatOpen(!isChatOpen)}
-                                className="flex w-full items-center justify-between px-3 py-3 text-left transition-colors hover:bg-[var(--hp-surface-1)]"
+                                className="flex w-full items-center justify-between px-3 py-3 text-left transition-colors hover:bg-[--hp-surface-1]"
                                 aria-expanded={isChatOpen}
                                 aria-haspopup="listbox"
                             >
-                                <span className="text-[var(--hp-text-primary)]">{t('settings.chat.enterBehavior')}</span>
-                                <span className="flex items-center gap-1 text-[var(--hp-text-tertiary)]">
+                                <span className="text-[--hp-text-primary]">{t('settings.chat.enterBehavior')}</span>
+                                <span className="flex items-center gap-1 text-[--hp-text-tertiary]">
                                     <span>{t(currentComposerEnterBehaviorLabel)}</span>
                                     <ChevronDownIcon className={`transition-transform ${isChatOpen ? 'rotate-180' : ''}`} />
                                 </span>
@@ -702,7 +702,7 @@ export default function SettingsPage() {
 
                             {isChatOpen && (
                                 <div
-                                    className="absolute right-3 top-full mt-1 min-w-[170px] rounded-[var(--hp-radius-md)] border border-[var(--hp-border)] bg-[var(--hp-surface-0)] shadow-[var(--hp-shadow-md)] overflow-hidden z-50"
+                                    className="absolute right-3 top-full mt-1 min-w-[170px] rounded-[--hp-radius-md] border border-[--hp-border] bg-[--hp-surface-0] shadow-[--hp-shadow-md] overflow-hidden z-50"
                                     role="listbox"
                                     aria-label={t('settings.chat.enterBehavior')}
                                 >
@@ -717,13 +717,13 @@ export default function SettingsPage() {
                                                 onClick={() => handleComposerEnterBehaviorChange(opt.value)}
                                                 className={`flex items-center justify-between w-full px-3 py-2 text-base text-left transition-colors ${
                                                     isSelected
-                                                        ? 'text-[var(--hp-primary)] bg-[var(--hp-surface-1)]'
-                                                        : 'text-[var(--hp-text-primary)] hover:bg-[var(--hp-surface-1)]'
+                                                        ? 'text-[--hp-primary] bg-[--hp-surface-1]'
+                                                        : 'text-[--hp-text-primary] hover:bg-[--hp-surface-1]'
                                                 }`}
                                             >
                                                 <span>{t(opt.labelKey)}</span>
                                                 {isSelected && (
-                                                    <span className="ml-2 text-[var(--hp-primary)]">
+                                                    <span className="ml-2 text-[--hp-primary]">
                                                         <CheckIcon />
                                                     </span>
                                                 )}
@@ -737,12 +737,12 @@ export default function SettingsPage() {
                             <button
                                 type="button"
                                 onClick={() => setIsTerminalToolDisplayOpen(!isTerminalToolDisplayOpen)}
-                                className="flex w-full items-center justify-between px-3 py-3 text-left transition-colors hover:bg-[var(--hp-surface-1)]"
+                                className="flex w-full items-center justify-between px-3 py-3 text-left transition-colors hover:bg-[--hp-surface-1]"
                                 aria-expanded={isTerminalToolDisplayOpen}
                                 aria-haspopup="listbox"
                             >
-                                <span className="text-[var(--hp-text-primary)]">{t('settings.chat.terminalToolDisplay')}</span>
-                                <span className="flex items-center gap-1 text-[var(--hp-text-tertiary)]">
+                                <span className="text-[--hp-text-primary]">{t('settings.chat.terminalToolDisplay')}</span>
+                                <span className="flex items-center gap-1 text-[--hp-text-tertiary]">
                                     <span>{t(currentTerminalToolDisplayModeLabel)}</span>
                                     <ChevronDownIcon className={`transition-transform ${isTerminalToolDisplayOpen ? 'rotate-180' : ''}`} />
                                 </span>
@@ -750,7 +750,7 @@ export default function SettingsPage() {
 
                             {isTerminalToolDisplayOpen && (
                                 <div
-                                    className="absolute right-3 top-full mt-1 min-w-[230px] rounded-[var(--hp-radius-md)] border border-[var(--hp-border)] bg-[var(--hp-surface-0)] shadow-[var(--hp-shadow-md)] overflow-hidden z-50"
+                                    className="absolute right-3 top-full mt-1 min-w-[230px] rounded-[--hp-radius-md] border border-[--hp-border] bg-[--hp-surface-0] shadow-[--hp-shadow-md] overflow-hidden z-50"
                                     role="listbox"
                                     aria-label={t('settings.chat.terminalToolDisplay')}
                                 >
@@ -765,13 +765,13 @@ export default function SettingsPage() {
                                                 onClick={() => handleTerminalToolDisplayModeChange(opt.value)}
                                                 className={`flex items-center justify-between w-full px-3 py-2 text-base text-left transition-colors ${
                                                     isSelected
-                                                        ? 'text-[var(--hp-primary)] bg-[var(--hp-surface-1)]'
-                                                        : 'text-[var(--hp-text-primary)] hover:bg-[var(--hp-surface-1)]'
+                                                        ? 'text-[--hp-primary] bg-[--hp-surface-1]'
+                                                        : 'text-[--hp-text-primary] hover:bg-[--hp-surface-1]'
                                                 }`}
                                             >
                                                 <span>{t(opt.labelKey)}</span>
                                                 {isSelected && (
-                                                    <span className="ml-2 text-[var(--hp-primary)]">
+                                                    <span className="ml-2 text-[--hp-primary]">
                                                         <CheckIcon />
                                                     </span>
                                                 )}
@@ -801,28 +801,28 @@ export default function SettingsPage() {
                     <ProviderSettings />
 
                     {/* About section */}
-                    <div className="border-b border-[var(--hp-divider)]">
-                        <div className="px-3 py-2 text-xs font-medium text-[var(--hp-text-tertiary)] uppercase tracking-wider">
+                    <div className="border-b border-[--hp-divider]">
+                        <div className="px-3 py-2 text-xs font-medium text-[--hp-text-tertiary] uppercase tracking-wider">
                             {t('settings.about.title')}
                         </div>
                         <div className="flex w-full items-center justify-between px-3 py-3">
-                            <span className="text-[var(--hp-text-primary)]">{t('settings.about.website')}</span>
+                            <span className="text-[--hp-text-primary]">{t('settings.about.website')}</span>
                             <a
                                 href="https://github.com/zulinliu/make-hapi-power-again"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-[var(--hp-primary)] hover:underline"
+                                className="text-[--hp-primary] hover:underline"
                             >
                                 GitHub
                             </a>
                         </div>
                         <div className="flex w-full items-center justify-between px-3 py-3">
-                            <span className="text-[var(--hp-text-primary)]">{t('settings.about.appVersion')}</span>
-                            <span className="text-[var(--hp-text-tertiary)]">{__APP_VERSION__}</span>
+                            <span className="text-[--hp-text-primary]">{t('settings.about.appVersion')}</span>
+                            <span className="text-[--hp-text-tertiary]">{__APP_VERSION__}</span>
                         </div>
                         <div className="flex w-full items-center justify-between px-3 py-3">
-                            <span className="text-[var(--hp-text-primary)]">{t('settings.about.protocolVersion')}</span>
-                            <span className="text-[var(--hp-text-tertiary)]">{PROTOCOL_VERSION}</span>
+                            <span className="text-[--hp-text-primary]">{t('settings.about.protocolVersion')}</span>
+                            <span className="text-[--hp-text-tertiary]">{PROTOCOL_VERSION}</span>
                         </div>
                     </div>
                 </div>
