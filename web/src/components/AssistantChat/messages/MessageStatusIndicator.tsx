@@ -34,7 +34,7 @@ export function MessageStatusIndicator(props: {
 }) {
     if (props.status === 'queued') {
         return (
-            <span role="status" aria-label="Queued" className="inline-flex h-4 w-4 items-center justify-center text-[var(--hp-text-tertiary)]">
+            <span role="status" aria-label="Queued" className="inline-flex h-4 w-4 items-center justify-center text-(--hp-text-tertiary)">
                 <QueuedIcon />
             </span>
         )
@@ -42,7 +42,7 @@ export function MessageStatusIndicator(props: {
 
     if (props.status === 'sending') {
         return (
-            <span role="status" aria-label="Sending" className="inline-flex h-4 w-4 items-center justify-center text-[var(--hp-primary)]">
+            <span role="status" aria-label="Sending" className="inline-flex h-4 w-4 items-center justify-center text-(--hp-primary)">
                 <SendingIcon />
             </span>
         )
@@ -54,14 +54,14 @@ export function MessageStatusIndicator(props: {
 
     return (
         <span className="inline-flex items-center gap-1">
-            <span className="text-[var(--hp-danger)]">
+            <span className="text-(--hp-danger)">
                 <ErrorIcon />
             </span>
             {props.onRetry ? (
                 <button
                     type="button"
                     onClick={props.onRetry}
-                    className="text-xs text-[var(--hp-primary)] hover:underline"
+                    className="text-xs text-(--hp-primary) hover:underline"
                 >
                     Retry
                 </button>

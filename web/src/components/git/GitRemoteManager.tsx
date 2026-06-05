@@ -77,37 +77,37 @@ export function GitRemoteManager({ sessionId, onRemotesLoaded }: { sessionId: st
         }
     }
 
-    const inputClass = "rounded-[var(--hp-radius-sm)] border border-[var(--hp-border)] bg-[var(--hp-surface-0)] px-3 py-1.5 text-sm text-[var(--hp-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--hp-primary)]"
+    const inputClass = "rounded-(--hp-radius-sm) border border-(--hp-border) bg-(--hp-surface-0) px-3 py-1.5 text-sm text-(--hp-text-primary) focus:outline-none focus:ring-1 focus:ring-(--hp-primary)"
 
     return (
         <div className="space-y-3 p-3">
             {error && (
-                <div className="rounded-[var(--hp-radius-sm)] bg-[var(--hp-danger-subtle)] px-3 py-2 text-sm text-[var(--hp-danger)]">
+                <div className="rounded-(--hp-radius-sm) bg-(--hp-danger-subtle) px-3 py-2 text-sm text-(--hp-danger)">
                     {error}
                 </div>
             )}
 
             {loading ? (
-                <div className="text-sm text-[var(--hp-text-tertiary)]">{t('git.remote.loading')}</div>
+                <div className="text-sm text-(--hp-text-tertiary)">{t('git.remote.loading')}</div>
             ) : remotes.length === 0 ? (
-                <div className="text-sm text-[var(--hp-text-tertiary)]">{t('git.remote.empty')}</div>
+                <div className="text-sm text-(--hp-text-tertiary)">{t('git.remote.empty')}</div>
             ) : (
                 <div className="space-y-2">
                     {remotes.map((remote) => (
                         <div
                             key={remote.name}
-                            className="flex items-center justify-between rounded-[var(--hp-radius-md)] border border-[var(--hp-border)] bg-[var(--hp-surface-1)] px-3 py-2 hover:bg-[var(--hp-surface-2)]"
+                            className="flex items-center justify-between rounded-(--hp-radius-md) border border-(--hp-border) bg-(--hp-surface-1) px-3 py-2 hover:bg-(--hp-surface-2)"
                         >
                             <div className="min-w-0 flex-1">
-                                <div className="text-sm font-medium text-[var(--hp-text-primary)]">{remote.name}</div>
-                                <div className="truncate text-xs font-mono text-[var(--hp-text-secondary)]">
+                                <div className="text-sm font-medium text-(--hp-text-primary)">{remote.name}</div>
+                                <div className="truncate text-xs font-mono text-(--hp-text-secondary)">
                                     {remote.url}
                                 </div>
                             </div>
                             <button
                                 type="button"
                                 onClick={() => handleRemove(remote.name)}
-                                className="ml-2 shrink-0 rounded-[var(--hp-radius-sm)] px-2 py-1 text-xs text-[var(--hp-danger)] hover:opacity-80"
+                                className="ml-2 shrink-0 rounded-(--hp-radius-sm) px-2 py-1 text-xs text-(--hp-danger) hover:opacity-80"
                             >
                                 {t('git.remote.remove')}
                             </button>
@@ -116,8 +116,8 @@ export function GitRemoteManager({ sessionId, onRemotesLoaded }: { sessionId: st
                 </div>
             )}
 
-            <div className="border-t border-[var(--hp-border)] pt-3">
-                <div className="mb-2 text-xs font-medium text-[var(--hp-text-tertiary)]">{t('git.remote.addTitle')}</div>
+            <div className="border-t border-(--hp-border) pt-3">
+                <div className="mb-2 text-xs font-medium text-(--hp-text-tertiary)">{t('git.remote.addTitle')}</div>
                 <div className="flex flex-col gap-2">
                     <div className="flex gap-2">
                         <input
@@ -137,7 +137,7 @@ export function GitRemoteManager({ sessionId, onRemotesLoaded }: { sessionId: st
                         type="button"
                         onClick={handleAdd}
                         disabled={!newName || !newUrl}
-                        className="self-end px-3 py-1.5 text-xs rounded-[var(--hp-radius-sm)] bg-[var(--hp-primary)] text-[var(--hp-primary-text)] hover:opacity-90 disabled:opacity-50"
+                        className="self-end px-3 py-1.5 text-xs rounded-(--hp-radius-sm) bg-(--hp-primary) text-(--hp-primary-text) hover:opacity-90 disabled:opacity-50"
                     >
                         {t('git.remote.add')}
                     </button>

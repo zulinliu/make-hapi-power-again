@@ -12,6 +12,11 @@ export default {
   // Login / Auth
   'login.title': 'Hapi Power',
   'login.subtitle': 'Think it. Ship it.',
+  'login.brand.headline': 'Your AI coding companion',
+  'login.brand.description': 'Hapi Power connects you to powerful AI agents that understand your codebase, write code, and ship features — all from a single interface.',
+  'login.brand.feature1': 'Multi-agent orchestration with Claude, Codex, Gemini, and more',
+  'login.brand.feature2': 'Secure token-based authentication with end-to-end encryption',
+  'login.brand.feature3': 'Full terminal, file editor, and Git integration built-in',
   'login.bind.title': 'Bind Telegram',
   'login.submit': 'Sign In',
   'login.bind.submit': 'Bind',
@@ -23,7 +28,7 @@ export default {
   'login.error.loginUnavailable': 'Login is unavailable.',
   'login.error.bindFailed': 'Binding failed',
   'login.error.authFailed': 'Authentication failed',
-  'login.help': 'Needs help?',
+  'login.help': 'Need help?',
   'login.server.default': '(Default)',
   'login.server.custom': '(Custom)',
   'login.server.title': 'Hub URL',
@@ -74,6 +79,10 @@ export default {
 
   // Session header
   'session.title': 'Files',
+  'session.back': 'Go back',
+  'session.navigation': 'Session navigation',
+  'session.files': 'Files',
+  'session.git': 'Git',
   'session.more': 'More actions',
   'session.tools': 'Tools',
   'session.extensions': 'Extensions',
@@ -83,6 +92,12 @@ export default {
   'session.outline.loadOlder': 'Load earlier',
   'session.outline.empty': 'No outline items in loaded messages',
   'session.outline.kind.user': 'User',
+
+  'session.unavailable': 'Session unavailable',
+  'session.notFound': 'Session not found',
+  'session.notFoundDesc': 'This session may have been deleted or is no longer available.',
+  'session.returnToSessions': 'Return to sessions',
+  'session.redirecting': 'Redirecting in 3 seconds…',
 
   // Session actions
   'session.action.rename': 'Rename',
@@ -100,7 +115,7 @@ export default {
   'dialog.rename.saving': 'Saving…',
   'dialog.rename.error': 'Failed to rename. Please try again.',
   'dialog.archive.title': 'Archive Session',
-  'dialog.archive.description': 'Are you sure you want to archive "{name}"? This will disconnect active session.',
+  'dialog.archive.description': 'Are you sure you want to archive "{name}"? This will disconnect the active session.',
   'dialog.archive.confirm': 'Archive',
   'dialog.archive.confirming': 'Archiving…',
   'dialog.delete.title': 'Delete Session',
@@ -200,6 +215,7 @@ export default {
 
   // Code block
   'code.copy': 'Copy',
+  'code.copied': 'Copied',
   'code.truncated': 'Preview truncated — open details for full output',
 
   // Diff view
@@ -244,6 +260,9 @@ export default {
   'file.page.imagePreviewAlt': 'Image preview for {name}',
   'file.page.empty': 'File is empty.',
   'file.page.noChanges': 'No changes to display.',
+  'file.page.loadingDiff': 'Loading diff...',
+  'file.page.modified': 'Modified',
+  'file.page.readOnly': 'Read-only preview',
   'file.error.readFailed': 'Failed to read file.',
   'file.error.readFailedWithDetail': 'Failed to read file: {error}',
   'file.error.diffUnavailable': 'Diff unavailable.',
@@ -697,5 +716,6 @@ export default {
   'file.upload.success': 'File uploaded successfully',
   'file.upload.error': 'Upload failed',
   'file.upload.tooLarge': 'File is too large (max 5MB)',
+  'file.upload.remove': 'Remove attachment',
 
 } as const

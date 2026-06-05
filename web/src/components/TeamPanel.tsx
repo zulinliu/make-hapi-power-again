@@ -2,15 +2,15 @@ import { useState } from 'react'
 import type { TeamState } from '@hapipower/protocol/types'
 
 function memberStatusDot(status?: string): string {
-    if (status === 'active') return 'bg-[var(--hp-success)]'
-    if (status === 'shutdown') return 'bg-[var(--hp-danger)]'
-    return 'bg-[var(--hp-text-tertiary)]'
+    if (status === 'active') return 'bg-(--hp-success)'
+    if (status === 'shutdown') return 'bg-(--hp-danger)'
+    return 'bg-(--hp-text-tertiary)'
 }
 
 function taskStatusColor(status?: string): string {
-    if (status === 'completed') return 'text-[var(--hp-success)]'
+    if (status === 'completed') return 'text-(--hp-success)'
     if (status === 'in_progress') return 'text-[var(--app-link)]'
-    if (status === 'blocked') return 'text-[var(--hp-danger)]'
+    if (status === 'blocked') return 'text-(--hp-danger)'
     return 'text-[var(--app-hint)]'
 }
 

@@ -165,9 +165,9 @@ export function SessionHeader(props: {
     const handleMenuExtensions = () => { setMenuOpen(false); navigate({ to: `${basePath}/extensions` }) }
     const handleMenuOutline = () => { setMenuOpen(false); props.onToggleOutline?.() }
 
-    const ghostBtnClass = 'flex h-10 w-10 items-center justify-center rounded-lg transition-colors duration-[var(--hp-duration-fast)] sm:h-8 sm:w-8 text-[var(--hp-text-secondary)] hover:bg-[var(--hp-surface-1)] hover:text-[var(--hp-text-primary)]'
-    const activeTabClass = 'text-[var(--hp-primary)]'
-    const inactiveTabClass = 'text-[var(--hp-text-secondary)]'
+    const ghostBtnClass = 'flex h-11 w-11 items-center justify-center rounded-lg transition-colors duration-(--hp-duration-fast) sm:h-8 sm:w-8 text-(--hp-text-secondary) hover:bg-(--hp-surface-1) hover:text-(--hp-text-primary)'
+    const activeTabClass = 'text-(--hp-primary)'
+    const inactiveTabClass = 'text-(--hp-text-secondary)'
 
     // In Telegram, don't render header (Telegram provides its own)
     if (isTelegramApp()) {
@@ -176,25 +176,26 @@ export function SessionHeader(props: {
 
     return (
         <>
-            <div className={`bg-[var(--hp-surface-0)] pt-[env(safe-area-inset-top)] border-b border-[var(--hp-divider)]`}>
-                <div className="mx-auto w-full max-w-content flex items-center gap-2 px-2 py-1.5 sm:px-3 sm:py-2 h-[var(--hp-mobile-header-height)] sm:h-[var(--hp-header-height)]">
+            <header className={`bg-(--hp-surface-0) pt-[env(safe-area-inset-top)] border-b border-(--hp-divider)`}>
+                <div className="mx-auto w-full max-w-content flex items-center gap-2 px-2 py-1.5 sm:px-3 sm:py-2 h-(--hp-mobile-header-height) sm:h-(--hp-header-height)">
                     {/* Back button */}
                     <button
                         type="button"
                         onClick={props.onBack}
                         className={ghostBtnClass}
+                        aria-label={t('session.back')}
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                             <polyline points="15 18 9 12 15 6" />
                         </svg>
                     </button>
 
                     {/* Session info */}
                     <div className="min-w-0 flex-1">
-                        <div className="truncate text-sm font-medium leading-tight text-[var(--hp-text-primary)] sm:text-base">
+                        <div className="truncate text-sm font-medium leading-tight text-(--hp-text-primary) sm:text-base">
                             {title}
                         </div>
-                        <div className="flex items-center gap-1.5 text-xs leading-tight text-[var(--hp-text-tertiary)] sm:gap-3">
+                        <div className="flex items-center gap-1.5 text-xs leading-tight text-(--hp-text-tertiary) sm:gap-3">
                             <span className="inline-flex shrink-0 items-center gap-1">
                                 <AgentFlavorIcon flavor={session.metadata?.flavor} className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                                 <span className="max-w-[4rem] truncate">{session.metadata?.flavor?.trim() || 'unknown'}</span>
@@ -212,69 +213,81 @@ export function SessionHeader(props: {
                         </div>
                     </div>
 
-                    {/* Files icon — always visible */}
-                    <button
-                        type="button"
-                        onClick={handleFilesClick}
-                        className={`${ghostBtnClass} ${isFilesActive ? activeTabClass : inactiveTabClass}`}
-                        title={t('session.title')}
-                    >
-                        <FilesIcon />
-                    </button>
+                    {/* Session navigation */}
+                    <nav aria-label={t('session.navigation')}>
+                        <div className="flex items-center gap-0.5">
+                            {/* Files icon — always visible */}
+                            <button
+                                type="button"
+                                onClick={handleFilesClick}
+                                className={`${ghostBtnClass} ${isFilesActive ? activeTabClass : inactiveTabClass}`}
+                                title={t('session.title')}
+                                aria-label={t('session.files')}
+                                aria-current={isFilesActive ? 'page' : undefined}
+                            >
+                                <FilesIcon />
+                            </button>
 
-                    {/* Git icon — desktop only */}
-                    <button
-                        type="button"
-                        onClick={handleGitClick}
-                        className={`${ghostBtnClass} ${isGitActive ? activeTabClass : inactiveTabClass} hidden lg:flex`}
-                        title="Git"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <circle cx="18" cy="18" r="3" /><circle cx="6" cy="6" r="3" /><path d="M13 6h3a2 2 0 0 1 2 2v7" /><path d="M6 9v12" />
-                        </svg>
-                    </button>
+                            {/* Git icon — desktop only */}
+                            <button
+                                type="button"
+                                onClick={handleGitClick}
+                                className={`${ghostBtnClass} ${isGitActive ? activeTabClass : inactiveTabClass} hidden lg:flex`}
+                                title="Git"
+                                aria-label={t('session.git')}
+                                aria-current={isGitActive ? 'page' : undefined}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                    <circle cx="18" cy="18" r="3" /><circle cx="6" cy="6" r="3" /><path d="M13 6h3a2 2 0 0 1 2 2v7" /><path d="M6 9v12" />
+                                </svg>
+                            </button>
 
-                    {/* Extensions icon — desktop only */}
-                    <button
-                        type="button"
-                        onClick={handleExtensionsClick}
-                        className={`${ghostBtnClass} ${isExtensionsActive ? activeTabClass : inactiveTabClass} hidden lg:flex`}
-                        title={t('session.extensions') ?? 'Extensions'}
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-                        </svg>
-                    </button>
+                            {/* Extensions icon — desktop only */}
+                            <button
+                                type="button"
+                                onClick={handleExtensionsClick}
+                                className={`${ghostBtnClass} ${isExtensionsActive ? activeTabClass : inactiveTabClass} hidden lg:flex`}
+                                title={t('session.extensions') ?? 'Extensions'}
+                                aria-label={t('session.extensions')}
+                                aria-current={isExtensionsActive ? 'page' : undefined}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                                </svg>
+                            </button>
 
-                    {/* Outline icon — desktop only, overlay toggle */}
-                    {props.onToggleOutline ? (
-                        <button
-                            type="button"
-                            onClick={props.onToggleOutline}
-                            className={`${ghostBtnClass} hidden lg:flex`}
-                            title={t('session.outline.open')}
-                            aria-label={t('session.outline.open')}
-                        >
-                            <OutlineIcon />
-                        </button>
-                    ) : null}
+                            {/* Outline icon — desktop only, overlay toggle */}
+                            {props.onToggleOutline ? (
+                                <button
+                                    type="button"
+                                    onClick={props.onToggleOutline}
+                                    className={`${ghostBtnClass} hidden lg:flex`}
+                                    title={t('session.outline.open')}
+                                    aria-label={t('session.outline.open')}
+                                >
+                                    <OutlineIcon />
+                                </button>
+                            ) : null}
 
-                    {/* More menu — always visible */}
-                    <button
-                        type="button"
-                        onClick={handleMenuToggle}
-                        onPointerDown={(e) => e.stopPropagation()}
-                        ref={menuAnchorRef}
-                        aria-haspopup="menu"
-                        aria-expanded={menuOpen}
-                        aria-controls={menuOpen ? menuId : undefined}
-                        className={ghostBtnClass}
-                        title={t('session.more')}
-                    >
-                        <MoreVerticalIcon />
-                    </button>
+                            {/* More menu — always visible */}
+                            <button
+                                type="button"
+                                onClick={handleMenuToggle}
+                                onPointerDown={(e) => e.stopPropagation()}
+                                ref={menuAnchorRef}
+                                aria-haspopup="menu"
+                                aria-expanded={menuOpen}
+                                aria-controls={menuOpen ? menuId : undefined}
+                                aria-label={t('session.more')}
+                                className={ghostBtnClass}
+                                title={t('session.more')}
+                            >
+                                <MoreVerticalIcon />
+                            </button>
+                        </div>
+                    </nav>
                 </div>
-            </div>
+            </header>
 
             <SessionActionMenu
                 isOpen={menuOpen}

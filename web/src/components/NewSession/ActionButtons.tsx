@@ -13,7 +13,7 @@ export function ActionButtons(props: {
     const { t } = useTranslation()
 
     return (
-        <div className="sticky bottom-0 z-10 border-t border-[var(--hp-border)] bg-[var(--hp-surface-0)] px-3 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)]">
+        <div className="sticky bottom-0 z-10 border-t border-(--hp-border) bg-(--hp-surface-0) px-3 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)]">
             <div className="flex gap-2">
                 <Button
                     variant="secondary"
@@ -31,7 +31,7 @@ export function ActionButtons(props: {
                 >
                     {props.isPending ? (
                         <>
-                            <Spinner size="sm" label={null} className="text-[var(--hp-primary-text)]" />
+                            <Spinner size="sm" label={null} className="text-(--hp-primary-text)" />
                             {t('newSession.creating')}
                         </>
                     ) : (

@@ -109,27 +109,27 @@ export function GitBranchManager({ sessionId }: { sessionId: string }) {
           value={newBranchName}
           onChange={(e) => setNewBranchName(e.target.value)}
           placeholder={t('git.branch.newPlaceholder')}
-          className="flex-1 text-sm px-3 py-1.5 rounded-[var(--hp-radius-sm)] border outline-none bg-[var(--hp-surface-1)] border-[var(--hp-border)] text-[var(--hp-text-primary)]"
+          className="flex-1 text-sm px-3 py-1.5 rounded-(--hp-radius-sm) border outline-none bg-(--hp-surface-1) border-(--hp-border) text-(--hp-text-primary)"
           onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
         />
         <button
           onClick={handleCreate}
           disabled={!newBranchName.trim()}
-          className="text-xs px-3 py-1.5 rounded-[var(--hp-radius-sm)] font-medium bg-[var(--hp-primary)] text-[var(--hp-primary-text)]"
+          className="text-xs px-3 py-1.5 rounded-(--hp-radius-sm) font-medium bg-(--hp-primary) text-(--hp-primary-text)"
           style={{ opacity: newBranchName.trim() ? 1 : 0.5 }}
         >
           {t('git.branch.create')}
         </button>
       </div>
 
-      {error && <p className="text-xs text-[var(--hp-danger)]">{error}</p>}
+      {error && <p className="text-xs text-(--hp-danger)">{error}</p>}
 
       {loading ? (
-        <p className="text-sm text-[var(--hp-text-tertiary)]">{t('git.branch.loading')}</p>
+        <p className="text-sm text-(--hp-text-tertiary)">{t('git.branch.loading')}</p>
       ) : (
         <div className="space-y-1">
           {branches.map((branch) => (
-            <div key={branch.name} className="flex items-center gap-2 text-sm py-1.5 px-2 rounded-[var(--hp-radius-sm)] hover:bg-[var(--hp-surface-1)]"
+            <div key={branch.name} className="flex items-center gap-2 text-sm py-1.5 px-2 rounded-(--hp-radius-sm) hover:bg-(--hp-surface-1)"
               style={{ background: branch.isCurrent ? 'var(--hp-primary-subtle)' : 'transparent' }}>
               <span className="w-4 text-center" style={{ color: branch.isCurrent ? 'var(--hp-success)' : 'transparent' }}>
                 ●
@@ -139,13 +139,13 @@ export function GitBranchManager({ sessionId }: { sessionId: string }) {
               </span>
               {!branch.isCurrent && !branch.isRemote && (
                 <>
-                  <button onClick={() => handleMerge(branch.name)} className="text-xs px-2 py-0.5 rounded-[var(--hp-radius-xs)] text-[var(--hp-text-tertiary)]" title={t('git.branch.merge')}>
+                  <button onClick={() => handleMerge(branch.name)} className="text-xs px-2 py-0.5 rounded-(--hp-radius-xs) text-(--hp-text-tertiary)" title={t('git.branch.merge')}>
                     ⊕
                   </button>
-                  <button onClick={() => handleSwitch(branch.name)} className="text-xs px-2 py-0.5 rounded-[var(--hp-radius-xs)] text-[var(--hp-text-tertiary)]" title={t('git.branch.switch')}>
+                  <button onClick={() => handleSwitch(branch.name)} className="text-xs px-2 py-0.5 rounded-(--hp-radius-xs) text-(--hp-text-tertiary)" title={t('git.branch.switch')}>
                     ⇄
                   </button>
-                  <button onClick={() => setDeleteTarget(branch.name)} className="text-xs px-2 py-0.5 rounded-[var(--hp-radius-xs)] text-[var(--hp-danger)]" title={t('git.branch.delete')}>
+                  <button onClick={() => setDeleteTarget(branch.name)} className="text-xs px-2 py-0.5 rounded-(--hp-radius-xs) text-(--hp-danger)" title={t('git.branch.delete')}>
                     ×
                   </button>
                 </>
