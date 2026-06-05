@@ -225,6 +225,19 @@ Socket 服务器创建早于 SyncEngine，使用 `getSyncEngine?: () => SyncEngi
 - Web 测试：`web/src/**/*.test.ts` / `web/src/**/*.test.tsx`
 - Shared 测试：`shared/src/**/*.test.ts`
 
+## 强制约束
+
+所有 AI Agent **必须**在首次交互时阅读并遵守以下规范文档：
+
+- **[GIT-STANDARDS.md](./GIT-STANDARDS.md)** — Git 管理规范（分支/commit/tag/release/作者/版本号）
+
+### 核心红线（违反即停）
+
+1. **作者唯一**：commit/tag/release 作者只能是 `zulinliu`，禁止任何 `Co-Authored-By` 行
+2. **品牌零残留**：commit message 和 release notes 禁止包含 `via [HAPI]`、`hapi.run`、`Generated with [Claude Code]` 等第三方品牌标识
+3. **三位版本号**：分支/tag/release 必须使用 `vX.Y.Z` 三位语义化版本号，禁止 `v1`、`v0.6` 等非完整格式
+4. **分支命名**：功能分支必须为 `feat/vX.Y.Z` 格式
+
 ## 规则
 
 - TypeScript strict，禁止 `any`（用 `unknown` + 类型收窄）
