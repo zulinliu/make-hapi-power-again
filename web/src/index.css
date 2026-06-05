@@ -35,6 +35,8 @@
     --app-subtle-bg: var(--hp-surface-1);
     --app-border: var(--hp-border);
     --app-divider: var(--hp-divider);
+    --app-fg-muted: var(--hp-text-tertiary);
+    --app-subtle-bg-hover: var(--hp-surface-2);
 
     /* === 聊天色彩 === */
     --app-chat-user-bg: var(--hp-primary-subtle);
@@ -556,9 +558,9 @@ html[data-theme="dark"] .shiki span {
   50% { opacity: 0.7; }
 }
 
-.animate-fade-in { animation: fade-in var(--hp-duration-normal) var(--hp-ease-default); }
-.animate-fade-in-up { animation: fade-in-up var(--hp-duration-normal) var(--hp-ease-default); }
-.animate-scale-in { animation: scale-in var(--hp-duration-normal) var(--hp-ease-overlay); }
+.animate-fade-in { animation: fade-in var(--hp-duration-normal) var(--hp-ease-default) both; }
+.animate-fade-in-up { animation: fade-in-up var(--hp-duration-normal) var(--hp-ease-default) both; }
+.animate-scale-in { animation: scale-in var(--hp-duration-normal) var(--hp-ease-overlay) both; }
 
 .skeleton-shimmer {
     background: linear-gradient(90deg, var(--hp-surface-1) 25%, var(--hp-surface-2) 50%, var(--hp-surface-1) 75%);

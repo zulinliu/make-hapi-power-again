@@ -9,9 +9,9 @@
 
 :root {
   /* === 品牌色 === */
-  --hp-primary: oklch(52% 0.12 200);
-  --hp-primary-hover: oklch(48% 0.14 200);
-  --hp-primary-subtle: oklch(52% 0.06 200 / 0.10);
+  --hp-primary: oklch(42% 0.14 200);
+  --hp-primary-hover: oklch(38% 0.16 200);
+  --hp-primary-subtle: oklch(42% 0.06 200 / 0.12);
   --hp-primary-text: oklch(100% 0 0);
 
   /* === 强调色 === */
@@ -37,7 +37,7 @@
   /* === 文本 === */
   --hp-text-primary: oklch(15% 0.01 75);
   --hp-text-secondary: oklch(42% 0.01 75);
-  --hp-text-tertiary: oklch(60% 0.01 75);
+  --hp-text-tertiary: oklch(52% 0.01 75);
   --hp-text-disabled: oklch(75% 0.01 75);
   --hp-text-inverse: oklch(100% 0 0);
 
@@ -96,9 +96,9 @@
 }
 
 [data-theme="dark"] {
-  --hp-primary: oklch(62% 0.12 200);
-  --hp-primary-hover: oklch(58% 0.14 200);
-  --hp-primary-subtle: oklch(62% 0.06 200 / 0.12);
+  --hp-primary: oklch(72% 0.12 200);
+  --hp-primary-hover: oklch(68% 0.14 200);
+  --hp-primary-subtle: oklch(72% 0.06 200 / 0.14);
   --hp-primary-text: oklch(100% 0 0);
 
   --hp-accent: oklch(75% 0.16 75);
@@ -123,5 +123,5 @@
   --hp-shadow-md: 0 4px 16px oklch(0% 0 0 / 0.4);
   --hp-shadow-lg: 0 8px 32px oklch(0% 0 0 / 0.5);
   --hp-shadow-xl: 0 16px 48px oklch(0% 0 0 / 0.6);
-  --hp-shadow-focus: 0 0 0 2px oklch(62% 0.12 200 / 0.4);
+  --hp-shadow-focus: 0 0 0 2px oklch(72% 0.12 200 / 0.4);
 }

@@ -189,7 +189,7 @@ function SessionsPage() {
                             <button
                                 type="button"
                                 onClick={() => navigate({ to: '/browse' })}
-                                className="p-1.5 rounded-full text-[--hp-text-tertiary] hover:text-[--hp-text-primary] hover:bg-[--hp-surface-1] transition-colors"
+                                className="p-2.5 rounded-full text-[--hp-text-tertiary] hover:text-[--hp-text-primary] hover:bg-[--hp-surface-1] transition-colors"
                                 title={t('browse.nav')}
                             >
                                 <FolderOpenIcon className="h-5 w-5" />
@@ -197,7 +197,7 @@ function SessionsPage() {
                             <button
                                 type="button"
                                 onClick={() => navigate({ to: '/settings' })}
-                                className="p-1.5 rounded-full text-[--hp-text-tertiary] hover:text-[--hp-text-primary] hover:bg-[--hp-surface-1] transition-colors"
+                                className="p-2.5 rounded-full text-[--hp-text-tertiary] hover:text-[--hp-text-primary] hover:bg-[--hp-surface-1] transition-colors"
                                 title={t('settings.title')}
                             >
                                 <SettingsIcon className="h-5 w-5" />
@@ -205,7 +205,7 @@ function SessionsPage() {
                             <button
                                 type="button"
                                 onClick={() => navigate({ to: '/sessions/new' })}
-                                className="session-list-new-button p-1.5 rounded-full text-[--hp-primary] transition-colors"
+                                className="session-list-new-button p-2.5 rounded-full text-[--hp-primary] transition-colors"
                                 title={t('sessions.new')}
                             >
                                 <PlusIcon className="h-5 w-5" />
@@ -548,7 +548,7 @@ function NewSessionPage() {
                         type="button"
                         onClick={goBack}
                         aria-label="Go back"
-                        className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--hp-text-tertiary)] transition-colors hover:bg-[var(--hp-surface-1)] hover:text-[var(--hp-text-primary)]"
+                        className="flex h-11 w-11 items-center justify-center rounded-full text-[var(--hp-text-tertiary)] transition-colors hover:bg-[var(--hp-surface-1)] hover:text-[var(--hp-text-primary)]"
                     >
                         <BackIcon />
                     </button>
@@ -604,7 +604,7 @@ function BrowsePage() {
                         type="button"
                         onClick={goBack}
                         aria-label="Go back"
-                        className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--hp-text-tertiary)] transition-colors hover:bg-[var(--hp-surface-1)] hover:text-[var(--hp-text-primary)]"
+                        className="flex h-11 w-11 items-center justify-center rounded-full text-[var(--hp-text-tertiary)] transition-colors hover:bg-[var(--hp-surface-1)] hover:text-[var(--hp-text-primary)]"
                     >
                         <BackIcon />
                     </button>
