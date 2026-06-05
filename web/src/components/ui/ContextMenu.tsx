@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
+import React, { useEffect, useRef, useState, useCallback } from 'react'
 
 export interface ContextMenuItem {
     label: string
     icon?: string
     danger?: boolean
     disabled?: boolean
+    dividerBefore?: boolean
     onClick: () => void
 }
 
@@ -64,40 +65,46 @@ export function ContextMenu({ x, y, items, onClose }: ContextMenuProps) {
     return (
         <div
             ref={menuRef}
-            className="fixed z-50 min-w-[180px] rounded-lg border py-1 shadow-lg"
+            className="fixed z-50 min-w-[180px] py-1 animate-fade-in-up"
             style={{
                 left: position.x,
                 top: position.y,
                 background: 'var(--app-bg)',
-                borderColor: 'var(--app-border)',
+                border: '1px solid var(--app-border)',
+                borderRadius: 'var(--hp-radius-md)',
+                boxShadow: 'var(--hp-shadow-md)',
             }}
         >
             {items.map((item, index) => (
-                <button
-                    key={index}
-                    type="button"
-                    disabled={item.disabled}
-                    className="flex w-full items-center gap-2 px-3 py-2.5 text-sm text-left transition-colors disabled:opacity-50"
-                    style={{
-                        color: item.danger ? 'var(--app-danger)' : 'var(--app-fg)',
-                        minHeight: 44,
-                    }}
-                    onClick={() => {
-                        item.onClick()
-                        onClose()
-                    }}
-                    onMouseEnter={(e) => {
-                        if (!item.disabled) {
-                            e.currentTarget.style.background = 'var(--app-secondary-bg)'
-                        }
-                    }}
-                    onMouseLeave={(e) => {
-                        e.currentTarget.style.background = 'transparent'
-                    }}
-                >
-                    {item.icon && <span className="w-4 text-center">{item.icon}</span>}
-                    <span>{item.label}</span>
-                </button>
+                <React.Fragment key={index}>
+                    {item.dividerBefore && (
+                        <div className="my-1 mx-2" style={{ height: 1, background: 'var(--hp-divider)' }} />
+                    )}
+                    <button
+                        type="button"
+                        disabled={item.disabled}
+                        className="flex w-full items-center gap-2 px-3 text-sm text-left transition-colors disabled:opacity-50 sm:py-2 py-3"
+                        style={{
+                            color: item.danger ? 'var(--hp-danger)' : 'var(--app-fg)',
+                            minHeight: 36,
+                        }}
+                        onClick={() => {
+                            item.onClick()
+                            onClose()
+                        }}
+                        onMouseEnter={(e) => {
+                            if (!item.disabled) {
+                                e.currentTarget.style.background = 'var(--hp-surface-1)'
+                            }
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.background = 'transparent'
+                        }}
+                    >
+                        {item.icon && <span className="w-4 text-center">{item.icon}</span>}
+                        <span>{item.label}</span>
+                    </button>
+                </React.Fragment>
             ))}
         </div>
     )

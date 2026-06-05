@@ -10,17 +10,21 @@ export const DialogContent = React.forwardRef<
     React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
 >(({ className, ...props }, ref) => (
     <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/60 backdrop-blur-[2px]" />
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 animate-fade-in" style={{ background: 'oklch(0% 0 0 / 0.5)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }} />
         <div className="fixed inset-0 z-50 overflow-y-auto overscroll-contain">
             <div className="min-h-[100dvh] flex items-start sm:items-center justify-center p-2 pt-[max(0.5rem,env(safe-area-inset-top))] sm:p-4 pointer-events-none">
                 <DialogPrimitive.Content
                     ref={ref}
                     className={cn(
-                        'pointer-events-auto w-full sm:max-w-lg max-h-[85dvh] sm:max-h-[calc(100dvh_-_32px)] overflow-y-auto',
-                        'rounded-xl bg-[var(--app-dialog-bg)] p-5 sm:p-4',
-                        'shadow-2xl overscroll-contain',
+                        'pointer-events-auto animate-scale-in relative w-full sm:max-w-lg max-h-[85dvh] sm:max-h-[calc(100dvh_-_32px)] overflow-y-auto',
+                        'p-5 sm:p-6 overscroll-contain',
                         className
                     )}
+                    style={{
+                        borderRadius: 'var(--hp-radius-lg)',
+                        background: 'var(--app-dialog-bg)',
+                        boxShadow: 'var(--hp-shadow-xl)',
+                    }}
                     {...props}
                 />
             </div>
@@ -28,6 +32,8 @@ export const DialogContent = React.forwardRef<
     </DialogPrimitive.Portal>
 ))
 DialogContent.displayName = 'DialogContent'
+
+export const DialogClose = DialogPrimitive.Close
 
 export const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
     <div className={cn('flex flex-col space-y-1.5 text-left', className)} {...props} />
@@ -58,5 +64,5 @@ export const DialogDescription = React.forwardRef<
 DialogDescription.displayName = 'DialogDescription'
 
 export const DialogFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-    <div className={cn('flex gap-3 justify-end pt-4', className)} {...props} />
+    <div className={cn('flex gap-3 justify-end pt-5', className)} {...props} />
 )

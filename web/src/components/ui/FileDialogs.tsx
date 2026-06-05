@@ -72,13 +72,14 @@ export function FileInputDialog({
                         placeholder={placeholder}
                         disabled={submitting}
                         enterKeyHint="done"
-                        className="w-full rounded-lg border px-3 py-2.5 text-sm transition-colors focus:outline-none focus:ring-2"
+                        className="w-full px-3 py-2.5 text-sm transition-colors focus:outline-none focus:ring-2"
                         style={{
-                            borderColor: 'var(--app-border)',
+                            borderRadius: 'var(--hp-radius-sm)',
+                            border: '1px solid var(--app-border)',
                             background: 'var(--app-secondary-bg)',
                             color: 'var(--app-fg)',
                             minHeight: 44,
-                            '--tw-ring-color': 'var(--app-link)',
+                            '--tw-ring-color': 'var(--hp-primary)',
                         } as React.CSSProperties}
                         onKeyDown={(e) => {
                             if (e.key === 'Enter' && value.trim() && !submitting) {
@@ -87,7 +88,7 @@ export function FileInputDialog({
                         }}
                     />
                     {error && (
-                        <p className="text-sm rounded-lg px-3 py-2 text-[var(--app-danger)] bg-[var(--app-badge-error-bg)]">{error}</p>
+                        <p className="text-sm px-3 py-2" style={{ borderRadius: 'var(--hp-radius-sm)', color: 'var(--hp-danger)', background: 'var(--hp-danger-subtle)' }}>{error}</p>
                     )}
                 </div>
                 <DialogFooter>
@@ -118,7 +119,8 @@ function PickerChevronIcon(props: { collapsed: boolean }) {
     return (
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
             strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-            className={`transition-transform duration-150 ${props.collapsed ? '' : 'rotate-90'}`}>
+            className="transition-transform duration-150 shrink-0"
+            style={{ color: 'var(--hp-text-tertiary)', transform: props.collapsed ? undefined : 'rotate(90deg)' }}>
             <polyline points="9 18 15 12 9 6" />
         </svg>
     )
@@ -128,7 +130,7 @@ function PickerFolderIcon() {
     return (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
             strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"
-            className="text-[var(--app-link)] shrink-0">
+            className="shrink-0" style={{ color: 'var(--hp-primary)' }}>
             <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
         </svg>
     )
@@ -159,17 +161,24 @@ function DirectoryPickerNode(props: {
     return (
         <div>
             <div
-                className={`flex items-center gap-2 px-2 py-2 rounded-lg cursor-pointer text-sm transition-colors ${
-                    isSelected
-                        ? 'bg-[var(--app-primary-subtle)] font-medium'
-                        : 'hover:bg-[var(--app-subtle-bg)]'
-                }`}
-                style={{ paddingLeft: indent, color: 'var(--app-fg)' }}
+                className="flex items-center gap-2 px-2 py-2 cursor-pointer text-sm transition-colors"
+                style={{
+                    paddingLeft: indent,
+                    borderRadius: 'var(--hp-radius-sm)',
+                    background: isSelected ? 'var(--hp-primary-subtle)' : undefined,
+                    fontWeight: isSelected ? 500 : undefined,
+                    color: 'var(--app-fg)',
+                }}
                 onClick={() => props.onSelect(props.path)}
+                onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = 'var(--hp-surface-1)' }}
+                onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.background = 'transparent' }}
             >
                 <span
-                    className="shrink-0 cursor-pointer p-0.5 rounded hover:bg-[var(--app-subtle-bg)]"
+                    className="shrink-0 cursor-pointer p-0.5"
+                    style={{ borderRadius: 'var(--hp-radius-xs)' }}
                     onClick={(e) => { e.stopPropagation(); props.onToggle(props.path) }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hp-surface-1)' }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
                 >
                     <PickerChevronIcon collapsed={!isExpanded} />
                 </span>
@@ -180,10 +189,10 @@ function DirectoryPickerNode(props: {
             {isExpanded ? (
                 isLoading ? (
                     <div className="px-2 py-3" style={{ paddingLeft: 8 + childDepth * 16 }}>
-                        <div className="h-3 w-32 rounded bg-[var(--app-subtle-bg)] animate-pulse" />
+                        <div className="h-3 w-32 rounded animate-pulse" style={{ background: 'var(--hp-surface-2)' }} />
                     </div>
                 ) : error ? (
-                    <div className="px-2 py-2 text-xs rounded-lg text-[var(--app-warning)]" style={{ paddingLeft: 8 + childDepth * 16 }}>
+                    <div className="px-2 py-2 text-xs" style={{ paddingLeft: 8 + childDepth * 16, color: 'var(--hp-warning)' }}>
                         {formatDirectoryError(error, t)}
                     </div>
                 ) : (
@@ -284,8 +293,8 @@ export function FileMoveDialog({
                         {t('file.move.selectDestination')}
                     </div>
 
-                    <div className="max-h-48 overflow-y-auto rounded-lg border p-1"
-                        style={{ borderColor: 'var(--app-border)', background: 'var(--app-secondary-bg)' }}>
+                    <div className="max-h-48 overflow-y-auto p-1"
+                        style={{ border: '1px solid var(--app-border)', borderRadius: 'var(--hp-radius-md)', background: 'var(--app-secondary-bg)' }}>
                         <DirectoryPickerNode
                             api={api}
                             sessionId={sessionId}
@@ -305,13 +314,14 @@ export function FileMoveDialog({
                         onChange={(e) => setDestPath(e.target.value)}
                         placeholder={t('file.move.destinationPlaceholder')}
                         disabled={submitting}
-                        className="w-full rounded-lg border px-3 py-2.5 text-sm font-mono transition-colors focus:outline-none focus:ring-2"
+                        className="w-full px-3 py-2.5 text-sm font-mono transition-colors focus:outline-none focus:ring-2"
                         style={{
-                            borderColor: 'var(--app-border)',
+                            borderRadius: 'var(--hp-radius-sm)',
+                            border: '1px solid var(--app-border)',
                             background: 'var(--app-secondary-bg)',
                             color: 'var(--app-fg)',
                             minHeight: 44,
-                            '--tw-ring-color': 'var(--app-link)',
+                            '--tw-ring-color': 'var(--hp-primary)',
                         } as React.CSSProperties}
                         onKeyDown={(e) => {
                             if (e.key === 'Enter' && destPath.trim() && !submitting) {
@@ -323,7 +333,7 @@ export function FileMoveDialog({
                         {t('file.move.pathHint')}
                     </div>
                     {error && (
-                        <p className="text-sm rounded-lg px-3 py-2 text-[var(--app-danger)] bg-[var(--app-badge-error-bg)]">{error}</p>
+                        <p className="text-sm px-3 py-2" style={{ borderRadius: 'var(--hp-radius-sm)', color: 'var(--hp-danger)', background: 'var(--hp-danger-subtle)' }}>{error}</p>
                     )}
                 </div>
                 <DialogFooter>

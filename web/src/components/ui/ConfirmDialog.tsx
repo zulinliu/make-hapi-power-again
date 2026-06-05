@@ -60,16 +60,28 @@ export function ConfirmDialog(props: ConfirmDialogProps) {
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && !isPending && onClose()}>
-            <DialogContent className="max-w-sm">
+            <DialogContent style={{ maxWidth: '400px' }}>
                 <DialogHeader>
-                    <DialogTitle>{title}</DialogTitle>
+                    <DialogTitle className="flex items-center gap-2.5">
+                        {destructive && (
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                                className="shrink-0" style={{ color: 'var(--hp-danger)' }}>
+                                <circle cx="12" cy="12" r="10" />
+                                <line x1="12" y1="8" x2="12" y2="12" />
+                                <line x1="12" y1="16" x2="12.01" y2="16" />
+                            </svg>
+                        )}
+                        {title}
+                    </DialogTitle>
                     <DialogDescription className="mt-1.5">
                         {description}
                     </DialogDescription>
                 </DialogHeader>
 
                 {error && (
-                    <div className="mt-3 rounded-lg px-3 py-2 text-sm text-[var(--app-danger)] bg-[var(--app-badge-error-bg)]">
+                    <div className="mt-3 rounded-[var(--hp-radius-sm)] px-3 py-2 text-sm"
+                        style={{ color: 'var(--hp-danger)', background: 'var(--hp-danger-subtle)' }}>
                         {error}
                     </div>
                 )}
