@@ -192,7 +192,7 @@ export function LoginPrompt(props: LoginPromptProps) {
                                     </DialogDescription>
                                 </DialogHeader>
                                 <form onSubmit={handleSaveServer} className="login-dialog-form">
-                                    <div className="text-xs text-[var(--lp-text-tertiary)]">
+                                    <div className="text-xs text-[var(--hp-text-tertiary)]">
                                         {t('login.server.current')} {serverSummary}
                                     </div>
                                     <div className="login-dialog-field">
@@ -208,7 +208,7 @@ export function LoginPrompt(props: LoginPromptProps) {
                                             placeholder={t('login.server.placeholder')}
                                             className="login-input"
                                         />
-                                        <div className="text-[11px] text-[var(--lp-text-tertiary)]">
+                                        <div className="text-[11px] text-[var(--hp-text-tertiary)]">
                                             {t('login.server.hint')}
                                         </div>
                                     </div>

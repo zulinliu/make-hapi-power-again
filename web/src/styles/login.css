@@ -1,52 +1,17 @@
 /**
  * Login Page Styles
- * Claude/Anthropic-inspired design language
- * Warm minimalism — generous whitespace, refined typography, subtle depth
- * Uses --lp-* namespace to isolate from global theme
+ * Hapi Power "精密工具" design language
+ * Uses --hp-* design tokens from tokens.css
+ * Falls back to --lp-* only where legacy dialog overlay compatibility is needed
  */
 
 :root {
-  --lp-bg: #f7f6f1;
-  --lp-surface: #ffffff;
-  --lp-surface-hover: #fafaf7;
-  --lp-border: #e4e2d9;
-  --lp-border-focus: #cccac0;
-  --lp-text-primary: #1a1917;
-  --lp-text-secondary: #6b6a63;
-  --lp-text-tertiary: #9c9b93;
-  --lp-accent: #c4694a;
-  --lp-accent-hover: #b35b3d;
-  --lp-accent-subtle: rgba(196, 105, 74, 0.12);
-  --lp-accent-text: #a5563a;
-  --lp-placeholder: #b5b4ac;
-  --lp-error: #c53030;
-  --lp-error-bg: #fef2f2;
-  --lp-error-border: #fca5a5;
-  --lp-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --lp-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06);
-  --lp-radius: 10px;
-  --lp-radius-lg: 14px;
+  /* Login page uses --hp-* design tokens directly */
+  --lp-accent-subtle: var(--hp-primary-subtle);
 }
 
 [data-theme="dark"] {
-  --lp-bg: #171715;
-  --lp-surface: #222220;
-  --lp-surface-hover: #2a2a27;
-  --lp-border: #383835;
-  --lp-border-focus: #555550;
-  --lp-text-primary: #eceade;
-  --lp-text-secondary: #a5a49a;
-  --lp-text-tertiary: #73726b;
-  --lp-accent: #d4825f;
-  --lp-accent-hover: #e09570;
-  --lp-accent-subtle: rgba(212, 130, 95, 0.15);
-  --lp-accent-text: #e09570;
-  --lp-placeholder: #5c5b56;
-  --lp-error: #fc8181;
-  --lp-error-bg: rgba(252, 129, 129, 0.08);
-  --lp-error-border: rgba(252, 129, 129, 0.2);
-  --lp-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
-  --lp-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.3);
+  /* Dark mode handled by --hp-* tokens automatically */
 }
 
 /* === Layout === */
@@ -57,7 +22,7 @@
   min-height: 100%;
   padding: 24px;
   position: relative;
-  background: var(--lp-bg);
+  background: var(--hp-canvas);
 }
 
 /* === Language Switcher === */
@@ -65,7 +30,7 @@
   position: absolute;
   top: 16px;
   right: 16px;
-  animation: lpFadeIn 0.4s ease-out 0.6s both;
+  animation: lpFadeIn var(--hp-duration-slow) var(--hp-ease-overlay) 0.6s both;
 }
 
 /* === Brand Header === */
@@ -73,14 +38,14 @@
   text-align: center;
   margin-top: clamp(140px, 38vh, 340px);
   margin-bottom: 40px;
-  animation: lpFadeSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+  animation: lpFadeSlideUp var(--hp-duration-slower) var(--hp-ease-overlay) 0.1s both;
 }
 
 .login-brand-name {
   font-family: var(--hp-font-display), Georgia, serif;
   font-size: clamp(2rem, 1.4rem + 2vw, 3rem);
   font-weight: 700;
-  color: var(--lp-text-primary);
+  color: var(--hp-text-primary);
   letter-spacing: -0.03em;
   line-height: 1.1;
 }
@@ -88,7 +53,7 @@
 .login-tagline {
   font-family: var(--hp-font-sans);
   font-size: clamp(0.8125rem, 0.75rem + 0.25vw, 0.9375rem);
-  color: var(--lp-text-tertiary);
+  color: var(--hp-text-tertiary);
   margin-top: 10px;
   letter-spacing: 0.02em;
   font-weight: 400;
@@ -98,14 +63,14 @@
 .login-form-container {
   width: 100%;
   max-width: 380px;
-  animation: lpFadeSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+  animation: lpFadeSlideUp var(--hp-duration-slower) var(--hp-ease-overlay) 0.2s both;
 }
 
 .login-label {
   display: block;
   font-size: 13px;
   font-weight: 500;
-  color: var(--lp-text-secondary);
+  color: var(--hp-text-secondary);
   margin-bottom: 8px;
   letter-spacing: 0.01em;
 }
@@ -116,27 +81,27 @@
   padding: 0 16px;
   font-family: var(--hp-font-sans);
   font-size: 15px;
-  color: var(--lp-text-primary);
-  background: var(--lp-surface);
-  border: 1px solid var(--lp-border);
-  border-radius: var(--lp-radius);
+  color: var(--hp-text-primary);
+  background: var(--hp-surface-0);
+  border: 1px solid var(--hp-border);
+  border-radius: var(--hp-radius-md);
   outline: none;
-  transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
-  box-shadow: var(--lp-shadow-sm);
+  transition: border-color var(--hp-duration-fast) var(--hp-ease-default), box-shadow var(--hp-duration-fast) var(--hp-ease-default), background-color var(--hp-duration-fast) var(--hp-ease-default);
+  box-shadow: var(--hp-shadow-xs);
 }
 
 .login-input::placeholder {
-  color: var(--lp-placeholder);
+  color: var(--hp-text-disabled);
 }
 
 .login-input:hover {
-  border-color: var(--lp-border-focus);
-  background: var(--lp-surface-hover);
+  border-color: var(--hp-border-hover);
+  background: var(--hp-surface-1);
 }
 
 .login-input:focus {
-  border-color: var(--lp-accent);
-  box-shadow: 0 0 0 3px var(--lp-accent-subtle), var(--lp-shadow-sm);
+  border-color: var(--hp-primary);
+  box-shadow: var(--hp-shadow-focus), var(--hp-shadow-xs);
 }
 
 .login-input:disabled {
@@ -150,11 +115,11 @@
   padding: 10px 14px;
   font-size: 13px;
   font-weight: 500;
-  color: var(--lp-error);
-  background: var(--lp-error-bg);
-  border: 1px solid var(--lp-error-border);
-  border-radius: 8px;
-  animation: lpFadeIn 0.2s ease-out;
+  color: var(--hp-danger);
+  background: var(--hp-danger-subtle);
+  border: 1px solid var(--hp-danger);
+  border-radius: var(--hp-radius-sm);
+  animation: lpFadeIn var(--hp-duration-fast) var(--hp-ease-default);
 }
 
 /* Button */
@@ -162,16 +127,16 @@
   width: 100%;
   height: 48px;
   margin-top: 16px;
-  background: var(--lp-text-primary);
-  color: var(--lp-bg);
+  background: var(--hp-primary);
+  color: var(--hp-primary-text);
   border: none;
-  border-radius: var(--lp-radius);
+  border-radius: var(--hp-radius-md);
   font-family: var(--hp-font-sans);
   font-size: 15px;
   font-weight: 600;
   letter-spacing: 0.01em;
   cursor: pointer;
-  transition: all 150ms ease;
+  transition: all var(--hp-duration-fast) var(--hp-ease-default);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -179,8 +144,8 @@
 }
 
 .login-btn:hover {
-  opacity: 0.88;
-  box-shadow: var(--lp-shadow-md);
+  background: var(--hp-primary-hover);
+  box-shadow: var(--hp-shadow-md);
 }
 
 .login-btn:active {
@@ -201,21 +166,21 @@
   justify-content: space-between;
   margin-top: 24px;
   padding-top: 20px;
-  border-top: 1px solid var(--lp-border);
-  animation: lpFadeIn 0.4s ease-out 0.5s both;
+  border-top: 1px solid var(--hp-divider);
+  animation: lpFadeIn var(--hp-duration-slow) var(--hp-ease-overlay) 0.5s both;
 }
 
 .login-link {
   font-family: var(--hp-font-sans);
   font-size: 13px;
   font-weight: 500;
-  color: var(--lp-accent-text);
+  color: var(--hp-primary);
   text-decoration: none;
   background: none;
   border: none;
   cursor: pointer;
   padding: 4px 0;
-  transition: opacity 150ms ease;
+  transition: opacity var(--hp-duration-fast) var(--hp-ease-default);
 }
 
 .login-link:hover {
@@ -229,32 +194,32 @@
   text-align: center;
   font-family: var(--hp-font-sans);
   font-size: 12px;
-  color: var(--lp-text-tertiary);
-  animation: lpFadeIn 0.5s ease-out 0.7s both;
+  color: var(--hp-text-tertiary);
+  animation: lpFadeIn var(--hp-duration-slower) var(--hp-ease-overlay) 0.7s both;
 }
 
 /* === Dialog Overrides === */
 body[data-login-active] {
-  --app-dialog-bg: var(--lp-surface);
-  --app-fg: var(--lp-text-primary);
-  --app-hint: var(--lp-text-secondary);
-  --app-border: var(--lp-border);
+  --app-dialog-bg: var(--hp-surface-0);
+  --app-fg: var(--hp-text-primary);
+  --app-hint: var(--hp-text-secondary);
+  --app-border: var(--hp-border);
 }
 
-/* Overlay — warmer, softer */
+/* Overlay */
 body[data-login-active] [data-radix-popper-content-wrapper] ~ div,
 body[data-login-active] .fixed.inset-0.bg-black\/60 {
-  background: rgba(26, 25, 23, 0.45) !important;
+  background: oklch(15% 0.01 75 / 0.45) !important;
   backdrop-filter: blur(4px) !important;
 }
 
 .login-dialog-content {
-  border: 1px solid var(--lp-border) !important;
-  border-radius: var(--lp-radius-lg) !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+  border: 1px solid var(--hp-border) !important;
+  border-radius: var(--hp-radius-lg) !important;
+  box-shadow: var(--hp-shadow-lg) !important;
   max-width: 420px !important;
   padding: 24px !important;
-  animation: lpDialogIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  animation: lpDialogIn var(--hp-duration-normal) var(--hp-ease-overlay) !important;
 }
 
 /* Dialog header */
@@ -268,23 +233,23 @@ body[data-login-active] .fixed.inset-0.bg-black\/60 {
   font-size: 18px !important;
   font-weight: 600 !important;
   letter-spacing: -0.01em;
-  color: var(--lp-text-primary) !important;
+  color: var(--hp-text-primary) !important;
 }
 
 .login-dialog-content p {
   font-size: 13px !important;
   line-height: 1.5 !important;
-  color: var(--lp-text-tertiary) !important;
+  color: var(--hp-text-tertiary) !important;
   margin-top: 4px !important;
 }
 
 /* Server info text */
 .login-dialog-content .text-xs {
   font-size: 12px;
-  color: var(--lp-text-tertiary);
+  color: var(--hp-text-tertiary);
   padding: 8px 10px;
-  background: var(--lp-bg);
-  border-radius: 6px;
+  background: var(--hp-canvas);
+  border-radius: var(--hp-radius-sm);
   margin-bottom: 4px;
 }
 
@@ -294,7 +259,7 @@ body[data-login-active] .fixed.inset-0.bg-black\/60 {
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--lp-text-secondary);
+  color: var(--hp-text-secondary);
 }
 
 /* Input */
@@ -304,13 +269,13 @@ body[data-login-active] .fixed.inset-0.bg-black\/60 {
 }
 
 .login-dialog-content .login-input:focus {
-  box-shadow: 0 0 0 3px var(--lp-accent-subtle);
+  box-shadow: var(--hp-shadow-focus);
 }
 
 /* Hint text */
 .login-dialog-content .text-\\[11px\\] {
   font-size: 11px;
-  color: var(--lp-text-tertiary);
+  color: var(--hp-text-tertiary);
   line-height: 1.4;
 }
 
@@ -342,21 +307,21 @@ body[data-login-active] .fixed.inset-0.bg-black\/60 {
 }
 
 .login-dialog-btn-primary {
-  background: var(--lp-text-primary);
-  color: var(--lp-bg);
+  background: var(--hp-primary);
+  color: var(--hp-primary-text);
   border: none;
-  border-radius: 8px;
+  border-radius: var(--hp-radius-sm);
   height: 40px;
   padding: 0 22px;
   font-family: var(--hp-font-sans);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: opacity 150ms ease;
+  transition: opacity var(--hp-duration-fast) var(--hp-ease-default);
 }
 
 .login-dialog-btn-primary:hover {
-  opacity: 0.85;
+  background: var(--hp-primary-hover);
 }
 
 .login-dialog-btn-primary:active {
@@ -365,22 +330,22 @@ body[data-login-active] .fixed.inset-0.bg-black\/60 {
 
 .login-dialog-btn-secondary {
   background: transparent;
-  color: var(--lp-text-secondary);
-  border: 1px solid var(--lp-border);
-  border-radius: 8px;
+  color: var(--hp-text-secondary);
+  border: 1px solid var(--hp-border);
+  border-radius: var(--hp-radius-sm);
   height: 40px;
   padding: 0 22px;
   font-family: var(--hp-font-sans);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 150ms ease;
+  transition: all var(--hp-duration-fast) var(--hp-ease-default);
 }
 
 .login-dialog-btn-secondary:hover {
-  border-color: var(--lp-border-focus);
-  color: var(--lp-text-primary);
-  background: var(--lp-surface-hover);
+  border-color: var(--hp-border-hover);
+  color: var(--hp-text-primary);
+  background: var(--hp-surface-1);
 }
 
 /* === Animations === */
@@ -420,7 +385,7 @@ body[data-login-active] .fixed.inset-0.bg-black\/60 {
   }
 
   .login-input {
-    height: 46px;
+    height: 44px;
     font-size: 16px;
   }
 
@@ -431,7 +396,7 @@ body[data-login-active] .fixed.inset-0.bg-black\/60 {
   }
 
   .login-btn {
-    height: 46px;
+    height: 44px;
     margin-top: 14px;
     font-size: 15px;
   }
