@@ -13,6 +13,8 @@ fi
 # Handles co-author lines with leading spaces or tabs
 perl -0777 -pi -e 's/^[ \t]*Co-Authored-By:.*\n//gm' "$COMMIT_MSG_FILE"
 perl -0777 -pi -e 's/^[ \t]*via \[HAPI\].*\n//gm' "$COMMIT_MSG_FILE"
+perl -0777 -pi -e 's/^[ \t]*via \[Claude Code\].*\n//gm' "$COMMIT_MSG_FILE"
+perl -0777 -pi -e 's/^[ \t]*Generated with \[.*\n//gm' "$COMMIT_MSG_FILE"
 
 # Collapse trailing blank lines
 perl -0777 -pi -e 's/\n{3,}$/\n\n/' "$COMMIT_MSG_FILE"
