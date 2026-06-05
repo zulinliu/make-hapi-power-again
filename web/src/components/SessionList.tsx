@@ -528,9 +528,10 @@ function SessionItem(props: {
     api: ApiClient | null
     selected?: boolean
     showDetailedStatus?: boolean
+    animationDelay?: number
 }) {
     const { t } = useTranslation()
-    const { session: s, onSelect, showPath = true, api, selected = false, showDetailedStatus = false } = props
+    const { session: s, onSelect, showPath = true, api, selected = false, showDetailedStatus = false, animationDelay } = props
     const { haptic } = usePlatform()
     const [menuOpen, setMenuOpen] = useState(false)
     const [menuAnchorPoint, setMenuAnchorPoint] = useState<{ x: number; y: number }>({ x: 0, y: 0 })
@@ -544,7 +545,7 @@ function SessionItem(props: {
         s.metadata?.flavor ?? null
     )
 
-    const longPressHandlers = useLongPress({
+    const { isLongPressed, ...longPressHandlers } = useLongPress({
         onLongPress: (point) => {
             haptic.impact('medium')
             setMenuAnchorPoint(point)
@@ -578,8 +579,12 @@ function SessionItem(props: {
             <button
                 type="button"
                 {...longPressHandlers}
-                className={`session-list-item flex w-full flex-col gap-1 px-2.5 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--hp-primary] select-none rounded-lg ${selected ? 'bg-[--hp-primary-subtle] border-l-2 border-l-[--hp-primary]' : ''}`}
-                style={{ WebkitTouchCallout: 'none' }}
+                className={`session-list-item flex w-full flex-col gap-1 px-2.5 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--hp-primary] select-none rounded-lg ${selected ? 'bg-[--hp-primary-subtle] border-l-2 border-l-[--hp-primary]' : ''} ${animationDelay != null ? 'animate-fade-in-up' : ''}`}
+                style={{
+                    WebkitTouchCallout: 'none',
+                    ...(animationDelay != null ? { animationDelay: `${animationDelay}ms` } : {}),
+                    ...(isLongPressed ? { transform: 'scale(0.98)', transition: 'transform var(--hp-duration-fast, 0.15s)' } : {})
+                }}
                 aria-current={selected ? 'page' : undefined}
             >
                 <div className={`flex items-center justify-between gap-3 ${!s.active ? 'opacity-50' : ''}`}>
@@ -948,7 +953,7 @@ export function SessionList(props: {
                                                 <div className="collapsible-panel" data-open={!isCollapsed || undefined}>
                                                     <div className="collapsible-inner">
                                                     <div className="flex flex-col gap-0.5 ml-3 pl-1 pr-1 py-1">
-                                                        {visibleGroupSessions.map((s) => (
+                                                        {visibleGroupSessions.map((s, sessionIndex) => (
                                                             <SessionItem
                                                                 key={s.id}
                                                                 session={s}
@@ -957,6 +962,7 @@ export function SessionList(props: {
                                                                 api={api}
                                                                 selected={s.id === selectedSessionId}
                                                                 showDetailedStatus={showDetailedStatus}
+                                                                animationDelay={sessionIndex < 10 ? sessionIndex * 60 : undefined}
                                                             />
                                                         ))}
                                                         {!isSearching && group.sessions.length > sessionPreviewLimit && (sessionGroupExpanded || hiddenSessionCount > 0) ? (

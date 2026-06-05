@@ -61,6 +61,9 @@ export function useViewportHeight(): void {
         viewport.addEventListener('scroll', update)
         document.addEventListener('focusout', onFocusOut)
 
+        // Set initial viewport height
+        update()
+
         return () => {
             mounted = false
             viewport.removeEventListener('resize', update)

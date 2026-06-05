@@ -426,8 +426,10 @@ function AppInner() {
             />
             <OfflineBanner />
             <UpdateBanner />
-            <div className="h-full min-h-0 flex flex-col">
-                <Outlet />
+            <div className="h-full min-h-0 flex flex-col" key={pathname}>
+                <div className="h-full animate-fade-in-up">
+                    <Outlet />
+                </div>
             </div>
             <ToastContainer />
             <InstallPrompt />

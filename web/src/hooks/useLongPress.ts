@@ -1,11 +1,13 @@
 import type React from 'react'
-import { useCallback, useRef } from 'react'
+import { useCallback, useRef, useState } from 'react'
 
 type UseLongPressOptions = {
     onLongPress: (point: { x: number; y: number }) => void
     onClick?: () => void
     threshold?: number
     disabled?: boolean
+    /** Called when the press state changes (active/inactive) for visual feedback */
+    onPressStateChange?: (pressed: boolean) => void
 }
 
 type UseLongPressHandlers = {
@@ -19,14 +21,20 @@ type UseLongPressHandlers = {
     onKeyDown: React.KeyboardEventHandler
 }
 
-export function useLongPress(options: UseLongPressOptions): UseLongPressHandlers {
-    const { onLongPress, onClick, threshold = 500, disabled = false } = options
+type UseLongPressResult = UseLongPressHandlers & {
+    /** Whether the element is currently in a long-pressed visual state */
+    isLongPressed: boolean
+}
+
+export function useLongPress(options: UseLongPressOptions): UseLongPressResult {
+    const { onLongPress, onClick, threshold = 500, disabled = false, onPressStateChange } = options
 
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
     const isLongPressRef = useRef(false)
     const touchMoved = useRef(false)
     const pressPointRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 })
     const isTouchingRef = useRef(false)
+    const [isLongPressed, setIsLongPressed] = useState(false)
 
     const clearTimer = useCallback(() => {
         if (timerRef.current) {
@@ -45,6 +53,8 @@ export function useLongPress(options: UseLongPressOptions): UseLongPressHandlers
 
         timerRef.current = setTimeout(() => {
             isLongPressRef.current = true
+            setIsLongPressed(true)
+            onPressStateChange?.(true)
             // Clear any text selection triggered by iOS during the long press hold
             const selection = window.getSelection()
             if (selection && selection.toString().length > 0) {
@@ -52,7 +62,7 @@ export function useLongPress(options: UseLongPressOptions): UseLongPressHandlers
             }
             onLongPress(pressPointRef.current)
         }, threshold)
-    }, [disabled, clearTimer, onLongPress, threshold])
+    }, [disabled, clearTimer, onLongPress, onPressStateChange, threshold])
 
     const handleEnd = useCallback((shouldTriggerClick: boolean) => {
         clearTimer()
@@ -61,9 +71,14 @@ export function useLongPress(options: UseLongPressOptions): UseLongPressHandlers
             onClick()
         }
 
+        if (isLongPressRef.current) {
+            setIsLongPressed(false)
+            onPressStateChange?.(false)
+        }
+
         isLongPressRef.current = false
         touchMoved.current = false
-    }, [clearTimer, onClick])
+    }, [clearTimer, onClick, onPressStateChange])
 
     const onMouseDown = useCallback<React.MouseEventHandler>((e) => {
         // Ignore mouse events after a touch interaction to prevent double-firing
@@ -132,6 +147,7 @@ export function useLongPress(options: UseLongPressOptions): UseLongPressHandlers
         onTouchEnd,
         onTouchMove,
         onContextMenu,
-        onKeyDown
+        onKeyDown,
+        isLongPressed
     }
 }
