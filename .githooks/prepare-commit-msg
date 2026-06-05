@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# prepare-commit-msg hook: 自动移除 Co-Authored-By 行
+# 防止 Claude Code / HAPI 注入 co-author 标记
+# 规则来源: memory/no-hapi-co-author.md + memory/git-standards.md
+COMMIT_MSG_FILE="$1"
+COMMIT_SOURCE="$2"
+
+# 只处理实际 commit message（merge 等 source 跳过）
+if [ "$COMMIT_SOURCE" = "merge" ]; then
+    exit 0
+fi
+
+# 移除 Co-Authored-By 行和 "via [HAPI]" 行
+sed -i -e '/^Co-Authored-By:/d' -e '/^via \[HAPI\]/d' "$COMMIT_MSG_FILE"
+
+# 移除末尾多余空行（最多保留一个）
+sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' "$COMMIT_MSG_FILE"
