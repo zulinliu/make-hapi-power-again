@@ -112,6 +112,18 @@
     --app-scrollbar-thumb: oklch(60% 0.01 200 / 0.25);
     --app-scrollbar-thumb-hover: oklch(60% 0.01 200 / 0.40);
 
+    /* === Agent Flavor 品牌色 === */
+    --app-flavor-claude: oklch(68% 0.15 70);
+    --app-flavor-codex: oklch(20% 0.02 260);
+    --app-flavor-cursor: oklch(50% 0.12 185);
+    --app-flavor-gemini: oklch(55% 0.18 260);
+    --app-flavor-kimi: oklch(50% 0.20 300);
+    --app-flavor-opencode: oklch(50% 0.15 155);
+
+    /* === Overlay === */
+    --app-overlay-bg: oklch(0% 0 0 / 0.5);
+    --app-overlay-blur: 4px;
+
     /* === 运行时变量 === */
     --app-font-scale: 1;
     --app-chat-font-size: 0.9375rem;

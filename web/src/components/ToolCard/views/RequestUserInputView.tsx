@@ -52,11 +52,11 @@ export function RequestUserInputView(props: ToolViewProps) {
                             // Pure text question - show the answer directly
                             hasAnswers && answer?.userNote ? (
                                 <div className="mt-3">
-                                    <div className="rounded-md border border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-2">
+                                    <div className="rounded-md border border-[var(--hp-success)] bg-[var(--hp-success-subtle)] px-2 py-2">
                                         <div className="flex items-start gap-2">
-                                            <span className="shrink-0 text-sm text-emerald-600">●</span>
+                                            <span className="shrink-0 text-sm text-[var(--hp-success)]">●</span>
                                             <div className="min-w-0 flex-1">
-                                                <div className="text-sm text-emerald-700 dark:text-emerald-300 font-medium break-words">
+                                                <div className="text-sm text-[var(--hp-success)] font-medium break-words">
                                                     {answer.userNote}
                                                 </div>
                                             </div>
@@ -76,7 +76,7 @@ export function RequestUserInputView(props: ToolViewProps) {
                                             className={cn(
                                                 "rounded-md border px-2 py-2",
                                                 isSelected
-                                                    ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30"
+                                                    ? "border-[var(--hp-success)] bg-[var(--hp-success-subtle)]"
                                                     : "border-[var(--app-border)]"
                                             )}
                                         >
@@ -85,7 +85,7 @@ export function RequestUserInputView(props: ToolViewProps) {
                                                     <span className={cn(
                                                         "shrink-0 text-sm",
                                                         isSelected
-                                                            ? "text-emerald-600"
+                                                            ? "text-[var(--hp-success)]"
                                                             : "text-[var(--app-hint)]"
                                                     )}>
                                                         {getSelectionMark(isSelected)}
@@ -95,7 +95,7 @@ export function RequestUserInputView(props: ToolViewProps) {
                                                     <div className={cn(
                                                         "[&_.aui-md]:text-sm",
                                                         isSelected
-                                                            ? "[&_.aui-md]:text-emerald-700 dark:[&_.aui-md]:text-emerald-300 [&_.aui-md]:font-medium"
+                                                            ? "[&_.aui-md]:text-[var(--hp-success)] [&_.aui-md]:font-medium"
                                                             : "[&_.aui-md]:text-[var(--app-fg)]"
                                                     )}>
                                                         <MarkdownRenderer content={opt.label} />
@@ -113,12 +113,12 @@ export function RequestUserInputView(props: ToolViewProps) {
 
                                 {/* Show user note if present */}
                                 {hasAnswers && answer?.userNote ? (
-                                    <div className="mt-2 rounded-md border border-blue-300 bg-blue-50 dark:bg-blue-950/30 px-2 py-2">
+                                    <div className="mt-2 rounded-md border border-[var(--hp-info)] bg-[var(--hp-info-subtle)] px-2 py-2">
                                         <div className="flex items-start gap-2">
-                                            <span className="shrink-0 text-xs text-blue-500">📝</span>
+                                            <span className="shrink-0 text-xs text-[var(--hp-info)]">📝</span>
                                             <div className="min-w-0 flex-1">
                                                 <div className="text-xs text-[var(--app-hint)]">Note:</div>
-                                                <div className="text-sm text-blue-700 dark:text-blue-300 break-words">
+                                                <div className="text-sm text-[var(--hp-info)] break-words">
                                                     {answer.userNote}
                                                 </div>
                                             </div>

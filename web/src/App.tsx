@@ -407,7 +407,7 @@ function AppInner() {
         return (
             <div className="p-4 space-y-3">
                 <div className="text-base font-semibold">{t('login.title')}</div>
-                <div className="text-sm text-red-600">
+                <div className="text-sm text-[var(--hp-danger)]">
                     {authError ?? t('login.error.authFailed')}
                 </div>
                 <div className="text-xs text-[var(--hp-text-tertiary)]">

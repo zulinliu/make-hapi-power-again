@@ -15,7 +15,7 @@ const buttonVariants = cva(
                 outline:
                     'border border-[var(--app-border)] bg-transparent hover:bg-[var(--hp-surface-1)] hover:border-[var(--hp-border-hover)]',
                 destructive:
-                    'bg-[var(--app-danger)] text-white hover:bg-[var(--hp-danger)] hover:opacity-90',
+                    'bg-[var(--app-danger)] text-[var(--hp-text-inverse)] hover:bg-[var(--hp-danger)] hover:opacity-90',
                 ghost:
                     'bg-transparent text-[var(--app-fg)] hover:bg-[var(--hp-surface-1)]'
             },

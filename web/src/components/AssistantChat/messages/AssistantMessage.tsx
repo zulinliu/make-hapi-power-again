@@ -226,7 +226,7 @@ export function HappyAssistantMessage() {
                             onClick={() => copy(copyText)}
                         >
                             {copied
-                                ? <CheckIcon className="h-3.5 w-3.5 text-green-500" />
+                                ? <CheckIcon className="h-3.5 w-3.5 text-[var(--hp-success)]" />
                                 : <CopyIcon className="h-3.5 w-3.5 text-[var(--hp-text-tertiary)]" />}
                         </button>
                     </div>

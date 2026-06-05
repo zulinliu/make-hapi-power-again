@@ -653,7 +653,7 @@ const MutationResultView: ToolViewComponent = (props: ToolViewProps) => {
 
     const text = extractTextFromResult(result)
     if (typeof text === 'string' && text.trim().length > 0) {
-        const className = state === 'error' ? 'text-red-600' : 'text-[var(--app-fg)]'
+        const className = state === 'error' ? 'text-[var(--hp-danger)]' : 'text-[var(--app-fg)]'
         const { mode, language } = getMutationResultRenderMode(text, state)
         return (
             <>
@@ -778,7 +778,7 @@ const CodexAgentResultView: ToolViewComponent = (props: ToolViewProps) => {
     if (state === 'error') {
         const text = extractTextFromResult(result)
         return (
-            <div className="text-sm text-red-600">
+            <div className="text-sm text-[var(--hp-danger)]">
                 {text?.trim() ? text : 'Agent tool failed'}
             </div>
         )
@@ -893,7 +893,7 @@ const SkillResultView: ToolViewComponent = (props: ToolViewProps) => {
     if (state === 'error') {
         const text = extractTextFromResult(result)
         return (
-            <div className="text-sm text-red-600">
+            <div className="text-sm text-[var(--hp-danger)]">
                 {text?.trim() ? text : 'Failed to load skill'}
             </div>
         )
