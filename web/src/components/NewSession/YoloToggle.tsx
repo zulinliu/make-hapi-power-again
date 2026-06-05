@@ -9,15 +9,19 @@ export function YoloToggle(props: {
 
     return (
         <div className="flex flex-col gap-1.5 px-3 py-3">
-            <label className="text-xs font-medium text-[var(--app-hint)]">
+            <label className="text-xs font-medium uppercase tracking-wider text-[var(--hp-text-tertiary)]">
                 {t('newSession.yolo')}
             </label>
-            <div className="flex items-center justify-between gap-3">
+            <div className={`flex items-center justify-between gap-3 rounded-[var(--hp-radius-md,8px)] border p-3 transition-colors ${
+                props.yoloMode
+                    ? 'border-[var(--hp-warning)] bg-[var(--hp-warning-subtle)]'
+                    : 'border-[var(--hp-border)] bg-[var(--hp-surface-0)]'
+            }`}>
                 <div className="flex flex-col">
-                    <span className="text-sm text-[var(--app-fg)]">
+                    <span className={`text-sm ${props.yoloMode ? 'text-[var(--hp-warning)]' : 'text-[var(--hp-text-primary)]'}`}>
                         {t('newSession.yolo.title')}
                     </span>
-                    <span className="text-xs text-[var(--app-hint)]">
+                    <span className="text-xs text-[var(--hp-text-tertiary)]">
                         {t('newSession.yolo.desc')}
                     </span>
                 </div>
@@ -29,8 +33,12 @@ export function YoloToggle(props: {
                         disabled={props.isDisabled}
                         className="peer sr-only"
                     />
-                    <span className="absolute inset-0 rounded-full bg-[var(--app-border)] transition-colors peer-checked:bg-[var(--app-link)] peer-disabled:opacity-50" />
-                    <span className="absolute left-0.5 h-4 w-4 rounded-full bg-[var(--app-bg)] transition-transform peer-checked:translate-x-4 peer-disabled:opacity-50" />
+                    <span className={`absolute inset-0 rounded-full transition-colors peer-disabled:opacity-50 ${
+                        props.yoloMode
+                            ? 'bg-[var(--hp-warning)]'
+                            : 'bg-[var(--hp-border)]'
+                    }`} />
+                    <span className="absolute left-0.5 h-4 w-4 rounded-full bg-[var(--hp-surface-0)] transition-transform peer-checked:translate-x-4 peer-disabled:opacity-50 shadow-sm" />
                 </label>
             </div>
         </div>
