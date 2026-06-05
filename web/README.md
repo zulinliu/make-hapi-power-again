@@ -1,3 +1,5 @@
+> Part of [Hapi Power](../README.md) — AI Coding Agent Workbench
+
 # Web
 
 Hapi Power 前端 — React PWA，提供完整的浏览器内 AI 代理开发体验。
@@ -10,15 +12,10 @@ Hapi Power 前端 — React PWA，提供完整的浏览器内 AI 代理开发体
 - xterm.js 全功能终端（多会话、分屏）
 - 插件管理、Skill 安装/卸载
 - 变更审查面板（按对话分组、逐文件审批）
-- 操作时间线、会话摘要
 - 撤销变更（会话/步骤/文件粒度）
-- 移动端专用界面 `/m/*`
-- 会话分享
+- 操作时间线、会话摘要
 - PWA 推送通知
 - 图片粘贴/拖拽上传
-- 语音录制转文字
-- 白板绘图工具
-- 编排 Skill 页面
 
 ## 技术栈
 
@@ -35,17 +32,10 @@ React 19 + Vite + TanStack Router + TanStack Query + Tailwind CSS + Monaco Edito
 | `/sessions/$sessionId/files` | 文件浏览 + Git 状态 | `FilesPage` |
 | `/sessions/$sessionId/file` | 文件查看/编辑 | `FileViewer` |
 | `/sessions/$sessionId/terminal` | 终端 | `TerminalPage` |
-| `/sessions/$sessionId/changes` | 变更审查 | `ChangeReview` |
-| `/sessions/$sessionId/timeline` | 操作时间线 | `TimelinePage` |
-| `/sessions/$sessionId/undo` | 撤销变更 | `UndoPage` |
 | `/settings` | 应用设置 | `SettingsPage` |
 | `/browse` | 工作区浏览 | `BrowsePage` |
 | `/sessions/$sessionId/git` | Git 管理 | `GitPage` |
 | `/sessions/$sessionId/extensions` | 会话扩展 | `ExtensionsPage` |
-| `/orchestration` | 编排 Skill | `OrchestrationPage` |
-| `/s/$shareId` | 分享查看 | `ShareViewPage` |
-| `/m/$sessionId/changes` | 移动端变更审查 | `MobileChangesPage` |
-| `/m/$sessionId/terminal` | 移动端终端 | `MobileTerminalPage` |
 
 ## 认证
 
@@ -65,13 +55,11 @@ React 19 + Vite + TanStack Router + TanStack Query + Tailwind CSS + Monaco Edito
 
 | 组件 | 说明 |
 |------|------|
-| `SessionChat.tsx` | 主聊天界面，集成图片上传、语音、白板 |
+| `SessionChat.tsx` | 主聊天界面，集成图片上传 |
 | `SessionList.tsx` | 会话列表，状态、待审批、进度 |
-| `SessionHeader.tsx` | 会话头部，白板入口 |
-| `AssistantChat/HappyComposer.tsx` | 消息编辑器，语音入口 |
+| `SessionHeader.tsx` | 会话头部 |
+| `AssistantChat/HappyComposer.tsx` | 消息编辑器 |
 | `ImagePasteDrop.tsx` | 图片粘贴/拖拽上传包装器 |
-| `VoiceRecorder.tsx` | 录音 → Whisper 转文字 |
-| `Whiteboard.tsx` | Canvas 绘图工具 |
 | `DiffView.tsx` | Diff 对比显示 |
 | `Editor/` | Monaco Editor 集成 |
 | `git/` | Git 管理组件 |
@@ -99,9 +87,6 @@ src/
 ├── routes/              路由页面组件
 │   ├── sessions/        会话视图
 │   ├── settings/        设置页面
-│   ├── mobile/          移动端路由
-│   ├── orchestration.tsx 编排 Skill
-│   └── share.tsx        分享页面
 ├── components/          UI 组件
 │   ├── AssistantChat/   assistant-ui 集成
 │   ├── ChatInput/       聊天输入
@@ -111,8 +96,6 @@ src/
 │   ├── SessionChat.tsx  主聊天界面
 │   ├── SessionList.tsx  会话列表
 │   ├── ImagePasteDrop.tsx 图片上传
-│   ├── VoiceRecorder.tsx 语音录制
-│   ├── Whiteboard.tsx   白板工具
 │   ├── DiffView.tsx     Diff 显示
 │   └── MarkdownRenderer.tsx Markdown 渲染
 ├── hooks/

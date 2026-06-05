@@ -18,7 +18,6 @@ import { AppContextProvider } from '@/lib/app-context'
 import { clearMessageWindow, fetchLatestMessages } from '@/lib/message-window-store'
 import { useAppGoBack } from '@/hooks/useAppGoBack'
 import { useTranslation } from '@/lib/use-translation'
-import { VoiceProvider } from '@/lib/voice-context'
 import { requireHubUrlForLogin } from '@/lib/runtime-config'
 import { getAppGlobalSseSubscription, getAppSessionSseSubscription } from '@/lib/appSseSubscriptions'
 import { LoginPrompt } from '@/components/LoginPrompt'
@@ -27,7 +26,6 @@ import { OfflineBanner } from '@/components/OfflineBanner'
 import { UpdateBanner } from '@/components/UpdateBanner'
 import { SyncingBanner } from '@/components/SyncingBanner'
 import { ReconnectingBanner } from '@/components/ReconnectingBanner'
-import { VoiceErrorBanner } from '@/components/VoiceErrorBanner'
 import { LoadingState } from '@/components/LoadingState'
 import { ToastContainer } from '@/components/ToastContainer'
 import { ToastProvider, useToast } from '@/lib/toast-context'
@@ -421,21 +419,18 @@ function AppInner() {
 
     return (
         <AppContextProvider value={{ api, token, baseUrl }}>
-            <VoiceProvider>
-                <SyncingBanner isSyncing={isSyncing} />
-                <ReconnectingBanner
-                    isReconnecting={sseDisconnected && !isSyncing}
-                    reason={sseDisconnectReason}
-                />
-                <VoiceErrorBanner />
-                <OfflineBanner />
-                <UpdateBanner />
-                <div className="h-full min-h-0 flex flex-col">
-                    <Outlet />
-                </div>
-                <ToastContainer />
-                <InstallPrompt />
-            </VoiceProvider>
+            <SyncingBanner isSyncing={isSyncing} />
+            <ReconnectingBanner
+                isReconnecting={sseDisconnected && !isSyncing}
+                reason={sseDisconnectReason}
+            />
+            <OfflineBanner />
+            <UpdateBanner />
+            <div className="h-full min-h-0 flex flex-col">
+                <Outlet />
+            </div>
+            <ToastContainer />
+            <InstallPrompt />
         </AppContextProvider>
     )
 }

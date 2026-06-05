@@ -4,7 +4,7 @@
  * Handles HAPI_POWER_API_URL initialization with priority:
  * 1. Environment variable (highest - allows temporary override)
  * 2. Settings file (~/.hapi-power/settings.json)
- * 3. Default value (http://localhost:3006)
+ * 3. Default value (http://localhost:3016)
  */
 
 import { configuration } from '@/configuration'

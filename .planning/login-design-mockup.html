@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hapi Power Login — Design Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;0,8..60,700;1,8..60,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --lp-bg: #faf9f5;
+  --lp-surface: #ffffff;
+  --lp-surface-elevated: #f5f4ed;
+  --lp-border: #e8e6dc;
+  --lp-border-focus: #d1cfc5;
+  --lp-text-primary: #141413;
+  --lp-text-secondary: #5e5d59;
+  --lp-text-tertiary: #87867f;
+  --lp-accent: #d97757;
+  --lp-accent-hover: #c96442;
+  --lp-accent-subtle: rgba(217, 119, 87, 0.18);
+  --lp-placeholder: #a8a69f;
+  --lp-error: #b53333;
+  --lp-error-bg: #fdf2f2;
+}
+
+html, body { height: 100%; }
+
+body {
+  font-family: 'DM Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--lp-bg);
+  color: var(--lp-text-primary);
+}
+
+/* === Layout === */
+.login-page {
+  display: flex;
+  height: 100vh;
+  position: relative;
+}
+
+/* === Left Panel (Brand) === */
+.login-brand-panel {
+  width: 45%;
+  background:
+    radial-gradient(ellipse at 30% 70%, rgba(255,255,255,0.08), transparent 60%),
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 40px,
+      rgba(255,255,255,0.02) 40px,
+      rgba(255,255,255,0.02) 41px
+    ),
+    linear-gradient(135deg, #d97757 0%, #c96442 50%, #b85540 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 64px;
+  position: relative;
+  overflow: hidden;
+  border-right: 1px solid rgba(0,0,0,0.06);
+}
+
+.login-brand-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+.login-brand-content {
+  margin-top: 8vh;
+}
+
+.login-brand-name {
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: clamp(2.5rem, 2rem + 2vw, 3.5rem);
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  animation: fadeSlideUp 0.6s ease-out 0.2s both;
+}
+
+.login-tagline {
+  font-family: 'DM Sans', sans-serif;
+  font-size: clamp(0.9rem, 0.8rem + 0.3vw, 1.05rem);
+  color: rgba(255,255,255,0.45);
+  margin-top: 12px;
+  letter-spacing: 0.01em;
+  animation: fadeSlideUp 0.5s ease-out 0.4s both;
+}
+
+.login-terminal {
+  position: absolute;
+  bottom: 48px;
+  left: 64px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: rgba(255,255,255,0.35);
+  line-height: 1.6;
+  animation: fadeIn 0.8s ease-out 0.8s both;
+}
+
+.login-terminal .cursor {
+  display: inline-block;
+  width: 8px;
+  height: 15px;
+  background: rgba(255,255,255,0.45);
+  vertical-align: text-bottom;
+  animation: blink 1s step-end infinite;
+}
+
+/* === Right Panel (Form) === */
+.login-form-panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  position: relative;
+  background: var(--lp-bg);
+}
+
+/* Language Switcher */
+.login-lang {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  display: flex;
+  gap: 2px;
+  background: var(--lp-surface-elevated);
+  border: 1px solid var(--lp-border);
+  border-radius: 6px;
+  padding: 2px;
+  animation: fadeIn 0.4s ease-out 0.9s both;
+}
+
+.login-lang button {
+  background: none;
+  border: none;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--lp-text-tertiary);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 150ms ease-out;
+}
+
+.login-lang button.active {
+  background: var(--lp-surface);
+  color: var(--lp-text-primary);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+}
+
+.login-lang button:hover:not(.active) {
+  color: var(--lp-text-secondary);
+}
+
+/* Form */
+.login-form-container {
+  width: 100%;
+  max-width: 400px;
+}
+
+.login-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--lp-text-secondary);
+  margin-bottom: 8px;
+  animation: fadeIn 0.4s ease-out 0.5s both;
+}
+
+.login-input {
+  width: 100%;
+  height: 48px;
+  padding: 0 16px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  color: var(--lp-text-primary);
+  background: var(--lp-surface);
+  border: 1px solid var(--lp-border);
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 150ms ease-out, box-shadow 150ms ease-out;
+  animation: fadeSlideUp 0.4s ease-out 0.6s both;
+}
+
+.login-input::placeholder {
+  color: var(--lp-placeholder);
+}
+
+.login-input:hover {
+  border-color: var(--lp-border-focus);
+}
+
+.login-input:focus {
+  border-color: var(--lp-accent);
+  box-shadow: 0 0 0 3px var(--lp-accent-subtle);
+}
+
+.login-error {
+  margin-top: 12px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lp-error);
+  background: var(--lp-error-bg);
+  border-radius: 6px;
+  border-left: 3px solid var(--lp-error);
+  display: none;
+}
+
+.login-error.visible {
+  display: block;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.login-btn {
+  width: 100%;
+  height: 48px;
+  margin-top: 16px;
+  background: var(--lp-accent);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: all 150ms ease-out;
+  animation: fadeSlideUp 0.4s ease-out 0.75s both;
+}
+
+.login-btn:hover {
+  background: var(--lp-accent-hover);
+  box-shadow: 0 2px 8px rgba(217,119,87,0.25);
+}
+
+.login-btn:active {
+  transform: translateY(1px);
+}
+
+.login-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Links */
+.login-links {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 24px;
+  animation: fadeIn 0.4s ease-out 0.9s both;
+}
+
+.login-links a,
+.login-links button {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lp-text-tertiary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 150ms ease-out;
+}
+
+.login-links a:hover,
+.login-links button:hover {
+  color: var(--lp-accent);
+}
+
+/* Footer */
+.login-footer {
+  position: absolute;
+  bottom: 28px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 12px;
+  color: var(--lp-text-tertiary);
+  animation: fadeIn 0.6s ease-out 1s both;
+}
+
+.login-footer .heart {
+  color: var(--lp-accent);
+}
+
+/* === Animations === */
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+/* === Responsive === */
+@media (max-width: 767px) {
+  .login-page {
+    flex-direction: column;
+  }
+
+  .login-brand-panel {
+    width: 100%;
+    height: 30vh;
+    padding: 32px;
+  }
+
+  .login-brand-name {
+    font-size: clamp(2rem, 1.5rem + 3vw, 2.5rem);
+  }
+
+  .login-terminal {
+    display: none;
+  }
+
+  .login-form-panel {
+    flex: 1;
+    padding: 32px 24px;
+  }
+}
+
+@media (max-width: 400px) {
+  .login-brand-panel {
+    height: 25vh;
+    padding: 24px;
+  }
+
+  .login-form-panel {
+    padding: 24px 16px;
+  }
+}
+
+/* === Demo controls === */
+.demo-controls {
+  position: fixed;
+  bottom: 60px;
+  right: 20px;
+  display: flex;
+  gap: 8px;
+  z-index: 100;
+  animation: fadeIn 0.4s ease-out 1.5s both;
+}
+
+.demo-controls button {
+  padding: 6px 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--lp-border);
+  border-radius: 6px;
+  background: var(--lp-surface);
+  color: var(--lp-text-secondary);
+  cursor: pointer;
+  transition: all 150ms ease-out;
+}
+
+.demo-controls button:hover {
+  border-color: var(--lp-accent);
+  color: var(--lp-accent);
+}
+
+.demo-controls button.active {
+  background: var(--lp-accent);
+  color: #fff;
+  border-color: var(--lp-accent);
+}
+
+/* Dark theme overrides */
+[data-theme="dark"] {
+  --lp-bg: #1a1918;
+  --lp-surface: #262624;
+  --lp-surface-elevated: #2e2d2b;
+  --lp-border: #3d3d3a;
+  --lp-border-focus: #5e5d59;
+  --lp-text-primary: #f5f4ed;
+  --lp-text-secondary: #b0aea5;
+  --lp-text-tertiary: #87867f;
+  --lp-accent: #d97757;
+  --lp-accent-hover: #e08868;
+  --lp-accent-subtle: rgba(217, 119, 87, 0.2);
+  --lp-placeholder: #6e6d68;
+  --lp-error: #f85149;
+  --lp-error-bg: rgba(248, 81, 73, 0.08);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+</style>
+</head>
+<body>
+<div class="login-page">
+  <!-- Left Panel: Brand Visual -->
+  <div class="login-brand-panel">
+    <div class="login-brand-content">
+      <h1 class="login-brand-name">Hapi Power</h1>
+      <p class="login-tagline">Vibe Coding Anytime, Anywhere</p>
+    </div>
+    <div class="login-terminal">
+      <div>> hapi-power --login</div>
+      <div>&nbsp;&nbsp;connecting...</div>
+      <div>&nbsp;&nbsp;<span class="cursor"></span></div>
+    </div>
+  </div>
+
+  <!-- Right Panel: Form -->
+  <div class="login-form-panel">
+    <!-- Language -->
+    <div class="login-lang">
+      <button class="active">EN</button>
+      <button>中文</button>
+    </div>
+
+    <div class="login-form-container">
+      <label class="login-label">Access Token</label>
+      <input class="login-input" type="password" placeholder="Access token" />
+
+      <div class="login-error" id="error-box">Authentication failed</div>
+
+      <button class="login-btn" id="submit-btn">Sign In</button>
+
+      <div class="login-links">
+        <a href="#">Needs help?</a>
+        <button>Hub (Default)</button>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="login-footer">
+      Designed with <span class="heart">&hearts;</span> for Vibe Coding &middot; &copy; 2026 Hapi Power
+    </div>
+  </div>
+</div>
+
+<!-- Demo controls -->
+<div class="demo-controls">
+  <button id="btn-light" class="active">Light</button>
+  <button id="btn-dark">Dark</button>
+  <button id="btn-error">Show Error</button>
+</div>
+
+<script>
+  const root = document.documentElement;
+  const errorBox = document.getElementById('error-box');
+
+  document.getElementById('btn-light').addEventListener('click', function() {
+    root.removeAttribute('data-theme');
+    this.classList.add('active');
+    document.getElementById('btn-dark').classList.remove('active');
+  });
+
+  document.getElementById('btn-dark').addEventListener('click', function() {
+    root.setAttribute('data-theme', 'dark');
+    this.classList.add('active');
+    document.getElementById('btn-light').classList.remove('active');
+  });
+
+  document.getElementById('btn-error').addEventListener('click', function() {
+    errorBox.classList.toggle('visible');
+    this.textContent = errorBox.classList.contains('visible') ? 'Hide Error' : 'Show Error';
+  });
+</script>
+</body>
+</html>

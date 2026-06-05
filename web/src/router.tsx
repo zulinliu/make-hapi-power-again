@@ -42,13 +42,6 @@ import FilePage from '@/routes/sessions/file'
 import TerminalPage from '@/routes/sessions/terminal'
 import GitPage from '@/routes/sessions/git'
 import ExtensionsPage from '@/routes/sessions/extensions'
-import ChangesPage from '@/routes/sessions/changes'
-import TimelinePage from '@/routes/sessions/timeline'
-import UndoPage from '@/routes/sessions/undo'
-import MobileChangesPage from '@/routes/mobile/changes'
-import MobileTerminalPage from '@/routes/mobile/terminal'
-import ShareViewPage from '@/routes/share'
-import OrchestrationPage from '@/routes/orchestration'
 import SettingsPage from '@/routes/settings'
 
 function BackIcon(props: { className?: string }) {
@@ -201,7 +194,6 @@ function SessionsPage() {
                             >
                                 <FolderOpenIcon className="h-5 w-5" />
                             </button>
-                            {/* Orchestration hidden — not in original requirements */}
                             <button
                                 type="button"
                                 onClick={() => navigate({ to: '/settings' })}
@@ -744,62 +736,10 @@ const sessionExtensionsRoute = createRoute({
     component: ExtensionsPage,
 })
 
-const sessionChangesRoute = createRoute({
-    getParentRoute: () => sessionDetailRoute,
-    path: 'changes',
-    component: ChangesPage,
-})
-
-const sessionTimelineRoute = createRoute({
-    getParentRoute: () => sessionDetailRoute,
-    path: 'timeline',
-    component: TimelinePage,
-})
-
-const sessionUndoRoute = createRoute({
-    getParentRoute: () => sessionDetailRoute,
-    path: 'undo',
-    component: UndoPage,
-})
-
-const mobileRoute = createRoute({
-    getParentRoute: () => rootRoute,
-    path: '/m',
-})
-
-const mobileSessionRoute = createRoute({
-    getParentRoute: () => mobileRoute,
-    path: '$sessionId',
-})
-
-const mobileChangesRoute = createRoute({
-    getParentRoute: () => mobileSessionRoute,
-    path: 'changes',
-    component: MobileChangesPage,
-})
-
-const mobileTerminalRoute = createRoute({
-    getParentRoute: () => mobileSessionRoute,
-    path: 'terminal',
-    component: MobileTerminalPage,
-})
-
-const shareViewRoute = createRoute({
-    getParentRoute: () => rootRoute,
-    path: '/s/$shareId',
-    component: ShareViewPage,
-})
-
 const settingsRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: '/settings',
     component: SettingsPage,
-})
-
-const orchestrationRoute = createRoute({
-    getParentRoute: () => rootRoute,
-    path: '/orchestration',
-    component: OrchestrationPage,
 })
 
 export const routeTree = rootRoute.addChildren([
@@ -813,21 +753,10 @@ export const routeTree = rootRoute.addChildren([
             sessionFilesRoute,
             sessionFileRoute,
             sessionExtensionsRoute,
-            sessionChangesRoute,
-            sessionTimelineRoute,
-            sessionUndoRoute,
         ]),
     ]),
     browseRoute,
     settingsRoute,
-    orchestrationRoute,
-    mobileRoute.addChildren([
-        mobileSessionRoute.addChildren([
-            mobileChangesRoute,
-            mobileTerminalRoute,
-        ]),
-    ]),
-    shareViewRoute,
 ])
 
 type RouterHistory = Parameters<typeof createRouter>[0]['history']

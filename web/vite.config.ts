@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
 const base = process.env.VITE_BASE_URL || '/'
-const hubTarget = process.env.VITE_HUB_PROXY || 'http://127.0.0.1:3006'
+const hubTarget = process.env.VITE_HUB_PROXY || 'http://127.0.0.1:3016'
 const appVersion = readAppVersion()
 
 function readAppVersion(): string {
@@ -37,20 +37,12 @@ function getVendorChunkName(id: string): string | undefined {
         return 'vendor-mermaid'
     }
 
-    if (id.includes('/node_modules/react-pdf/')) {
-        return 'vendor-pdf'
-    }
-
     if (
         id.includes('/node_modules/@assistant-ui/')
         || id.includes('/node_modules/remark-gfm/')
         || id.includes('/node_modules/hast-util-to-jsx-runtime/')
     ) {
         return 'vendor-assistant'
-    }
-
-    if (id.includes('/node_modules/@elevenlabs/react/')) {
-        return 'vendor-voice'
     }
 
     return undefined

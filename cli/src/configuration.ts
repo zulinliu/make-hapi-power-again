@@ -58,7 +58,7 @@ class Configuration {
 
     constructor() {
         // Server configuration
-        this._apiUrl = process.env.HAPI_POWER_API_URL || 'http://localhost:3006'
+        this._apiUrl = process.env.HAPI_POWER_API_URL || 'http://localhost:3016'
         this._cliApiToken = process.env.CLI_API_TOKEN || ''
         this._extraHeaders = parseExtraHeaders(process.env.HAPI_POWER_EXTRA_HEADERS_JSON)
 

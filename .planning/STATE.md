@@ -343,4 +343,107 @@ TOP 10 缺口：EDIT-01, FILE-01, FILE-02, FILE-05, PTY-02, GIT-04, FILE-12, EDI
 - 配置：.planning/config-v9.json（YOLO + 粗粒度 + 并行）
 
 ---
+
+## v0.12.0 已完成 — 功能精简与焦点聚焦
+
+### 核心目的
+删除已屏蔽/禁用的非核心功能代码，保持代码库整洁，聚焦核心实用功能（会话管理、聊天、文件管理、Git、终端、扩展系统、供应商配置），形成生产可用的稳定版本。
+
+### 当前活跃功能清单
+
+> **重要：后续迭代请以本清单为准，不要从早期文档推断功能范围。**
+
+| # | 功能 | 代码位置 | 备注 |
+|---|------|---------|------|
+| 1 | 会话管理 | web/src/routes/sessions/ | 创建/列表/详情/删除 |
+| 2 | AI 多代理聊天 | web/src/components/SessionChat.tsx | Claude/Codex/Gemini/OpenCode |
+| 3 | 文件管理 + Monaco Editor | web/src/routes/sessions/files.tsx | 文件树 + 代码编辑 |
+| 4 | Git 管理 | web/src/routes/sessions/git.tsx | 状态/历史/分支/diff/commit/push |
+| 5 | PTY 终端 | web/src/routes/sessions/terminal.tsx | xterm.js + Socket.IO |
+| 6 | 扩展系统 | web/src/routes/sessions/extensions.tsx | 插件 + Skill + Claude Plugin |
+| 7 | 供应商配置 | web/src/routes/settings/ | 自定义 API + 模型发现 |
+| 8 | 图片上传 | web/src/components/ImagePasteDrop.tsx | Socket.IO binary event |
+| 9 | 推送通知 | hub/src/notifications/ | Web Push + Badge + ServerChan + Telegram |
+| 10 | PWA | web/src/sw.ts + web/src/main.tsx | Service Worker + 离线 + 安装引导 |
+| 11 | i18n | web/src/lib/locales/ | 中英双语 |
+
+### 已删除功能 (9 项)
+
+| # | 功能 | 删除范围 | 原因 |
+|---|------|---------|------|
+| 1 | 白板 (Whiteboard) | 组件 + SessionChat 引用 + i18n | 完全隐藏，从未渲染 |
+| 2 | Skill编排 (Orchestration) | 前端页面 + 后端路由(假数据) + 测试 | 纯假数据，无真实后端 |
+| 3 | 移动端路由 (/m/*) | 2 个页面 + 路由注册 | 无导航入口，硬编码中文 |
+| 4 | 变更审查页 (Changes) | 前端页面 + 后端路由 + API方法 + i18n | 导航隐藏，后端独立 |
+| 5 | 撤销页 (Undo) | 前端页面 + 后端路由 + API方法 + i18n | 导航隐藏，后端独立 |
+| 6 | 操作时间线 (Timeline) | 前端页面 + 后端路由 + API方法 + i18n | 导航隐藏，reducerTimeline保留(聊天核心) |
+| 7 | 会话分享 (Share) | 前端页面 + 后端路由(含DB) + API方法 + i18n | 后端完整但无创建UI |
+| 8 | 语音录制 STT (Whisper) | VoiceRecorder + 后端转录路由 | 外部API依赖，非核心 |
+| 9 | 实时语音 (ElevenLabs) | realtime/ 目录 + VoiceProvider + 语音设置 + 后端路由 + 共享协议 | onVoiceToggle=undefined 禁用 |
+
+### 代码变更统计
+
+- **删除文件**: ~40 个
+- **修改文件**: ~25 个
+- **删除 i18n 键**: 103 个 (en + zh-CN)
+- **移除 npm 依赖**: @elevenlabs/react
+- **预估净删减**: ~4000+ 行
+
+### 保留的基础设施
+
+- `reducerTimeline.ts` + `reducerTimeline.test.ts` — 聊天消息核心渲染器，非时间线功能
+- `FileSnapshotStore` + `file_snapshots` 表 — DB Schema 基础设施，保留兼容
+- Push Notifications + App Badge API — 活跃 PWA 基础设施
+- ServerChan / Telegram Bot — 活跃通知渠道
+
+### 质量门禁
+
+- typecheck: 通过
+- vitest: 77 文件 651 测试全部通过
+- build: 成功
+
+### 规划文档
+- 方案：.planning/phases/code-cleanup/PLAN.md
+- **完整 GSD 记录**：.planning/phases/code-cleanup/RECORD.md（流程沉淀 + 删减结果 + 活跃功能清单 + 经验教训）
+
+## v0.12.1 进行中 — Tab 切换自动刷新修复
+
+### 根因分析
+
+Phase 19 (PWA 更新机制修复) 引入了三个叠加问题：
+
+| # | 问题 | 文件 | 行号 | 根因 |
+|---|------|------|------|------|
+| 1 | visibilitychange 每次切回触发 SW 更新检查 | `main.tsx` | 71-75 | 切标签页即触发 `registration.update()` |
+| 2 | sw.ts SKIP_WAITING 监听器累积 | `sw.ts` | 36-39 | 每次 postMessage 新增一个 activate listener |
+| 3 | workbox-window controlling 事件可能触发 reload | `main.tsx` (registerSW) | 55-91 | SW 激活后客户端自动重载 |
+
+**原版代码** (commit 85560c1): `setInterval(update, 60min)` + 直接 `skipWaiting()`，无 visibilitychange，无监听器累积。
+
+### 修复方案
+
+| # | 修复 | 做法 |
+|---|------|------|
+| 1 | visibilitychange 节流 | 仅当离开超过 5 分钟后切回才检查更新 |
+| 2 | sw.ts 监听器修复 | activate listener 提到全局，只注册一次 |
+| 3 | 确认无 auto-reload | 检查 registerSW 配置，确保无自动 reload |
+
+### 质量门禁
+
+- [x] typecheck 通过
+- [x] vitest 全部通过 (77 文件 651 测试)
+- [x] build 成功
+- [ ] 手动验证：切换标签页不再触发全局刷新
+
+### 实际修复
+
+| # | 文件 | 修改 |
+|---|------|------|
+| 1 | `web/src/main.tsx` | visibilitychange 节流：仅离开 >5 分钟后切回才 `registration.update()` |
+| 2 | `web/src/sw.ts` | 移除 SKIP_WAITING 内的 activate listener 累积 |
+| 3 | `web/vite.config.ts` | 确认 registerType:'prompt' + UpdateBanner 仅用户点击触发，无 auto-reload |
+
+---
+*状态更新: 2026-06-05 (v0.12.1 Tab切换自动刷新修复 — 实施完成，待手动验证)*
+*状态更新: 2026-06-04 (v0.12.0 功能精简完成 — 9 项非核心功能已删除)*
 *状态更新: 2026-06-03 (v9 UI统一优化规划完成)*

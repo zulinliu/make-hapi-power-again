@@ -22,10 +22,6 @@ type SessionActionMenuProps = {
     onViewGit?: () => void
     onViewExtensions?: () => void
     onOpenOutline?: () => void
-    onViewChanges?: () => void
-    onViewTimeline?: () => void
-    onViewUndo?: () => void
-    onWhiteboard?: () => void
 }
 
 function EditIcon() {
@@ -76,38 +72,6 @@ function OutlineIcon() {
     )
 }
 
-function ChangesIcon() {
-    return (
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-        </svg>
-    )
-}
-
-function TimelineIcon() {
-    return (
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
-        </svg>
-    )
-}
-
-function UndoIcon() {
-    return (
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="1 4 1 10 7 10" /><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
-        </svg>
-    )
-}
-
-function WhiteboardIcon() {
-    return (
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="3" width="18" height="18" rx="2" /><path d="m9.3 6.3 1.4 1.4" /><path d="m14.7 6.3-1.4 1.4" /><path d="M9 15a3.5 3.5 0 0 0 6 0" />
-        </svg>
-    )
-}
-
 type MenuPosition = {
     top: number
     left: number
@@ -128,10 +92,6 @@ export function SessionActionMenu(props: SessionActionMenuProps) {
         onViewGit,
         onViewExtensions,
         onOpenOutline,
-        onViewChanges,
-        onViewTimeline,
-        onViewUndo,
-        onWhiteboard,
     } = props
     const menuRef = useRef<HTMLDivElement | null>(null)
     const [menuPosition, setMenuPosition] = useState<MenuPosition | null>(null)
@@ -149,7 +109,7 @@ export function SessionActionMenu(props: SessionActionMenuProps) {
         return () => mql.removeEventListener('change', handler)
     }, [])
 
-    const hasSecondaryActions = onViewGit || onViewExtensions || onOpenOutline || onViewChanges || onViewTimeline || onViewUndo || onWhiteboard
+    const hasSecondaryActions = onViewGit || onViewExtensions || onOpenOutline
 
     const handleAction = (callback?: () => void) => {
         if (!callback) return
@@ -249,7 +209,6 @@ export function SessionActionMenu(props: SessionActionMenuProps) {
         { label: 'Git', icon: <GitIcon />, onClick: onViewGit },
         { label: t('session.extensions') ?? 'Extensions', icon: <ExtensionsIcon />, onClick: onViewExtensions },
         { label: t('session.outline.open') ?? 'Outline', icon: <OutlineIcon />, onClick: onOpenOutline },
-        // Changes/Timeline/Undo/Whiteboard hidden — not in original requirements
     ].filter(item => item.onClick)
 
     return (

@@ -65,12 +65,17 @@ async function bootstrap() {
         },
         onRegistered(registration) {
             if (registration) {
-                // Only check for updates when the page becomes visible again
-                // This prevents the 30-min polling interval from triggering SW updates
-                // while the app is in the background on iOS Safari
+                // Only check for SW updates when returning after 5+ minutes away
+                // Prevents auto-refresh on every tab switch
+                let lastVisible = Date.now()
                 const handleVisibility = () => {
                     if (document.visibilityState === 'visible') {
-                        registration.update()
+                        const awayMs = Date.now() - lastVisible
+                        if (awayMs > 5 * 60 * 1000) {
+                            registration.update()
+                        }
+                    } else {
+                        lastVisible = Date.now()
                     }
                 }
                 document.addEventListener('visibilitychange', handleVisibility)

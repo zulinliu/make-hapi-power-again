@@ -1,7 +1,7 @@
 # Requirements: Hapi Power v9 — UI 统一优化
 
 **Defined:** 2026-06-03
-**Core Value:** 所有子页面（Git/扩展/变更/时间线/撤销/上下文）与文件管理主页保持统一的视觉和交互体验
+**Core Value:** 所有子页面（Git/扩展/上下文）与文件管理主页保持统一的视觉和交互体验（~~Changes/Timeline/Undo 已在 v0.12.0 删除~~）
 
 ## v9 Requirements
 
@@ -21,7 +21,7 @@
 - [ ] **LAYOUT-05**: 所有子页面 Tab 指示器统一使用绝对定位下划线（参考文件页）
 - [ ] **LAYOUT-06**: 所有子页面 header padding 统一为 `p-3`（参考文件页）
 - [ ] **LAYOUT-07**: 提取共享布局组件（SubPageLayout）供所有子页面复用
-- [ ] **LAYOUT-08**: 统一涉及页面：Git、Extensions、Changes、Timeline、Undo、上下文管理
+- [ ] **LAYOUT-08**: 统一涉及页面：Git、Extensions、上下文管理（~~Changes/Timeline/Undo 已在 v0.12.0 删除~~）
 
 ### CTXMENU — 右键菜单全局适配
 
