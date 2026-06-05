@@ -2,7 +2,7 @@
 
 ## What This Is
 
-**Hapi Power** 是一个面向 AI 编码代理的全栈开发者工作台（Bun + Hono + React 19 monorepo），将远程代理管理、本地开发工具链（文件管理 + 代码编辑 + PTY 终端 + Git 管理）、扩展生态系统（插件 + Skill + Claude Plugin）、AI 工作流增强（变更审查 + 时间线 + 撤销 + 移动速览 + 会话分享）融合为统一的 Web 体验。项目基于 hapi（AGPL-3.0）上游源码二次开发，保留 CLI-Hub-Web 三层架构，在其上构建完整的开发者工具链。
+**Hapi Power** 是一个面向 AI 编码代理的全栈开发者工作台（Bun + Hono + React 19 monorepo），将远程代理管理、本地开发工具链（文件管理 + 代码编辑 + PTY 终端 + Git 管理）、扩展生态系统（插件 + Skill + Claude Plugin）、自定义模型 API 配置融合为统一的 Web 体验。项目基于 hapi（AGPL-3.0）上游源码二次开发，保留 CLI-Hub-Web 三层架构，在其上构建完整的开发者工具链。
 
 ## Core Value
 
@@ -56,17 +56,17 @@
 - [ ] 统一 Skill 存储路径（~/.claude/skills/）
 
 **Module E — AI 工作流增强**
-- [ ] 变更审查流程（基于 ToolCall 追踪 + 三态审查模型 + DiffView 复用）
-- [ ] 代理操作时间线 + 会话摘要（增量摘要 + 检查点机制）
-- [ ] 撤销变更（Git 优先回滚 + 文件快照兜底 + 三种粒度）
-- [ ] 移动端代码文档速览（专用 /m/* 路由 + PWA 推送通知）
-- [ ] 会话分享（只读快照 + 范围控制 + 时效控制）
+- [x] ~~变更审查流程（基于 ToolCall 追踪 + 三态审查模型 + DiffView 复用）~~ → v0.12.0 已删除
+- [x] ~~代理操作时间线 + 会话摘要（增量摘要 + 检查点机制）~~ → v0.12.0 已删除
+- [x] ~~撤销变更（Git 优先回滚 + 文件快照兜底 + 三种粒度）~~ → v0.12.0 已删除
+- [x] ~~移动端代码文档速览（专用 /m/* 路由 + PWA 推送通知）~~ → v0.12.0 已删除
+- [x] ~~会话分享（只读快照 + 范围控制 + 时效控制）~~ → v0.12.0 已删除
 
 **Module F — 代理体验增强**
 - [ ] 二进制帧传输（图片/截图 → 代理，Socket.IO binary event）
-- [ ] 语音对话界面（浏览器麦克风 → Whisper API → 代理）
-- [ ] Skill 编排系统（Loop、Handoff、Advisor、Committee、Epic）
-- [ ] 简易白板工具（Canvas 绘图 → base64 → 代理）
+- [x] ~~语音对话界面（浏览器麦克风 → Whisper API → 代理）~~ → v0.12.0 已删除
+- [x] ~~Skill 编排系统（Loop、Handoff、Advisor、Committee、Epic）~~ → v0.12.0 已删除
+- [x] ~~简易白板工具（Canvas 绘图 → base64 → 代理）~~ → v0.12.0 已删除
 
 **Module G — 会话上下文管理**
 - [ ] 上下文用量可视化（进度条 + 状态指示）
@@ -160,6 +160,26 @@
 | v0.7 AES-256-GCM API Key 加密（ADR-014） | SQLite 加密存储，优于 cc-switch 的明文方案 | — Pending |
 | v0.8 协议转换延后（ADR-015） | v0.7 仅做配置+发现，协议转换由中转服务或 v0.8 Hub 代理实现 | — Pending |
 
+## v0.12.0 功能精简 (2026-06-04)
+
+为了聚焦核心实用功能、保持代码库整洁，v0.12.0 删除了 9 项非核心功能（白板、Skill编排、移动端路由、变更审查、撤销、时间线、会话分享、语音录制、实时语音）。详见 STATE.md v0.12.0 章节。
+
+**当前活跃功能清单（仅以下功能在代码库中存在）：**
+
+| 模块 | 功能 | 状态 |
+|------|------|------|
+| 会话管理 | 创建/列表/详情/删除会话 | ✓ 活跃 |
+| AI 聊天 | 多代理聊天（Claude/Codex/Gemini/OpenCode） | ✓ 活跃 |
+| 文件管理 | 文件树 + Monaco Editor + 预览 | ✓ 活跃 |
+| Git 管理 | 状态/历史/分支/diff/commit/push | ✓ 活跃 |
+| PTY 终端 | xterm.js + Socket.IO 多会话 | ✓ 活跃 |
+| 扩展系统 | 插件 + Skill 搜索/安装 + Claude Plugin | ✓ 活跃 |
+| 供应商配置 | 自定义 API 供应商 + 模型发现 | ✓ 活跃 |
+| 图片上传 | 二进制帧传输（Socket.IO） | ✓ 活跃 |
+| 推送通知 | Web Push + Badge API + ServerChan + Telegram | ✓ 活跃 |
+| PWA | Service Worker + 离线 + 安装引导 | ✓ 活跃 |
+| i18n | 中英双语 | ✓ 活跃 |
+
 ## Evolution
 
 This document evolves at phase transitions and milestone boundaries.
@@ -178,4 +198,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-03 after v9 UI统一优化规划*
+*Last updated: 2026-06-05 after v0.12.0 功能精简*
