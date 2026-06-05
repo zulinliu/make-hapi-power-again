@@ -3,14 +3,14 @@ import type { TeamState } from '@hapipower/protocol/types'
 
 function memberStatusDot(status?: string): string {
     if (status === 'active') return 'bg-emerald-500'
-    if (status === 'shutdown') return 'bg-red-500'
-    return 'bg-gray-400'
+    if (status === 'shutdown') return 'bg-[var(--hp-danger)]'
+    return 'bg-[var(--hp-text-tertiary)]'
 }
 
 function taskStatusColor(status?: string): string {
     if (status === 'completed') return 'text-emerald-600'
     if (status === 'in_progress') return 'text-[var(--app-link)]'
-    if (status === 'blocked') return 'text-red-500'
+    if (status === 'blocked') return 'text-[var(--hp-danger)]'
     return 'text-[var(--app-hint)]'
 }
 
