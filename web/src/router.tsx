@@ -246,7 +246,7 @@ function SessionsPage() {
                 onPointerDown={sidebar.onPointerDown}
             />
 
-            <main className={`${isSessionsIndex ? 'hidden lg:flex' : 'flex'} min-w-0 flex-1 flex-col bg-[--hp-canvas]`}>
+            <main id="main-content" className={`${isSessionsIndex ? 'hidden lg:flex' : 'flex'} min-w-0 flex-1 flex-col bg-[--hp-canvas]`}>
                 <div className="flex-1 min-h-0">
                     <Outlet />
                 </div>
@@ -378,20 +378,23 @@ function SessionPage(props: { outlineOpen?: boolean; setOutlineOpen?: (open: boo
         if (sessionError) {
             return (
                 <div className="flex h-full flex-col items-center justify-center gap-3 p-4 text-center">
-                    <div className="text-sm font-medium text-[var(--app-fg)]">Session unavailable</div>
-                    <div className="max-w-md text-xs text-[var(--app-hint)]">{sessionError}</div>
+                    <svg className="h-10 w-10 text-[var(--hp-warning)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                    </svg>
+                    <div className="text-sm font-medium text-[var(--hp-text-primary)]">Session unavailable</div>
+                    <div className="max-w-md text-xs text-[var(--hp-text-tertiary)]">{sessionError}</div>
                     <div className="flex gap-2">
                         <button
                             type="button"
                             onClick={() => navigate({ to: '/sessions', replace: true })}
-                            className="rounded-md border border-[var(--app-border)] px-3 py-1.5 text-sm text-[var(--app-fg)] hover:bg-[var(--app-secondary-bg)]"
+                            className="rounded-[var(--hp-radius-sm)] border border-[var(--hp-border)] px-3 py-1.5 text-sm text-[var(--hp-text-primary)] hover:bg-[var(--hp-surface-1)]"
                         >
                             Back to sessions
                         </button>
                         <button
                             type="button"
                             onClick={() => { void refetchSession() }}
-                            className="rounded-md bg-[var(--app-link)] px-3 py-1.5 text-sm text-white"
+                            className="rounded-[var(--hp-radius-sm)] bg-[var(--hp-primary)] px-3 py-1.5 text-sm text-[var(--hp-primary-text)] hover:bg-[var(--hp-primary-hover)]"
                         >
                             Retry
                         </button>
@@ -450,13 +453,30 @@ function SessionDetailRoute() {
         if (!sessionNotFound) {
             return
         }
-        navigate({ to: '/sessions', replace: true })
+        const timer = setTimeout(() => {
+            navigate({ to: '/sessions', replace: true })
+        }, 3000)
+        return () => clearTimeout(timer)
     }, [navigate, sessionNotFound])
 
     if (sessionNotFound) {
         return (
-            <div className="flex-1 flex items-center justify-center p-4">
-                <LoadingState label="Session not found. Returning to sessions…" className="text-sm" />
+            <div className="flex-1 flex flex-col items-center justify-center gap-3 p-4 text-center">
+                <svg className="h-12 w-12 text-[var(--hp-warning)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                </svg>
+                <div className="text-base font-semibold text-[var(--hp-text-primary)]">Session not found</div>
+                <div className="text-sm text-[var(--hp-text-tertiary)]">
+                    This session may have been deleted or is no longer available.
+                </div>
+                <button
+                    type="button"
+                    onClick={() => navigate({ to: '/sessions', replace: true })}
+                    className="mt-2 rounded-[var(--hp-radius-sm)] bg-[var(--hp-primary)] px-4 py-2 text-sm font-medium text-[var(--hp-primary-text)] hover:bg-[var(--hp-primary-hover)] transition-colors"
+                >
+                    Return to sessions
+                </button>
+                <div className="text-xs text-[var(--hp-text-tertiary)]">Redirecting in 3 seconds…</div>
             </div>
         )
     }
