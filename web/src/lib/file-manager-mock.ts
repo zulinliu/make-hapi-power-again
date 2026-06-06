@@ -38,7 +38,6 @@ function buildFS(): VirtualFS {
   const T5 = '2025-05-20T16:45:00Z'
   const T6 = '2025-06-05T11:00:00Z'
 
-  // Root
   fs.set(ROOT, [
     dir('src', T3),
     dir('public', T5),
@@ -61,7 +60,6 @@ function buildFS(): VirtualFS {
     d('LICENSE', 1070, T4),
   ])
 
-  // src/
   fs.set(`${ROOT}/src`, [
     dir('components', T3),
     dir('hooks', T5),
@@ -75,7 +73,6 @@ function buildFS(): VirtualFS {
     d('vite-env.d.ts', 38, T2),
   ])
 
-  // src/components/
   fs.set(`${ROOT}/src/components`, [
     dir('FileManager', T6),
     dir('ui', T5),
@@ -86,7 +83,6 @@ function buildFS(): VirtualFS {
     d('FileIcon.tsx', 1560, T6),
   ])
 
-  // src/components/FileManager/
   fs.set(`${ROOT}/src/components/FileManager`, [
     d('types.ts', 920, T6),
     d('FileManager.tsx', 6400, T6),
@@ -96,7 +92,6 @@ function buildFS(): VirtualFS {
     d('useFileNavigation.ts', 1800, T5),
   ])
 
-  // src/hooks/
   fs.set(`${ROOT}/src/hooks`, [
     d('useAuth.ts', 1280, T5),
     d('useDebounce.ts', 640, T2),
@@ -104,7 +99,6 @@ function buildFS(): VirtualFS {
     d('useLocalStorage.ts', 720, T4),
   ])
 
-  // src/lib/
   fs.set(`${ROOT}/src/lib`, [
     d('api.ts', 3200, T3),
     d('utils.ts', 860, T3),
@@ -112,7 +106,6 @@ function buildFS(): VirtualFS {
     d('file-manager-mock.ts', 4800, T6),
   ])
 
-  // src/pages/
   fs.set(`${ROOT}/src/pages`, [
     d('Dashboard.tsx', 2800, T3),
     d('FileManagerPage.tsx', 1600, T6),
@@ -120,19 +113,16 @@ function buildFS(): VirtualFS {
     d('Login.tsx', 1400, T4),
   ])
 
-  // src/styles/
   fs.set(`${ROOT}/src/styles`, [
     d('globals.css', 2400, T4),
     d('animations.css', 860, T3),
   ])
 
-  // src/types/
   fs.set(`${ROOT}/src/types`, [
     d('index.ts', 1200, T3),
     d('api.ts', 2400, T5),
   ])
 
-  // public/
   fs.set(`${ROOT}/public`, [
     dir('icons', T4),
     dir('images', T5),
@@ -141,21 +131,18 @@ function buildFS(): VirtualFS {
     d('manifest.json', 320, T4),
   ])
 
-  // public/icons/
   fs.set(`${ROOT}/public/icons`, [
     d('icon-192.png', 12840, T4),
     d('icon-512.png', 24680, T4),
     d('apple-touch-icon.png', 8420, T4),
   ])
 
-  // public/images/
   fs.set(`${ROOT}/public/images`, [
     d('logo.svg', 3200, T5),
     d('hero-banner.webp', 48_200, T5),
     d('og-image.png', 92_400, T4),
   ])
 
-  // docs/
   fs.set(`${ROOT}/docs`, [
     d('ARCHITECTURE.md', 8400, T4),
     d('CONTRIBUTING.md', 3200, T4),
@@ -164,14 +151,12 @@ function buildFS(): VirtualFS {
     d('DEPLOYMENT.md', 4400, T4),
   ])
 
-  // .github/
   fs.set(`${ROOT}/.github`, [
     dir('workflows', T4, { isHidden: true }),
     d('CODEOWNERS', 180, T4, { isHidden: true }),
     d('PULL_REQUEST_TEMPLATE.md', 640, T4, { isHidden: true }),
   ])
 
-  // .github/workflows/
   fs.set(`${ROOT}/.github/workflows`, [
     d('ci.yml', 2400, T4, { isHidden: true }),
     d('deploy.yml', 1800, T4, { isHidden: true }),
@@ -181,17 +166,14 @@ function buildFS(): VirtualFS {
   return fs
 }
 
-const fs = buildFS()
+let fs = buildFS()
 
 function resolvePath(inputPath: string): string {
   const parts = inputPath.split('/').filter(Boolean)
   const resolved: string[] = []
   for (const part of parts) {
-    if (part === '..') {
-      resolved.pop()
-    } else if (part !== '.') {
-      resolved.push(part)
-    }
+    if (part === '..') resolved.pop()
+    else if (part !== '.') resolved.push(part)
   }
   return '/' + resolved.join('/')
 }
@@ -215,37 +197,120 @@ function hasGitDirectory(dirPath: string): boolean {
   return false
 }
 
+function annotate(normalized: string, entries: FileEntry[]): FileEntry[] {
+  const sorted = [...entries].sort((a, b) => {
+    if (a.type !== b.type) return a.type === 'directory' ? -1 : 1
+    return a.name.localeCompare(b.name)
+  })
+  return sorted.map((entry) => ({
+    ...entry,
+    path: `${normalized}/${entry.name}`,
+    isGitRepo: entry.type === 'directory' ? hasGitDirectory(`${normalized}/${entry.name}`) : undefined,
+    isHidden: entry.name.startsWith('.'),
+  }))
+}
+
+const delay = () => new Promise<void>((r) => setTimeout(r, 100 + Math.floor(Math.random() * 200)))
+const now = () => new Date().toISOString()
+
 export async function mockListDirectory(
   path: string,
   showHidden: boolean = false,
 ): Promise<DirectoryListing> {
-  const delay = 100 + Math.floor(Math.random() * 200)
-  await new Promise((r) => setTimeout(r, delay))
-
+  await delay()
   const normalized = resolvePath(path)
-
   const entries = fs.get(normalized)
-  if (!entries) {
-    throw new Error(`Directory not found: ${normalized}`)
-  }
-
+  if (!entries) throw new Error(`Directory not found: ${normalized}`)
   const filtered = showHidden ? entries : entries.filter((e) => !e.isHidden)
-  const sorted = [...filtered].sort((a, b) => {
-    if (a.type !== b.type) return a.type === 'directory' ? -1 : 1
-    return a.name.localeCompare(b.name)
-  })
+  return { path: normalized, entries: annotate(normalized, filtered), parentPath: parentPath(normalized) }
+}
 
-  const annotated = sorted.map((entry) => ({
-    ...entry,
-    path: `${normalized}/${entry.name}`,
-    isGitRepo:
-      entry.type === 'directory' ? hasGitDirectory(`${normalized}/${entry.name}`) : undefined,
-    isHidden: entry.name.startsWith('.'),
-  }))
+export async function mockCreateFile(dirPath: string, name: string): Promise<FileEntry> {
+  await delay()
+  const normalized = resolvePath(dirPath)
+  const entries = fs.get(normalized)
+  if (!entries) throw new Error(`Directory not found: ${normalized}`)
+  if (entries.some((e) => e.name === name)) throw new Error(`"${name}" already exists`)
+  const entry: FileEntry = { name, path: `${normalized}/${name}`, type: 'file', size: 0, modified: now(), isHidden: name.startsWith('.') }
+  entries.push(entry)
+  return { ...entry, path: `${normalized}/${name}` }
+}
 
-  return {
-    path: normalized,
-    entries: annotated,
-    parentPath: parentPath(normalized),
+export async function mockCreateFolder(dirPath: string, name: string): Promise<FileEntry> {
+  await delay()
+  const normalized = resolvePath(dirPath)
+  const entries = fs.get(normalized)
+  if (!entries) throw new Error(`Directory not found: ${normalized}`)
+  if (entries.some((e) => e.name === name)) throw new Error(`"${name}" already exists`)
+  const entry: FileEntry = { name, path: `${normalized}/${name}`, type: 'directory', size: 0, modified: now(), isHidden: name.startsWith('.') }
+  entries.push(entry)
+  fs.set(`${normalized}/${name}`, [])
+  return { ...entry, path: `${normalized}/${name}` }
+}
+
+export async function mockDelete(dirPath: string, name: string): Promise<void> {
+  await delay()
+  const normalized = resolvePath(dirPath)
+  const entries = fs.get(normalized)
+  if (!entries) throw new Error(`Directory not found: ${normalized}`)
+  const idx = entries.findIndex((e) => e.name === name)
+  if (idx === -1) throw new Error(`"${name}" not found`)
+  const entry = entries[idx]
+  entries.splice(idx, 1)
+  if (entry.type === 'directory') fs.delete(`${normalized}/${name}`)
+}
+
+export async function mockRename(dirPath: string, oldName: string, newName: string): Promise<FileEntry> {
+  await delay()
+  const normalized = resolvePath(dirPath)
+  const entries = fs.get(normalized)
+  if (!entries) throw new Error(`Directory not found: ${normalized}`)
+  const idx = entries.findIndex((e) => e.name === oldName)
+  if (idx === -1) throw new Error(`"${oldName}" not found`)
+  if (entries.some((e) => e.name === newName)) throw new Error(`"${newName}" already exists`)
+  entries[idx] = { ...entries[idx], name: newName, path: `${normalized}/${newName}`, modified: now(), isHidden: newName.startsWith('.') }
+  return entries[idx]
+}
+
+export async function mockCopy(srcPath: string, destDir: string): Promise<FileEntry> {
+  await delay()
+  const srcDir = resolvePath(srcPath.substring(0, srcPath.lastIndexOf('/')))
+  const srcName = srcPath.substring(srcPath.lastIndexOf('/') + 1)
+  const srcEntries = fs.get(srcDir)
+  if (!srcEntries) throw new Error(`Source not found: ${srcPath}`)
+  const src = srcEntries.find((e) => e.name === srcName)
+  if (!src) throw new Error(`"${srcName}" not found`)
+  const destEntries = fs.get(resolvePath(destDir))
+  if (!destEntries) throw new Error(`Destination not found: ${destDir}`)
+  if (destEntries.some((e) => e.name === srcName)) throw new Error(`"${srcName}" already exists at destination`)
+  const copy: FileEntry = { ...src, path: `${resolvePath(destDir)}/${srcName}`, modified: now() }
+  destEntries.push(copy)
+  if (src.type === 'directory') {
+    const srcChildren = fs.get(srcPath)
+    fs.set(`${resolvePath(destDir)}/${srcName}`, srcChildren ? [...srcChildren] : [])
   }
+  return copy
+}
+
+export async function mockMove(srcPath: string, destDir: string): Promise<FileEntry> {
+  await delay()
+  const srcDir = resolvePath(srcPath.substring(0, srcPath.lastIndexOf('/')))
+  const srcName = srcPath.substring(srcPath.lastIndexOf('/') + 1)
+  const srcEntries = fs.get(srcDir)
+  if (!srcEntries) throw new Error(`Source not found: ${srcPath}`)
+  const idx = srcEntries.findIndex((e) => e.name === srcName)
+  if (idx === -1) throw new Error(`"${srcName}" not found`)
+  const entry = srcEntries[idx]
+  const destEntries = fs.get(resolvePath(destDir))
+  if (!destEntries) throw new Error(`Destination not found: ${destDir}`)
+  if (destEntries.some((e) => e.name === srcName)) throw new Error(`"${srcName}" already exists at destination`)
+  srcEntries.splice(idx, 1)
+  const moved: FileEntry = { ...entry, path: `${resolvePath(destDir)}/${srcName}`, modified: now() }
+  destEntries.push(moved)
+  if (entry.type === 'directory') {
+    const children = fs.get(srcPath)
+    fs.delete(srcPath)
+    fs.set(`${resolvePath(destDir)}/${srcName}`, children ?? [])
+  }
+  return moved
 }
