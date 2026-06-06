@@ -34,12 +34,14 @@ import { useSendMessage } from '@/hooks/mutations/useSendMessage'
 import { queryKeys } from '@/lib/query-keys'
 import { useToast } from '@/lib/toast-context'
 import { useTranslation } from '@/lib/use-translation'
+import { decodeBase64 } from '@/lib/utils'
 import { fetchLatestMessages, seedMessageWindowFromSession } from '@/lib/message-window-store'
 import { clearDraftsAfterSend } from '@/lib/clearDraftsAfterSend'
 import { markSessionSeen } from '@/lib/sessionLastSeen'
 import type { Machine } from '@/types/api'
 import FilesPage from '@/routes/sessions/files'
 import FilePage from '@/routes/sessions/file'
+import BrowseFilePage from '@/routes/browse/file'
 import TerminalPage from '@/routes/sessions/terminal'
 import GitPage from '@/routes/sessions/git'
 import ExtensionsPage from '@/routes/sessions/extensions'
@@ -587,11 +589,18 @@ function BrowsePage() {
     const { t } = useTranslation()
     const goBack = useAppGoBack()
     const { api } = useAppContext()
-    const search = useRouterState({ select: (s) => s.location.search as { machineId?: string } })
+    const search = useRouterState({ select: (s) => s.location.search as { machineId?: string; path?: string } })
     const { machines } = useMachines(api, true)
     const machineId = search.machineId ?? machines[0]?.id ?? null
     const machine = machines.find(m => m.id === machineId)
     const workspaceRoot = machine?.metadata?.workspaceRoots?.[0]
+    const initialPath = useMemo(() => {
+        if (typeof search.path === 'string' && search.path) {
+            const decoded = decodeBase64(search.path)
+            return decoded.ok ? decoded.text : search.path
+        }
+        return workspaceRoot
+    }, [search.path, workspaceRoot])
 
     return (
         <div className="flex h-full min-h-0 flex-col">
@@ -610,8 +619,8 @@ function BrowsePage() {
             </div>
 
             <div className="flex-1 min-h-0">
-                {workspaceRoot ? (
-                    <FileManager api={api} machineId={machineId} initialPath={workspaceRoot} />
+                {initialPath ? (
+                    <FileManager api={api} machineId={machineId} initialPath={initialPath} />
                 ) : (
                     <div className="flex items-center justify-center h-full">
                         <div className="animate-pulse text-(--hp-text-tertiary)">{t('session.loading')}</div>
@@ -732,13 +741,35 @@ const newSessionRoute = createRoute({
 const browseRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: '/browse',
-    validateSearch: (search: Record<string, unknown>): { machineId?: string } => {
+    validateSearch: (search: Record<string, unknown>): { machineId?: string; path?: string } => {
+        const result: { machineId?: string; path?: string } = {}
         if (typeof search.machineId === 'string' && search.machineId) {
-            return { machineId: search.machineId }
+            result.machineId = search.machineId
         }
-        return {}
+        if (typeof search.path === 'string' && search.path) {
+            result.path = search.path
+        }
+        return result
     },
     component: BrowsePage,
+})
+
+type BrowseFileSearch = {
+    machineId?: string
+    path: string
+}
+
+const browseFileRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/browse/file',
+    validateSearch: (search: Record<string, unknown>): BrowseFileSearch => {
+        const result: BrowseFileSearch = { path: typeof search.path === 'string' ? search.path : '' }
+        if (typeof search.machineId === 'string' && search.machineId) {
+            result.machineId = search.machineId
+        }
+        return result
+    },
+    component: BrowseFilePage,
 })
 
 const sessionGitRoute = createRoute({
@@ -773,6 +804,7 @@ export const routeTree = rootRoute.addChildren([
         ]),
     ]),
     browseRoute,
+    browseFileRoute,
     settingsRoute,
 ])
 

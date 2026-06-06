@@ -388,8 +388,8 @@ export class ApiClient {
         return await this.request<FileReadResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/file?${params.toString()}`)
     }
 
-    async writeSessionFile(sessionId: string, path: string, content: string, expectedHash?: string, forceOverwrite?: boolean): Promise<{ success: boolean; error?: string }> {
-        return await this.request<{ success: boolean; error?: string }>(`/api/sessions/${encodeURIComponent(sessionId)}/file`, {
+    async writeSessionFile(sessionId: string, path: string, content: string, expectedHash?: string, forceOverwrite?: boolean): Promise<{ success: boolean; error?: string; hash?: string }> {
+        return await this.request<{ success: boolean; error?: string; hash?: string }>(`/api/sessions/${encodeURIComponent(sessionId)}/file`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ path, content, expectedHash, forceOverwrite })

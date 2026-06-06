@@ -242,3 +242,72 @@ git diff --check
 2. 上传、下载已隐藏但尚未交付，35.5 必须以真实能力回归。
 3. session common read handler 还缺 `hash/size/modified`，统一冲突检测仍待补齐。
 4. FileManager 的移动/复制目标当前是路径输入，生产上后续可以增强为目录选择器，但当前不再是空壳。
+
+## Phase 35.4 Review: 预览编辑生产化
+
+**状态**: 完成。
+
+### 本阶段交付
+
+1. session `ReadFile` RPC 返回 `content`、`hash`、`size`、`modified`，补齐保存冲突检测所需元数据。
+2. session 文件页保存从默认 `forceOverwrite=true` 改为 `expectedHash` 安全保存，避免静默覆盖外部修改。
+3. session 保存失败时保留本地内容，并提供重试、重新加载、强制覆盖、复制内容四种恢复动作。
+4. 新增 machine scoped `/browse/file` 路由，全局 `/browse` 点击文件直接打开预览/编辑，不再依赖活动会话。
+5. machine 文件页支持文本轻编辑、Markdown 预览/编辑切换、图片预览、二进制保护、大文件只读保护和下载。
+6. machine 文件页保存同样使用 `expectedHash`，支持冲突后 reload / force overwrite / copy local recovery。
+7. `/browse/file` 返回 `/browse` 时携带父目录路径，避免深层目录打开文件后返回丢失空间上下文。
+8. 修正轻编辑工具栏只读提示，只在预览态显示，不在编辑态误导用户。
+9. 新增 `cli/src/modules/common/handlers/files.test.ts`，覆盖 read metadata 和 stale expectedHash 拒绝。
+
+### 用户反馈覆盖
+
+| 用户问题 | 状态 | 说明 |
+|---|---|---|
+| 文件点击无反应 | 已解决 | `/browse` 文件点击进入 `/browse/file` 全局文件页 |
+| 编辑入口不清晰 | 已解决基础闭环 | 文件页提供预览、编辑、保存、下载和恢复动作 |
+| 没有活动会话导致文件无法操作 | 已进一步解决 | 全局文件打开和保存走 machine API，不需要 session |
+| 大量占位功能不可用 | 已进一步解决 | 下载在文件页以真实 blob 下载接入，上传和搜索进入 35.5 |
+| session 和全局割裂 | 部分解决 | session directory 复用 FileManager；文件页行为基本对齐，但 viewer 代码仍可继续抽组件 |
+
+### 是否引入新空壳入口
+
+没有新增空壳入口。Monaco 懒加载未在本阶段落地，当前以 textarea 轻编辑作为明确可用的生产兜底；35.6 前需要决定是否继续接 Monaco，或将 Monaco 留到后续版本并在文档中明确。
+
+### 全局和会话一致性
+
+- 全局和会话文件页都支持预览、轻编辑、保存、失败恢复、二进制保护和大文件保护。
+- 全局文件页不含 Git diff tab，这是符合 machine scoped 模式的差异；session 文件页保留 Git diff 作为会话增强能力。
+- 当前两套文件页存在重复 UI 代码，后续可抽 `FileViewer` 组件降低维护风险。
+
+### 移动端触控和可访问性
+
+- 关键按钮在移动端保持 44px 触控目标或通过 `max-md:min-h-[44px]` 增强。
+- 保存失败恢复动作均为显性按钮，不依赖右键或长按。
+- Dirty 离开保护使用确认对话框，避免移动端误触丢失内容。
+
+### 质量门禁
+
+```bash
+bun run typecheck
+# PASS
+
+cd cli && bun test src/modules/common/handlers/files.test.ts src/api/apiMachine.fileOperations.test.ts
+# PASS: 8 tests
+
+cd web && bun test src/lib/file-manager-api.test.ts src/lib/files-i18n.test.ts
+# PASS: 7 tests
+
+bun run test:web
+# PASS: 79 files, 672 tests
+
+git diff --check
+# PASS
+```
+
+### 剩余风险
+
+1. 上传仍未接入真实能力，35.5 必须实现并重新显示入口。
+2. FileManager 列表页下载入口仍未恢复，35.5 需要接入单文件下载，目录下载 zip 可作为后续增强。
+3. 全局和会话文件页重复较多，35.6 质量收敛时应评估是否抽组件。
+4. Monaco 懒加载未落地，当前轻编辑可用但不满足历史“代码编辑器”理想形态。
+5. 文件保存大小仍受 Hub `writeFileSchema` 5MB 限制，上传阶段需要明确限制和错误文案。

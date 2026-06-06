@@ -209,8 +209,15 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
       })
       return
     }
-    showToast(t(mode === 'machine' ? 'fm.toast.openRequiresSession' : 'fm.toast.operationFailed'), 'error')
-  }, [sessionId, navigate, t, mode])
+    if (machineId) {
+      navigate({
+        to: '/browse/file',
+        search: { machineId, path: encodeBase64(filePath) },
+      })
+      return
+    }
+    showToast(t(mode === 'machine' ? 'fm.toast.machineUnavailable' : 'fm.toast.operationFailed'), 'error')
+  }, [sessionId, machineId, navigate, t, mode])
 
   const handleContextMenu = useCallback(
     (path: string, _type: 'file' | 'directory', point: { x: number; y: number }) => {
