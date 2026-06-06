@@ -15,8 +15,7 @@ export interface DirectoryViewProps {
     selectedPath: string | null
     onSelect: (path: string) => void
     onRetry: () => void
-    onCreateFile: () => void
-    onCreateFolder: () => void
+    onCreate: () => void
     /** Batch selection */
     selectedPaths: Set<string>
     onToggleSelect: (path: string, shiftKey: boolean, ctrlKey: boolean) => void
@@ -225,7 +224,7 @@ function SortHeader({ sort, t, onSortChange, allSelected, onSelectAll }: { sort:
     )
 }
 
-function EmptyState({ t, onCreateFile, onCreateFolder }: { t: Translate; onCreateFile: () => void; onCreateFolder: () => void }) {
+function EmptyState({ t, onCreate }: { t: Translate; onCreate: () => void }) {
     return (
         <div className="fm-state" style={{ display: 'flex', minHeight: 300, flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 'var(--hp-space-8) var(--hp-space-5)', gap: 12, textAlign: 'center' }}>
             <div style={{ width: 56, height: 56, display: 'grid', placeItems: 'center', borderRadius: 'var(--hp-radius-lg)', background: 'var(--hp-primary-subtle)', color: 'var(--hp-primary)' }}>
@@ -235,10 +234,7 @@ function EmptyState({ t, onCreateFile, onCreateFolder }: { t: Translate; onCreat
             </div>
             <div style={{ fontSize: 15, fontWeight: 650, color: 'var(--hp-text-primary)' }}>{t('fm.empty.title')}</div>
             <div style={{ fontSize: 13, color: 'var(--hp-text-secondary)', maxWidth: 340, lineHeight: 1.55 }}>{t('fm.empty.hintDetailed')}</div>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center', marginTop: 4 }}>
-                <button type="button" className="fm-primary-button" onClick={onCreateFile}>{t('fm.toolbar.fileShort')}</button>
-                <button type="button" className="fm-secondary-button" onClick={onCreateFolder}>{t('fm.toolbar.folderShort')}</button>
-            </div>
+            <button type="button" className="fm-primary-button" onClick={onCreate} style={{ marginTop: 4 }}>{t('fm.toolbar.new')}</button>
         </div>
     )
 }
@@ -262,7 +258,7 @@ function ErrorState({ message, t, onRetry }: { message: string; t: Translate; on
 
 export default function DirectoryView({
     entries, isLoading, error, sort, onSortChange, onOpenDirectory, onOpenFile, onContextMenu,
-    selectedPath, onSelect, onRetry, onCreateFile, onCreateFolder, selectedPaths, onToggleSelect, onSelectAll, highlightPath,
+    selectedPath, onSelect, onRetry, onCreate, selectedPaths, onToggleSelect, onSelectAll, highlightPath,
 }: DirectoryViewProps) {
     const { t, locale } = useTranslation()
     const sorted = entries
@@ -280,7 +276,7 @@ export default function DirectoryView({
             ) : error ? (
                 <ErrorState message={error} t={t} onRetry={onRetry} />
             ) : sorted.length === 0 ? (
-                <EmptyState t={t} onCreateFile={onCreateFile} onCreateFolder={onCreateFolder} />
+                <EmptyState t={t} onCreate={onCreate} />
             ) : (
                 <div role="list" aria-label={t('fm.directoryContents')}>
                     {sorted.map((entry, index) => (

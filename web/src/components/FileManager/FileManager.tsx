@@ -15,6 +15,8 @@ import {
   mockCreateFolder,
   mockDelete,
   mockRename,
+  mockCopy,
+  mockMove,
 } from '@/lib/file-manager-mock'
 import {
   isApiReady,
@@ -23,6 +25,8 @@ import {
   createFolder as apiCreateFolder,
   deleteEntry as apiDeleteEntry,
   renameEntry as apiRenameEntry,
+  copyEntry as apiCopyEntry,
+  moveEntry as apiMoveEntry,
 } from '@/lib/file-manager-api'
 import type { ApiClient } from '@/api/client'
 import type { FileEntry, FileManagerMode, SortOption, SortField, BreadcrumbSegment } from './types'
@@ -54,12 +58,15 @@ function sortEntries(entries: FileEntry[], sort: SortOption): FileEntry[] {
   return copy
 }
 
+type CreateKind = 'file' | 'folder'
+type TransferOperation = 'move' | 'copy'
+
 type DialogState =
-  | { type: 'newFile' }
-  | { type: 'newFolder' }
+  | { type: 'create' }
   | { type: 'rename'; name: string; path: string }
   | { type: 'delete'; name: string; path: string }
   | { type: 'batchDelete'; paths: string[] }
+  | { type: 'transfer'; operation: TransferOperation; paths: string[] }
   | null
 
 function isValidFileName(name: string): boolean {
@@ -74,6 +81,22 @@ function isValidFileName(name: string): boolean {
 function normalizePath(path: string): string {
   const normalized = path.replace(/\/+$/, '')
   return normalized || '/'
+}
+
+function joinPath(dirPath: string, name: string): string {
+  const dir = normalizePath(dirPath)
+  return dir === '/' ? `/${name}` : `${dir}/${name}`
+}
+
+function basename(path: string): string {
+  return path.split('/').filter(Boolean).pop() ?? path
+}
+
+function isValidDestinationDir(path: string): boolean {
+  const value = path.trim()
+  if (!value) return false
+  if (value.includes('\0')) return false
+  return true
 }
 
 function getParentPath(path: string, rootPath: string): string | null {
@@ -114,6 +137,7 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
   const [dialog, setDialog] = useState<DialogState>(null)
   const [dialogLoading, setDialogLoading] = useState(false)
   const [inputValue, setInputValue] = useState('')
+  const [createKind, setCreateKind] = useState<CreateKind>('file')
   const [highlightPath, setHighlightPath] = useState<string | null>(null)
   const [selectedPaths, setSelectedPaths] = useState<Set<string>>(new Set())
   const [navKey, setNavKey] = useState(0)
@@ -188,26 +212,17 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
     showToast(t(mode === 'machine' ? 'fm.toast.openRequiresSession' : 'fm.toast.operationFailed'), 'error')
   }, [sessionId, navigate, t, mode])
 
-  const handleUnavailableAction = useCallback((label: string) => {
-    showToast(t('fm.toast.unavailableAction', { action: label }))
-  }, [t])
-
   const handleContextMenu = useCallback(
-    (path: string, type: 'file' | 'directory', point: { x: number; y: number }) => {
+    (path: string, _type: 'file' | 'directory', point: { x: number; y: number }) => {
       if (isLoading) return
       setSelectedPath(path)
       const name = path.split('/').pop() ?? ''
       const items: ContextMenuItem[] = [
-        { label: t('fm.context.newFile'), icon: 'file', onClick: () => { setInputValue(''); setDialog({ type: 'newFile' }) } },
-        { label: t('fm.context.newFolder'), icon: 'folder', onClick: () => { setInputValue(''); setDialog({ type: 'newFolder' }) } },
         { label: t('fm.context.rename'), icon: 'rename', onClick: () => { setInputValue(name); setDialog({ type: 'rename', name, path }) } },
+        { label: t('fm.context.move'), icon: 'move', onClick: () => { setInputValue(currentPath); setDialog({ type: 'transfer', operation: 'move', paths: [path] }) } },
+        { label: t('fm.context.copy'), icon: 'copy', onClick: () => { setInputValue(currentPath); setDialog({ type: 'transfer', operation: 'copy', paths: [path] }) } },
         { label: t('fm.context.copyPath'), icon: 'copyPath', onClick: () => { copyToClipboard(path, t) } },
-        { label: t('fm.context.move'), icon: 'move', onClick: () => handleUnavailableAction(t('fm.batch.move')) },
-        { label: t('fm.context.copy'), icon: 'copy', onClick: () => handleUnavailableAction(t('fm.batch.copy')) },
       ]
-      if (type === 'file') {
-        items.push({ label: t('fm.context.download'), icon: 'download', onClick: () => handleUnavailableAction(t('fm.context.download')) })
-      }
       items.push({
         label: t('fm.context.delete'),
         icon: 'delete',
@@ -216,7 +231,7 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
       })
       ctxMenu.show(point.x, point.y, items)
     },
-    [ctxMenu, handleUnavailableAction, isLoading, t],
+    [ctxMenu, currentPath, isLoading, t],
   )
 
   // Batch selection
@@ -252,41 +267,44 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
     if (!dialog) return
 
     // Validate BEFORE setting loading state so early returns don't bypass finally
-    if (dialog.type === 'newFile' || dialog.type === 'newFolder' || dialog.type === 'rename') {
+    if (dialog.type === 'create' || dialog.type === 'rename') {
       const name = inputValue.trim()
       if (!name) { showToast(t('fm.toast.nameRequired'), 'error'); return }
       if (!isValidFileName(name)) { showToast(t('fm.toast.invalidName'), 'error'); return }
       if (dialog.type === 'rename' && name === dialog.name) { setDialog(null); return }
+    }
+    if (dialog.type === 'transfer') {
+      const destinationDir = inputValue.trim()
+      if (!destinationDir) { showToast(t('fm.toast.destinationRequired'), 'error'); return }
+      if (!isValidDestinationDir(destinationDir)) { showToast(t('fm.toast.invalidDestination'), 'error'); return }
     }
 
     setDialogLoading(true)
     try {
       const mid = machineId ?? ''
       switch (dialog.type) {
-        case 'newFile': {
+        case 'create': {
           const name = inputValue.trim()
-          if (useRealApi && api && mid) {
-            await apiCreateFile(api, mid, sessionId ?? null, currentPath, name)
-          } else if (!useRealApi) {
-            await mockCreateFile(currentPath, name)
+          if (createKind === 'file') {
+            if (useRealApi && api && mid) {
+              await apiCreateFile(api, mid, sessionId ?? null, currentPath, name)
+            } else if (!useRealApi) {
+              await mockCreateFile(currentPath, name)
+            } else {
+              throw new Error(t('fm.toast.machineUnavailable'))
+            }
+            showToast(t('fm.toast.fileCreated'))
           } else {
-            throw new Error(t('fm.toast.noActiveSession'))
+            if (useRealApi && api && mid) {
+              await apiCreateFolder(api, mid, sessionId ?? null, currentPath, name)
+            } else if (!useRealApi) {
+              await mockCreateFolder(currentPath, name)
+            } else {
+              throw new Error(t('fm.toast.machineUnavailable'))
+            }
+            showToast(t('fm.toast.folderCreated'))
           }
-          setHighlightPath(`${currentPath}/${name}`)
-          showToast(t('fm.toast.fileCreated'))
-          break
-        }
-        case 'newFolder': {
-          const name = inputValue.trim()
-          if (useRealApi && api && mid) {
-            await apiCreateFolder(api, mid, sessionId ?? null, currentPath, name)
-          } else if (!useRealApi) {
-            await mockCreateFolder(currentPath, name)
-          } else {
-            throw new Error(t('fm.toast.noActiveSession'))
-          }
-          setHighlightPath(`${currentPath}/${name}`)
-          showToast(t('fm.toast.folderCreated'))
+          setHighlightPath(joinPath(currentPath, name))
           break
         }
         case 'rename': {
@@ -296,7 +314,7 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
           } else if (!useRealApi) {
             await mockRename(currentPath, dialog.name, name)
           } else {
-            throw new Error(t('fm.toast.noActiveSession'))
+            throw new Error(t('fm.toast.machineUnavailable'))
           }
           showToast(t('fm.toast.renamed'))
           break
@@ -308,7 +326,7 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
           } else if (!useRealApi) {
             await mockDelete(currentPath, dialog.name)
           } else {
-            throw new Error(t('fm.toast.noActiveSession'))
+            throw new Error(t('fm.toast.machineUnavailable'))
           }
           setSelectedPaths((prev) => { const n = new Set(prev); n.delete(dialog.path); return n })
           showToast(t('fm.toast.deleted'))
@@ -323,11 +341,36 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
             } else if (!useRealApi) {
               await mockDelete(currentPath, name)
             } else {
-              throw new Error(t('fm.toast.noActiveSession'))
+              throw new Error(t('fm.toast.machineUnavailable'))
             }
           }
           setSelectedPaths(new Set())
           showToast(dialog.paths.length === 1 ? t('fm.toast.batchDeleted.one') : t('fm.toast.batchDeleted', { count: dialog.paths.length }))
+          break
+        }
+        case 'transfer': {
+          const destinationDir = inputValue.trim()
+          for (const p of dialog.paths) {
+            if (useRealApi && api && mid) {
+              if (dialog.operation === 'move') {
+                await apiMoveEntry(api, mid, sessionId ?? null, p, destinationDir)
+              } else {
+                await apiCopyEntry(api, mid, sessionId ?? null, p, destinationDir)
+              }
+            } else if (!useRealApi) {
+              if (dialog.operation === 'move') {
+                await mockMove(p, destinationDir)
+              } else {
+                await mockCopy(p, destinationDir)
+              }
+            } else {
+              throw new Error(t('fm.toast.machineUnavailable'))
+            }
+          }
+          setSelectedPaths(new Set())
+          showToast(dialog.operation === 'move'
+            ? (dialog.paths.length === 1 ? t('fm.toast.moved.one') : t('fm.toast.moved', { count: dialog.paths.length }))
+            : (dialog.paths.length === 1 ? t('fm.toast.copied.one') : t('fm.toast.copied', { count: dialog.paths.length })))
           break
         }
       }
@@ -339,18 +382,19 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
     } finally {
       setDialogLoading(false)
     }
-  }, [dialog, inputValue, currentPath, reload, useRealApi, api, machineId, sessionId, entries, t])
+  }, [dialog, inputValue, createKind, currentPath, reload, useRealApi, api, machineId, sessionId, entries, t])
 
-  const handleToolbarNew = useCallback(() => {
+  const handleCreate = useCallback((kind: CreateKind = 'file') => {
+    setCreateKind(kind)
     setInputValue('')
-    setDialog({ type: 'newFile' })
+    setDialog({ type: 'create' })
   }, [])
 
-  const handleToolbarNewFolder = useCallback(() => {
-    setInputValue('')
-    setDialog({ type: 'newFolder' })
-  }, [])
-
+  const handleTransfer = useCallback((operation: TransferOperation, paths: string[]) => {
+    if (paths.length === 0) return
+    setInputValue(currentPath)
+    setDialog({ type: 'transfer', operation, paths })
+  }, [currentPath])
 
   const handleSelectPath = useCallback((path: string) => {
     setSelectedPath(path)
@@ -499,8 +543,8 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
 
         <button
           type="button"
-          onClick={handleToolbarNew}
-          aria-label={t('fm.toolbar.newFile')}
+          onClick={() => handleCreate('file')}
+          aria-label={t('fm.toolbar.new')}
           className="fm-toolbar-primary"
           style={{
             minHeight: 40,
@@ -518,33 +562,7 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
           }}
         >
           <span style={{ fontSize: 15, lineHeight: 1 }} aria-hidden="true">+</span>
-          <span className="hidden sm:inline">{t('fm.toolbar.newFile')}</span>
-          <span className="sm:hidden">{t('fm.toolbar.fileShort')}</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={handleToolbarNewFolder}
-          aria-label={t('fm.toolbar.newFolder')}
-          className="fm-toolbar-button hidden sm:inline-flex"
-          style={{
-            minHeight: 40,
-            alignItems: 'center',
-            gap: 6,
-            padding: '0 var(--hp-space-3)',
-            borderRadius: 'var(--hp-radius-md)',
-            fontSize: 12,
-            fontWeight: 650,
-            border: '1px solid var(--hp-border)',
-            cursor: 'pointer',
-            color: 'var(--hp-text-primary)',
-            background: 'var(--hp-surface-0)',
-          }}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-          </svg>
-          <span>{t('fm.toolbar.newFolder')}</span>
+          <span>{t('fm.toolbar.new')}</span>
         </button>
 
         <div className="min-w-0 flex-1" />
@@ -579,8 +597,7 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
             selectedPath={selectedPath}
             onSelect={handleSelectPath}
             onRetry={reload}
-            onCreateFile={handleToolbarNew}
-            onCreateFolder={handleToolbarNewFolder}
+            onCreate={() => handleCreate('file')}
             selectedPaths={selectedPaths}
             onToggleSelect={handleToggleSelect}
             onSelectAll={handleSelectAll}
@@ -593,8 +610,8 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
         <BatchActionBar
           selectedCount={selectedPaths.size}
           onDelete={handleBatchDelete}
-          onMove={() => handleUnavailableAction(t('fm.batch.move'))}
-          onCopy={() => handleUnavailableAction(t('fm.batch.copy'))}
+          onMove={() => handleTransfer('move', [...selectedPaths])}
+          onCopy={() => handleTransfer('copy', [...selectedPaths])}
           onStartSession={() => {
             if (machineId && selectedPaths.size === 1) {
               const path = [...selectedPaths][0]
@@ -610,9 +627,7 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
 
       {/* Bottom toolbar (mobile) */}
       <div className="flex items-center justify-around border-t border-(--hp-border) md:hidden" style={{ height: 56, background: 'var(--hp-surface-0)', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
-        <ToolbarButton label={t('fm.toolbar.fileShort')} icon="+" onClick={handleToolbarNew} />
-        <ToolbarButton label={t('fm.toolbar.folderShort')} icon="folder" onClick={handleToolbarNewFolder} />
-        <ToolbarButton label={t('fm.toolbar.upload')} icon="↑" onClick={() => handleUnavailableAction(t('fm.toolbar.upload'))} />
+        <ToolbarButton label={t('fm.toolbar.newShort')} icon="+" onClick={() => handleCreate('file')} />
         <ToolbarButton label={t('fm.toolbar.sessionShort')} icon="▶" onClick={() => {
           navigate({ to: '/sessions/new', search: { directory: currentPath, ...(machineId ? { machineId } : {}) } })
         }} />
@@ -621,14 +636,33 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
       <ContextMenu state={ctxMenu.state} onClose={ctxMenu.hide} />
 
       {/* Dialogs */}
-      {dialog?.type === 'newFile' && (
-        <Dialog title={t('fm.dialog.newFile.title')} onClose={() => setDialog(null)} onSubmit={handleDialogSubmit} submitLabel={t('fm.dialog.create')} loading={dialogLoading}>
-          <InputField value={inputValue} onChange={setInputValue} placeholder={t('fm.dialog.newFile.placeholder')} autoFocus onKeyDown={(e) => { if (e.key === 'Enter') handleDialogSubmit() }} />
-        </Dialog>
-      )}
-      {dialog?.type === 'newFolder' && (
-        <Dialog title={t('fm.dialog.newFolder.title')} onClose={() => setDialog(null)} onSubmit={handleDialogSubmit} submitLabel={t('fm.dialog.create')} loading={dialogLoading}>
-          <InputField value={inputValue} onChange={setInputValue} placeholder={t('fm.dialog.newFolder.placeholder')} autoFocus onKeyDown={(e) => { if (e.key === 'Enter') handleDialogSubmit() }} />
+      {dialog?.type === 'create' && (
+        <Dialog title={t('fm.dialog.create.title')} onClose={() => setDialog(null)} onSubmit={handleDialogSubmit} submitLabel={t('fm.dialog.create')} loading={dialogLoading}>
+          <div role="group" aria-label={t('fm.dialog.create.kind')} style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+            {(['file', 'folder'] as const).map((kind) => (
+              <button
+                key={kind}
+                type="button"
+                aria-pressed={createKind === kind}
+                onClick={() => setCreateKind(kind)}
+                className="fm-dialog-button"
+                style={{
+                  minHeight: 40,
+                  flex: 1,
+                  borderRadius: 'var(--hp-radius-md)',
+                  border: `1px solid ${createKind === kind ? 'var(--hp-primary)' : 'var(--hp-border)'}`,
+                  background: createKind === kind ? 'var(--hp-primary-subtle)' : 'var(--hp-surface-0)',
+                  color: createKind === kind ? 'var(--hp-primary)' : 'var(--hp-text-primary)',
+                  fontSize: 13,
+                  fontWeight: 650,
+                  cursor: 'pointer',
+                }}
+              >
+                {kind === 'file' ? t('fm.dialog.create.file') : t('fm.dialog.create.folder')}
+              </button>
+            ))}
+          </div>
+          <InputField value={inputValue} onChange={setInputValue} placeholder={createKind === 'file' ? t('fm.dialog.newFile.placeholder') : t('fm.dialog.newFolder.placeholder')} autoFocus onKeyDown={(e) => { if (e.key === 'Enter') handleDialogSubmit() }} />
         </Dialog>
       )}
       {dialog?.type === 'rename' && (
@@ -644,6 +678,25 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
       {dialog?.type === 'batchDelete' && (
         <Dialog title={t('fm.dialog.delete.title')} onClose={() => setDialog(null)} onSubmit={handleDialogSubmit} submitLabel={t('fm.dialog.delete.submit')} submitDanger loading={dialogLoading}>
           <ConfirmMessage message={dialog.paths.length === 1 ? t('fm.dialog.batchDelete.confirm.one') : t('fm.dialog.batchDelete.confirm', { count: dialog.paths.length })} />
+        </Dialog>
+      )}
+      {dialog?.type === 'transfer' && (
+        <Dialog
+          title={dialog.operation === 'move' ? t('fm.dialog.move.title') : t('fm.dialog.copy.title')}
+          onClose={() => setDialog(null)}
+          onSubmit={handleDialogSubmit}
+          submitLabel={dialog.operation === 'move' ? t('fm.dialog.move.submit') : t('fm.dialog.copy.submit')}
+          loading={dialogLoading}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <ConfirmMessage message={dialog.paths.length === 1
+              ? t('fm.dialog.transfer.source', { name: basename(dialog.paths[0]) })
+              : t('fm.dialog.transfer.sourceMany', { count: dialog.paths.length })} />
+            <InputField value={inputValue} onChange={setInputValue} placeholder={currentPath} autoFocus onKeyDown={(e) => { if (e.key === 'Enter') handleDialogSubmit() }} />
+            <div style={{ fontSize: 12, color: 'var(--hp-text-tertiary)', lineHeight: 1.5 }}>
+              {t('fm.dialog.transfer.hint')}
+            </div>
+          </div>
         </Dialog>
       )}
 

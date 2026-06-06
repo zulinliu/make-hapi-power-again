@@ -178,3 +178,67 @@ git diff --check
 3. 全局文件点击仍未真实打开预览编辑，需 35.4 使用 machine read/write/hash API 接入。
 4. 会话文件页仍与全局 FileManager 割裂，35.3 必须收敛操作模型。
 5. session common read handler 还未返回 `hash/size/modified`，35.4 需要补齐以实现统一冲突检测。
+
+## Phase 35.3 Review: UI 行为收敛和去空壳
+
+**状态**: 完成。
+
+### 本阶段交付
+
+1. FileManager 顶部、空状态、移动端底部栏统一为单一“新建”入口。
+2. 新建弹窗内选择文件或文件夹，避免“新建文件”和“新建文件夹”在多个入口重复出现。
+3. 右键菜单移除与当前文件项无关的“新建文件/新建文件夹”入口。
+4. 移动、复制、批量移动、批量复制接入真实 API：session mode 调 session API，machine mode 调 machine API，mock mode 调 mock FS。
+5. 上传、下载占位入口从全局 FileManager 的右键菜单和移动端底部栏移除，避免继续显示空壳操作。
+6. `/sessions/:id/files` 的“目录”Tab 改为复用统一 FileManager，保留“变更”Tab 作为 Git 增强视图。
+7. 删除旧 session directory tree 的右键菜单、弹窗、上传占位和独立 CRUD 状态，减少两套文件页割裂。
+8. 新增 `web/src/lib/file-manager-api.test.ts`，覆盖 move/copy 目标路径拼接和 create failure 冒泡。
+
+### 用户反馈覆盖
+
+| 用户问题 | 状态 | 说明 |
+|---|---|---|
+| 新建文件/文件夹多处冗余 | 已解决全局 FileManager | 单一“新建”按钮 + 弹窗选择类型 |
+| 大量功能不可用或占位 | 已进一步解决 | 移动/复制已真实可用；上传/下载占位已隐藏 |
+| 没有活动会话导致操作不可用 | 已解决基础 CRUD | machine mode create/delete/rename/move/copy 不需要 session |
+| session 文件页和全局文件管理割裂 | 已显著改善 | session “目录”Tab 复用 FileManager；Git 变更 Tab 保留 |
+| 文件点击无反应和编辑入口不清晰 | 待 35.4 | 仍需全局 preview/edit 真实接入 |
+
+### 是否引入新空壳入口
+
+没有新增空壳入口。上传和下载尚未实现，因此从全局 FileManager 可见操作中移除，等待 35.5 以真实上传下载能力重新接入。
+
+### 全局和会话一致性
+
+- `/browse` 和 `/sessions/:id/files?tab=directories` 现在复用同一个 FileManager 组件。
+- create/delete/rename/move/copy 的 UI 操作模型一致。
+- session files 的 Git changes 仍保持独立增强视图，这是有意保留的 session 上下文能力。
+
+### 移动端触控和可访问性
+
+- 移动端底部栏减少为“新建”和“会话”，不再暴露上传占位。
+- 新建类型选择按钮和移动/复制目标输入保持 40px 以上高度，底部栏按钮保持 48px 触控目标。
+- 右键菜单仍使用 fixed 定位和 keyboard focus 管理。
+
+### 质量门禁
+
+```bash
+bun run typecheck
+# PASS
+
+cd web && bun test src/lib/file-manager-api.test.ts src/lib/files-i18n.test.ts
+# PASS: 7 tests
+
+bun run test:web
+# PASS: 79 files, 672 tests
+
+git diff --check
+# PASS
+```
+
+### 剩余风险
+
+1. 全局文件点击仍只是提示，需要 35.4 接入 machine read/write 到统一 viewer/editor。
+2. 上传、下载已隐藏但尚未交付，35.5 必须以真实能力回归。
+3. session common read handler 还缺 `hash/size/modified`，统一冲突检测仍待补齐。
+4. FileManager 的移动/复制目标当前是路径输入，生产上后续可以增强为目录选择器，但当前不再是空壳。

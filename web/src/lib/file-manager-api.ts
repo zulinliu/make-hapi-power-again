@@ -2,8 +2,22 @@ import type { ApiClient } from '@/api/client'
 import type { FileEntry, DirectoryListing } from '@/components/FileManager/types'
 import type { MachineDirectoryEntry } from '@hapipower/protocol/apiTypes'
 
+function stripTrailingSlash(path: string): string {
+  const normalized = path.replace(/\/+$/, '')
+  return normalized || '/'
+}
+
+function joinPath(dirPath: string, name: string): string {
+  const dir = stripTrailingSlash(dirPath)
+  return dir === '/' ? `/${name}` : `${dir}/${name}`
+}
+
+function basename(path: string): string {
+  return path.split('/').filter(Boolean).pop() ?? path
+}
+
 function machineEntryToFileEntry(path: string, entry: MachineDirectoryEntry): FileEntry {
-  const entryPath = `${path.replace(/\/+$/, '')}/${entry.name}`
+  const entryPath = joinPath(path, entry.name)
   return {
     name: entry.name,
     path: entryPath,
@@ -30,7 +44,7 @@ export async function listDirectory(
     .map((e) => machineEntryToFileEntry(path, e))
 
   const filtered = showHidden ? entries : entries.filter((e) => !e.isHidden)
-  const normalized = path.replace(/\/+$/, '')
+  const normalized = stripTrailingSlash(path)
   const parentIdx = normalized.lastIndexOf('/')
   const parentPath = parentIdx > 0 ? normalized.slice(0, parentIdx) : null
 
@@ -44,7 +58,7 @@ export async function createFile(
   dirPath: string,
   name: string,
 ): Promise<FileEntry> {
-  const fullPath = `${dirPath.replace(/\/+$/, '')}/${name}`
+  const fullPath = joinPath(dirPath, name)
   if (sessionId) {
     const res = await api.writeSessionFile(sessionId, fullPath, '')
     if (!res.success) throw new Error(res.error ?? `Failed to create "${name}"`)
@@ -69,7 +83,7 @@ export async function createFolder(
   dirPath: string,
   name: string,
 ): Promise<FileEntry> {
-  const fullPath = `${dirPath.replace(/\/+$/, '')}/${name}`
+  const fullPath = joinPath(dirPath, name)
   const res = sessionId
     ? await api.createDirectory(sessionId, fullPath, true)
     : await api.createMachineDirectory(machineId, fullPath, true)
@@ -107,8 +121,8 @@ export async function renameEntry(
   oldName: string,
   newName: string,
 ): Promise<FileEntry> {
-  const oldPath = `${dirPath.replace(/\/+$/, '')}/${oldName}`
-  const newPath = `${dirPath.replace(/\/+$/, '')}/${newName}`
+  const oldPath = joinPath(dirPath, oldName)
+  const newPath = joinPath(dirPath, newName)
   const res = sessionId
     ? await api.renameSessionFile(sessionId, oldPath, newPath)
     : await api.renameMachineFile(machineId, oldPath, newPath)
@@ -121,6 +135,34 @@ export async function renameEntry(
     modified: new Date().toISOString(),
     isHidden: newName.startsWith('.'),
   }
+}
+
+export async function moveEntry(
+  api: ApiClient,
+  machineId: string,
+  sessionId: string | null,
+  sourcePath: string,
+  destinationDir: string,
+): Promise<void> {
+  const destinationPath = joinPath(destinationDir, basename(sourcePath))
+  const res = sessionId
+    ? await api.moveSessionFile(sessionId, sourcePath, destinationPath)
+    : await api.moveMachineFile(machineId, sourcePath, destinationPath)
+  if (!res.success) throw new Error(res.error ?? `Failed to move "${basename(sourcePath)}"`)
+}
+
+export async function copyEntry(
+  api: ApiClient,
+  machineId: string,
+  sessionId: string | null,
+  sourcePath: string,
+  destinationDir: string,
+): Promise<void> {
+  const destinationPath = joinPath(destinationDir, basename(sourcePath))
+  const res = sessionId
+    ? await api.copySessionFile(sessionId, sourcePath, destinationPath)
+    : await api.copyMachineFile(machineId, sourcePath, destinationPath)
+  if (!res.success) throw new Error(res.error ?? `Failed to copy "${basename(sourcePath)}"`)
 }
 
 export function isApiReady(api: ApiClient | null, machineId: string | null): api is ApiClient {
