@@ -720,4 +720,21 @@ export default {
   'file.upload.tooLarge': 'File is too large (max 5MB)',
   'file.upload.remove': 'Remove attachment',
 
+  // File Manager (global)
+  'fm.toolbar.showHidden': 'Show dotfiles',
+  'fm.toolbar.hideHidden': 'Hide dotfiles',
+  'fm.toolbar.newFile': 'New File',
+  'fm.toolbar.newFolder': 'New Folder',
+  'fm.toolbar.paste': 'Paste',
+  'fm.toolbar.upload': 'Upload',
+  'fm.toolbar.clone': 'Git Clone',
+  'fm.toolbar.startSession': 'Start Session',
+  'fm.itemCount': '{n} items',
+  'fm.itemCount.one': '1 item',
+  'fm.empty.title': 'This folder is empty',
+  'fm.empty.hint': 'Create a new file or folder to get started',
+  'fm.error.title': 'Failed to load directory',
+  'fm.error.retry': 'Retry',
+  'fm.loading': 'Loading directory…',
+
 } as const

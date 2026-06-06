@@ -720,4 +720,21 @@ export default {
   'file.upload.tooLarge': '文件过大（最大 5MB）',
   'file.upload.remove': '移除附件',
 
+  // 全局文件管理器
+  'fm.toolbar.showHidden': '显示隐藏文件',
+  'fm.toolbar.hideHidden': '隐藏 dotfiles',
+  'fm.toolbar.newFile': '新建文件',
+  'fm.toolbar.newFolder': '新建文件夹',
+  'fm.toolbar.paste': '粘贴',
+  'fm.toolbar.upload': '上传',
+  'fm.toolbar.clone': 'Git 克隆',
+  'fm.toolbar.startSession': '启动会话',
+  'fm.itemCount': '{n} 个项目',
+  'fm.itemCount.one': '1 个项目',
+  'fm.empty.title': '此文件夹为空',
+  'fm.empty.hint': '创建一个新文件或文件夹来开始',
+  'fm.error.title': '加载目录失败',
+  'fm.error.retry': '重试',
+  'fm.loading': '加载目录中…',
+
 } as const

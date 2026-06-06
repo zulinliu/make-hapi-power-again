@@ -17,7 +17,7 @@ import { SessionChat } from '@/components/SessionChat'
 import { SessionHeader } from '@/components/SessionHeader'
 import { SessionList } from '@/components/SessionList'
 import { NewSession } from '@/components/NewSession'
-import { WorkspaceBrowser } from '@/components/WorkspaceBrowser'
+import { FileManager } from '@/components/FileManager/FileManager'
 import { LoadingState } from '@/components/LoadingState'
 import { useAppContext } from '@/lib/app-context'
 import { useAppGoBack } from '@/hooks/useAppGoBack'
@@ -583,19 +583,8 @@ function NewSessionPage() {
 }
 
 function BrowsePage() {
-    const { api } = useAppContext()
-    const navigate = useNavigate()
-    const goBack = useAppGoBack()
-    const { machines, isLoading: machinesLoading } = useMachines(api, true)
     const { t } = useTranslation()
-    const { machineId: initialMachineId } = browseRoute.useSearch()
-
-    const handleStartSession = useCallback((machineId: string, directory: string) => {
-        navigate({
-            to: '/sessions/new',
-            search: { directory, machineId }
-        })
-    }, [navigate])
+    const goBack = useAppGoBack()
 
     return (
         <div className="flex h-full min-h-0 flex-col">
@@ -614,13 +603,7 @@ function BrowsePage() {
             </div>
 
             <div className="flex-1 min-h-0">
-                <WorkspaceBrowser
-                    api={api}
-                    machines={machines}
-                    machinesLoading={machinesLoading}
-                    onStartSession={handleStartSession}
-                    initialMachineId={initialMachineId}
-                />
+                <FileManager />
             </div>
         </div>
     )
