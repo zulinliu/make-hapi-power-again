@@ -12,7 +12,7 @@ export const DialogContent = React.forwardRef<
     <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 animate-fade-in" style={{ background: 'var(--app-overlay-bg)', backdropFilter: 'blur(var(--app-overlay-blur))', WebkitBackdropFilter: 'blur(var(--app-overlay-blur))' }} />
         <div className="fixed inset-0 z-50 overflow-y-auto overscroll-contain dialog-container-ios-safe">
-            <div className="min-h-[100dvh] flex justify-center p-4 sm:p-6 pointer-events-none">
+            <div className="min-h-[100dvh] flex justify-center px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6 sm:pt-6 sm:pb-6 pointer-events-none">
                 <DialogPrimitive.Content
                     ref={ref}
                     className={cn(
