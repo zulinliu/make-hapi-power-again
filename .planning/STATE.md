@@ -448,7 +448,7 @@ Phase 19 (PWA 更新机制修复) 引入了三个叠加问题：
 *状态更新: 2026-06-04 (v0.12.0 功能精简完成 — 9 项非核心功能已删除)*
 *状态更新: 2026-06-03 (v9 UI统一优化规划完成)*
 
-## v0.17.0 进行中 — 全功能文件管理器生产化
+## v0.17.0 已完成 — 全功能文件管理器生产化
 
 ### 启动原因
 
@@ -471,6 +471,7 @@ Phase 19 (PWA 更新机制修复) 引入了三个叠加问题：
 - `.planning/phases/35-v0.17-file-manager-production/35-UX-SHAPE.md`
 - `.planning/phases/35-v0.17-file-manager-production/35-PLAN.md`
 - `.planning/phases/35-v0.17-file-manager-production/35-SELF-REVIEW.md`
+- `.planning/phases/35-v0.17-file-manager-production/35-REVIEW.md`
 
 ### 当前状态
 
@@ -538,4 +539,4 @@ Phase 19 (PWA 更新机制修复) 引入了三个叠加问题：
 - session 文件目录页已复用统一 FileManager，保留 Git changes 作为 session 增强能力。
 
 ---
-*状态更新: 2026-06-07 (v0.17 Phase 35.6 质量门禁完成 — 文件管理器生产化专项已完成，待推送/发版)*
+*状态更新: 2026-06-07 (v0.17 Phase 35.6 质量门禁完成 — 文件管理器生产化专项已完成，feat/v0.17.0 已推送，待合并/发版)*

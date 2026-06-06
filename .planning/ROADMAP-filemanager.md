@@ -146,6 +146,7 @@ Full-featured global file manager replacing the existing `/browse` page. Mobile-
 - `.planning/phases/35-v0.17-file-manager-production/35-UX-SHAPE.md`
 - `.planning/phases/35-v0.17-file-manager-production/35-PLAN.md`
 - `.planning/phases/35-v0.17-file-manager-production/35-SELF-REVIEW.md`
+- `.planning/phases/35-v0.17-file-manager-production/35-REVIEW.md`
 
 **Why this plan exists:** previous FileManager phases delivered useful UI foundation and session file operations, but the product is still not a production full-featured global file manager. `/browse` remains mostly read-only because it has no `sessionId`, hidden files are filtered before the UI sees them, and several visible actions are placeholders.
 

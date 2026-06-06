@@ -3,7 +3,7 @@ phase: 35-v0.17-file-manager-production
 document: PRD
 version: v0.17.0
 created: 2026-06-06
-status: active
+status: completed
 ---
 
 # PRD: v0.17.0 全功能文件管理器

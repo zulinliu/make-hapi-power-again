@@ -82,7 +82,7 @@ git diff --check
 
 ## 发布前动作
 
-- [ ] 推送 `feat/v0.17.0`
+- [x] 推送 `feat/v0.17.0`
 - [ ] 由维护者确认是否立即合并 main
 - [ ] 合并后创建 `v0.17.0` tag
 - [ ] 创建 GitHub Release，Release Notes 禁止第三方品牌残留

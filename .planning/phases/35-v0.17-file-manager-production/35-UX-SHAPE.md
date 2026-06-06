@@ -4,7 +4,7 @@ document: UX-SHAPE
 version: v0.17.0
 created: 2026-06-06
 skill: impeccable
-status: active
+status: completed
 ---
 
 # UX Shape: v0.17.0 文件管理器

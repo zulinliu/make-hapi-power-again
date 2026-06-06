@@ -3,7 +3,7 @@ phase: 35-v0.17-file-manager-production
 document: SELF-REVIEW
 version: v0.17.0
 created: 2026-06-06
-status: active
+status: completed
 ---
 
 # Self Review: v0.17.0 文件管理器生产化
@@ -22,7 +22,7 @@ status: active
 
 ## Phase 35.0 Review: 规划和 Git 基线
 
-**状态**: 进行中。
+**状态**: 完成。
 
 ### 目标
 

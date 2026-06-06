@@ -543,6 +543,7 @@ Plans:
   - `.planning/phases/35-v0.17-file-manager-production/35-UX-SHAPE.md`
   - `.planning/phases/35-v0.17-file-manager-production/35-PLAN.md`
   - `.planning/phases/35-v0.17-file-manager-production/35-SELF-REVIEW.md`
+  - `.planning/phases/35-v0.17-file-manager-production/35-REVIEW.md`
 **Plans**: 7 staged plans
 
 Plans:

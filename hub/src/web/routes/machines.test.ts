@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'bun:test'
 import { Hono } from 'hono'
 import type { Machine, SyncEngine } from '../../sync/syncEngine'
+import type { Store } from '../../store'
 import type { WebAppEnv } from '../middleware/auth'
 import { createMachinesRoutes } from './machines'
 
@@ -8,7 +9,7 @@ const mockStore = {
     providers: {
         getById: () => null,
     },
-} as any
+} as unknown as Store
 
 function createMachine(overrides?: Partial<Machine>): Machine {
     return {

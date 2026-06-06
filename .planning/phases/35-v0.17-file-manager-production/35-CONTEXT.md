@@ -3,7 +3,7 @@ phase: 35-v0.17-file-manager-production
 version: v0.17.0
 created: 2026-06-06
 branch: feat/v0.17.0
-status: active
+status: completed
 skills:
   - gsd-new-project
   - impeccable
