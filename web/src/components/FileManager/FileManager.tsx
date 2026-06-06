@@ -13,17 +13,52 @@ import {
   mockDelete,
   mockRename,
 } from '@/lib/file-manager-mock'
-import type { FileEntry, SortOption, BreadcrumbSegment } from './types'
+import type { FileEntry, SortOption, SortField, BreadcrumbSegment } from './types'
 
 const DEFAULT_ROOT = '/home/user/project'
 const DEFAULT_SORT: SortOption = { field: 'name', direction: 'asc' }
+
+function sortEntries(entries: FileEntry[], sort: SortOption): FileEntry[] {
+  const copy = [...entries]
+  copy.sort((a, b) => {
+    if (a.type !== b.type) return a.type === 'directory' ? -1 : 1
+    const dir = sort.direction === 'asc' ? 1 : -1
+    switch (sort.field as SortField) {
+      case 'name': return dir * a.name.localeCompare(b.name)
+      case 'size': return dir * (a.size - b.size)
+      case 'modified': return dir * (new Date(a.modified).getTime() - new Date(b.modified).getTime())
+      default: return 0
+    }
+  })
+  return copy
+}
 
 type DialogState =
   | { type: 'newFile' }
   | { type: 'newFolder' }
   | { type: 'rename'; name: string; path: string }
   | { type: 'delete'; name: string; path: string }
+  | { type: 'batchDelete'; paths: string[] }
   | null
+
+function isValidFileName(name: string): boolean {
+  if (!name || name === '.' || name === '..') return false
+  if (name.includes('/') || name.includes('\\')) return false
+  return true
+}
+
+async function copyToClipboard(text: string) {
+  try {
+    if (!navigator.clipboard?.writeText) {
+      showToast('Clipboard not available', 'error')
+      return
+    }
+    await navigator.clipboard.writeText(text)
+    showToast('Path copied')
+  } catch {
+    showToast('Failed to copy path', 'error')
+  }
+}
 
 export function FileManager() {
   const [currentPath, setCurrentPath] = useState(DEFAULT_ROOT)
@@ -39,6 +74,7 @@ export function FileManager() {
   const [highlightPath, setHighlightPath] = useState<string | null>(null)
   const [selectedPaths, setSelectedPaths] = useState<Set<string>>(new Set())
   const [navKey, setNavKey] = useState(0)
+  const sortedEntries = useMemo(() => sortEntries(entries, sort), [entries, sort])
   const mountedRef = useRef(false)
   const ctxMenu = useContextMenu()
 
@@ -46,6 +82,7 @@ export function FileManager() {
     setIsLoading(true)
     setError(null)
     setSelectedPath(null)
+    setSelectedPaths(new Set())
     try {
       const result = await mockListDirectory(path, hidden)
       setEntries(result.entries)
@@ -76,7 +113,7 @@ export function FileManager() {
     return () => clearTimeout(timer)
   }, [highlightPath])
 
-  const breadcrumbs: BreadcrumbSegment[] = buildBreadcrumbs(currentPath, 'project')
+  const breadcrumbs: BreadcrumbSegment[] = useMemo(() => buildBreadcrumbs(currentPath, 'project'), [currentPath])
 
   const handleNavigate = useCallback((path: string) => {
     loadDirectory(path, showHidden)
@@ -98,7 +135,7 @@ export function FileManager() {
         { label: 'New File', icon: '📄', onClick: () => { setInputValue(''); setDialog({ type: 'newFile' }) } },
         { label: 'New Folder', icon: '📁', onClick: () => { setInputValue(''); setDialog({ type: 'newFolder' }) } },
         { label: 'Rename', icon: '✏️', onClick: () => { setInputValue(name); setDialog({ type: 'rename', name, path }) } },
-        { label: 'Copy Path', icon: '📋', onClick: () => { navigator.clipboard.writeText(path); showToast('Path copied') } },
+        { label: 'Copy Path', icon: '📋', onClick: () => { copyToClipboard(path) } },
         { label: 'Move…', icon: '↗️', onClick: () => {} },
         { label: 'Copy…', icon: '⊂', onClick: () => {} },
       ]
@@ -121,8 +158,7 @@ export function FileManager() {
     setSelectedPaths((prev) => {
       const next = new Set(prev)
       if (shiftKey && prev.size > 0) {
-        // Range select: find paths between last selected and clicked
-        const paths = entries.map((e) => e.path)
+        const paths = sortedEntries.map((e) => e.path)
         const lastSelected = [...prev].pop()!
         const fromIdx = paths.indexOf(lastSelected)
         const toIdx = paths.indexOf(path)
@@ -136,14 +172,14 @@ export function FileManager() {
       else next.add(path)
       return next
     })
-  }, [entries])
+  }, [sortedEntries])
 
   const handleSelectAll = useCallback(() => {
     setSelectedPaths((prev) => {
-      if (prev.size === entries.length) return new Set()
-      return new Set(entries.map((e) => e.path))
+      if (prev.size === sortedEntries.length) return new Set()
+      return new Set(sortedEntries.map((e) => e.path))
     })
-  }, [entries])
+  }, [sortedEntries])
 
   // Dialog submit
   const handleDialogSubmit = useCallback(async () => {
@@ -152,22 +188,29 @@ export function FileManager() {
     try {
       switch (dialog.type) {
         case 'newFile': {
-          if (!inputValue.trim()) return
-          await mockCreateFile(currentPath, inputValue.trim())
-          setHighlightPath(`${currentPath}/${inputValue.trim()}`)
+          const name = inputValue.trim()
+          if (!name) { showToast('Name cannot be empty', 'error'); return }
+          if (!isValidFileName(name)) { showToast('Invalid name: must not contain / or ..', 'error'); return }
+          await mockCreateFile(currentPath, name)
+          setHighlightPath(`${currentPath}/${name}`)
           showToast('File created')
           break
         }
         case 'newFolder': {
-          if (!inputValue.trim()) return
-          await mockCreateFolder(currentPath, inputValue.trim())
-          setHighlightPath(`${currentPath}/${inputValue.trim()}`)
+          const name = inputValue.trim()
+          if (!name) { showToast('Name cannot be empty', 'error'); return }
+          if (!isValidFileName(name)) { showToast('Invalid name: must not contain / or ..', 'error'); return }
+          await mockCreateFolder(currentPath, name)
+          setHighlightPath(`${currentPath}/${name}`)
           showToast('Folder created')
           break
         }
         case 'rename': {
-          if (!inputValue.trim() || inputValue.trim() === dialog.name) { setDialog(null); setDialogLoading(false); return }
-          await mockRename(currentPath, dialog.name, inputValue.trim())
+          const name = inputValue.trim()
+          if (!name) { showToast('Name cannot be empty', 'error'); return }
+          if (!isValidFileName(name)) { showToast('Invalid name: must not contain / or ..', 'error'); return }
+          if (name === dialog.name) { setDialog(null); return }
+          await mockRename(currentPath, dialog.name, name)
           showToast('Renamed')
           break
         }
@@ -175,6 +218,15 @@ export function FileManager() {
           await mockDelete(currentPath, dialog.name)
           setSelectedPaths((prev) => { const n = new Set(prev); n.delete(dialog.path); return n })
           showToast('Deleted')
+          break
+        }
+        case 'batchDelete': {
+          for (const p of dialog.paths) {
+            const name = p.split('/').pop() ?? ''
+            await mockDelete(currentPath, name)
+          }
+          setSelectedPaths(new Set())
+          showToast(`${dialog.paths.length} item${dialog.paths.length > 1 ? 's' : ''} deleted`)
           break
         }
       }
@@ -195,8 +247,7 @@ export function FileManager() {
 
   const handleBatchDelete = useCallback(() => {
     if (selectedPaths.size === 0) return
-    const names = [...selectedPaths].map((p) => p.split('/').pop()).join(', ')
-    setDialog({ type: 'delete', name: `${selectedPaths.size} items: ${names}`, path: '' })
+    setDialog({ type: 'batchDelete', paths: [...selectedPaths] })
   }, [selectedPaths])
 
   // Keyboard shortcuts
@@ -239,8 +290,7 @@ export function FileManager() {
 
       if (mod && e.key === 'c' && selectedPath) {
         e.preventDefault()
-        navigator.clipboard.writeText(selectedPath)
-        showToast('Path copied')
+        copyToClipboard(selectedPath)
       }
     }
     window.addEventListener('keydown', handler, true)
@@ -276,7 +326,7 @@ export function FileManager() {
 
       <div className="min-h-0 flex-1 overflow-y-auto" key={navKey}>
         <DirectoryView
-            entries={entries}
+            entries={sortedEntries}
             isLoading={isLoading}
             error={error}
             sort={sort}
@@ -334,6 +384,11 @@ export function FileManager() {
       {dialog?.type === 'delete' && (
         <Dialog title="Delete" onClose={() => setDialog(null)} onSubmit={handleDialogSubmit} submitLabel="Delete" submitDanger loading={dialogLoading}>
           <ConfirmMessage message={`Delete "${dialog.name}"? This cannot be undone.`} />
+        </Dialog>
+      )}
+      {dialog?.type === 'batchDelete' && (
+        <Dialog title="Delete" onClose={() => setDialog(null)} onSubmit={handleDialogSubmit} submitLabel="Delete" submitDanger loading={dialogLoading}>
+          <ConfirmMessage message={`Delete ${dialog.paths.length} selected item${dialog.paths.length > 1 ? 's' : ''}? This cannot be undone.`} />
         </Dialog>
       )}
 

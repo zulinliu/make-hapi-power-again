@@ -1,4 +1,4 @@
-import { useMemo, useCallback, useInsertionEffect, useRef } from 'react'
+import { useCallback, useInsertionEffect, useRef } from 'react'
 import { FileIcon } from './FileIcon'
 import type { FileEntry, SortOption, SortField, SortDirection } from './types'
 
@@ -271,20 +271,7 @@ export default function DirectoryView({
 }: DirectoryViewProps) {
   useDirectoryStyles()
 
-  const sorted = useMemo(() => {
-    const copy = [...entries]
-    copy.sort((a, b) => {
-      if (a.type !== b.type) return a.type === 'directory' ? -1 : 1
-      const dir = sort.direction === 'asc' ? 1 : -1
-      switch (sort.field) {
-        case 'name': return dir * a.name.localeCompare(b.name)
-        case 'size': return dir * (a.size - b.size)
-        case 'modified': return dir * (new Date(a.modified).getTime() - new Date(b.modified).getTime())
-        default: return 0
-      }
-    })
-    return copy
-  }, [entries, sort])
+  const sorted = entries
 
   const allSelected = entries.length > 0 && entries.every((e) => selectedPaths.has(e.path))
 
