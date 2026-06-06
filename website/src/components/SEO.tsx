@@ -14,8 +14,8 @@ export function SEO({ title, description, image, url }: SEOProps) {
   
   const siteTitle = "Hapi Power - Code Free, Powered by AI";
   const defaultDescription = "One workbench for every AI coding agent. Code free, powered by AI.";
-  const siteUrl = "https://YOUR_DOMAIN";
-  const defaultImage = "/images/og-image.png"; // We need to create this or use an existing one
+  const siteUrl = "https://hapi-power.liuzl.asia";
+  const defaultImage = "/images/og-image.png";
 
   const metaTitle = title ? `${title} | Hapi Power` : siteTitle;
   const metaDescription = description || defaultDescription;
