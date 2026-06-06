@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import { BreadcrumbNav, buildBreadcrumbs } from './BreadcrumbNav'
 import DirectoryView from './DirectoryView'
 import { ContextMenu, useContextMenu } from './ContextMenu'
@@ -13,7 +14,23 @@ import {
   mockDelete,
   mockRename,
 } from '@/lib/file-manager-mock'
+import {
+  isApiReady,
+  listDirectory as apiListDirectory,
+  createFile as apiCreateFile,
+  createFolder as apiCreateFolder,
+  deleteEntry as apiDeleteEntry,
+  renameEntry as apiRenameEntry,
+} from '@/lib/file-manager-api'
+import type { ApiClient } from '@/api/client'
 import type { FileEntry, SortOption, SortField, BreadcrumbSegment } from './types'
+
+export interface FileManagerProps {
+  api?: ApiClient | null
+  machineId?: string | null
+  sessionId?: string | null
+  initialPath?: string
+}
 
 const DEFAULT_ROOT = '/home/user/project'
 const DEFAULT_SORT: SortOption = { field: 'name', direction: 'asc' }
@@ -60,8 +77,10 @@ async function copyToClipboard(text: string) {
   }
 }
 
-export function FileManager() {
-  const [currentPath, setCurrentPath] = useState(DEFAULT_ROOT)
+export function FileManager({ api, machineId, sessionId, initialPath }: FileManagerProps = {}) {
+  const navigate = useNavigate()
+  const useRealApi = isApiReady(api ?? null, machineId ?? null)
+  const [currentPath, setCurrentPath] = useState<string>(initialPath ?? DEFAULT_ROOT)
   const [entries, setEntries] = useState<FileEntry[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -84,7 +103,12 @@ export function FileManager() {
     setSelectedPath(null)
     setSelectedPaths(new Set())
     try {
-      const result = await mockListDirectory(path, hidden)
+      let result: { path: string; entries: FileEntry[] }
+      if (useRealApi && api && machineId) {
+        result = await apiListDirectory(api, machineId, path, hidden)
+      } else {
+        result = await mockListDirectory(path, hidden)
+      }
       setEntries(result.entries)
       setCurrentPath(path)
       setNavKey((k) => k + 1)
@@ -93,13 +117,16 @@ export function FileManager() {
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [useRealApi, api, machineId])
 
   const reload = useCallback(() => {
     loadDirectory(currentPath, showHidden)
   }, [loadDirectory, currentPath, showHidden])
 
-  useEffect(() => { loadDirectory(DEFAULT_ROOT, false) }, [loadDirectory])
+  // Load initial directory once on mount
+  useEffect(() => {
+    loadDirectory(initialPath ?? DEFAULT_ROOT, false)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!mountedRef.current) { mountedRef.current = true; return }
@@ -191,7 +218,11 @@ export function FileManager() {
           const name = inputValue.trim()
           if (!name) { showToast('Name cannot be empty', 'error'); return }
           if (!isValidFileName(name)) { showToast('Invalid name: must not contain / or ..', 'error'); return }
-          await mockCreateFile(currentPath, name)
+          if (useRealApi && api && sessionId) {
+            await apiCreateFile(api, machineId!, sessionId, currentPath, name)
+          } else {
+            await mockCreateFile(currentPath, name)
+          }
           setHighlightPath(`${currentPath}/${name}`)
           showToast('File created')
           break
@@ -200,7 +231,11 @@ export function FileManager() {
           const name = inputValue.trim()
           if (!name) { showToast('Name cannot be empty', 'error'); return }
           if (!isValidFileName(name)) { showToast('Invalid name: must not contain / or ..', 'error'); return }
-          await mockCreateFolder(currentPath, name)
+          if (useRealApi && api && sessionId) {
+            await apiCreateFolder(api, machineId!, sessionId, currentPath, name)
+          } else {
+            await mockCreateFolder(currentPath, name)
+          }
           setHighlightPath(`${currentPath}/${name}`)
           showToast('Folder created')
           break
@@ -210,12 +245,21 @@ export function FileManager() {
           if (!name) { showToast('Name cannot be empty', 'error'); return }
           if (!isValidFileName(name)) { showToast('Invalid name: must not contain / or ..', 'error'); return }
           if (name === dialog.name) { setDialog(null); return }
-          await mockRename(currentPath, dialog.name, name)
+          if (useRealApi && api && sessionId) {
+            await apiRenameEntry(api, machineId!, sessionId, currentPath, dialog.name, name)
+          } else {
+            await mockRename(currentPath, dialog.name, name)
+          }
           showToast('Renamed')
           break
         }
         case 'delete': {
-          await mockDelete(currentPath, dialog.name)
+          if (useRealApi && api && sessionId) {
+            const entry = entries.find(e => e.path === dialog.path)
+            await apiDeleteEntry(api, machineId!, sessionId, currentPath, dialog.name, dialog.path, entry?.type ?? 'file')
+          } else {
+            await mockDelete(currentPath, dialog.name)
+          }
           setSelectedPaths((prev) => { const n = new Set(prev); n.delete(dialog.path); return n })
           showToast('Deleted')
           break
@@ -223,7 +267,12 @@ export function FileManager() {
         case 'batchDelete': {
           for (const p of dialog.paths) {
             const name = p.split('/').pop() ?? ''
-            await mockDelete(currentPath, name)
+            if (useRealApi && api && sessionId) {
+              const entry = entries.find(e => e.path === p)
+              await apiDeleteEntry(api, machineId!, sessionId, currentPath, name, p, entry?.type ?? 'file')
+            } else {
+              await mockDelete(currentPath, name)
+            }
           }
           setSelectedPaths(new Set())
           showToast(`${dialog.paths.length} item${dialog.paths.length > 1 ? 's' : ''} deleted`)
@@ -238,7 +287,7 @@ export function FileManager() {
     } finally {
       setDialogLoading(false)
     }
-  }, [dialog, inputValue, currentPath, reload])
+  }, [dialog, inputValue, currentPath, reload, useRealApi, api, machineId, sessionId, entries])
 
   const handleToolbarNew = useCallback(() => {
     setInputValue('')
@@ -364,7 +413,16 @@ export function FileManager() {
           onDelete={handleBatchDelete}
           onMove={() => {}}
           onCopy={() => {}}
-          onStartSession={() => {}}
+          onStartSession={() => {
+            if (machineId && selectedPaths.size === 1) {
+              const path = [...selectedPaths][0]
+              const entry = entries.find(e => e.path === path)
+              const dir = entry?.type === 'directory' ? path : currentPath
+              navigate({ to: '/sessions/new', search: { directory: dir, machineId } })
+            } else {
+              navigate({ to: '/sessions/new', search: { directory: currentPath, ...(machineId ? { machineId } : {}) } })
+            }
+          }}
         />
       )}
 
@@ -373,7 +431,9 @@ export function FileManager() {
         <ToolbarButton label="New" icon="+" onClick={handleToolbarNew} />
         <ToolbarButton label="Paste" icon="⊂" />
         <ToolbarButton label="Upload" icon="↑" />
-        <ToolbarButton label="Session" icon="▶" />
+        <ToolbarButton label="Session" icon="▶" onClick={() => {
+          navigate({ to: '/sessions/new', search: { directory: currentPath, ...(machineId ? { machineId } : {}) } })
+        }} />
       </div>
 
       <ContextMenu state={ctxMenu.state} onClose={ctxMenu.hide} />

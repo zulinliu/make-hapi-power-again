@@ -10,6 +10,7 @@ import {
     useMatchRoute,
     useNavigate,
     useParams,
+    useRouterState,
 } from '@tanstack/react-router'
 import { getScrollRestorationKey } from '@/lib/scrollRestorationKey'
 import { App } from '@/App'
@@ -585,6 +586,12 @@ function NewSessionPage() {
 function BrowsePage() {
     const { t } = useTranslation()
     const goBack = useAppGoBack()
+    const { api } = useAppContext()
+    const search = useRouterState({ select: (s) => s.location.search as { machineId?: string } })
+    const { machines } = useMachines(api, true)
+    const machineId = search.machineId ?? machines[0]?.id ?? null
+    const machine = machines.find(m => m.id === machineId)
+    const workspaceRoot = machine?.metadata?.workspaceRoots?.[0]
 
     return (
         <div className="flex h-full min-h-0 flex-col">
@@ -603,7 +610,13 @@ function BrowsePage() {
             </div>
 
             <div className="flex-1 min-h-0">
-                <FileManager />
+                {workspaceRoot ? (
+                    <FileManager api={api} machineId={machineId} initialPath={workspaceRoot} />
+                ) : (
+                    <div className="flex items-center justify-center h-full">
+                        <div className="animate-pulse text-(--hp-text-tertiary)">{t('session.loading', 'Loading...')}</div>
+                    </div>
+                )}
             </div>
         </div>
     )
