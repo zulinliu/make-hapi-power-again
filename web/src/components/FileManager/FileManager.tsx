@@ -1,6 +1,8 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { BreadcrumbNav, buildBreadcrumbs } from './BreadcrumbNav'
 import DirectoryView from './DirectoryView'
+import { ContextMenu, useContextMenu } from './ContextMenu'
+import type { ContextMenuItem } from './ContextMenu'
 import { mockListDirectory } from '@/lib/file-manager-mock'
 import type { FileEntry, SortOption, BreadcrumbSegment } from './types'
 
@@ -16,6 +18,7 @@ export function FileManager() {
   const [sort, setSort] = useState<SortOption>(DEFAULT_SORT)
   const [selectedPath, setSelectedPath] = useState<string | null>(null)
   const mountedRef = useRef(false)
+  const ctxMenu = useContextMenu()
 
   const loadDirectory = useCallback(async (path: string, hidden: boolean) => {
     setIsLoading(true)
@@ -32,12 +35,10 @@ export function FileManager() {
     }
   }, [])
 
-  // Initial load
   useEffect(() => {
     loadDirectory(DEFAULT_ROOT, false)
   }, [loadDirectory])
 
-  // Reload when showHidden changes
   useEffect(() => {
     if (!mountedRef.current) {
       mountedRef.current = true
@@ -61,10 +62,23 @@ export function FileManager() {
   }, [])
 
   const handleContextMenu = useCallback(
-    (_path: string, _type: 'file' | 'directory', _point: { x: number; y: number }) => {
-      // Phase 2+: context menu
+    (path: string, type: 'file' | 'directory', point: { x: number; y: number }) => {
+      setSelectedPath(path)
+      const items: ContextMenuItem[] = [
+        { label: 'New File', icon: '📄', onClick: () => {} },
+        { label: 'New Folder', icon: '📁', onClick: () => {} },
+        { label: 'Rename', icon: '✏️', onClick: () => {} },
+        { label: 'Copy Path', icon: '📋', onClick: () => { navigator.clipboard.writeText(path) } },
+        { label: 'Move…', icon: '↗️', onClick: () => {} },
+        { label: 'Copy…', icon: '📋', onClick: () => {} },
+      ]
+      if (type === 'file') {
+        items.push({ label: 'Download', icon: '⬇️', onClick: () => {} })
+      }
+      items.push({ label: 'Delete', icon: '🗑️', danger: true, onClick: () => {} })
+      ctxMenu.show(point.x, point.y, items)
     },
-    [],
+    [ctxMenu],
   )
 
   const handleRetry = useCallback(() => {
@@ -172,6 +186,9 @@ export function FileManager() {
         <ToolbarButton label="Upload" icon="↑" />
         <ToolbarButton label="Session" icon="▶" />
       </div>
+
+      {/* Context menu (portal-level fixed) */}
+      <ContextMenu state={ctxMenu.state} onClose={ctxMenu.hide} />
     </div>
   )
 }
