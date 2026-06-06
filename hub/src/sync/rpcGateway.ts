@@ -156,8 +156,8 @@ export class RpcGateway {
         }
     }
 
-    async listMachineDirectory(machineId: string, path: string): Promise<RpcListDirectoryResponse> {
-        const result = await this.machineRpc(machineId, RPC_METHODS.ListMachineDirectory, { path }) as RpcListDirectoryResponse | unknown
+    async listMachineDirectory(machineId: string, path: string, showHidden?: boolean): Promise<RpcListDirectoryResponse> {
+        const result = await this.machineRpc(machineId, RPC_METHODS.ListMachineDirectory, { path, showHidden }) as RpcListDirectoryResponse | unknown
         if (!result || typeof result !== 'object') {
             return { success: false, error: 'Unexpected list-directory result' }
         }

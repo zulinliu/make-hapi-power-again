@@ -740,6 +740,7 @@ export default {
   // 全局文件管理器
   'fm.toolbar.showHidden': '显示隐藏文件',
   'fm.toolbar.hideHidden': '隐藏隐藏文件',
+  'fm.toolbar.parent': '返回上一级',
   'fm.toolbar.newFile': '新建文件',
   'fm.toolbar.newFolder': '新建文件夹',
   'fm.toolbar.paste': '粘贴',
@@ -762,7 +763,8 @@ export default {
   'fm.toast.clipboardUnavailable': '剪贴板不可用',
   'fm.toast.pathCopied': '路径已复制',
   'fm.toast.copyPathFailed': '复制路径失败',
-  'fm.toast.unavailableAction': '{action} 将在下一阶段文件工作流中提供',
+  'fm.toast.unavailableAction': '当前位置暂不支持 {action}',
+  'fm.toast.openRequiresSession': '全局文件预览正在接入。当前可从此目录启动会话后打开文件。',
   'fm.toast.nameRequired': '名称不能为空',
   'fm.toast.invalidName': '名称无效：不能包含 /、\\ 或保留名称',
   'fm.toast.noActiveSession': '没有活动会话，请先启动会话。',

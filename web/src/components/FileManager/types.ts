@@ -10,6 +10,8 @@ export interface FileEntry {
   permissions?: string
 }
 
+export type FileManagerMode = 'machine' | 'session' | 'mock'
+
 export interface DirectoryListing {
   path: string
   entries: FileEntry[]

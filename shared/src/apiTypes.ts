@@ -190,7 +190,8 @@ export const SpawnSessionRequestSchema = z.object({
 export type SpawnSessionRequest = z.infer<typeof SpawnSessionRequestSchema>
 
 export const MachineListDirectoryRequestSchema = z.object({
-    path: z.string().min(1)
+    path: z.string().min(1),
+    showHidden: z.boolean().optional()
 })
 
 export type MachineListDirectoryRequest = z.infer<typeof MachineListDirectoryRequestSchema>

@@ -21,7 +21,7 @@ export async function listDirectory(
   path: string,
   showHidden: boolean,
 ): Promise<DirectoryListing> {
-  const res = await api.listMachineDirectory(machineId, path)
+  const res = await api.listMachineDirectory(machineId, path, showHidden)
   if (!res.success || !res.entries) {
     throw new Error(res.error ?? 'Failed to list directory')
   }

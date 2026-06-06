@@ -738,6 +738,7 @@ export default {
   // File Manager (global)
   'fm.toolbar.showHidden': 'Show dotfiles',
   'fm.toolbar.hideHidden': 'Hide dotfiles',
+  'fm.toolbar.parent': 'Up one level',
   'fm.toolbar.newFile': 'New File',
   'fm.toolbar.newFolder': 'New Folder',
   'fm.toolbar.paste': 'Paste',
@@ -760,7 +761,8 @@ export default {
   'fm.toast.clipboardUnavailable': 'Clipboard is not available',
   'fm.toast.pathCopied': 'Path copied',
   'fm.toast.copyPathFailed': 'Failed to copy path',
-  'fm.toast.unavailableAction': '{action} will ship in the next file workflow phase',
+  'fm.toast.unavailableAction': '{action} is not available for this location yet',
+  'fm.toast.openRequiresSession': 'Global file preview is being connected. Start a session from this folder to open files now.',
   'fm.toast.nameRequired': 'Name cannot be empty',
   'fm.toast.invalidName': 'Invalid name: must not contain /, \\ or reserved names',
   'fm.toast.noActiveSession': 'No active session. Start a session first.',

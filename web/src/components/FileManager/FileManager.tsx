@@ -25,7 +25,7 @@ import {
   renameEntry as apiRenameEntry,
 } from '@/lib/file-manager-api'
 import type { ApiClient } from '@/api/client'
-import type { FileEntry, SortOption, SortField, BreadcrumbSegment } from './types'
+import type { FileEntry, FileManagerMode, SortOption, SortField, BreadcrumbSegment } from './types'
 
 export interface FileManagerProps {
   api?: ApiClient | null
@@ -71,6 +71,21 @@ function isValidFileName(name: string): boolean {
   return true
 }
 
+function normalizePath(path: string): string {
+  const normalized = path.replace(/\/+$/, '')
+  return normalized || '/'
+}
+
+function getParentPath(path: string, rootPath: string): string | null {
+  const normalized = normalizePath(path)
+  const root = normalizePath(rootPath)
+  if (normalized === root) return null
+  const idx = normalized.lastIndexOf('/')
+  const parent = idx > 0 ? normalized.slice(0, idx) : '/'
+  if (root !== '/' && (parent.length < root.length || !parent.startsWith(root))) return null
+  return parent
+}
+
 async function copyToClipboard(text: string, t: Translate) {
   try {
     if (!navigator.clipboard?.writeText) {
@@ -88,6 +103,7 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
   const navigate = useNavigate()
   const { t } = useTranslation()
   const useRealApi = isApiReady(api ?? null, machineId ?? null)
+  const mode: FileManagerMode = useRealApi ? (sessionId ? 'session' : 'machine') : 'mock'
   const [currentPath, setCurrentPath] = useState<string>(initialPath ?? DEFAULT_ROOT)
   const [entries, setEntries] = useState<FileEntry[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -102,6 +118,8 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
   const [selectedPaths, setSelectedPaths] = useState<Set<string>>(new Set())
   const [navKey, setNavKey] = useState(0)
   const sortedEntries = useMemo(() => sortEntries(entries, sort), [entries, sort])
+  const rootPath = useMemo(() => normalizePath(initialPath ?? DEFAULT_ROOT), [initialPath])
+  const parentPath = useMemo(() => getParentPath(currentPath, rootPath), [currentPath, rootPath])
   const mountedRef = useRef(false)
   const ctxMenu = useContextMenu()
 
@@ -165,8 +183,10 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
         params: { sessionId },
         search: { path: encodeBase64(filePath) },
       })
+      return
     }
-  }, [sessionId, navigate])
+    showToast(t(mode === 'machine' ? 'fm.toast.openRequiresSession' : 'fm.toast.operationFailed'), 'error')
+  }, [sessionId, navigate, t, mode])
 
   const handleUnavailableAction = useCallback((label: string) => {
     showToast(t('fm.toast.unavailableAction', { action: label }))
@@ -418,6 +438,37 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
           flexShrink: 0,
         }}
       >
+        <button
+          type="button"
+          onClick={() => { if (parentPath) handleNavigate(parentPath) }}
+          disabled={!parentPath}
+          aria-label={t('fm.toolbar.parent')}
+          title={t('fm.toolbar.parent')}
+          className="fm-toolbar-button"
+          style={{
+            minHeight: 40,
+            minWidth: 40,
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '0 var(--hp-space-3)',
+            borderRadius: 'var(--hp-radius-md)',
+            fontSize: 12,
+            fontWeight: 650,
+            border: '1px solid var(--hp-border)',
+            cursor: parentPath ? 'pointer' : 'not-allowed',
+            color: parentPath ? 'var(--hp-text-secondary)' : 'var(--hp-text-disabled, var(--hp-text-tertiary))',
+            background: 'var(--hp-surface-1)',
+            opacity: parentPath ? 1 : 0.55,
+            transition: 'background var(--hp-duration-fast) var(--hp-ease-out), border-color var(--hp-duration-fast) var(--hp-ease-out), color var(--hp-duration-fast) var(--hp-ease-out)',
+          }}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="m15 18-6-6 6-6" />
+            <path d="M9 12h12" />
+          </svg>
+        </button>
+
         <button
           type="button"
           onClick={() => setShowHidden((v) => !v)}

@@ -38,6 +38,7 @@ interface PathExistsRequest {
 
 interface ListMachineDirectoryRequest {
     path: string
+    showHidden?: boolean
 }
 
 function normalizeWorkspaceRoots(paths?: string[]): string[] | undefined {
@@ -137,8 +138,10 @@ export class ApiMachineClient {
                 const dirEntries = await readdir(targetPath, { withFileTypes: true })
                 const entries: MachineDirectoryEntry[] = []
 
+                const showHidden = params.showHidden === true
+
                 await Promise.all(dirEntries.map(async (entry) => {
-                    if (entry.name.startsWith('.')) return
+                    if (!showHidden && entry.name.startsWith('.')) return
 
                     const fullPath = join(targetPath, entry.name)
                     let type: 'file' | 'directory' | 'other' = 'other'

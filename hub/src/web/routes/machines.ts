@@ -94,7 +94,7 @@ export function createMachinesRoutes(getSyncEngine: () => SyncEngine | null, sto
         }
 
         try {
-            const result = await engine.listMachineDirectory(machineId, parsed.data.path)
+            const result = await engine.listMachineDirectory(machineId, parsed.data.path, parsed.data.showHidden)
             return c.json(result)
         } catch (error) {
             return c.json({ error: error instanceof Error ? error.message : 'Failed to list directory' }, 500)
