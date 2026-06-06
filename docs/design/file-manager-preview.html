@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Hapi Power — File Manager Design Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* === Token System (matching project tokens.css) === */
+:root {
+  /* Brand */
+  --primary: oklch(0.68 0.18 55);
+  --primary-hover: oklch(0.62 0.20 50);
+  --primary-subtle: oklch(0.68 0.06 55 / 0.12);
+  --primary-text: oklch(1 0 0);
+  --accent: oklch(0.78 0.14 85);
+
+  /* Semantic */
+  --success: oklch(0.65 0.16 155);
+  --success-subtle: oklch(0.65 0.06 155 / 0.12);
+  --warning: oklch(0.75 0.15 80);
+  --warning-subtle: oklch(0.75 0.06 80 / 0.12);
+  --danger: oklch(0.60 0.20 22);
+  --danger-subtle: oklch(0.60 0.08 22 / 0.12);
+  --info: oklch(0.65 0.12 230);
+
+  /* Surfaces (dark mode) */
+  --canvas: oklch(0.13 0.015 55);
+  --surface-0: oklch(0.15 0.012 55);
+  --surface-1: oklch(0.18 0.010 55);
+  --surface-2: oklch(0.22 0.008 55);
+  --surface-3: oklch(0.26 0.006 55);
+
+  /* Text */
+  --text-primary: oklch(0.95 0.005 55);
+  --text-secondary: oklch(0.70 0.008 55);
+  --text-tertiary: oklch(0.52 0.008 55);
+
+  /* Borders */
+  --border: oklch(1 0 0 / 0.08);
+  --divider: oklch(1 0 0 / 0.06);
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px oklch(0 0 0 / 0.3);
+  --shadow-md: 0 4px 16px oklch(0 0 0 / 0.4);
+  --shadow-lg: 0 8px 32px oklch(0 0 0 / 0.5);
+  --shadow-xl: 0 16px 48px oklch(0 0 0 / 0.6);
+
+  /* Timing */
+  --duration-fast: 120ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-overlay: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Layout */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+/* === Reset === */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-sans);
+  background: var(--canvas);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  height: 100vh;
+  height: 100dvh;
+}
+
+/* === Preview Frames === */
+.preview-container {
+  display: flex;
+  height: 100dvh;
+  gap: 24px;
+  padding: 24px;
+  overflow-x: auto;
+}
+
+.frame-label {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  letter-spacing: 0.02em;
+}
+
+/* === Mobile Frame === */
+.mobile-frame {
+  flex-shrink: 0;
+  width: 375px;
+  height: 812px;
+  border-radius: 40px;
+  border: 3px solid oklch(0.3 0.01 55);
+  overflow: hidden;
+  background: var(--canvas);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-shadow: 0 0 0 1px oklch(0.2 0.01 55), var(--shadow-xl);
+}
+
+/* === Desktop Frame === */
+.desktop-frame {
+  flex-shrink: 0;
+  width: 900px;
+  height: 600px;
+  border-radius: 12px;
+  border: 2px solid oklch(0.3 0.01 55);
+  overflow: hidden;
+  background: var(--canvas);
+  display: flex;
+  position: relative;
+  box-shadow: var(--shadow-xl);
+}
+
+/* === Mobile Components === */
+.m-header {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  background: var(--surface-0);
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.m-header-title {
+  flex: 1;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.m-icon-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-default);
+}
+.m-icon-btn:hover { background: var(--surface-1); }
+
+.m-machine-bar {
+  height: 36px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  background: var(--surface-1);
+  border-bottom: 1px solid var(--border);
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+.m-machine-bar .machine-name {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+.m-machine-bar .chevron {
+  color: var(--text-tertiary);
+}
+
+.m-breadcrumb {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  background: var(--surface-1);
+  border-bottom: 1px solid var(--border);
+  gap: 4px;
+  font-size: 13px;
+  flex-shrink: 0;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+.m-breadcrumb::-webkit-scrollbar { display: none; }
+.crumb { color: var(--text-secondary); cursor: pointer; }
+.crumb:hover { color: var(--text-primary); }
+.crumb-sep { color: var(--text-tertiary); font-size: 11px; }
+.crumb-active { color: var(--primary); font-weight: 600; }
+
+.m-toolbar {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.m-search-input {
+  flex: 1;
+  height: 32px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface-1);
+  padding: 0 10px 0 32px;
+  font-size: 14px;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  outline: none;
+  position: relative;
+  transition: border-color var(--duration-fast);
+}
+.m-search-input:focus { border-color: var(--primary); }
+.m-search-wrap {
+  flex: 1;
+  position: relative;
+}
+.m-search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-tertiary);
+  font-size: 14px;
+  pointer-events: none;
+}
+
+.m-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  transition: background var(--duration-fast);
+}
+.m-toggle:hover { background: var(--surface-1); }
+.m-toggle-switch {
+  width: 28px;
+  height: 16px;
+  border-radius: var(--radius-full);
+  background: var(--surface-2);
+  position: relative;
+  transition: background var(--duration-normal);
+}
+.m-toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--text-tertiary);
+  transition: transform var(--duration-normal) var(--ease-default), background var(--duration-normal);
+}
+.m-toggle.active .m-toggle-switch { background: var(--primary); }
+.m-toggle.active .m-toggle-switch::after { transform: translateX(12px); background: white; }
+
+/* === File List === */
+.m-file-list {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.m-file-list::-webkit-scrollbar { width: 4px; }
+.m-file-list::-webkit-scrollbar-thumb {
+  background: var(--surface-2);
+  border-radius: 2px;
+}
+
+.m-file-row {
+  display: flex;
+  align-items: center;
+  height: 52px;
+  padding: 0 16px;
+  gap: 12px;
+  border-bottom: 1px solid var(--divider);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-default);
+  position: relative;
+  overflow: hidden;
+}
+.m-file-row:hover { background: var(--surface-1); }
+.m-file-row.selected {
+  background: var(--primary-subtle);
+}
+.m-file-row.selected::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--primary);
+  border-radius: 0 2px 2px 0;
+}
+.m-file-row.cut {
+  opacity: 0.5;
+  border-style: dashed;
+  border-color: var(--warning);
+}
+
+.m-file-icon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  font-size: 18px;
+}
+
+.m-file-info {
+  flex: 1;
+  min-width: 0;
+}
+.m-file-name {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.m-file-meta {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin-top: 1px;
+}
+
+.m-file-size {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  flex-shrink: 0;
+}
+
+.m-action-btn {
+  width: 32px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  font-size: 18px;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  transition: color var(--duration-fast), background var(--duration-fast);
+}
+.m-action-btn:hover {
+  color: var(--text-primary);
+  background: var(--surface-2);
+}
+
+/* Folder icon colors */
+.icon-folder { color: var(--primary); }
+.icon-ts { color: oklch(0.60 0.15 250); }
+.icon-js { color: oklch(0.75 0.16 85); }
+.icon-py { color: oklch(0.55 0.15 65); }
+.icon-json { color: oklch(0.70 0.10 85); }
+.icon-md { color: var(--text-secondary); }
+.icon-css { color: oklch(0.65 0.14 300); }
+.icon-git { color: oklch(0.60 0.14 20); }
+.icon-img { color: oklch(0.55 0.12 160); }
+.icon-zip { color: oklch(0.65 0.10 85); }
+.icon-env { color: oklch(0.60 0.12 250); }
+.icon-config { color: var(--text-tertiary); }
+.icon-hidden { color: var(--text-tertiary); opacity: 0.6; }
+.icon-git-repo { position: relative; }
+.icon-git-repo::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  right: -4px;
+  width: 10px;
+  height: 10px;
+  background: var(--success);
+  border-radius: 50%;
+  border: 2px solid var(--canvas);
+}
+
+/* === Bottom Toolbar === */
+.m-bottom-bar {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  background: var(--surface-0);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -4px 16px oklch(0 0 0 / 0.2);
+  flex-shrink: 0;
+  gap: 4px;
+}
+
+.m-bottom-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 4px 12px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 10px;
+  font-family: var(--font-sans);
+  transition: background var(--duration-fast), color var(--duration-fast);
+}
+.m-bottom-action:hover { background: var(--surface-1); color: var(--text-primary); }
+.m-bottom-action .icon { font-size: 20px; line-height: 1; }
+
+.m-bottom-spacer { flex: 1; }
+
+.m-cta-btn {
+  height: 38px;
+  padding: 0 20px;
+  border-radius: var(--radius-md);
+  border: none;
+  background: var(--primary);
+  color: var(--primary-text);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: background var(--duration-fast), transform var(--duration-fast);
+}
+.m-cta-btn:hover { background: var(--primary-hover); }
+.m-cta-btn:active { transform: scale(0.97); }
+
+/* === Desktop Components === */
+.d-sidebar {
+  width: 240px;
+  background: var(--surface-0);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.d-sidebar-header {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.d-session-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  gap: 10px;
+  cursor: pointer;
+  transition: background var(--duration-fast);
+  border-bottom: 1px solid var(--divider);
+}
+.d-session-item:hover { background: var(--surface-1); }
+.d-session-item.active { background: var(--primary-subtle); }
+
+.d-session-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.d-session-name {
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.d-session-path {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.d-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.d-breadcrumb-bar {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  background: var(--surface-0);
+  border-bottom: 1px solid var(--border);
+  gap: 4px;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.d-toolbar {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 10px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.d-search-input {
+  width: 220px;
+  height: 30px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface-1);
+  padding: 0 10px 0 30px;
+  font-size: 13px;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  outline: none;
+  transition: border-color var(--duration-fast);
+}
+.d-search-input:focus { border-color: var(--primary); }
+.d-search-wrap { position: relative; }
+.d-search-wrap .d-search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-tertiary);
+  font-size: 12px;
+}
+
+.d-new-btn {
+  height: 30px;
+  padding: 0 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: background var(--duration-fast), border-color var(--duration-fast);
+}
+.d-new-btn:hover { background: var(--surface-1); border-color: var(--primary); }
+
+.d-sort-btn {
+  height: 30px;
+  padding: 0 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: background var(--duration-fast);
+}
+.d-sort-btn:hover { background: var(--surface-1); }
+
+/* Desktop file list */
+.d-file-list {
+  flex: 1;
+  overflow-y: auto;
+}
+.d-file-list::-webkit-scrollbar { width: 4px; }
+.d-file-list::-webkit-scrollbar-thumb {
+  background: var(--surface-2);
+  border-radius: 2px;
+}
+
+.d-file-header {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 16px;
+  background: var(--surface-1);
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.d-file-header span { cursor: pointer; }
+.d-file-header span:hover { color: var(--text-secondary); }
+
+.d-file-row {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  padding: 0 16px;
+  gap: 10px;
+  border-bottom: 1px solid var(--divider);
+  cursor: pointer;
+  transition: background var(--duration-fast);
+  position: relative;
+}
+.d-file-row:hover { background: var(--surface-1); }
+.d-file-row.selected { background: var(--primary-subtle); }
+
+.d-checkbox {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1.5px solid var(--text-tertiary);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background var(--duration-fast), border-color var(--duration-fast);
+}
+.d-checkbox.checked {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+.d-checkbox.checked::after {
+  content: '✓';
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.d-file-icon-sm {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.d-file-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.d-file-size-d, .d-file-date-d {
+  width: 70px;
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  text-align: right;
+}
+
+/* Desktop action bar */
+.d-action-bar {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  background: var(--surface-0);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+  gap: 8px;
+}
+
+.d-action-bar .d-cta-btn {
+  height: 30px;
+  padding: 0 16px;
+  font-size: 13px;
+}
+
+.d-batch-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-left: auto;
+}
+
+.d-batch-action {
+  height: 28px;
+  padding: 0 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: all var(--duration-fast);
+}
+.d-batch-action:hover { background: var(--surface-1); color: var(--text-primary); }
+.d-batch-action.danger { color: var(--danger); border-color: var(--danger-subtle); }
+.d-batch-action.danger:hover { background: var(--danger-subtle); }
+
+/* === Animations === */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes highlight-flash {
+  0% { background: var(--primary-subtle); }
+  100% { background: transparent; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+.animate-row {
+  animation: fadeInUp 0.2s var(--ease-out) both;
+}
+.animate-row:nth-child(1) { animation-delay: 0ms; }
+.animate-row:nth-child(2) { animation-delay: 30ms; }
+.animate-row:nth-child(3) { animation-delay: 60ms; }
+.animate-row:nth-child(4) { animation-delay: 90ms; }
+.animate-row:nth-child(5) { animation-delay: 120ms; }
+.animate-row:nth-child(6) { animation-delay: 150ms; }
+.animate-row:nth-child(7) { animation-delay: 180ms; }
+.animate-row:nth-child(8) { animation-delay: 210ms; }
+.animate-row:nth-child(9) { animation-delay: 240ms; }
+.animate-row:nth-child(10) { animation-delay: 270ms; }
+
+.skeleton {
+  animation: pulse 1.5s ease-in-out infinite;
+  background: var(--surface-1);
+  border-radius: var(--radius-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-row { animation: none; opacity: 1; }
+  .skeleton { animation: none; opacity: 0.5; }
+}
+</style>
+</head>
+<body>
+
+<div class="preview-container">
+  <!-- ============ Mobile Preview ============ -->
+  <div>
+    <div class="frame-label">Mobile (iOS)</div>
+    <div class="mobile-frame">
+      <!-- Header -->
+      <div class="m-header">
+        <button class="m-icon-btn" title="Back">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <span class="m-header-title">Files</span>
+        <button class="m-icon-btn" title="Machine" style="font-size: 12px; width: auto; padding: 0 8px; gap: 4px; display: flex; align-items: center;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><circle cx="6" cy="6" r="1"/><circle cx="6" cy="18" r="1"/></svg>
+          <span style="font-size:12px;">Runner-1</span>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+      </div>
+
+      <!-- Breadcrumb -->
+      <div class="m-breadcrumb">
+        <span class="crumb">~</span>
+        <span class="crumb-sep">/</span>
+        <span class="crumb">liuzl</span>
+        <span class="crumb-sep">/</span>
+        <span class="crumb">projects</span>
+        <span class="crumb-sep">/</span>
+        <span class="crumb-active">make-hapi-power-again</span>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="m-toolbar">
+        <div class="m-search-wrap">
+          <span class="m-search-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </span>
+          <input class="m-search-input" type="text" placeholder="Search files...">
+        </div>
+        <div class="m-toggle active">
+          <div class="m-toggle-switch"></div>
+          <span>.</span>
+        </div>
+        <button class="m-icon-btn" title="Sort" style="font-size:11px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="m21 8-4-4-4 4"/><path d="M17 4v16"/></svg>
+        </button>
+      </div>
+
+      <!-- File List -->
+      <div class="m-file-list">
+        <!-- Directories -->
+        <div class="m-file-row animate-row">
+          <div class="m-file-icon icon-folder icon-git-repo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          </div>
+          <div class="m-file-info">
+            <div class="m-file-name">src</div>
+            <div class="m-file-meta">24 items</div>
+          </div>
+          <div class="m-action-btn">⋯</div>
+        </div>
+
+        <div class="m-file-row animate-row">
+          <div class="m-file-icon icon-folder">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" opacity="0.85"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          </div>
+          <div class="m-file-info">
+            <div class="m-file-name">public</div>
+            <div class="m-file-meta">8 items</div>
+          </div>
+          <div class="m-action-btn">⋯</div>
+        </div>
+
+        <div class="m-file-row animate-row">
+          <div class="m-file-icon icon-folder">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" opacity="0.85"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          </div>
+          <div class="m-file-info">
+            <div class="m-file-name">docs</div>
+            <div class="m-file-meta">12 items</div>
+          </div>
+          <div class="m-action-btn">⋯</div>
+        </div>
+
+        <!-- Hidden folders -->
+        <div class="m-file-row animate-row">
+          <div class="m-file-icon icon-hidden">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          </div>
+          <div class="m-file-info">
+            <div class="m-file-name" style="color: var(--text-tertiary);">.claude</div>
+            <div class="m-file-meta">hidden folder</div>
+          </div>
+          <div class="m-action-btn">⋯</div>
+        </div>
+
+        <div class="m-file-row animate-row">
+          <div class="m-file-icon icon-hidden">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          </div>
+          <div class="m-file-info">
+            <div class="m-file-name" style="color: var(--text-tertiary);">.git</div>
+            <div class="m-file-meta">hidden folder</div>
+          </div>
+          <div class="m-action-btn">⋯</div>
+        </div>
+
+        <!-- Files -->
+        <div class="m-file-row animate-row">
+          <div class="m-file-icon icon-json">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+          </div>
+          <div class="m-file-info">
+            <div class="m-file-name">package.json</div>
+            <div class="m-file-meta">Modified 2 hours ago</div>
+          </div>
+          <span class="m-file-size">2.1K</span>
+          <div class="m-action-btn">⋯</div>
+        </div>
+
+        <div class="m-file-row animate-row selected">
+          <div class="m-file-icon icon-md">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+          </div>
+          <div class="m-file-info">
+            <div class="m-file-name">README.md</div>
+            <div class="m-file-meta">Modified yesterday</div>
+          </div>
+          <span class="m-file-size">4.2K</span>
+          <div class="m-action-btn">⋯</div>
+        </div>
+
+        <div class="m-file-row animate-row">
+          <div class="m-file-icon icon-ts">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+          </div>
+          <div class="m-file-info">
+            <div class="m-file-name">tsconfig.json</div>
+            <div class="m-file-meta">Modified 3 days ago</div>
+          </div>
+          <span class="m-file-size">856B</span>
+          <div class="m-action-btn">⋯</div>
+        </div>
+
+        <div class="m-file-row animate-row">
+          <div class="m-file-icon icon-js">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+          </div>
+          <div class="m-file-info">
+            <div class="m-file-name">vite.config.ts</div>
+            <div class="m-file-meta">Modified 5 days ago</div>
+          </div>
+          <span class="m-file-size">1.4K</span>
+          <div class="m-action-btn">⋯</div>
+        </div>
+
+        <div class="m-file-row animate-row">
+          <div class="m-file-icon icon-css">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+          </div>
+          <div class="m-file-info">
+            <div class="m-file-name">tailwind.config.ts</div>
+            <div class="m-file-meta">Modified 1 week ago</div>
+          </div>
+          <span class="m-file-size">1.8K</span>
+          <div class="m-action-btn">⋯</div>
+        </div>
+
+        <div class="m-file-row animate-row cut">
+          <div class="m-file-icon icon-env">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+          </div>
+          <div class="m-file-info">
+            <div class="m-file-name" style="opacity:0.7;">.env.local</div>
+            <div class="m-file-meta" style="color: var(--warning);">✂ Cut to clipboard</div>
+          </div>
+          <span class="m-file-size">128B</span>
+          <div class="m-action-btn">⋯</div>
+        </div>
+
+        <div class="m-file-row animate-row">
+          <div class="m-file-icon icon-git">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+          </div>
+          <div class="m-file-info">
+            <div class="m-file-name">.gitignore</div>
+            <div class="m-file-meta">Modified 2 weeks ago</div>
+          </div>
+          <span class="m-file-size">256B</span>
+          <div class="m-action-btn">⋯</div>
+        </div>
+
+        <div class="m-file-row animate-row">
+          <div class="m-file-icon icon-img">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+          </div>
+          <div class="m-file-info">
+            <div class="m-file-name">screenshot.png</div>
+            <div class="m-file-meta">Modified 3 days ago</div>
+          </div>
+          <span class="m-file-size">142K</span>
+          <div class="m-action-btn">⋯</div>
+        </div>
+
+        <div class="m-file-row animate-row">
+          <div class="m-file-icon icon-zip">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+          </div>
+          <div class="m-file-info">
+            <div class="m-file-name">backup.tar.gz</div>
+            <div class="m-file-meta">Modified 1 month ago</div>
+          </div>
+          <span class="m-file-size">5.8M</span>
+          <div class="m-action-btn">⋯</div>
+        </div>
+      </div>
+
+      <!-- Bottom Toolbar -->
+      <div class="m-bottom-bar">
+        <button class="m-bottom-action">
+          <span class="icon">+</span>
+          <span>New</span>
+        </button>
+        <button class="m-bottom-action">
+          <span class="icon">📋</span>
+          <span>Paste</span>
+        </button>
+        <button class="m-bottom-action">
+          <span class="icon">↑</span>
+          <span>Upload</span>
+        </button>
+        <button class="m-bottom-action">
+          <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><path d="M6 9v12"/></svg>
+          <span>Clone</span>
+        </button>
+        <div class="m-bottom-spacer"></div>
+        <button class="m-cta-btn">Start Session</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ Desktop Preview ============ -->
+  <div>
+    <div class="frame-label">Desktop</div>
+    <div class="desktop-frame">
+      <!-- Sidebar -->
+      <div class="d-sidebar">
+        <div class="d-sidebar-header">Sessions</div>
+        <div class="d-session-item active">
+          <div class="d-session-dot" style="background: oklch(0.68 0.15 70);"></div>
+          <div>
+            <div class="d-session-name">Claude - File Manager</div>
+            <div class="d-session-path">~/projects/hapi-power</div>
+          </div>
+        </div>
+        <div class="d-session-item">
+          <div class="d-session-dot" style="background: oklch(0.55 0.18 260);"></div>
+          <div>
+            <div class="d-session-name">Gemini - API Fix</div>
+            <div class="d-session-path">~/projects/webapp</div>
+          </div>
+        </div>
+        <div class="d-session-item">
+          <div class="d-session-dot" style="background: oklch(0.20 0.02 260);"></div>
+          <div>
+            <div class="d-session-name">Codex - Tests</div>
+            <div class="d-session-path">~/projects/webapp</div>
+          </div>
+        </div>
+        <div class="d-session-item">
+          <div class="d-session-dot" style="background: oklch(0.50 0.15 155);"></div>
+          <div>
+            <div class="d-session-name">OpenCode - Docs</div>
+            <div class="d-session-path">~/projects/hapi-power</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="d-main">
+        <!-- Breadcrumb -->
+        <div class="d-breadcrumb-bar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="color: var(--text-tertiary); flex-shrink:0;"><path d="m15 18-6-6 6-6"/></svg>
+          <span class="crumb">~</span>
+          <span class="crumb-sep">/</span>
+          <span class="crumb">liuzl</span>
+          <span class="crumb-sep">/</span>
+          <span class="crumb">projects</span>
+          <span class="crumb-sep">/</span>
+          <span class="crumb-active">make-hapi-power-again</span>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="d-toolbar">
+          <div class="d-search-wrap">
+            <span class="d-search-icon">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </span>
+            <input class="d-search-input" type="text" placeholder="Search files...">
+          </div>
+          <div class="m-toggle active" style="font-size:10px;">
+            <div class="m-toggle-switch"></div>
+            <span>hidden</span>
+          </div>
+          <button class="d-sort-btn">
+            Name
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div style="flex:1;"></div>
+          <button class="d-new-btn">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New
+          </button>
+        </div>
+
+        <!-- File Header -->
+        <div class="d-file-header">
+          <div style="width:26px;"></div>
+          <div style="width:20px;"></div>
+          <span style="flex:1;">Name</span>
+          <span style="width:70px; text-align:right;">Size</span>
+          <span style="width:70px; text-align:right;">Modified</span>
+          <div style="width:20px;"></div>
+        </div>
+
+        <!-- File List -->
+        <div class="d-file-list">
+          <div class="d-file-row animate-row">
+            <div class="d-checkbox"></div>
+            <div class="d-file-icon-sm icon-folder icon-git-repo">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+            </div>
+            <span class="d-file-name">src</span>
+            <span class="d-file-size-d">24 items</span>
+            <span class="d-file-date-d">2h ago</span>
+            <div class="m-action-btn" style="height:32px;">⋯</div>
+          </div>
+
+          <div class="d-file-row animate-row">
+            <div class="d-checkbox"></div>
+            <div class="d-file-icon-sm icon-folder">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" opacity="0.85"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+            </div>
+            <span class="d-file-name">public</span>
+            <span class="d-file-size-d">8 items</span>
+            <span class="d-file-date-d">5d ago</span>
+            <div class="m-action-btn" style="height:32px;">⋯</div>
+          </div>
+
+          <div class="d-file-row animate-row">
+            <div class="d-checkbox"></div>
+            <div class="d-file-icon-sm icon-folder">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" opacity="0.85"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+            </div>
+            <span class="d-file-name">docs</span>
+            <span class="d-file-size-d">12 items</span>
+            <span class="d-file-date-d">1w ago</span>
+            <div class="m-action-btn" style="height:32px;">⋯</div>
+          </div>
+
+          <div class="d-file-row animate-row">
+            <div class="d-checkbox"></div>
+            <div class="d-file-icon-sm icon-json">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+            </div>
+            <span class="d-file-name">package.json</span>
+            <span class="d-file-size-d">2.1K</span>
+            <span class="d-file-date-d">2h ago</span>
+            <div class="m-action-btn" style="height:32px;">⋯</div>
+          </div>
+
+          <div class="d-file-row animate-row selected">
+            <div class="d-checkbox checked"></div>
+            <div class="d-file-icon-sm icon-md">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+            </div>
+            <span class="d-file-name">README.md</span>
+            <span class="d-file-size-d">4.2K</span>
+            <span class="d-file-date-d">yesterday</span>
+            <div class="m-action-btn" style="height:32px;">⋯</div>
+          </div>
+
+          <div class="d-file-row animate-row selected">
+            <div class="d-checkbox checked"></div>
+            <div class="d-file-icon-sm icon-ts">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+            </div>
+            <span class="d-file-name">tsconfig.json</span>
+            <span class="d-file-size-d">856B</span>
+            <span class="d-file-date-d">3d ago</span>
+            <div class="m-action-btn" style="height:32px;">⋯</div>
+          </div>
+
+          <div class="d-file-row animate-row">
+            <div class="d-checkbox"></div>
+            <div class="d-file-icon-sm icon-js">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+            </div>
+            <span class="d-file-name">vite.config.ts</span>
+            <span class="d-file-size-d">1.4K</span>
+            <span class="d-file-date-d">5d ago</span>
+            <div class="m-action-btn" style="height:32px;">⋯</div>
+          </div>
+
+          <div class="d-file-row animate-row">
+            <div class="d-checkbox"></div>
+            <div class="d-file-icon-sm icon-css">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+            </div>
+            <span class="d-file-name">tailwind.config.ts</span>
+            <span class="d-file-size-d">1.8K</span>
+            <span class="d-file-date-d">1w ago</span>
+            <div class="m-action-btn" style="height:32px;">⋯</div>
+          </div>
+
+          <div class="d-file-row animate-row cut">
+            <div class="d-checkbox"></div>
+            <div class="d-file-icon-sm icon-env">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+            </div>
+            <span class="d-file-name" style="opacity:0.6;">.env.local</span>
+            <span class="d-file-size-d">128B</span>
+            <span class="d-file-date-d" style="color: var(--warning);">✂ cut</span>
+            <div class="m-action-btn" style="height:32px;">⋯</div>
+          </div>
+
+          <div class="d-file-row animate-row">
+            <div class="d-checkbox"></div>
+            <div class="d-file-icon-sm icon-git">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+            </div>
+            <span class="d-file-name">.gitignore</span>
+            <span class="d-file-size-d">256B</span>
+            <span class="d-file-date-d">2w ago</span>
+            <div class="m-action-btn" style="height:32px;">⋯</div>
+          </div>
+
+          <div class="d-file-row animate-row">
+            <div class="d-checkbox"></div>
+            <div class="d-file-icon-sm icon-img">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+            </div>
+            <span class="d-file-name">screenshot.png</span>
+            <span class="d-file-size-d">142K</span>
+            <span class="d-file-date-d">3d ago</span>
+            <div class="m-action-btn" style="height:32px;">⋯</div>
+          </div>
+
+          <div class="d-file-row animate-row">
+            <div class="d-checkbox"></div>
+            <div class="d-file-icon-sm icon-zip">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+            </div>
+            <span class="d-file-name">backup.tar.gz</span>
+            <span class="d-file-size-d">5.8M</span>
+            <span class="d-file-date-d">1mo ago</span>
+            <div class="m-action-btn" style="height:32px;">⋯</div>
+          </div>
+        </div>
+
+        <!-- Action Bar -->
+        <div class="d-action-bar">
+          <button class="m-cta-btn d-cta-btn" style="height:30px; font-size:13px;">
+            Start Session
+          </button>
+          <div class="d-batch-info">
+            <span style="background: var(--primary-subtle); color: var(--primary); padding: 2px 8px; border-radius: var(--radius-full); font-weight: 600; font-size: 11px;">2</span>
+            <span>selected</span>
+          </div>
+          <button class="d-batch-action">Move</button>
+          <button class="d-batch-action">Copy</button>
+          <button class="d-batch-action">Archive</button>
+          <button class="d-batch-action danger">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Interactive toggle demo
+document.querySelectorAll('.m-toggle').forEach(toggle => {
+  toggle.addEventListener('click', () => {
+    toggle.classList.toggle('active');
+  });
+});
+
+// Interactive checkbox demo
+document.querySelectorAll('.d-checkbox').forEach(cb => {
+  cb.addEventListener('click', () => {
+    cb.classList.toggle('checked');
+    const row = cb.closest('.d-file-row');
+    if (row) row.classList.toggle('selected');
+  });
+});
+
+// Interactive row selection (mobile)
+document.querySelectorAll('.mobile-frame .m-file-row').forEach(row => {
+  row.addEventListener('click', (e) => {
+    if (e.target.closest('.m-action-btn')) return;
+    document.querySelectorAll('.mobile-frame .m-file-row').forEach(r => r.classList.remove('selected'));
+    row.classList.toggle('selected');
+  });
+});
+</script>
+
+</body>
+</html>
