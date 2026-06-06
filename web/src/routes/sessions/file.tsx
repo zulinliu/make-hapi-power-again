@@ -257,10 +257,11 @@ export default function FilePage() {
     }, [displayMode])
 
     // --- Error/loading states ---
-    const loading = diffQuery.isLoading || fileQuery.isLoading
+    const loading = fileQuery.isLoading
     const fileError = fileContentResult && !fileContentResult.success
         ? (fileContentResult.error ?? 'Failed to read file')
         : null
+    const noApi = !api
     const missingPath = !filePath
     const diffErrorMessage = diffError ? formatDiffError(diffError, t) : null
     const fileErrorMessage = fileError ? formatReadFileError(fileError, t) : null
@@ -276,7 +277,7 @@ export default function FilePage() {
                     <button
                         type="button"
                         onClick={handleGoBack}
-                        className="shrink-0 rounded p-1 text-(--hp-text-tertiary) hover:bg-(--hp-surface-1) hover:text-(--hp-text-primary) transition-colors"
+                        className="shrink-0 rounded p-1.5 text-(--hp-text-tertiary) hover:bg-(--hp-surface-1) hover:text-(--hp-text-primary) focus-visible:outline-2 focus-visible:outline-(--hp-primary) focus-visible:outline-offset-1 transition-colors"
                         aria-label={t('file.page.goBack')}
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -288,7 +289,7 @@ export default function FilePage() {
                         {filePath || t('file.page.unknownPath')}
                     </span>
                     {saveError && (
-                        <span className="text-xs font-medium text-(--hp-danger)" role="status" aria-live="polite">
+                        <span className="text-xs font-medium text-(--hp-danger) truncate max-w-[200px]" role="status" aria-live="polite">
                             {t('file.page.saveFailed')}
                         </span>
                     )}
@@ -298,14 +299,14 @@ export default function FilePage() {
                         </span>
                     )}
                     <button type="button" onClick={() => copyPath(filePath)}
-                        className="shrink-0 rounded p-1 text-(--hp-text-tertiary) hover:bg-(--hp-surface-1) hover:text-(--hp-text-primary) transition-colors"
+                        className="shrink-0 rounded p-1.5 text-(--hp-text-tertiary) hover:bg-(--hp-surface-1) hover:text-(--hp-text-primary) focus-visible:outline-2 focus-visible:outline-(--hp-primary) focus-visible:outline-offset-1 transition-colors"
                         title={t('file.page.copyPath')}
                         aria-label={t('file.page.copyPath')}>
                         {pathCopied ? <CheckIcon className="h-3.5 w-3.5" /> : <CopyIcon className="h-3.5 w-3.5" />}
                     </button>
                     {fileContentResult?.success && fileContentResult.content && (
                         <button type="button" onClick={handleDownload}
-                            className="shrink-0 rounded p-1 text-(--hp-text-tertiary) hover:bg-(--hp-surface-1) hover:text-(--hp-text-primary) transition-colors"
+                            className="shrink-0 rounded p-1.5 text-(--hp-text-tertiary) hover:bg-(--hp-surface-1) hover:text-(--hp-text-primary) focus-visible:outline-2 focus-visible:outline-(--hp-primary) focus-visible:outline-offset-1 transition-colors"
                             title={t('file.page.download')}
                             aria-label={t('file.page.download')}>
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -322,19 +323,22 @@ export default function FilePage() {
                     <div className="mx-auto w-full max-w-content px-3 py-2 flex items-center gap-2 border-b border-(--hp-divider)">
                         {isMarkdown && (
                             <button type="button" onClick={() => handleModeChange('preview')}
-                                className={`rounded px-3 py-1 text-xs font-semibold min-h-[32px] ${displayMode === 'preview' ? 'bg-(--hp-primary) text-(--hp-primary-text)' : 'bg-(--hp-surface-1) text-(--hp-text-tertiary)'}`}>
+                                aria-pressed={displayMode === 'preview'}
+                                className={`rounded px-3 py-1 text-xs font-semibold min-h-[32px] max-md:min-h-[44px] max-md:px-4 ${displayMode === 'preview' ? 'bg-(--hp-primary) text-(--hp-primary-text)' : 'bg-(--hp-surface-1) text-(--hp-text-tertiary)'}`}>
                                 {t('file.preview.mode.preview')}
                             </button>
                         )}
                         {isEditable && (
                             <button type="button" onClick={() => handleModeChange('edit')}
-                                className={`rounded px-3 py-1 text-xs font-semibold min-h-[32px] ${displayMode === 'edit' ? 'bg-(--hp-primary) text-(--hp-primary-text)' : 'bg-(--hp-surface-1) text-(--hp-text-tertiary)'}`}>
+                                aria-pressed={displayMode === 'edit'}
+                                className={`rounded px-3 py-1 text-xs font-semibold min-h-[32px] max-md:min-h-[44px] max-md:px-4 ${displayMode === 'edit' ? 'bg-(--hp-primary) text-(--hp-primary-text)' : 'bg-(--hp-surface-1) text-(--hp-text-tertiary)'}`}>
                                 {t('file.preview.mode.edit')}
                             </button>
                         )}
                         {diffContent && !imageMimeType && (
                             <button type="button" onClick={() => handleModeChange('diff')}
-                                className={`rounded px-3 py-1 text-xs font-semibold min-h-[32px] ${displayMode === 'diff' ? 'bg-(--hp-primary) text-(--hp-primary-text)' : 'bg-(--hp-surface-1) text-(--hp-text-tertiary)'}`}>
+                                aria-pressed={displayMode === 'diff'}
+                                className={`rounded px-3 py-1 text-xs font-semibold min-h-[32px] max-md:min-h-[44px] max-md:px-4 ${displayMode === 'diff' ? 'bg-(--hp-primary) text-(--hp-primary-text)' : 'bg-(--hp-surface-1) text-(--hp-text-tertiary)'}`}>
                                 {t('file.preview.mode.diff')}
                             </button>
                         )}
@@ -343,8 +347,15 @@ export default function FilePage() {
             )}
 
             {/* Content */}
-            <div className="flex-1 min-h-0">
-                {diffErrorMessage && !fileError ? (
+            <div className="flex-1 min-h-0" aria-busy={loading}>
+                {noApi ? (
+                    <div className="flex flex-col items-center justify-center gap-3 py-12 text-(--hp-text-tertiary)">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 opacity-40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="12" cy="12" r="10" /><line x1="12" x2="12" y1="8" y2="12" /><line x1="12" x2="12.01" y1="16" y2="16" />
+                        </svg>
+                        <span className="text-sm">{t('file.viewer.noSession')}</span>
+                    </div>
+                ) : diffErrorMessage && !fileError ? (
                     <div className="p-4 sm:p-6"><div className="mb-3 rounded-md bg-(--hp-warning-subtle) p-2 text-xs text-(--hp-text-secondary)">{diffErrorMessage}</div></div>
                 ) : missingPath ? (
                     <div className="p-4 sm:p-6 text-sm text-(--hp-text-tertiary)">{t('file.page.missingPath')}</div>
@@ -356,7 +367,7 @@ export default function FilePage() {
                         <button
                             type="button"
                             onClick={() => queryClient.invalidateQueries({ queryKey: queryKeys.sessionFile(sessionId, filePath) })}
-                            className="mt-2 text-xs text-(--hp-primary) hover:underline"
+                            className="mt-2 text-xs text-(--hp-primary) hover:underline focus-visible:underline"
                         >
                             {t('file.page.retry')}
                         </button>
@@ -408,16 +419,15 @@ export default function FilePage() {
                     </div>
                 ) : displayMode === 'diff' && diffContent ? (
                     <div className="app-scroll-y h-full p-4 sm:p-6 lg:p-8">
-                        <pre className="font-mono text-xs leading-relaxed whitespace-pre-wrap break-words" style={{ color: 'var(--hp-text-primary)' }}>
-                            {diffContent}
+                        <pre className="font-mono text-xs leading-relaxed text-(--hp-text-primary) whitespace-pre-wrap break-words overflow-wrap-anywhere">
+                            {diffContent.replace(/\x1b\[[0-9;]*m/g, '')}
                         </pre>
                     </div>
                 ) : displayMode === 'edit' || displayMode === 'preview' ? (
                     <div className="flex flex-col h-full">
                         {/* Editor toolbar */}
-                        <div className="flex items-center gap-2 px-3 py-1.5 border-b shrink-0"
-                            style={{ borderColor: 'var(--hp-divider)', background: 'var(--hp-surface-0)' }}>
-                            <div className="flex-1 text-xs" style={{ color: 'var(--hp-text-tertiary)' }}>
+                        <div className="flex items-center gap-2 px-3 border-b border-(--hp-divider) bg-(--hp-surface-0) shrink-0" style={{ minHeight: 'var(--hp-space-12)' }}>
+                            <div className="flex-1 text-xs text-(--hp-text-tertiary) min-w-0">
                                 {saveError ? (
                                     <span className="text-(--hp-danger)" role="alert">
                                         {t('file.page.saveErrorDetail', { error: saveError })}
@@ -430,13 +440,13 @@ export default function FilePage() {
                             </div>
                             <button type="button" onClick={() => copyContent(localContent)}
                                 disabled={!canCopyContent}
-                                className="rounded p-1 text-(--hp-text-tertiary) hover:bg-(--hp-surface-1) transition-colors disabled:opacity-40"
+                                className="rounded p-1.5 text-(--hp-text-tertiary) hover:bg-(--hp-surface-1) focus-visible:outline-2 focus-visible:outline-(--hp-primary) focus-visible:outline-offset-1 transition-colors disabled:opacity-40 max-md:min-h-[44px] max-md:min-w-[44px] max-md:flex max-md:items-center max-md:justify-center"
                                 title={t('file.page.copyContent')}
                                 aria-label={t('file.page.copyContent')}>
                                 {contentCopied ? <CheckIcon className="h-3.5 w-3.5" /> : <CopyIcon className="h-3.5 w-3.5" />}
                             </button>
                             <button type="button" onClick={handleDownload}
-                                className="rounded p-1 text-(--hp-text-tertiary) hover:bg-(--hp-surface-1) transition-colors"
+                                className="rounded p-1.5 text-(--hp-text-tertiary) hover:bg-(--hp-surface-1) focus-visible:outline-2 focus-visible:outline-(--hp-primary) focus-visible:outline-offset-1 transition-colors max-md:min-h-[44px] max-md:min-w-[44px] max-md:flex max-md:items-center max-md:justify-center"
                                 title={t('file.page.download')}
                                 aria-label={t('file.page.download')}>
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -445,14 +455,16 @@ export default function FilePage() {
                             </button>
                             {isDirty && (
                                 <button type="button" onClick={handleDiscard}
-                                    className="px-3 py-1 rounded text-xs font-semibold transition-colors min-h-[32px] bg-(--hp-surface-1) text-(--hp-text-secondary) hover:text-(--hp-text-primary)">
+                                    aria-label={t('file.page.discardChanges')}
+                                    className="px-3 py-1 rounded text-xs font-semibold transition-colors min-h-[32px] bg-(--hp-surface-1) text-(--hp-text-secondary) hover:text-(--hp-text-primary) max-md:min-h-[44px]">
                                     {t('file.page.discardChanges')}
                                 </button>
                             )}
                             {isDirty && (
                                 <button ref={saveButtonRef} type="button" onClick={handleSave}
                                     disabled={isSaving}
-                                    className="px-3 py-1 rounded text-xs font-semibold transition-colors min-h-[32px] disabled:opacity-60"
+                                    aria-label={t('button.save')}
+                                    className="px-3 py-1 rounded text-xs font-semibold transition-colors min-h-[32px] disabled:opacity-60 disabled:cursor-not-allowed max-md:min-h-[44px]"
                                     style={{ background: 'var(--hp-primary)', color: 'var(--hp-primary-text)' }}>
                                     {isSaving ? (
                                         <span className="flex items-center gap-1.5">
@@ -468,7 +480,9 @@ export default function FilePage() {
                         </div>
                         {saveError && (
                             <div className="px-3 py-2 bg-(--hp-danger-subtle) border-b border-(--hp-divider) flex items-center gap-2 shrink-0">
-                                <span className="flex-1 text-xs text-(--hp-danger)">{t('file.page.saveErrorDetail', { error: saveError })}</span>
+                                <span className="flex-1 text-xs text-(--hp-danger) break-words" role="alert">
+                                        {t('file.page.saveErrorDetail', { error: saveError })}
+                                    </span>
                                 <button type="button" onClick={handleSave}
                                     className="px-2 py-1 rounded text-xs font-semibold bg-(--hp-primary) text-(--hp-primary-text) min-h-[32px]">
                                     {t('file.page.retry')}
@@ -484,7 +498,7 @@ export default function FilePage() {
                             onChange={(e) => { setLocalContent(e.target.value); setSaveError(null) }}
                             spellCheck={false}
                             readOnly={displayMode === 'preview'}
-                            className="flex-1 w-full resize-none p-4 font-mono text-sm leading-relaxed focus:outline-none"
+                            className={`flex-1 w-full resize-none p-4 font-mono text-sm leading-relaxed focus:outline-none ${displayMode === 'preview' ? 'cursor-default opacity-80' : ''}`}
                             style={{
                                 background: 'var(--hp-canvas)',
                                 color: 'var(--hp-text-primary)',

@@ -278,6 +278,7 @@ export default {
   'file.viewer.leaveBody': '对 {name} 的修改尚未保存。',
   'file.viewer.stay': '留下',
   'file.viewer.discardAndLeave': '放弃修改',
+  'file.viewer.noSession': '没有活跃的会话，请先启动一个会话。',
 
   'file.error.readFailed': '读取文件失败。',
   'file.error.readFailedWithDetail': '读取文件失败：{error}',

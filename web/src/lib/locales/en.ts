@@ -276,6 +276,7 @@ export default {
   'file.viewer.leaveBody': 'Your edits to {name} have not been saved.',
   'file.viewer.stay': 'Stay',
   'file.viewer.discardAndLeave': 'Discard changes',
+  'file.viewer.noSession': 'No active session. Please start a session first.',
 
   'file.error.readFailed': 'Failed to read file.',
   'file.error.readFailedWithDetail': 'Failed to read file: {error}',
