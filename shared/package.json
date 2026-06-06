@@ -14,6 +14,7 @@
         "./modes": "./src/modes.ts",
         "./rpcMethods": "./src/rpcMethods.ts",
         "./schemas": "./src/schemas.ts",
+        "./socket": "./src/socket.ts",
         "./types": "./src/types.ts"
     },
     "sideEffects": false,

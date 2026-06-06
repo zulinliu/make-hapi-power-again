@@ -1,0 +1,201 @@
+/* FileManager shared interaction styles
+   Extracted from component-level style injection so the surface uses one
+   maintainable style layer while keeping component layout co-located. */
+
+@keyframes fm-row-enter {
+    from { opacity: 0; transform: translateY(3px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fm-row-new {
+    0% { opacity: 0; transform: translateX(-10px); }
+    55% { opacity: 1; transform: translateX(0); background: var(--hp-primary-subtle); }
+    100% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fm-dir-enter {
+    from { opacity: 0; transform: translateX(6px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fm-menu-in {
+    from { opacity: 0; transform: scale(0.95) translateY(-4px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes fm-dialog-backdrop-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fm-dialog-in {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes fm-toast-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fm-dir-enter {
+    animation: fm-dir-enter var(--hp-duration-normal, 200ms) var(--hp-ease-overlay, cubic-bezier(0.16, 1, 0.3, 1)) both;
+}
+
+.fm-file-row {
+    min-height: 56px;
+    outline: none;
+    transition: background var(--hp-duration-fast, 120ms) var(--hp-ease-out, ease-out), box-shadow var(--hp-duration-fast, 120ms) var(--hp-ease-out, ease-out);
+    box-shadow: inset 0 0 0 0 transparent;
+}
+
+.fm-file-row-main:focus-visible {
+    box-shadow: inset 0 0 0 2px var(--hp-primary);
+}
+
+.fm-file-row::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 8px;
+    bottom: 8px;
+    width: 3px;
+    border-radius: 0 var(--hp-radius-full) var(--hp-radius-full) 0;
+    background: transparent;
+    transition: background var(--hp-duration-fast, 120ms) var(--hp-ease-out, ease-out);
+}
+
+.fm-file-row-selected::before {
+    background: var(--hp-primary);
+}
+
+.fm-file-row-skeleton {
+    min-height: 56px;
+}
+
+.fm-icon-button:focus-visible,
+.fm-file-row-main:focus-visible,
+.fm-sort-button:focus-visible,
+.fm-checkbox:focus-visible,
+.fm-primary-button:focus-visible,
+.fm-secondary-button:focus-visible,
+.fm-toolbar-button:focus-visible,
+.fm-toolbar-primary:focus-visible,
+.fm-mobile-toolbar-button:focus-visible,
+.fm-breadcrumb button:focus-visible,
+.fm-context-menu-item:focus-visible,
+.fm-dialog-button:focus-visible,
+.fm-dialog-input:focus-visible {
+    outline: 2px solid var(--hp-primary);
+    outline-offset: 2px;
+}
+
+.fm-context-menu-item:focus-visible {
+    outline-offset: -2px;
+}
+
+.fm-dialog-button:hover:not(:disabled) {
+    filter: brightness(0.98);
+}
+
+.fm-primary-button,
+.fm-secondary-button {
+    min-height: 40px;
+    border-radius: var(--hp-radius-md);
+    padding: 0 var(--hp-space-4);
+    font-size: 13px;
+    font-weight: 650;
+    cursor: pointer;
+    transition: background var(--hp-duration-fast, 120ms) var(--hp-ease-out, ease-out), border-color var(--hp-duration-fast, 120ms) var(--hp-ease-out, ease-out), color var(--hp-duration-fast, 120ms) var(--hp-ease-out, ease-out), transform var(--hp-duration-instant, 60ms) var(--hp-ease-out, ease-out);
+}
+
+.fm-primary-button {
+    border: 1px solid var(--hp-primary);
+    background: var(--hp-primary);
+    color: var(--hp-primary-text);
+}
+
+.fm-secondary-button {
+    border: 1px solid var(--hp-border);
+    background: var(--hp-surface-0);
+    color: var(--hp-text-primary);
+}
+
+.fm-primary-button:hover {
+    background: var(--hp-primary-hover);
+    border-color: var(--hp-primary-hover);
+}
+
+.fm-secondary-button:hover {
+    background: var(--hp-surface-2);
+    border-color: var(--hp-border-hover);
+}
+
+.fm-toolbar-primary:hover {
+    background: var(--hp-primary-hover) !important;
+    border-color: var(--hp-primary-hover) !important;
+}
+
+.fm-toolbar-button:hover,
+.fm-mobile-toolbar-button:hover,
+.fm-breadcrumb button:hover {
+    background: var(--hp-surface-2) !important;
+    border-color: var(--hp-border-hover) !important;
+    color: var(--hp-text-primary) !important;
+}
+
+.fm-primary-button:active,
+.fm-secondary-button:active {
+    transform: translateY(1px);
+}
+
+@media (min-width: 768px) {
+    .fm-sort-header { display: flex !important; }
+    .fm-file-row { min-height: 48px !important; }
+    .fm-file-row-skeleton { min-height: 48px !important; }
+    .fm-row-subtitle { display: none !important; }
+    .fm-row-size-desktop,
+    .fm-row-modified-desktop { display: block !important; }
+    .fm-row-checkbox { display: flex !important; }
+}
+
+@media (max-width: 767px) {
+    .fm-sort-header { display: none !important; }
+    .fm-row-size-desktop,
+    .fm-row-modified-desktop { display: none !important; }
+    .fm-file-row {
+        padding-left: var(--hp-space-3) !important;
+        padding-right: var(--hp-space-2) !important;
+    }
+    .fm-state { min-height: 360px !important; }
+    .fm-context-menu { min-width: min(260px, calc(100vw - 24px)) !important; }
+}
+
+@media (max-width: 480px) {
+    .fm-dialog-panel { max-width: calc(100vw - 24px) !important; }
+    .fm-dialog-footer { flex-direction: column-reverse; }
+    .fm-dialog-footer button {
+        width: 100%;
+        min-height: 44px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .fm-row-enter,
+    .fm-row-new,
+    .fm-dir-enter,
+    .fm-context-menu,
+    .fm-dialog-backdrop,
+    .fm-dialog-panel,
+    .fm-toast {
+        animation: none !important;
+    }
+
+    .fm-file-row,
+    .fm-icon-button,
+    .fm-sort-button,
+    .fm-primary-button,
+    .fm-secondary-button {
+        transition: none !important;
+    }
+}

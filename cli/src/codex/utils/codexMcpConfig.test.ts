@@ -9,7 +9,7 @@ describe('codexMcpConfig', () => {
     describe('buildMcpServerConfigArgs', () => {
         it('builds config args for a single MCP server', () => {
             const mcpServers = {
-                hapi-power: {
+                'hapi-power': {
                     command: 'hapi-power',
                     args: ['mcp', '--url', 'http://localhost:3000']
                 }
@@ -18,21 +18,21 @@ describe('codexMcpConfig', () => {
             const args = buildMcpServerConfigArgs(mcpServers);
 
             expect(args).toEqual([
-                '-c', 'mcp_servers.hapi-power.command="hapi"',
+                '-c', 'mcp_servers.hapi-power.command="hapi-power"',
                 '-c', "mcp_servers.hapi-power.args=['mcp','--url','http://localhost:3000']"
             ]);
         });
 
         it('builds config args for multiple MCP servers', () => {
             const mcpServers = {
-                hapi-power: { command: 'hapi-power', args: ['mcp'] },
+                'hapi-power': { command: 'hapi-power', args: ['mcp'] },
                 other: { command: 'node', args: ['server.js'] }
             };
 
             const args = buildMcpServerConfigArgs(mcpServers);
 
             expect(args).toContain('-c');
-            expect(args).toContain('mcp_servers.hapi-power.command="hapi"');
+            expect(args).toContain('mcp_servers.hapi-power.command="hapi-power"');
             expect(args).toContain('mcp_servers.other.command="node"');
         });
 

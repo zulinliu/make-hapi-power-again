@@ -61,7 +61,7 @@ export async function buildHapiPowerMcpBridge(
             stop: happyServer.stop
         },
         mcpServers: {
-            hapi-power: {
+            'hapi-power': {
                 command: bridgeCommand.command,
                 args: bridgeCommand.args
             }

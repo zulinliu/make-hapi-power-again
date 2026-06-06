@@ -3,6 +3,7 @@
 @import "./styles/tokens.css";
 @import "./styles/typography.css";
 @import "./styles/login.css";
+@import "./styles/file-manager.css";
 @config "../tailwind.config.ts";
 
 /* ===================================================

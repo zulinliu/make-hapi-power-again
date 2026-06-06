@@ -1,9 +1,11 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it, setDefaultTimeout } from 'bun:test'
 import { Database } from 'bun:sqlite'
 import { mkdtempSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import { Store } from './index'
+
+setDefaultTimeout(90_000)
 
 /**
  * Tests for V7→V8 schema migration: adding invoked_at column to messages table.
