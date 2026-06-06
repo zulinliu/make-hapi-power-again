@@ -94,7 +94,7 @@ function ProviderForm({
                 <button
                     type="button"
                     onClick={onCancel}
-                    className="min-h-[44px] rounded-(--hp-radius-md) px-4 py-2 text-sm text-(--hp-text-tertiary) hover:bg-(--hp-surface-1) transition-colors"
+                    className="min-h-[44px] rounded-(--hp-radius-md) border border-(--hp-border) px-4 py-2 text-sm text-(--hp-text-secondary) hover:bg-(--hp-surface-1) hover:border-(--hp-border-hover) transition-colors"
                 >
                     {t('settings.providers.cancel')}
                 </button>
