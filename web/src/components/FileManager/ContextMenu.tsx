@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef, useCallback, useInsertionEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { useTranslation } from '@/lib/use-translation'
 
 export interface ContextMenuItem {
   label: string
@@ -13,29 +14,6 @@ export interface ContextMenuState {
   x: number
   y: number
   items: ContextMenuItem[]
-}
-
-const STYLESHEET = `
-.fm-context-menu-item:focus-visible {
-  outline: 2px solid var(--hp-primary);
-  outline-offset: -2px;
-}
-@media (max-width: 767px) {
-  .fm-context-menu { min-width: min(260px, calc(100vw - 24px)) !important; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .fm-context-menu { animation: none !important; }
-}
-`
-
-function useContextMenuStyles() {
-  useInsertionEffect(() => {
-    if (document.querySelector('style[data-fm-context-menu]')) return
-    const el = document.createElement('style')
-    el.setAttribute('data-fm-context-menu', '')
-    el.textContent = STYLESHEET
-    document.head.appendChild(el)
-  }, [])
 }
 
 export function useContextMenu() {
@@ -92,7 +70,7 @@ function MenuIcon({ icon, danger }: { icon: ContextMenuItem['icon']; danger?: bo
 }
 
 export function ContextMenu({ state, onClose }: ContextMenuProps) {
-  useContextMenuStyles()
+  const { t } = useTranslation()
   const menuRef = useRef<HTMLDivElement>(null)
   const [position, setPosition] = useState({ x: state.x, y: state.y })
 
@@ -177,7 +155,7 @@ export function ContextMenu({ state, onClose }: ContextMenuProps) {
     <div
       ref={menuRef}
       role="menu"
-      aria-label="Context menu"
+      aria-label={t('fm.contextMenu.label')}
       tabIndex={-1}
       className="fm-context-menu"
       style={{
@@ -238,13 +216,6 @@ export function ContextMenu({ state, onClose }: ContextMenuProps) {
           <span style={{ flex: 1 }}>{item.label}</span>
         </button>
       ))}
-
-      {!reducedMotion && <style>{`
-        @keyframes fm-menu-in {
-          from { opacity: 0; transform: scale(0.95) translateY(-4px); }
-          to { opacity: 1; transform: scale(1) translateY(0); }
-        }
-      `}</style>}
     </div>
   )
 }

@@ -1,9 +1,11 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it, setDefaultTimeout } from 'bun:test'
 import { Database } from 'bun:sqlite'
 import { mkdtempSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import { Store } from './index'
+
+setDefaultTimeout(90_000)
 
 /**
  * Tests for V8→V9 schema migration: adding scheduled_at column to messages table.

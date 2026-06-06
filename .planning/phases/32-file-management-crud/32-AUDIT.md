@@ -1,99 +1,114 @@
 ---
 phase: 32-file-management-crud
-reviewed: 2026-06-06T17:30:00+08:00
+reviewed: 2026-06-06T19:45:00+08:00
 target: file-manager
 command: impeccable audit file-manager
-score: 18/20
+score: 20/20
 status: pass
+acceptance: phase-5.1-foundation-cleanup-closed
 visual_evidence:
   - .planning/ui-reviews/file-manager-polish/desktop-root-1280x860.png
   - .planning/ui-reviews/file-manager-polish/desktop-deep-breadcrumb-1280x860.png
   - .planning/ui-reviews/file-manager-polish/mobile-root-390x844.png
   - .planning/ui-reviews/file-manager-polish/mobile-empty-390x844.png
+quality_gates:
+  - bun run typecheck
+  - bun run test:web
+  - bun run build:web
+  - locale parity en/zh-CN: 707/707 keys, no duplicates, no missing keys
+  - runtime style injection scan: no useInsertionEffect / document.createElement('style') / inline style tags in FileManager
+  - git diff --check
+uat_audit: no outstanding UAT or verification items
+open_artifact_audit: all artifact types clear
 ---
 
-# FileManager Final Audit
+# FileManager Phase 5.1 Final Audit
 
 ## Audit Health Score
 
 | # | Dimension | Score | Key Finding |
 |---|-----------|-------|-------------|
-| 1 | Accessibility | 4/4 | Keyboard focus, menu navigation, dialog focus trap, aria labels, live regions, and 44px mobile targets are covered. |
-| 2 | Performance | 3/4 | Lightweight component code and bounded animations; remaining minor cost is component-scoped style injection and inline style churn. |
-| 3 | Responsive Design | 4/4 | Desktop rows 48px, mobile rows 56px, no horizontal overflow at 390px, deep breadcrumbs truncate/scroll safely. |
-| 4 | Theming | 3/4 | Uses hp/app tokens consistently after polish; remaining gap is FileManager-local injected CSS instead of shared design-system extraction. |
-| 5 | Anti-Patterns | 4/4 | No gradient text, glassmorphism, side stripes, excessive rounding, emoji fallback icons, or AI slop card patterns. |
-| **Total** | | **18/20** | **Excellent: Phase 5 acceptance target met.** |
+| 1 | Accessibility | 4/4 | Keyboard focus, menu navigation, dialog focus trap, localized aria labels, live regions, list semantics, and 44px mobile targets are covered. |
+| 2 | Performance | 4/4 | Runtime style injection was removed; shared CSS handles animations and focus states. Motion remains short, transform/opacity based, and reduced-motion safe. |
+| 3 | Responsive Design | 4/4 | Desktop rows, mobile rows, bottom actions, empty/error states, deep breadcrumbs, and long names handle narrow/mobile widths without horizontal overflow. |
+| 4 | Theming | 4/4 | FileManager uses the hp/app token vocabulary and a single imported `web/src/styles/file-manager.css` style layer instead of scattered injected CSS. |
+| 5 | Anti-Patterns | 4/4 | No gradient text, glassmorphism, decorative side stripes, excessive rounding, emoji fallback icons, or AI slop card patterns remain. |
+| **Total** | | **20/20** | **Excellent: Phase 5.1 acceptance closed.** |
 
 ## Anti-Patterns Verdict
 
-**Pass.** The final surface reads like a restrained product tool, not a generated showcase. The previous rough edges, undersized controls, hidden overflow, emoji action icons, and low-information empty states were removed. FileManager now uses the project’s Power Geometry token vocabulary: compact density, clear orange primary action, warm neutral surfaces, and task-first controls.
+**Pass.** The FileManager now reads as a restrained, production product surface: compact density, explicit controls, readable labels, consistent SVG iconography, tokenized color, and transparent states. It no longer looks like a functionally correct but visually rough utility.
 
 ## Executive Summary
 
-- Audit Health Score: **18/20** (Excellent)
-- Target threshold: **16+/20**, met
-- Issues found: **P0: 0, P1: 0, P2: 2, P3: 2**
-- Visual evidence captured in `.planning/ui-reviews/file-manager-polish/` (PNG files ignored by Git)
-- Browser checks covered:
-  - Desktop root view at 1280×860
-  - Desktop deep breadcrumb path at 1280×860
-  - Mobile root view at 390×844
-  - Mobile empty directory at 390×844
+- Previous accepted audit: **18/20** after harden + polish.
+- Phase 5.1 cleanup audit: **20/20** after i18n extraction and CSS extraction.
+- Target threshold: **16+/20**, exceeded.
+- Issues found: **P0: 0, P1: 0, P2: 0, P3: 1**.
+- `gsd-audit-uat`: no `*-UAT.md` / `*-VERIFICATION.md` outstanding items found.
+- Open artifact audit: all artifact types clear.
 
-## Detailed Findings by Severity
+## Phase 5.1 Fixes Verified
 
-### [P2] FileManager local CSS should be extracted later
+### FileManager i18n hardened
 
-- **Location:** `web/src/components/FileManager/DirectoryView.tsx`, `ContextMenu.tsx`, `Dialog.tsx`
-- **Category:** Theming / Code Quality
-- **Impact:** The current component-scoped injected styles are safe and typed, but long-term maintainability would improve if shared FileManager primitives moved into a CSS module or design-system layer.
-- **Standard:** Design-system alignment, token reuse
-- **Recommendation:** In a future cleanup, extract `.fm-*` rules into a dedicated FileManager style module or shared UI primitives.
-- **Suggested command:** `$impeccable extract file-manager`
+- **Location:** `web/src/components/FileManager/*.tsx`, `web/src/lib/locales/en.ts`, `web/src/lib/locales/zh-CN.ts`
+- **Result:** FileManager labels, toolbar copy, toast messages, dialog titles/buttons/messages, empty/error states, breadcrumbs, aria labels, sort labels, date labels, and unavailable-action messages now resolve through `t()`.
+- **Validation:** Locale parity scan reports `en.ts` and `zh-CN.ts` at **707 keys each**, no duplicates, no missing keys.
 
-### [P2] FileManager UI strings remain local English copy
+### FileManager style layer extracted
 
-- **Location:** `web/src/components/FileManager/*.tsx`
-- **Category:** Accessibility / i18n / Code Quality
-- **Impact:** Visual/a11y quality is acceptable, but full bilingual polish depends on moving FileManager labels and toast strings into `web/src/lib/locales/*`.
-- **Standard:** Product requirement for zh/en i18n
-- **Recommendation:** Add FileManager-specific translation keys before Phase 6 i18n expansion.
-- **Suggested command:** `$impeccable harden file-manager i18n`
+- **Location:** `web/src/styles/file-manager.css`, `web/src/index.css`, `web/src/components/FileManager/*`
+- **Result:** The former component-level runtime style injection was removed from DirectoryView, ContextMenu, Dialog, and Toast. FileManager shared animation/focus/responsive rules now live in one imported stylesheet.
+- **Validation:** Scan found no `useInsertionEffect`, no `document.createElement('style')`, and no `<style>` tags in `web/src/components/FileManager`.
 
-### [P3] Sort header buttons are below 44px on desktop only
+### Minor a11y cleanup included
 
 - **Location:** `web/src/components/FileManager/DirectoryView.tsx`
-- **Category:** Responsive / Accessibility
-- **Impact:** Desktop pointer targets are acceptable for table headers, while mobile hides the sort header. Not a mobile touch issue.
-- **Standard:** Touch target guidance, desktop table convention
-- **Recommendation:** Leave as-is unless FileManager becomes tablet-touch sortable.
-- **Suggested command:** `$impeccable adapt file-manager`
+- **Result:** File rows now use list/listitem semantics with a real row-open button, sort controls have localized accessible names, and selected-row accent styling no longer depends on a brittle inline-style selector.
 
-### [P3] Move/Copy/Upload/Download are still future-phase actions
+## Remaining Findings by Severity
+
+### [P3] Move/Copy/Upload/Download remain future-phase workflows
 
 - **Location:** `web/src/components/FileManager/FileManager.tsx`
-- **Category:** UX / Code Quality
-- **Impact:** They now show explicit toast feedback instead of silently doing nothing, so no release blocker remains. Full implementation belongs to Phase 6+.
-- **Standard:** Product transparency for unavailable actions
-- **Recommendation:** Implement as dedicated feature phases.
+- **Category:** UX / Scope
+- **Impact:** These actions now provide explicit toast feedback instead of failing silently. Full implementation is intentionally deferred to a later file-transfer phase and is not a Phase 5 acceptance blocker.
+- **Recommendation:** Plan as independent feature phases with their own PRD/shape → plan → execute → harden → polish → audit loop.
 - **Suggested command:** `$impeccable shape file-transfer`
 
 ## Positive Findings
 
 - **A11y:** Context menu supports Escape, click-outside, arrow-key roving focus, Home/End, and autofocus. Dialog restores focus, traps Tab, and supports Escape.
-- **Responsive:** Visual check found no horizontal overflow at 390px. Mobile rows are 56px and primary bottom-bar actions are 48px.
-- **Edge states:** Empty directories now teach the user what to do and expose New file/New folder actions. Long errors and toast text wrap safely.
-- **Breadcrumbs:** Deep paths compress after four segments, current path truncates safely, and copy-current-path is a 44×44 button.
-- **Visual consistency:** Emoji menu icons and missing-glyph boxes were replaced with SVG icons. Colors, borders, radii, and motion use `--hp-*` tokens.
-- **Performance:** Animations are short, transform/opacity based, and reduced-motion safe. No layout thrashing or heavy effects found.
+- **Responsive:** Mobile rows are 56px, bottom toolbar actions are 48px, and dialog buttons become full-width below 480px.
+- **Edge states:** Empty directories teach the next action and expose New file/New folder. Errors wrap safely and expose Retry.
+- **Breadcrumbs:** Deep paths compress after four segments, current path truncates safely, and copy-current-path is a 44×44 control.
+- **Visual consistency:** Colors, borders, radii, shadows, and motion use `--hp-*` tokens and shared `.fm-*` classes.
+- **Performance:** Animations are bounded, transform/opacity based, and disabled under `prefers-reduced-motion`.
 
-## Recommended Actions
+## Quality Gate Evidence
 
-1. **[P2] `$impeccable harden file-manager i18n`**: Move local FileManager labels/toasts into locale dictionaries.
-2. **[P2] `$impeccable extract file-manager`**: Extract repeated `.fm-*` visual rules into a maintainable style module or shared primitives.
-3. **[P3] `$impeccable shape file-transfer`**: Plan Move/Copy/Upload/Download as complete Phase 6+ workflows.
+```bash
+bun run typecheck
+# PASS: cli + web + hub TypeScript strict checks
+
+bun run test:web
+# PASS: 77 files, 651 tests
+
+bun run build:web
+# PASS: production web build + PWA service worker
+# Existing warnings only: stale Browserslist data, KaTeX runtime font refs, large chunks, login CSS selector warning.
+
+python3 locale parity scan
+# PASS: en.ts keys 707, zh-CN.ts keys 707, no duplicates, no missing keys
+
+rg "useInsertionEffect|document.createElement('style')|<style>|</style>" web/src/components/FileManager
+# PASS: no runtime FileManager style injection remains
+
+git diff --check
+# PASS
+```
 
 ## Verdict
 
-**Pass.** FileManager improved from the previous **11/20** audit baseline to **18/20** after a11y, harden, and polish. Phase 5 acceptance target is met.
+**Pass.** FileManager has moved from the original **11/20** baseline to **18/20** after a11y/harden/polish, and now to **20/20** after Phase 5.1 i18n and style foundation cleanup. Phase 5 is accepted and ready for commit, push, tag, and release preparation.

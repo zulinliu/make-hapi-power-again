@@ -1,4 +1,5 @@
 import { useRef, useEffect, useCallback } from 'react'
+import { useTranslation } from '@/lib/use-translation'
 import type { BreadcrumbSegment } from './types'
 
 export interface BreadcrumbNavProps {
@@ -8,6 +9,7 @@ export interface BreadcrumbNavProps {
 }
 
 export function BreadcrumbNav({ segments, onNavigate, onCopyPath }: BreadcrumbNavProps) {
+  const { t } = useTranslation()
   const scrollRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = useCallback(() => {
@@ -27,7 +29,7 @@ export function BreadcrumbNav({ segments, onNavigate, onCopyPath }: BreadcrumbNa
 
   return (
     <nav
-      aria-label="Breadcrumb"
+      aria-label={t('fm.breadcrumb.label')}
       className="fm-breadcrumb"
       style={{
         minHeight: 44,
@@ -89,7 +91,7 @@ export function BreadcrumbNav({ segments, onNavigate, onCopyPath }: BreadcrumbNa
                 <button
                   type="button"
                   onClick={() => onNavigate(segment.path)}
-                  aria-label={isEllipsis ? 'Jump toward parent folders' : `Open ${segment.name}`}
+                  aria-label={isEllipsis ? t('fm.breadcrumb.jumpParents') : t('fm.breadcrumb.open', { name: segment.name })}
                   title={isEllipsis ? segment.path : segment.name}
                   style={{
                     minHeight: 44,
@@ -123,8 +125,8 @@ export function BreadcrumbNav({ segments, onNavigate, onCopyPath }: BreadcrumbNa
         <button
           type="button"
           onClick={() => onCopyPath(segments[segments.length - 1]?.path ?? '')}
-          aria-label="Copy current path"
-          title="Copy current path"
+          aria-label={t('fm.breadcrumb.copyCurrentPath')}
+          title={t('fm.breadcrumb.copyCurrentPath')}
           style={{
             width: 44,
             minWidth: 44,
@@ -150,7 +152,7 @@ export function BreadcrumbNav({ segments, onNavigate, onCopyPath }: BreadcrumbNa
   )
 }
 
-export function buildBreadcrumbs(path: string, rootLabel: string): BreadcrumbSegment[] {
+export function buildBreadcrumbs(path: string, rootLabel: string, rootDisplayLabel = 'Project root'): BreadcrumbSegment[] {
   const normalized = path.replace(/\\/g, '/')
   const clean = normalized.replace(/\/+$/, '')
 
@@ -166,11 +168,11 @@ export function buildBreadcrumbs(path: string, rootLabel: string): BreadcrumbSeg
   const afterRoot = clean.slice(rootEnd)
 
   if (!afterRoot) {
-    return [{ name: 'Project root', path: rootPath }]
+    return [{ name: rootDisplayLabel, path: rootPath }]
   }
 
   const parts = afterRoot.split('/').filter(Boolean)
-  const segments: BreadcrumbSegment[] = [{ name: 'Project root', path: rootPath }]
+  const segments: BreadcrumbSegment[] = [{ name: rootDisplayLabel, path: rootPath }]
 
   let currentPath = rootPath
   for (const part of parts) {

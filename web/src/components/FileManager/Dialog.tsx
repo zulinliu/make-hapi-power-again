@@ -1,4 +1,5 @@
-import { useEffect, useInsertionEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
+import { useTranslation } from '@/lib/use-translation'
 
 interface DialogProps {
   title: string
@@ -12,38 +13,8 @@ interface DialogProps {
 
 const FOCUSABLE = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
 
-const STYLESHEET = `
-.fm-dialog-button:focus-visible,
-.fm-dialog-input:focus-visible {
-  outline: 2px solid var(--hp-primary);
-  outline-offset: 2px;
-}
-.fm-dialog-button:hover:not(:disabled) {
-  filter: brightness(0.98);
-}
-@media (max-width: 480px) {
-  .fm-dialog-panel { max-width: calc(100vw - 24px) !important; }
-  .fm-dialog-footer { flex-direction: column-reverse; }
-  .fm-dialog-footer button { width: 100%; min-height: 44px; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .fm-dialog-backdrop,
-  .fm-dialog-panel { animation: none !important; }
-}
-`
-
-function useDialogStyles() {
-  useInsertionEffect(() => {
-    if (document.querySelector('style[data-fm-dialog]')) return
-    const el = document.createElement('style')
-    el.setAttribute('data-fm-dialog', '')
-    el.textContent = STYLESHEET
-    document.head.appendChild(el)
-  }, [])
-}
-
 export function Dialog({ title, children, onClose, onSubmit, submitLabel, submitDanger, loading }: DialogProps) {
-  useDialogStyles()
+  const { t } = useTranslation()
   const dialogRef = useRef<HTMLDivElement>(null)
   const prevFocusRef = useRef<HTMLElement | null>(null)
 
@@ -154,7 +125,7 @@ export function Dialog({ title, children, onClose, onSubmit, submitLabel, submit
               cursor: loading ? 'not-allowed' : 'pointer',
             }}
           >
-            Cancel
+            {t('fm.dialog.cancel')}
           </button>
           {onSubmit && (
             <button
@@ -176,16 +147,11 @@ export function Dialog({ title, children, onClose, onSubmit, submitLabel, submit
                 opacity: loading ? 0.7 : 1,
               }}
             >
-              {loading ? '…' : submitLabel ?? 'Confirm'}
+              {loading ? '…' : submitLabel ?? t('fm.dialog.confirm')}
             </button>
           )}
         </div>
       </div>
-
-      {!reducedMotion && <style>{`
-        @keyframes fm-dialog-backdrop-in { from { opacity: 0 } to { opacity: 1 } }
-        @keyframes fm-dialog-in { from { opacity: 0; transform: scale(0.95) } to { opacity: 1; transform: scale(1) } }
-      `}</style>}
     </div>
   )
 }

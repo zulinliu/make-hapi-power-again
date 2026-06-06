@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { useTranslation } from '@/lib/use-translation'
 
 export interface BatchActionBarProps {
   selectedCount: number
@@ -15,6 +16,8 @@ export function BatchActionBar({
   onCopy,
   onStartSession,
 }: BatchActionBarProps) {
+  const { t } = useTranslation()
+  const selectedLabel = selectedCount === 1 ? t('fm.batch.selected.one') : t('fm.batch.selected', { count: selectedCount })
   const barRef = useRef<HTMLDivElement>(null)
   const reducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -35,7 +38,7 @@ export function BatchActionBar({
       className="hidden md:flex"
       role="status"
       aria-live="polite"
-      aria-label={`${selectedCount} items selected`}
+      aria-label={selectedLabel}
       style={{
         position: 'relative',
         zIndex: 10,
@@ -72,7 +75,7 @@ export function BatchActionBar({
         onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hp-primary-hover)' }}
         onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--hp-primary)' }}
       >
-        Start session
+        {t('fm.toolbar.startSession')}
       </button>
 
       {/* Right: count + actions */}
@@ -96,9 +99,9 @@ export function BatchActionBar({
         </span>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          <ActionBtn label="Move" onClick={onMove} />
-          <ActionBtn label="Copy" onClick={onCopy} />
-          <ActionBtn label="Delete" onClick={onDelete} danger />
+          <ActionBtn label={t('fm.batch.move')} onClick={onMove} />
+          <ActionBtn label={t('fm.batch.copy')} onClick={onCopy} />
+          <ActionBtn label={t('fm.batch.delete')} onClick={onDelete} danger />
         </div>
       </div>
     </div>

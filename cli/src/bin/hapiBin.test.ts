@@ -4,7 +4,7 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const require = createRequire(import.meta.url);
-const binModulePath = path.resolve(process.cwd(), 'bin/hapi.cjs');
+const binModulePath = path.resolve(process.cwd(), 'bin/hapi-power.cjs');
 const {
     formatCommand,
     isSupportedPlatform,
@@ -16,21 +16,21 @@ const {
 
 describe('hapi binary launcher error reporting', () => {
     it('formats command with shell-safe JSON quoting', () => {
-        const command = formatCommand('/tmp/hapi', ['serve', '--name', 'my agent']);
-        expect(command).toBe('"/tmp/hapi" "serve" "--name" "my agent"');
+        const command = formatCommand('/tmp/hapi-power', ['serve', '--name', 'my agent']);
+        expect(command).toBe('"/tmp/hapi-power" "serve" "--name" "my agent"');
     });
 
     it('normalizes child process execution errors', () => {
         const normalized = normalizeExecError({
             status: 132,
             signal: 'SIGILL',
-            message: 'Command failed: /tmp/hapi',
+            message: 'Command failed: /tmp/hapi-power',
         });
 
         expect(normalized).toEqual({
             status: 132,
             signal: 'SIGILL',
-            message: 'Command failed: /tmp/hapi',
+            message: 'Command failed: /tmp/hapi-power',
         });
     });
 
@@ -44,14 +44,14 @@ describe('hapi binary launcher error reporting', () => {
                 signal: 'SIGILL',
                 message: 'Illegal instruction (core dumped)',
             },
-            '/tmp/hapi',
+            '/tmp/hapi-power',
             ['serve', '--port', '3000'],
             log,
         );
 
         expect(result).toEqual({ status: 132, signal: 'SIGILL' });
         expect(lines).toEqual([
-            'Failed to execute: "/tmp/hapi" "serve" "--port" "3000"',
+            'Failed to execute: "/tmp/hapi-power" "serve" "--port" "3000"',
             'Binary terminated by signal SIGILL.',
             'Binary exited with status 132.',
             'Illegal instruction (core dumped)',
@@ -61,12 +61,12 @@ describe('hapi binary launcher error reporting', () => {
     it('handles unknown failures with generic output', () => {
         const lines: string[] = [];
 
-        const result = reportExecutionFailure({}, '/tmp/hapi', [], (line: string) => {
+        const result = reportExecutionFailure({}, '/tmp/hapi-power', [], (line: string) => {
             lines.push(line);
         });
 
         expect(result).toEqual({ status: null, signal: null });
-        expect(lines).toEqual(['Failed to execute: "/tmp/hapi"']);
+        expect(lines).toEqual(['Failed to execute: "/tmp/hapi-power"']);
     });
 
     it('distinguishes supported and unsupported platforms', () => {
@@ -91,10 +91,10 @@ describe('hapi binary launcher error reporting', () => {
             lines.push(line);
         });
 
-        expect(lines).toContain('Missing platform package: @twsxtd/hapi-linux-x64');
+        expect(lines).toContain('Missing platform package: @hapipower/hapi-power-linux-x64');
         expect(lines).toContain('Try reinstalling with the official npm registry:');
-        expect(lines).toContain('  npm install -g @twsxtd/hapi --registry=https://registry.npmjs.org');
+        expect(lines).toContain('  npm install -g @hapipower/hapi-power --registry=https://registry.npmjs.org');
         expect(lines).toContain('Or download the binary manually from:');
-        expect(lines).toContain('  https://github.com/tiann/hapi/releases');
+        expect(lines).toContain('  https://github.com/zulinliu/make-hapi-power-again/releases');
     });
 });

@@ -398,7 +398,7 @@ class CodexRemoteLauncher extends RemoteLauncherBase {
             if (!serverName || !toolName) {
                 return null;
             }
-            return `mcp__${serverName}__${toolName}`;
+            return `mcp__${serverName.replace(/-/g, '_')}__${toolName}`;
         };
 
         const isHapiPowerChangeTitleToolName = (toolName: string | null): boolean => {

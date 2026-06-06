@@ -54,6 +54,7 @@ export function ToastContainer() {
         <div
           key={t.id}
           role="status"
+          className="fm-toast"
           style={{
             width: 'fit-content',
             maxWidth: 'min(520px, 100%)',
@@ -73,9 +74,6 @@ export function ToastContainer() {
           {t.message}
         </div>
       ))}
-      {!reducedMotion && <style>{`
-        @keyframes fm-toast-in { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: translateY(0) } }
-      `}</style>}
     </div>
   )
 }

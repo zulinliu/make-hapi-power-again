@@ -18,7 +18,7 @@ describe('codexMcpConfig', () => {
             const args = buildMcpServerConfigArgs(mcpServers);
 
             expect(args).toEqual([
-                '-c', 'mcp_servers.hapi-power.command="hapi"',
+                '-c', 'mcp_servers.hapi-power.command="hapi-power"',
                 '-c', "mcp_servers.hapi-power.args=['mcp','--url','http://localhost:3000']"
             ]);
         });
@@ -32,7 +32,7 @@ describe('codexMcpConfig', () => {
             const args = buildMcpServerConfigArgs(mcpServers);
 
             expect(args).toContain('-c');
-            expect(args).toContain('mcp_servers.hapi-power.command="hapi"');
+            expect(args).toContain('mcp_servers.hapi-power.command="hapi-power"');
             expect(args).toContain('mcp_servers.other.command="node"');
         });
 
