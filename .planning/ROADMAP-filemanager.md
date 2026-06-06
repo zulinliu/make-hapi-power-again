@@ -110,3 +110,26 @@ Full-featured global file manager replacing the existing `/browse` page. Mobile-
 - ZIP/tar.gz compress and extract
 - File properties panel
 - Sort by size/date
+
+
+---
+
+## Phase 6.0: File Preview / Editing
+
+**Goal:** Build the FileManager content loop: open file → preview → edit text/Markdown → save → recover from errors without losing local changes.
+
+**Planning Artifacts:**
+- `.planning/phases/34-file-preview-editing/34-PRD.md`
+- `.planning/phases/34-file-preview-editing/34-UX-SHAPE.md`
+- `.planning/phases/34-file-preview-editing/34-PLAN.md`
+
+**Success Criteria:**
+1. File rows open a unified viewer/editor surface.
+2. Text and code files can be previewed, edited, and saved.
+3. Save failures keep local edits and expose retry/copy recovery actions.
+4. Dirty navigation shows a leave confirmation.
+5. Markdown defaults to preview and can switch to edit.
+6. Images preview as images; binary files show a safe non-preview state.
+7. Large files are protected from accidental expensive editing.
+8. All new copy is bilingual and passes locale parity.
+9. Harden → polish → audit closes the feature at 16+/20, target 18+/20.

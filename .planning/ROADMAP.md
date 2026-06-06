@@ -438,6 +438,7 @@ Plans:
 - [ ] **Phase 31: Git 管理优化** — i18n + bug 修复 + commit UI + fetch UI
 - [ ] **Phase 32: 文件管理全栈 CRUD** — 文件操作 + 预览增强 + iOS 适配
 - [ ] **Phase 33: Skill/Plugin 管理增强** — 多平台搜索 + 真实安装 + 市场
+- [ ] **Phase 34: 文件预览 / 编辑闭环** — FileManager 打开文件、预览、编辑、保存、失败恢复、Dirty 离开保护
 
 ### Phase 31: Git 管理优化
 **Goal**: 修复 Git 管理的核心体验问题：i18n 缺失、已知 bug、补齐 commit/fetch UI
@@ -498,7 +499,31 @@ Plans:
 - [ ] 33-03: Plugin 市场（Claude 官方 + GitHub）
 - [ ] 33-04: 质量门禁
 
+
+### Phase 34: 文件预览 / 编辑闭环
+**Goal**: 在 FileManager 基础上建立文件内容查看与轻量编辑闭环，覆盖文本、代码、Markdown、图片、二进制、大文件、保存失败、未保存离开确认。
+**Depends on**: Phase 32
+**Requirements**: FPV-01~10
+**Success Criteria**:
+  1. 从 FileManager 点击文件可打开统一 Viewer
+  2. 文本/代码文件可预览、编辑、保存
+  3. 保存失败时本地改动不丢失，可重试或复制内容
+  4. Dirty 状态离开会确认
+  5. Markdown 默认预览，可切换编辑
+  6. 图片文件使用图片预览，二进制文件显示不可预览状态
+  7. 大文件触发保护状态，不直接进入可编辑区域
+  8. 中英 i18n、a11y、移动端触控目标达标
+  9. typecheck + tests + build 质量门禁通过
+**Planning Artifacts**:
+  - `.planning/phases/34-file-preview-editing/34-PRD.md`
+  - `.planning/phases/34-file-preview-editing/34-UX-SHAPE.md`
+  - `.planning/phases/34-file-preview-editing/34-PLAN.md`
+**Plans**: 1 vertical MVP plan
+
+Plans:
+- [ ] 34-01: 文件预览 / 编辑垂直闭环（打开→预览→编辑→保存→失败恢复→Dirty 离开保护）
+
 ---
 
 *Roadmap created: 2026-05-30*
-*Last updated: 2026-05-31 — v0.6 Phases 31~33 已规划（核心功能迭代优化）*
+*Last updated: 2026-06-06 — Phase 34 文件预览 / 编辑闭环已规划*
