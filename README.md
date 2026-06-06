@@ -80,7 +80,7 @@ Most AI coding tools lock you into one agent, one terminal, one machine. Hapi Po
 
 **Custom Model Providers** — Configure third-party API endpoints, auto-discover available models, and bind providers per session. API keys stored with AES-256-GCM encryption.
 
-**Mobile-First PWA** — Responsive mobile UI with swipe-to-approve gestures, read-only terminal, and iOS-optimized PWA experience. Review and approve AI agent changes from your phone, anytime, anywhere.
+**Mobile-First PWA** — Responsive mobile UI with tap and long-press gestures for change review, read-only terminal, and iOS-optimized PWA experience. Review and approve AI agent changes from your phone, anytime, anywhere.
 
 **Single Binary Deploy** — Build a self-contained executable with embedded web assets. One file, full platform, zero dependencies. Deploy on any server in seconds.
 
@@ -97,9 +97,9 @@ Most AI coding tools lock you into one agent, one terminal, one machine. Hapi Po
 
 **Custom Model Providers** — Configure third-party API endpoints, auto-discover models via `/v1/models`, and bind providers per session or agent type. AES-256-GCM encrypted key storage.
 
-**Permission Modes** — Each agent supports its own permission modes. Claude: default, acceptEdits, bypassPermissions, plan. Codex: default, read-only, safe-yolo, yolo.
+**Permission Modes** — Each agent supports its own permission modes. Claude: default, acceptEdits, bypassPermissions, plan. Codex/Gemini/Kimi: default, read-only, safe-yolo, yolo. Cursor: default, plan, ask, yolo. OpenCode: default, plan, yolo.
 
-**Mobile-First PWA** — Responsive mobile UI with swipe gestures for change review, read-only terminal, iOS-optimized install guidance, and offline support via service worker.
+**Mobile-First PWA** — Responsive mobile UI with tap and long-press gestures for change review, read-only terminal, iOS-optimized install guidance, and offline support via service worker.
 
 **Encrypted Relay** — Secure tunnel for remote CLI-to-Hub connections. Connect with `hub --relay` — no manual configuration needed.
 
@@ -215,10 +215,10 @@ bun run build:single-exe
 | `CLI_API_TOKEN` | Shared secret for CLI and Web authentication | auto-generated |
 | `HAPI_POWER_HOME` | Data storage directory | `~/.hapi-power` |
 | `CORS_ORIGINS` | CORS allowed origins (comma-separated) | — |
-| `HAPI_POWER_PUBLIC_URL` | Public URL for external access | — |
+| `HAPI_POWER_PUBLIC_URL` | Public URL for external access | `http://localhost:{port}` |
 | `TELEGRAM_BOT_TOKEN` | Telegram Bot API token for auth | — |
 | `VAPID_SUBJECT` | Contact info for Web Push (email or URL) | `mailto:admin@YOUR_DOMAIN` |
-| `HAPI_POWER_RELAY_API` | Relay API domain for encrypted tunnel | — |
+| `HAPI_POWER_RELAY_API` | Relay API domain for encrypted tunnel | `YOUR_RELAY_DOMAIN` |
 | `HAPI_POWER_RELAY_AUTH` | Relay authentication key | — |
 
 **CLI:**

@@ -80,7 +80,7 @@
 
 **自定义模型 Provider** — 配置第三方 API 端点，自动发现可用模型，按会话绑定 Provider。API 密钥以 AES-256-GCM 加密存储。
 
-**移动端优先 PWA** — 响应式移动端 UI、滑动手势审批变更、只读终端、针对 iOS 深度优化 PWA 体验。随时随地用手机审批 AI 代理的代码变更。
+**移动端优先 PWA** — 响应式移动端 UI、点击和长按手势审批变更、只读终端、针对 iOS 深度优化 PWA 体验。随时随地用手机审批 AI 代理的代码变更。
 
 **单文件部署** — 构建产物为内嵌 Web 资源的自包含可执行文件——一个文件即完整平台，零外部依赖，秒级部署到任意服务器。
 
@@ -97,9 +97,9 @@
 
 **自定义模型 Provider** — 配置第三方 API 端点，通过 `/v1/models` 自动发现可用模型，按会话或代理类型绑定 Provider。API 密钥以 AES-256-GCM 加密存储。
 
-**权限模式** — 每种代理支持独立的权限模式，实现细粒度操作控制。例如 Claude 支持 default、acceptEdits、bypassPermissions、plan 四种模式；Codex 支持 default、read-only、safe-yolo、yolo 模式。
+**权限模式** — 每种代理支持独立的权限模式。Claude：default、acceptEdits、bypassPermissions、plan。Codex/Gemini/Kimi：default、read-only、safe-yolo、yolo。Cursor：default、plan、ask、yolo。OpenCode：default、plan、yolo。
 
-**移动端优先 PWA** — 响应式移动端 UI，滑动手势审批变更，只读终端，针对 iOS 深度优化 PWA 体验，支持安装引导和离线访问。
+**移动端优先 PWA** — 响应式移动端 UI，点击和长按手势审批变更，只读终端，针对 iOS 深度优化 PWA 体验，支持安装引导和离线访问。
 
 **加密中继** — 安全隧道用于 CLI 到 Hub 的远程连接。通过 `hub --relay` 参数启动，零配置安全远程访问。
 
@@ -215,10 +215,10 @@ bun run build:single-exe
 | `CLI_API_TOKEN` | CLI 和 Web 认证的共享密钥 | 自动生成 |
 | `HAPI_POWER_HOME` | 数据存储目录 | `~/.hapi-power` |
 | `CORS_ORIGINS` | CORS 允许的来源（逗号分隔） | — |
-| `HAPI_POWER_PUBLIC_URL` | 外部访问的公网 URL | — |
+| `HAPI_POWER_PUBLIC_URL` | 外部访问的公网 URL | `http://localhost:{port}` |
 | `TELEGRAM_BOT_TOKEN` | Telegram Bot API 令牌（用于认证） | — |
 | `VAPID_SUBJECT` | Web Push 联系方式（邮箱或 URL） | `mailto:admin@YOUR_DOMAIN` |
-| `HAPI_POWER_RELAY_API` | 加密中继 API 域名 | — |
+| `HAPI_POWER_RELAY_API` | 加密中继 API 域名 | `YOUR_RELAY_DOMAIN` |
 | `HAPI_POWER_RELAY_AUTH` | 中继认证密钥 | — |
 
 **CLI：**
