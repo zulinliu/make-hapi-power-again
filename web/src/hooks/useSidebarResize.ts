@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-const STORAGE_KEY = 'hapi-sidebar-width'
+const STORAGE_KEY = 'hapi-power-sidebar-width'
+const STORAGE_KEY_LEGACY = 'hapi-sidebar-width'
 const MIN_WIDTH = 280
 const MAX_WIDTH = 600
 const DEFAULT_WIDTH = 420
@@ -10,6 +11,15 @@ function clamp(value: number): number {
 }
 
 function loadWidth(): number {
+    // Migration: move legacy key to new key
+    const newValue = localStorage.getItem(STORAGE_KEY)
+    if (newValue === null) {
+        const legacyValue = localStorage.getItem(STORAGE_KEY_LEGACY)
+        if (legacyValue !== null) {
+            localStorage.setItem(STORAGE_KEY, legacyValue)
+            localStorage.removeItem(STORAGE_KEY_LEGACY)
+        }
+    }
     const stored = localStorage.getItem(STORAGE_KEY)
     if (stored) {
         const parsed = Number(stored)

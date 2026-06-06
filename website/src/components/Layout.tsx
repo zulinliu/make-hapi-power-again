@@ -13,7 +13,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col bg-background font-sans selection:bg-primary selection:text-primary-foreground">
       {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b-2 border-border bg-background/70 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
+      <header className="sticky top-0 z-50 w-full border-b bg-background/70 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-2">
             <Link href="/" className="flex items-center gap-2 group">
@@ -30,7 +30,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <a href="https://github.com/zulinliu/make-hapi-power-again" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
                 <Github className="h-5 w-5" />
               </a>
-              <Button className="font-bold shadow-hard hover:translate-y-0.5 hover:shadow-none transition-all border-2 border-border" asChild>
+              <Button className="font-bold shadow-hard hover:translate-y-0.5 hover:shadow-none transition-all border border-border" asChild>
                 <a href="/docs/">{t('nav.getStarted')}</a>
               </Button>
             </div>
@@ -48,7 +48,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
         {/* Mobile Nav */}
         {isMenuOpen && (
-          <div className="md:hidden border-b-2 border-border bg-background p-4">
+          <div className="md:hidden border-b border-border bg-background p-4">
             <nav className="flex flex-col gap-4">
               <div className="flex flex-col gap-2">
                 <Button className="w-full font-bold shadow-hard border-2 border-border" asChild>
@@ -69,7 +69,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </main>
 
       {/* Footer */}
-      <footer className="border-t-2 border-border bg-muted/30 py-12">
+      <footer className="border-t border-border bg-muted/30 py-12">
         <div className="container">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="col-span-1 md:col-span-2">
@@ -99,7 +99,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
           
-          <div className="mt-12 pt-8 border-t-2 border-border flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
+          <div className="mt-12 pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
             <p>{t('footer.copyright', { year: new Date().getFullYear() })}</p>
             <p dangerouslySetInnerHTML={{ __html: t('footer.designedWith') }} />
           </div>

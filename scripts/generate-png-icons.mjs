@@ -15,30 +15,30 @@ const CHROME_PATH = '/usr/bin/google-chrome';
 // All PNG assets to generate
 const tasks = [
   // PWA icons
-  { name: 'pwa-64x64.png', width: 64, height: 64, bg: '#0A0A0B', padding: 0.05 },
-  { name: 'pwa-192x192.png', width: 192, height: 192, bg: '#0A0A0B', padding: 0.05 },
-  { name: 'pwa-512x512.png', width: 512, height: 512, bg: '#0A0A0B', padding: 0.05 },
+  { name: 'pwa-64x64.png', width: 64, height: 64, bg: '#1C1611', padding: 0.05 },
+  { name: 'pwa-192x192.png', width: 192, height: 192, bg: '#1C1611', padding: 0.05 },
+  { name: 'pwa-512x512.png', width: 512, height: 512, bg: '#1C1611', padding: 0.05 },
   // PWA maskable icons (more padding for safe zone)
-  { name: 'pwa-maskable-192x192.png', width: 192, height: 192, bg: '#0A0A0B', padding: 0.25 },
-  { name: 'pwa-maskable-512x512.png', width: 512, height: 512, bg: '#0A0A0B', padding: 0.25 },
+  { name: 'pwa-maskable-192x192.png', width: 192, height: 192, bg: '#1C1611', padding: 0.25 },
+  { name: 'pwa-maskable-512x512.png', width: 512, height: 512, bg: '#1C1611', padding: 0.25 },
   // Apple touch icons
-  { name: 'apple-touch-icon-120x120.png', width: 120, height: 120, bg: '#0A0A0B', padding: 0.08 },
-  { name: 'apple-touch-icon-152x152.png', width: 152, height: 152, bg: '#0A0A0B', padding: 0.08 },
-  { name: 'apple-touch-icon-167x167.png', width: 167, height: 167, bg: '#0A0A0B', padding: 0.08 },
-  { name: 'apple-touch-icon-180x180.png', width: 180, height: 180, bg: '#0A0A0B', padding: 0.08 },
+  { name: 'apple-touch-icon-120x120.png', width: 120, height: 120, bg: '#1C1611', padding: 0.08 },
+  { name: 'apple-touch-icon-152x152.png', width: 152, height: 152, bg: '#1C1611', padding: 0.08 },
+  { name: 'apple-touch-icon-167x167.png', width: 167, height: 167, bg: '#1C1611', padding: 0.08 },
+  { name: 'apple-touch-icon-180x180.png', width: 180, height: 180, bg: '#1C1611', padding: 0.08 },
   // Splash screens
   { name: 'splash-light-750x1334.png', width: 750, height: 1334, bg: '#FAFAFA', iconSize: 200 },
-  { name: 'splash-dark-750x1334.png', width: 750, height: 1334, bg: '#0A0A0B', iconSize: 200 },
+  { name: 'splash-dark-750x1334.png', width: 750, height: 1334, bg: '#1C1611', iconSize: 200 },
   { name: 'splash-light-1125x2436.png', width: 1125, height: 2436, bg: '#FAFAFA', iconSize: 280 },
-  { name: 'splash-dark-1125x2436.png', width: 1125, height: 2436, bg: '#0A0A0B', iconSize: 280 },
+  { name: 'splash-dark-1125x2436.png', width: 1125, height: 2436, bg: '#1C1611', iconSize: 280 },
   { name: 'splash-light-1170x2532.png', width: 1170, height: 2532, bg: '#FAFAFA', iconSize: 280 },
-  { name: 'splash-dark-1170x2532.png', width: 1170, height: 2532, bg: '#0A0A0B', iconSize: 280 },
+  { name: 'splash-dark-1170x2532.png', width: 1170, height: 2532, bg: '#1C1611', iconSize: 280 },
   { name: 'splash-light-1179x2556.png', width: 1179, height: 2556, bg: '#FAFAFA', iconSize: 280 },
-  { name: 'splash-dark-1179x2556.png', width: 1179, height: 2556, bg: '#0A0A0B', iconSize: 280 },
+  { name: 'splash-dark-1179x2556.png', width: 1179, height: 2556, bg: '#1C1611', iconSize: 280 },
   { name: 'splash-light-1284x2778.png', width: 1284, height: 2778, bg: '#FAFAFA', iconSize: 320 },
-  { name: 'splash-dark-1284x2778.png', width: 1284, height: 2778, bg: '#0A0A0B', iconSize: 320 },
+  { name: 'splash-dark-1284x2778.png', width: 1284, height: 2778, bg: '#1C1611', iconSize: 320 },
   { name: 'splash-light-1290x2796.png', width: 1290, height: 2796, bg: '#FAFAFA', iconSize: 320 },
-  { name: 'splash-dark-1290x2796.png', width: 1290, height: 2796, bg: '#0A0A0B', iconSize: 320 },
+  { name: 'splash-dark-1290x2796.png', width: 1290, height: 2796, bg: '#1C1611', iconSize: 320 },
 ];
 
 function buildIconHTML(task) {

@@ -820,10 +820,6 @@ export default function SettingsPage() {
                             <span className="text-(--hp-text-primary)">{t('settings.about.appVersion')}</span>
                             <span className="text-(--hp-text-tertiary)">{__APP_VERSION__}</span>
                         </div>
-                        <div className="flex w-full items-center justify-between px-3 py-3">
-                            <span className="text-(--hp-text-primary)">{t('settings.about.protocolVersion')}</span>
-                            <span className="text-(--hp-text-tertiary)">{PROTOCOL_VERSION}</span>
-                        </div>
                     </div>
                 </div>
             </div>

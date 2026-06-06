@@ -1,21 +1,21 @@
 /**
- * Hapi Power Design Tokens v2.0
- * "精密工具" 设计方向
- * 主色: 深青墨 (Ink Teal) — 远离AI紫蓝同质化
- * 强调: 琥珀金 (Amber) — 深色背景上醒目的CTA
- * 中性色: 暖灰调 — 传递工具品质感
+ * Hapi Power Design Tokens v3.0
+ * "力量几何" 设计方向 — Power Geometry
+ * 主色: 电光橙 (Electric Orange) — 活力+创造+潮流感
+ * 强调: 琥珀金 (Amber Gold) — 温暖能量
+ * 中性色: 橙调灰 — 品牌一致的暖灰体系
  * 色彩系统基于 oklch 实现感知均匀
  */
 
 :root {
   /* === 品牌色 === */
-  --hp-primary: oklch(42% 0.14 200);
-  --hp-primary-hover: oklch(38% 0.16 200);
-  --hp-primary-subtle: oklch(42% 0.06 200 / 0.12);
+  --hp-primary: oklch(68% 0.18 55);
+  --hp-primary-hover: oklch(62% 0.20 50);
+  --hp-primary-subtle: oklch(68% 0.06 55 / 0.10);
   --hp-primary-text: oklch(100% 0 0);
 
   /* === 强调色 === */
-  --hp-accent: oklch(72% 0.16 75);
+  --hp-accent: oklch(78% 0.14 85);
 
   /* === 语义色 === */
   --hp-success: oklch(65% 0.16 155);
@@ -27,32 +27,32 @@
   --hp-info: oklch(65% 0.12 230);
   --hp-info-subtle: oklch(65% 0.06 230 / 0.10);
 
-  /* === 表面层次 (暖灰调) === */
-  --hp-canvas: oklch(97.5% 0.005 75);
+  /* === 表面层次 (橙调暖白) === */
+  --hp-canvas: oklch(99% 0.003 75);
   --hp-surface-0: oklch(100% 0 0);
-  --hp-surface-1: oklch(99% 0.002 75);
-  --hp-surface-2: oklch(97% 0.003 75);
-  --hp-surface-3: oklch(95% 0.005 75);
+  --hp-surface-1: oklch(98.5% 0.003 55);
+  --hp-surface-2: oklch(96% 0.005 55);
+  --hp-surface-3: oklch(94% 0.008 55);
 
   /* === 文本 === */
-  --hp-text-primary: oklch(15% 0.01 75);
-  --hp-text-secondary: oklch(42% 0.01 75);
-  --hp-text-tertiary: oklch(52% 0.01 75);
-  --hp-text-disabled: oklch(75% 0.01 75);
+  --hp-text-primary: oklch(13% 0.02 55);
+  --hp-text-secondary: oklch(40% 0.01 55);
+  --hp-text-tertiary: oklch(52% 0.01 55);
+  --hp-text-disabled: oklch(75% 0.01 55);
   --hp-text-inverse: oklch(100% 0 0);
 
   /* === 边框与分割 === */
-  --hp-border: oklch(80% 0.005 75 / 0.25);
-  --hp-border-hover: oklch(65% 0.01 75 / 0.4);
-  --hp-divider: oklch(85% 0.003 75 / 0.2);
+  --hp-border: oklch(80% 0.005 55 / 0.25);
+  --hp-border-hover: oklch(65% 0.01 55 / 0.4);
+  --hp-divider: oklch(85% 0.003 55 / 0.2);
 
   /* === 阴影 === */
-  --hp-shadow-xs: 0 1px 2px oklch(15% 0.01 75 / 0.04);
-  --hp-shadow-sm: 0 2px 8px oklch(15% 0.01 75 / 0.06);
-  --hp-shadow-md: 0 4px 16px oklch(15% 0.01 75 / 0.10);
-  --hp-shadow-lg: 0 8px 32px oklch(15% 0.01 75 / 0.15);
-  --hp-shadow-xl: 0 16px 48px oklch(15% 0.01 75 / 0.25);
-  --hp-shadow-focus: 0 0 0 2px oklch(52% 0.12 200 / 0.3);
+  --hp-shadow-xs: 0 1px 2px oklch(13% 0.02 55 / 0.04);
+  --hp-shadow-sm: 0 2px 8px oklch(13% 0.02 55 / 0.06);
+  --hp-shadow-md: 0 4px 16px oklch(13% 0.02 55 / 0.10);
+  --hp-shadow-lg: 0 8px 32px oklch(13% 0.02 55 / 0.15);
+  --hp-shadow-xl: 0 16px 48px oklch(13% 0.02 55 / 0.25);
+  --hp-shadow-focus: 0 0 0 2px oklch(68% 0.12 55 / 0.3);
 
   /* === 圆角 === */
   --hp-radius-xs: 4px;
@@ -96,32 +96,32 @@
 }
 
 [data-theme="dark"] {
-  --hp-primary: oklch(72% 0.12 200);
-  --hp-primary-hover: oklch(68% 0.14 200);
-  --hp-primary-subtle: oklch(72% 0.06 200 / 0.14);
+  --hp-primary: oklch(72% 0.16 55);
+  --hp-primary-hover: oklch(68% 0.18 50);
+  --hp-primary-subtle: oklch(72% 0.06 55 / 0.14);
   --hp-primary-text: oklch(100% 0 0);
 
-  --hp-accent: oklch(75% 0.16 75);
+  --hp-accent: oklch(78% 0.14 85);
 
-  --hp-canvas: oklch(12% 0.008 200);
-  --hp-surface-0: oklch(15% 0.008 200);
-  --hp-surface-1: oklch(18% 0.008 200);
-  --hp-surface-2: oklch(22% 0.010 200);
-  --hp-surface-3: oklch(26% 0.012 200);
+  --hp-canvas: oklch(13% 0.015 55);
+  --hp-surface-0: oklch(15% 0.012 55);
+  --hp-surface-1: oklch(18% 0.010 55);
+  --hp-surface-2: oklch(22% 0.008 55);
+  --hp-surface-3: oklch(26% 0.006 55);
 
-  --hp-text-primary: oklch(95% 0.005 200);
-  --hp-text-secondary: oklch(70% 0.008 200);
-  --hp-text-tertiary: oklch(52% 0.008 200);
-  --hp-text-disabled: oklch(40% 0.005 200);
+  --hp-text-primary: oklch(95% 0.005 55);
+  --hp-text-secondary: oklch(70% 0.008 55);
+  --hp-text-tertiary: oklch(52% 0.008 55);
+  --hp-text-disabled: oklch(40% 0.005 55);
 
-  --hp-border: oklch(38% 0.008 200 / 0.35);
-  --hp-border-hover: oklch(52% 0.01 200 / 0.5);
-  --hp-divider: oklch(32% 0.005 200 / 0.3);
+  --hp-border: oklch(38% 0.008 55 / 0.35);
+  --hp-border-hover: oklch(52% 0.01 55 / 0.5);
+  --hp-divider: oklch(32% 0.005 55 / 0.3);
 
   --hp-shadow-xs: 0 1px 2px oklch(0% 0 0 / 0.2);
   --hp-shadow-sm: 0 2px 8px oklch(0% 0 0 / 0.3);
   --hp-shadow-md: 0 4px 16px oklch(0% 0 0 / 0.4);
   --hp-shadow-lg: 0 8px 32px oklch(0% 0 0 / 0.5);
   --hp-shadow-xl: 0 16px 48px oklch(0% 0 0 / 0.6);
-  --hp-shadow-focus: 0 0 0 2px oklch(72% 0.12 200 / 0.4);
+  --hp-shadow-focus: 0 0 0 2px oklch(72% 0.12 55 / 0.4);
 }

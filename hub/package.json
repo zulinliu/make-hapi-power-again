@@ -3,7 +3,7 @@
     "private": true,
     "version": "0.3.0",
     "description": "Hapi Power Hub - AI Coding Agent Platform",
-    "author": "weishu",
+    "author": "zulinliu",
     "license": "AGPL-3.0-only",
     "type": "module",
     "exports": {

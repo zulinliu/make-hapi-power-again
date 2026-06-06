@@ -2,7 +2,7 @@
   "name": "@hapipower/hapi-power",
   "version": "0.3.0",
   "description": "Hapi Power - AI Coding Agent Platform",
-  "author": "Hapi Power Team",
+  "author": "zulinliu",
   "license": "AGPL-3.0-only",
   "type": "module",
   "homepage": "https://github.com/zulinliu/make-hapi-power-again",

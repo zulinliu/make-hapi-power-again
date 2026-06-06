@@ -3,11 +3,9 @@ import { useCallback, useEffect, useState } from 'react'
 export const DEFAULT_SESSION_PREVIEW_LIMIT = 8
 export const MIN_SESSION_PREVIEW_LIMIT = 1
 export const MAX_SESSION_PREVIEW_LIMIT = 99
-const SESSION_PREVIEW_LIMIT_CHANGED_EVENT = 'hapi-session-preview-limit-changed'
-
-function getSessionPreviewLimitStorageKey(): string {
-    return 'hapi-session-preview-limit'
-}
+const SESSION_PREVIEW_LIMIT_CHANGED_EVENT = 'hapi-power-session-preview-limit-changed'
+const SESSION_PREVIEW_LIMIT_STORAGE_KEY = 'hapi-power-session-preview-limit'
+const SESSION_PREVIEW_LIMIT_STORAGE_KEY_LEGACY = 'hapi-session-preview-limit'
 
 function isBrowser(): boolean {
     return typeof window !== 'undefined' && typeof document !== 'undefined'
@@ -61,8 +59,19 @@ function parseSessionPreviewLimit(raw: string | null): number {
     return normalizeSessionPreviewLimit(value)
 }
 
+function migrateSessionPreviewLimitStorage(): void {
+    const newValue = safeGetItem(SESSION_PREVIEW_LIMIT_STORAGE_KEY)
+    if (newValue !== null) return
+    const legacyValue = safeGetItem(SESSION_PREVIEW_LIMIT_STORAGE_KEY_LEGACY)
+    if (legacyValue !== null) {
+        safeSetItem(SESSION_PREVIEW_LIMIT_STORAGE_KEY, legacyValue)
+        safeRemoveItem(SESSION_PREVIEW_LIMIT_STORAGE_KEY_LEGACY)
+    }
+}
+
 export function getInitialSessionPreviewLimit(): number {
-    return parseSessionPreviewLimit(safeGetItem(getSessionPreviewLimitStorageKey()))
+    migrateSessionPreviewLimitStorage()
+    return parseSessionPreviewLimit(safeGetItem(SESSION_PREVIEW_LIMIT_STORAGE_KEY))
 }
 
 export function useSessionPreviewLimit(): {
@@ -77,7 +86,7 @@ export function useSessionPreviewLimit(): {
         }
 
         const onStorage = (event: StorageEvent) => {
-            if (event.key !== getSessionPreviewLimitStorageKey()) {
+            if (event.key !== SESSION_PREVIEW_LIMIT_STORAGE_KEY) {
                 return
             }
             setSessionPreviewLimitState(parseSessionPreviewLimit(event.newValue))
@@ -103,9 +112,9 @@ export function useSessionPreviewLimit(): {
         setSessionPreviewLimitState(normalized)
 
         if (normalized === DEFAULT_SESSION_PREVIEW_LIMIT) {
-            safeRemoveItem(getSessionPreviewLimitStorageKey())
+            safeRemoveItem(SESSION_PREVIEW_LIMIT_STORAGE_KEY)
         } else {
-            safeSetItem(getSessionPreviewLimitStorageKey(), String(normalized))
+            safeSetItem(SESSION_PREVIEW_LIMIT_STORAGE_KEY, String(normalized))
         }
 
         if (isBrowser()) {

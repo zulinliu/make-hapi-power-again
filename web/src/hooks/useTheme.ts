@@ -7,8 +7,8 @@ export type AppearancePreference = 'system' | 'dark' | 'light'
 
 const APPEARANCE_KEY = 'hapi-power-appearance'
 const THEME_COLORS: Record<ColorScheme, string> = {
-    light: '#F5F4F0',
-    dark: '#191A1C',
+    light: '#FFF8F3',
+    dark: '#F97316',
 }
 
 function isBrowser(): boolean {

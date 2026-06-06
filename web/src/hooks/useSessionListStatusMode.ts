@@ -11,9 +11,8 @@ export function getSessionListStatusModeOptions(): ReadonlyArray<{ value: Sessio
     ]
 }
 
-function getSessionListStatusModeStorageKey(): string {
-    return 'hapi-session-list-status-mode'
-}
+const SESSION_LIST_STATUS_MODE_STORAGE_KEY = 'hapi-power-session-list-status-mode'
+const SESSION_LIST_STATUS_MODE_STORAGE_KEY_LEGACY = 'hapi-session-list-status-mode'
 
 function isBrowser(): boolean {
     return typeof window !== 'undefined' && typeof document !== 'undefined'
@@ -59,8 +58,19 @@ function parseSessionListStatusMode(raw: string | null): SessionListStatusMode {
     return DEFAULT_SESSION_LIST_STATUS_MODE
 }
 
+function migrateSessionListStatusModeStorage(): void {
+    const newValue = safeGetItem(SESSION_LIST_STATUS_MODE_STORAGE_KEY)
+    if (newValue !== null) return
+    const legacyValue = safeGetItem(SESSION_LIST_STATUS_MODE_STORAGE_KEY_LEGACY)
+    if (legacyValue !== null) {
+        safeSetItem(SESSION_LIST_STATUS_MODE_STORAGE_KEY, legacyValue)
+        safeRemoveItem(SESSION_LIST_STATUS_MODE_STORAGE_KEY_LEGACY)
+    }
+}
+
 export function getInitialSessionListStatusMode(): SessionListStatusMode {
-    return parseSessionListStatusMode(safeGetItem(getSessionListStatusModeStorageKey()))
+    migrateSessionListStatusModeStorage()
+    return parseSessionListStatusMode(safeGetItem(SESSION_LIST_STATUS_MODE_STORAGE_KEY))
 }
 
 export function useSessionListStatusMode(): {
@@ -75,7 +85,7 @@ export function useSessionListStatusMode(): {
         }
 
         const onStorage = (event: StorageEvent) => {
-            if (event.key !== getSessionListStatusModeStorageKey()) {
+            if (event.key !== SESSION_LIST_STATUS_MODE_STORAGE_KEY) {
                 return
             }
             setSessionListStatusModeState(parseSessionListStatusMode(event.newValue))
@@ -89,9 +99,9 @@ export function useSessionListStatusMode(): {
         setSessionListStatusModeState(mode)
 
         if (mode === DEFAULT_SESSION_LIST_STATUS_MODE) {
-            safeRemoveItem(getSessionListStatusModeStorageKey())
+            safeRemoveItem(SESSION_LIST_STATUS_MODE_STORAGE_KEY)
         } else {
-            safeSetItem(getSessionListStatusModeStorageKey(), mode)
+            safeSetItem(SESSION_LIST_STATUS_MODE_STORAGE_KEY, mode)
         }
     }, [])
 
