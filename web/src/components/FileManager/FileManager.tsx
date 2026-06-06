@@ -60,7 +60,10 @@ type DialogState =
 
 function isValidFileName(name: string): boolean {
   if (!name || name === '.' || name === '..') return false
+  if (name.length > 255) return false
   if (name.includes('/') || name.includes('\\')) return false
+  if (/[\x00-\x1f]/.test(name)) return false
+  if (name.includes(':') && !/^[a-zA-Z]:/.test(name)) return false
   return true
 }
 
@@ -156,6 +159,7 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
 
   const handleContextMenu = useCallback(
     (path: string, type: 'file' | 'directory', point: { x: number; y: number }) => {
+      if (isLoading) return
       setSelectedPath(path)
       const name = path.split('/').pop() ?? ''
       const items: ContextMenuItem[] = [
@@ -177,7 +181,7 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
       })
       ctxMenu.show(point.x, point.y, items)
     },
-    [ctxMenu],
+    [ctxMenu, isLoading],
   )
 
   // Batch selection
@@ -211,17 +215,28 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
   // Dialog submit
   const handleDialogSubmit = useCallback(async () => {
     if (!dialog) return
+
+    // Validate BEFORE setting loading state so early returns don't bypass finally
+    if (dialog.type === 'newFile' || dialog.type === 'newFolder' || dialog.type === 'rename') {
+      const name = inputValue.trim()
+      if (!name) { showToast('Name cannot be empty', 'error'); return }
+      if (!isValidFileName(name)) { showToast('Invalid name: must not contain / or ..', 'error'); return }
+      if (dialog.type === 'rename' && name === dialog.name) { setDialog(null); return }
+    }
+
     setDialogLoading(true)
     try {
+      const mid = machineId ?? ''
+      const sid = sessionId ?? ''
       switch (dialog.type) {
         case 'newFile': {
           const name = inputValue.trim()
-          if (!name) { showToast('Name cannot be empty', 'error'); return }
-          if (!isValidFileName(name)) { showToast('Invalid name: must not contain / or ..', 'error'); return }
-          if (useRealApi && api && sessionId) {
-            await apiCreateFile(api, machineId!, sessionId, currentPath, name)
-          } else {
+          if (useRealApi && api && sid) {
+            await apiCreateFile(api, mid, sid, currentPath, name)
+          } else if (!useRealApi) {
             await mockCreateFile(currentPath, name)
+          } else {
+            throw new Error('No active session. Start a session first.')
           }
           setHighlightPath(`${currentPath}/${name}`)
           showToast('File created')
@@ -229,12 +244,12 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
         }
         case 'newFolder': {
           const name = inputValue.trim()
-          if (!name) { showToast('Name cannot be empty', 'error'); return }
-          if (!isValidFileName(name)) { showToast('Invalid name: must not contain / or ..', 'error'); return }
-          if (useRealApi && api && sessionId) {
-            await apiCreateFolder(api, machineId!, sessionId, currentPath, name)
-          } else {
+          if (useRealApi && api && sid) {
+            await apiCreateFolder(api, mid, sid, currentPath, name)
+          } else if (!useRealApi) {
             await mockCreateFolder(currentPath, name)
+          } else {
+            throw new Error('No active session. Start a session first.')
           }
           setHighlightPath(`${currentPath}/${name}`)
           showToast('Folder created')
@@ -242,23 +257,24 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
         }
         case 'rename': {
           const name = inputValue.trim()
-          if (!name) { showToast('Name cannot be empty', 'error'); return }
-          if (!isValidFileName(name)) { showToast('Invalid name: must not contain / or ..', 'error'); return }
-          if (name === dialog.name) { setDialog(null); return }
-          if (useRealApi && api && sessionId) {
-            await apiRenameEntry(api, machineId!, sessionId, currentPath, dialog.name, name)
-          } else {
+          if (useRealApi && api && sid) {
+            await apiRenameEntry(api, mid, sid, currentPath, dialog.name, name)
+          } else if (!useRealApi) {
             await mockRename(currentPath, dialog.name, name)
+          } else {
+            throw new Error('No active session. Start a session first.')
           }
           showToast('Renamed')
           break
         }
         case 'delete': {
-          if (useRealApi && api && sessionId) {
+          if (useRealApi && api && sid) {
             const entry = entries.find(e => e.path === dialog.path)
-            await apiDeleteEntry(api, machineId!, sessionId, currentPath, dialog.name, dialog.path, entry?.type ?? 'file')
-          } else {
+            await apiDeleteEntry(api, mid, sid, currentPath, dialog.name, dialog.path, entry?.type ?? 'file')
+          } else if (!useRealApi) {
             await mockDelete(currentPath, dialog.name)
+          } else {
+            throw new Error('No active session. Start a session first.')
           }
           setSelectedPaths((prev) => { const n = new Set(prev); n.delete(dialog.path); return n })
           showToast('Deleted')
@@ -267,11 +283,13 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
         case 'batchDelete': {
           for (const p of dialog.paths) {
             const name = p.split('/').pop() ?? ''
-            if (useRealApi && api && sessionId) {
+            if (useRealApi && api && sid) {
               const entry = entries.find(e => e.path === p)
-              await apiDeleteEntry(api, machineId!, sessionId, currentPath, name, p, entry?.type ?? 'file')
-            } else {
+              await apiDeleteEntry(api, mid, sid, currentPath, name, p, entry?.type ?? 'file')
+            } else if (!useRealApi) {
               await mockDelete(currentPath, name)
+            } else {
+              throw new Error('No active session. Start a session first.')
             }
           }
           setSelectedPaths(new Set())
