@@ -23,15 +23,32 @@ function interpolate(str: string, params?: Record<string, string | number>): str
   })
 }
 
+const LANG_STORAGE_KEY = 'hapi-power-lang'
+const LANG_STORAGE_KEY_LEGACY = 'hapi-lang'
+
+function readStoredLocale(): string | null {
+  try {
+    const value = localStorage.getItem(LANG_STORAGE_KEY)
+    if (value !== null) return value
+    const legacy = localStorage.getItem(LANG_STORAGE_KEY_LEGACY)
+    if (legacy !== null) {
+      localStorage.setItem(LANG_STORAGE_KEY, legacy)
+      localStorage.removeItem(LANG_STORAGE_KEY_LEGACY)
+      return legacy
+    }
+  } catch { /* ignore */ }
+  return null
+}
+
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>(() => {
-    const saved = localStorage.getItem('hapi-lang')
+    const saved = readStoredLocale()
     return (saved === 'en' || saved === 'zh-CN') ? saved : 'en'
   })
 
   const setLocale = useCallback((newLocale: Locale) => {
     setLocaleState(newLocale)
-    localStorage.setItem('hapi-lang', newLocale)
+    localStorage.setItem(LANG_STORAGE_KEY, newLocale)
     document.documentElement.lang = newLocale
   }, [])
 

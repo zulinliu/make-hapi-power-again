@@ -11,9 +11,8 @@ export function getComposerEnterBehaviorOptions(): ReadonlyArray<{ value: Compos
     ]
 }
 
-function getComposerEnterBehaviorStorageKey(): string {
-    return 'hapi-composer-enter-behavior'
-}
+const COMPOSER_ENTER_BEHAVIOR_STORAGE_KEY = 'hapi-power-composer-enter-behavior'
+const COMPOSER_ENTER_BEHAVIOR_STORAGE_KEY_LEGACY = 'hapi-composer-enter-behavior'
 
 function isBrowser(): boolean {
     return typeof window !== 'undefined' && typeof document !== 'undefined'
@@ -59,8 +58,19 @@ function parseComposerEnterBehavior(raw: string | null): ComposerEnterBehavior {
     return DEFAULT_COMPOSER_ENTER_BEHAVIOR
 }
 
+function migrateComposerEnterBehaviorStorage(): void {
+    const newValue = safeGetItem(COMPOSER_ENTER_BEHAVIOR_STORAGE_KEY)
+    if (newValue !== null) return
+    const legacyValue = safeGetItem(COMPOSER_ENTER_BEHAVIOR_STORAGE_KEY_LEGACY)
+    if (legacyValue !== null) {
+        safeSetItem(COMPOSER_ENTER_BEHAVIOR_STORAGE_KEY, legacyValue)
+        safeRemoveItem(COMPOSER_ENTER_BEHAVIOR_STORAGE_KEY_LEGACY)
+    }
+}
+
 export function getInitialComposerEnterBehavior(): ComposerEnterBehavior {
-    return parseComposerEnterBehavior(safeGetItem(getComposerEnterBehaviorStorageKey()))
+    migrateComposerEnterBehaviorStorage()
+    return parseComposerEnterBehavior(safeGetItem(COMPOSER_ENTER_BEHAVIOR_STORAGE_KEY))
 }
 
 export function useComposerEnterBehavior(): {
@@ -75,7 +85,7 @@ export function useComposerEnterBehavior(): {
         }
 
         const onStorage = (event: StorageEvent) => {
-            if (event.key !== getComposerEnterBehaviorStorageKey()) {
+            if (event.key !== COMPOSER_ENTER_BEHAVIOR_STORAGE_KEY) {
                 return
             }
             setComposerEnterBehaviorState(parseComposerEnterBehavior(event.newValue))
@@ -89,9 +99,9 @@ export function useComposerEnterBehavior(): {
         setComposerEnterBehaviorState(behavior)
 
         if (behavior === DEFAULT_COMPOSER_ENTER_BEHAVIOR) {
-            safeRemoveItem(getComposerEnterBehaviorStorageKey())
+            safeRemoveItem(COMPOSER_ENTER_BEHAVIOR_STORAGE_KEY)
         } else {
-            safeSetItem(getComposerEnterBehaviorStorageKey(), behavior)
+            safeSetItem(COMPOSER_ENTER_BEHAVIOR_STORAGE_KEY, behavior)
         }
     }, [])
 

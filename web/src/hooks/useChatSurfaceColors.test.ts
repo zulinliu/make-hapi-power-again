@@ -22,8 +22,8 @@ describe('useChatSurfaceColors', () => {
     })
 
     it('falls back to default when storage is missing or invalid', () => {
-        localStorage.setItem('hapi-tool-group-bg', 'preset:invalid')
-        localStorage.setItem('hapi-user-message-bg', 'custom:not-a-color')
+        localStorage.setItem('hapi-power-tool-group-bg', 'preset:invalid')
+        localStorage.setItem('hapi-power-user-message-bg', 'custom:not-a-color')
 
         expect(getToolGroupBackgroundPreference()).toBe('default')
         expect(getUserMessageBackgroundPreference()).toBe('default')
@@ -37,8 +37,8 @@ describe('useChatSurfaceColors', () => {
             result.current.setUserMessageBackground('custom:#88cc44')
         })
 
-        expect(localStorage.getItem('hapi-tool-group-bg')).toBe('preset:soft-blue')
-        expect(localStorage.getItem('hapi-user-message-bg')).toBe('custom:#88cc44')
+        expect(localStorage.getItem('hapi-power-tool-group-bg')).toBe('preset:soft-blue')
+        expect(localStorage.getItem('hapi-power-user-message-bg')).toBe('custom:#88cc44')
         expect(result.current.toolGroupBackground).toBe('preset:soft-blue')
         expect(result.current.userMessageBackground).toBe('custom:#88cc44')
     })
@@ -67,8 +67,8 @@ describe('useChatSurfaceColors', () => {
     })
 
     it('reapplies stored values during initialization', () => {
-        localStorage.setItem('hapi-tool-group-bg', 'preset:soft-yellow')
-        localStorage.setItem('hapi-user-message-bg', 'custom:#88cc44')
+        localStorage.setItem('hapi-power-tool-group-bg', 'preset:soft-yellow')
+        localStorage.setItem('hapi-power-user-message-bg', 'custom:#88cc44')
 
         initializeChatSurfaceColors()
 

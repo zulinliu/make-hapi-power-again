@@ -10,9 +10,8 @@ export function getTerminalFontSizeOptions(): ReadonlyArray<{ value: TerminalFon
     return TERMINAL_FONT_SIZES.map(value => ({ value, label: `${value}px` }))
 }
 
-function getTerminalFontSizeStorageKey(): string {
-    return 'hapi-terminal-font-size'
-}
+const TERMINAL_FONT_SIZE_STORAGE_KEY = 'hapi-power-terminal-font-size'
+const TERMINAL_FONT_SIZE_STORAGE_KEY_LEGACY = 'hapi-terminal-font-size'
 
 function isBrowser(): boolean {
     return typeof window !== 'undefined' && typeof document !== 'undefined'
@@ -56,8 +55,19 @@ function parseTerminalFontSize(raw: string | null): TerminalFontSize {
     return TERMINAL_FONT_SIZES.find(size => size === value) ?? DEFAULT_TERMINAL_FONT_SIZE
 }
 
+function migrateTerminalFontSizeStorage(): void {
+    const newValue = safeGetItem(TERMINAL_FONT_SIZE_STORAGE_KEY)
+    if (newValue !== null) return
+    const legacyValue = safeGetItem(TERMINAL_FONT_SIZE_STORAGE_KEY_LEGACY)
+    if (legacyValue !== null) {
+        safeSetItem(TERMINAL_FONT_SIZE_STORAGE_KEY, legacyValue)
+        safeRemoveItem(TERMINAL_FONT_SIZE_STORAGE_KEY_LEGACY)
+    }
+}
+
 export function getInitialTerminalFontSize(): TerminalFontSize {
-    return parseTerminalFontSize(safeGetItem(getTerminalFontSizeStorageKey()))
+    migrateTerminalFontSizeStorage()
+    return parseTerminalFontSize(safeGetItem(TERMINAL_FONT_SIZE_STORAGE_KEY))
 }
 
 export function useTerminalFontSize(): {
@@ -72,7 +82,7 @@ export function useTerminalFontSize(): {
         }
 
         const onStorage = (event: StorageEvent) => {
-            if (event.key !== getTerminalFontSizeStorageKey()) {
+            if (event.key !== TERMINAL_FONT_SIZE_STORAGE_KEY) {
                 return
             }
             setTerminalFontSizeState(parseTerminalFontSize(event.newValue))
@@ -86,9 +96,9 @@ export function useTerminalFontSize(): {
         setTerminalFontSizeState(size)
 
         if (size === DEFAULT_TERMINAL_FONT_SIZE) {
-            safeRemoveItem(getTerminalFontSizeStorageKey())
+            safeRemoveItem(TERMINAL_FONT_SIZE_STORAGE_KEY)
         } else {
-            safeSetItem(getTerminalFontSizeStorageKey(), String(size))
+            safeSetItem(TERMINAL_FONT_SIZE_STORAGE_KEY, String(size))
         }
     }, [])
 

@@ -1,4 +1,5 @@
-const FILE_PATH_HREF_PREFIX = 'hapi-file:'
+const FILE_PATH_HREF_PREFIX = 'hapi-power-file:'
+const FILE_PATH_HREF_PREFIX_LEGACY = 'hapi-file:'
 
 const PATH_PATTERN = /(?:\.\/|[A-Za-z0-9_.-]+\/)[^\s`"\'<>]*?\.(?:[A-Za-z0-9]{1,12}|lock)(?::\d+(?::\d+)?)?|(?:[A-Za-z0-9_.-]+\.(?:[A-Za-z0-9]{1,12}|lock))(?::\d+(?::\d+)?)?/g
 
@@ -23,9 +24,10 @@ function createFileHref(path: string): string {
 }
 
 export function decodeFilePathHref(href: string): string | null {
-    if (!href.startsWith(FILE_PATH_HREF_PREFIX)) return null
+    if (!href.startsWith(FILE_PATH_HREF_PREFIX) && !href.startsWith(FILE_PATH_HREF_PREFIX_LEGACY)) return null
+    const prefix = href.startsWith(FILE_PATH_HREF_PREFIX) ? FILE_PATH_HREF_PREFIX : FILE_PATH_HREF_PREFIX_LEGACY
     try {
-        return decodeURIComponent(href.slice(FILE_PATH_HREF_PREFIX.length))
+        return decodeURIComponent(href.slice(prefix.length))
     } catch {
         return null
     }
