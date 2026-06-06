@@ -608,8 +608,12 @@ html[data-theme="dark"] .shiki span {
         -webkit-overflow-scrolling: touch;
         overflow-y: auto;
         max-height: 100dvh;
-        /* Force iOS to use dvh so the dialog doesn't leave stale viewport height */
-        height: 100dvh;
+    }
+
+    .dialog-container-ios-safe > div {
+        min-height: auto;
+        padding-top: env(safe-area-inset-top, 0px);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
     }
 }
 

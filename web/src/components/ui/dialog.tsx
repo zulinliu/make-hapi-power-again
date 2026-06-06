@@ -11,15 +11,12 @@ export const DialogContent = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 animate-fade-in" style={{ background: 'var(--app-overlay-bg)', backdropFilter: 'blur(var(--app-overlay-blur))', WebkitBackdropFilter: 'blur(var(--app-overlay-blur))' }} />
-        <div className="fixed inset-0 z-50 overflow-y-auto overscroll-contain dialog-container-ios-safe">
-            <div
-                className="min-h-[100dvh] flex justify-center pointer-events-none"
-                style={{ paddingLeft: '1rem', paddingRight: '1rem', paddingTop: 'max(1rem, env(safe-area-inset-top))', paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
-            >
+        <div className="fixed inset-0 z-50 overflow-y-auto overscroll-contain">
+            <div className="min-h-[100dvh] flex items-start sm:items-center justify-center p-2 pt-[max(0.5rem,env(safe-area-inset-top))] sm:p-4 pointer-events-none">
                 <DialogPrimitive.Content
                     ref={ref}
                     className={cn(
-                        'pointer-events-auto animate-scale-in relative w-full sm:max-w-lg max-h-[85dvh] sm:max-h-[calc(100dvh_-_48px)] overflow-y-auto my-auto',
+                        'pointer-events-auto animate-scale-in relative w-full sm:max-w-lg max-h-[85dvh] sm:max-h-[calc(100dvh_-_32px)] overflow-y-auto',
                         'p-5 sm:p-6 overscroll-contain',
                         className
                     )}
