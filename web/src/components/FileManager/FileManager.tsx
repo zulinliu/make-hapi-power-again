@@ -288,6 +288,19 @@ export function FileManager() {
         setDialog({ type: 'rename', name, path: selectedPath })
       }
 
+      // Shift+F10 or ContextMenu key: open context menu for selected item
+      if ((e.key === 'ContextMenu') || (e.shiftKey && e.key === 'F10')) {
+        if (selectedPath) {
+          e.preventDefault()
+          const entry = entries.find(en => en.path === selectedPath)
+          if (entry) {
+            const active = document.activeElement as HTMLElement
+            const rect = active?.getBoundingClientRect()
+            if (rect) handleContextMenu(selectedPath, entry.type, { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 })
+          }
+        }
+      }
+
       if (mod && e.key === 'c' && selectedPath) {
         e.preventDefault()
         copyToClipboard(selectedPath)
@@ -301,7 +314,7 @@ export function FileManager() {
     <div className="flex h-full flex-col">
       {/* Toolbar */}
       <div className="flex items-center gap-2 border-b border-(--hp-border) px-3" style={{ height: 44, background: 'var(--hp-surface-0)' }}>
-        <button type="button" onClick={() => setShowHidden((v) => !v)}
+        <button type="button" onClick={() => setShowHidden((v) => !v)} aria-label={showHidden ? 'Hide dotfiles' : 'Show dotfiles'}
           style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', borderRadius: 8, fontSize: 12, fontWeight: 500, border: 'none', cursor: 'pointer', color: showHidden ? 'var(--hp-primary)' : 'var(--hp-text-tertiary)', background: showHidden ? 'var(--hp-primary-subtle)' : 'var(--hp-surface-1)', transition: 'all 0.15s' }}>
           <svg xmlns="http://www.w3.org/2000/svg" width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             {showHidden ? <><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" /><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" /><line x1="1" y1="1" x2="23" y2="23" /></>
@@ -310,7 +323,7 @@ export function FileManager() {
           <span className="hidden sm:inline">{showHidden ? 'Hide dotfiles' : 'Show dotfiles'}</span>
         </button>
 
-        <button type="button" onClick={handleToolbarNew}
+        <button type="button" onClick={handleToolbarNew} aria-label="New file"
           style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, border: 'none', cursor: 'pointer', color: 'oklch(100% 0 0)', background: 'var(--hp-primary)' }}>
           <span style={{ fontSize: 14, lineHeight: 1 }}>+</span>
           <span className="hidden sm:inline">New</span>
@@ -399,7 +412,7 @@ export function FileManager() {
 
 function ToolbarButton({ label, icon, onClick }: { label: string; icon: string; onClick?: () => void }) {
   return (
-    <button type="button" onClick={onClick}
+    <button type="button" onClick={onClick} aria-label={label}
       style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, padding: '4px 12px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--hp-text-tertiary)', borderRadius: 8, minWidth: 56, transition: 'color 0.15s' }}
       onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--hp-text-primary)' }} onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--hp-text-tertiary)' }}>
       <span style={{ fontSize: 18, lineHeight: 1 }}>{icon}</span>

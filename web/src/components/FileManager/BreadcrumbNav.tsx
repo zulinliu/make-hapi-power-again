@@ -52,7 +52,7 @@ export function BreadcrumbNav({ segments, onNavigate }: BreadcrumbNavProps) {
                 <span style={{ color: 'var(--hp-text-tertiary)', fontSize: 11, flexShrink: 0 }} aria-hidden="true">/</span>
               )}
               {isLast ? (
-                <span style={{ color: 'var(--hp-primary)', fontWeight: 600, fontSize: 13, flexShrink: 0 }}>
+                <span aria-current="page" style={{ color: 'var(--hp-primary)', fontWeight: 600, fontSize: 13, flexShrink: 0 }}>
                   {segment.name}
                 </span>
               ) : (

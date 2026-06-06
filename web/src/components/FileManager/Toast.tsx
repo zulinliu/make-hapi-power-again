@@ -36,6 +36,8 @@ export function ToastContainer() {
 
   if (items.length === 0) return null
 
+  const reducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
   return (
     <div
       aria-live="polite"
@@ -54,24 +56,25 @@ export function ToastContainer() {
       {items.map((t) => (
         <div
           key={t.id}
+          role="status"
           style={{
             padding: '10px 20px',
             borderRadius: 10,
             fontSize: 13,
             fontWeight: 500,
             color: 'oklch(100% 0 0)',
-            background: t.type === 'error' ? 'var(--hp-danger)' : 'oklch(55% 0.16 55)',
+            background: t.type === 'error' ? 'var(--hp-danger)' : 'oklch(45% 0.16 55)',
             boxShadow: '0 4px 16px oklch(0 0 0 / 0.2)',
-            animation: 'fm-toast-in 0.2s ease-out',
+            animation: reducedMotion ? 'none' : 'fm-toast-in 0.2s ease-out',
             whiteSpace: 'nowrap',
           }}
         >
           {t.message}
         </div>
       ))}
-      <style>{`
+      {!reducedMotion && <style>{`
         @keyframes fm-toast-in { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: translateY(0) } }
-      `}</style>
+      `}</style>}
     </div>
   )
 }

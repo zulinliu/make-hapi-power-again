@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 
 interface DialogProps {
   title: string
@@ -10,22 +10,53 @@ interface DialogProps {
   loading?: boolean
 }
 
+const FOCUSABLE = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+
 export function Dialog({ title, children, onClose, onSubmit, submitLabel, submitDanger, loading }: DialogProps) {
   const dialogRef = useRef<HTMLDivElement>(null)
+  const prevFocusRef = useRef<HTMLElement | null>(null)
 
+  // Restore focus on unmount
   useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+    prevFocusRef.current = document.activeElement as HTMLElement
+    return () => { prevFocusRef.current?.focus() }
+  }, [])
+
+  // Focus trap + Escape
+  useEffect(() => {
+    const el = dialogRef.current
+    if (!el) return
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { onClose(); return }
+      if (e.key !== 'Tab') return
+      const focusable = el.querySelectorAll<HTMLElement>(FOCUSABLE)
+      if (focusable.length === 0) return
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault(); last.focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault(); first.focus()
+      }
     }
-    document.addEventListener('keydown', handleEscape)
-    return () => document.removeEventListener('keydown', handleEscape)
+    el.addEventListener('keydown', handleKeyDown)
+    return () => el.removeEventListener('keydown', handleKeyDown)
   }, [onClose])
 
+  // Auto-focus first input or confirm button
   useEffect(() => {
-    const firstInput = dialogRef.current?.querySelector('input')
-    firstInput?.focus()
-    firstInput?.select()
+    const el = dialogRef.current
+    if (!el) return
+    const firstInput = el.querySelector<HTMLInputElement>('input')
+    if (firstInput) { firstInput.focus(); firstInput.select() }
+    else {
+      const confirmBtn = el.querySelector<HTMLButtonElement>('[data-submit]')
+      confirmBtn?.focus()
+    }
   }, [])
+
+  const reducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
   return (
     <div
@@ -37,7 +68,7 @@ export function Dialog({ title, children, onClose, onSubmit, submitLabel, submit
         alignItems: 'center',
         justifyContent: 'center',
         background: 'oklch(0 0 0 / 0.5)',
-        animation: 'fm-dialog-backdrop-in 0.15s ease-out',
+        animation: reducedMotion ? 'none' : 'fm-dialog-backdrop-in 0.15s ease-out',
         padding: 16,
       }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
@@ -46,6 +77,7 @@ export function Dialog({ title, children, onClose, onSubmit, submitLabel, submit
         ref={dialogRef}
         role="dialog"
         aria-label={title}
+        aria-modal="true"
         style={{
           width: '100%',
           maxWidth: 380,
@@ -53,7 +85,7 @@ export function Dialog({ title, children, onClose, onSubmit, submitLabel, submit
           border: '1px solid var(--hp-border)',
           borderRadius: 14,
           boxShadow: '0 16px 50px oklch(0 0 0 / 0.3)',
-          animation: 'fm-dialog-in 0.2s ease-out',
+          animation: reducedMotion ? 'none' : 'fm-dialog-in 0.2s ease-out',
           overflow: 'hidden',
         }}
         onClick={(e) => e.stopPropagation()}
@@ -92,6 +124,7 @@ export function Dialog({ title, children, onClose, onSubmit, submitLabel, submit
           {onSubmit && (
             <button
               type="button"
+              data-submit
               onClick={onSubmit}
               disabled={loading}
               style={{
@@ -112,10 +145,10 @@ export function Dialog({ title, children, onClose, onSubmit, submitLabel, submit
         </div>
       </div>
 
-      <style>{`
+      {!reducedMotion && <style>{`
         @keyframes fm-dialog-backdrop-in { from { opacity: 0 } to { opacity: 1 } }
         @keyframes fm-dialog-in { from { opacity: 0; transform: scale(0.95) } to { opacity: 1; transform: scale(1) } }
-      `}</style>
+      `}</style>}
     </div>
   )
 }

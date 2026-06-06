@@ -16,21 +16,26 @@ export function BatchActionBar({
   onStartSession,
 }: BatchActionBarProps) {
   const barRef = useRef<HTMLDivElement>(null)
+  const reducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
   useEffect(() => {
     const el = barRef.current
     if (!el) return
+    if (reducedMotion) { el.style.transform = 'translateY(0)'; return }
     el.style.transform = 'translateY(100%)'
     const raf = requestAnimationFrame(() => {
       el.style.transform = 'translateY(0)'
     })
     return () => cancelAnimationFrame(raf)
-  }, [])
+  }, [reducedMotion])
 
   return (
     <div
       ref={barRef}
       className="hidden md:flex"
+      role="status"
+      aria-live="polite"
+      aria-label={`${selectedCount} items selected`}
       style={{
         position: 'relative',
         zIndex: 10,

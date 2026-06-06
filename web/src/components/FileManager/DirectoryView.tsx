@@ -127,6 +127,7 @@ function FileRow({ entry, index, isSelected, isChecked, isNew, onOpenDirectory, 
         <input
           type="checkbox"
           checked={isChecked}
+          aria-label={`Select ${entry.name}`}
           onChange={(e) => {
             const ne = e.nativeEvent as MouseEvent
             onToggleSelect(entry.path, ne.shiftKey, ne.ctrlKey || ne.metaKey)
@@ -173,12 +174,13 @@ function SortHeader({ sort, onSortChange, allSelected, onSelectAll }: { sort: So
   return (
     <div className="fm-sort-header" style={{ height: 32, display: 'none', alignItems: 'center', gap: 12, padding: '0 16px', background: 'var(--hp-surface-1)', borderBottom: '1px solid var(--hp-divider)' }}>
       <label className="fm-row-checkbox" style={{ display: 'none', alignItems: 'center', justifyContent: 'center', width: 20, flexShrink: 0, cursor: 'pointer' }}>
-        <input type="checkbox" checked={allSelected} onChange={onSelectAll} style={{ width: 16, height: 16, accentColor: 'var(--hp-primary)', cursor: 'pointer' }} />
+        <input type="checkbox" checked={allSelected} onChange={onSelectAll} aria-label="Select all files" style={{ width: 16, height: 16, accentColor: 'var(--hp-primary)', cursor: 'pointer' }} />
       </label>
       {cells.map((cell) => {
         const active = sort.field === cell.field
         return (
           <button key={cell.field} type="button" onClick={() => onSortChange({ field: cell.field, direction: active ? OPPOSITE[sort.direction] : 'asc' })}
+            aria-sort={active ? (sort.direction === 'asc' ? 'ascending' : 'descending') : 'none'}
             style={{ ...(cell.flex != null ? { flex: cell.flex } : { width: cell.width }), textAlign: cell.align, fontSize: 11, fontWeight: 600, color: active ? 'var(--hp-text-secondary)' : 'var(--hp-text-tertiary)', textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer', padding: 0, letterSpacing: '0.02em', userSelect: 'none' }}>
             {cell.label}{active ? (sort.direction === 'asc' ? ' ↑' : ' ↓') : ''}
           </button>
