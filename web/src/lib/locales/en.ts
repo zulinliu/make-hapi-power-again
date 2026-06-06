@@ -573,6 +573,7 @@ export default {
   'git.remote.loading': 'Loading remotes…',
   'git.remote.empty': 'No remotes configured',
   'git.remote.remove': 'Remove',
+  'git.remote.removeConfirm': 'Remove remote "{name}"? This will not affect the remote repository.',
   'git.remote.addTitle': 'Add Remote',
   'git.remote.add': 'Add',
 
@@ -681,6 +682,7 @@ export default {
   'extensions.searchSkills': 'Search skills...',
   'extensions.install': 'Install',
   'extensions.remove': 'Remove',
+  'extensions.removeConfirm': 'Uninstall extension "{name}"? This action cannot be undone.',
   'extensions.installed': 'Installed',
   'extensions.installedSkills': 'Installed',
   'extensions.onlineInstall': 'Install Online',

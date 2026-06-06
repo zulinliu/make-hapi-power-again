@@ -237,7 +237,7 @@ export function LoginPrompt(props: LoginPromptProps) {
                     {!isBindMode && (
                         <div className="login-links">
                             <a
-                                href={`${props.serverUrl || props.baseUrl}/docs`}
+                                href="https://github.com/zulinliu/make-hapi-power-again"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="login-link"

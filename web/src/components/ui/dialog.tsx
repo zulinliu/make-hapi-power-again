@@ -5,10 +5,16 @@ import { cn } from '@/lib/utils'
 export const Dialog = DialogPrimitive.Root
 export const DialogTrigger = DialogPrimitive.Trigger
 
+const dialogContentStyle = {
+    borderRadius: 'var(--hp-radius-lg)',
+    background: 'var(--app-dialog-bg)',
+    boxShadow: 'var(--hp-shadow-xl)',
+} as React.CSSProperties
+
 export const DialogContent = React.forwardRef<
     HTMLDivElement,
     React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
->(({ className, ...props }, ref) => (
+>(({ className, style, ...props }, ref) => (
     <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 animate-fade-in" style={{ background: 'var(--app-overlay-bg)', backdropFilter: 'blur(var(--app-overlay-blur))', WebkitBackdropFilter: 'blur(var(--app-overlay-blur))' }} />
         <div className="fixed inset-0 z-50 overflow-y-auto overscroll-contain">
@@ -20,11 +26,7 @@ export const DialogContent = React.forwardRef<
                         'p-5 sm:p-6 overscroll-contain',
                         className
                     )}
-                    style={{
-                        borderRadius: 'var(--hp-radius-lg)',
-                        background: 'var(--app-dialog-bg)',
-                        boxShadow: 'var(--hp-shadow-xl)',
-                    }}
+                    style={{ ...dialogContentStyle, ...style }}
                     {...props}
                 />
             </div>

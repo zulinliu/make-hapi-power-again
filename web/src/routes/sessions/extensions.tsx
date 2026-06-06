@@ -6,6 +6,7 @@ import { useSession } from '@/hooks/queries/useSession'
 import { queryKeys } from '@/lib/query-keys'
 import { useTranslation } from '@/lib/use-translation'
 import { SubPageLayout } from '@/components/ui/SubPageLayout'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 
 function PuzzleIcon() {
     return (
@@ -83,6 +84,8 @@ export default function ExtensionsPage() {
     const [successMsg, setSuccessMsg] = useState<string | null>(null)
     const [pluginIdInput, setPluginIdInput] = useState('')
     const [pluginSourceInput, setPluginSourceInput] = useState('')
+    const [uninstallTarget, setUninstallTarget] = useState<{ type: 'skill' | 'plugin'; name: string } | null>(null)
+    const [uninstalling, setUninstalling] = useState(false)
 
     useSession(api, sessionId)
 
@@ -143,7 +146,7 @@ export default function ExtensionsPage() {
 
     const handleUninstallSkill = useCallback(async (name: string) => {
         if (!api) return
-        setInstalling(name)
+        setUninstalling(true)
         setError(null)
         try {
             const res = await api.uninstallSkill(sessionId, name)
@@ -154,11 +157,12 @@ export default function ExtensionsPage() {
         } catch (e) {
             setError(e instanceof Error ? e.message : 'Uninstall failed')
         }
-        setInstalling(null)
+        setUninstalling(false)
     }, [api, sessionId, queryClient])
 
     const handleUninstallPlugin = useCallback(async (pluginId: string) => {
         if (!api) return
+        setUninstalling(true)
         setError(null)
         try {
             await api.uninstallPlugin(sessionId, pluginId)
@@ -166,7 +170,7 @@ export default function ExtensionsPage() {
         } catch (e) {
             setError(e instanceof Error ? e.message : 'Uninstall failed')
         }
-        setInstalling(null)
+        setUninstalling(false)
     }, [api, sessionId, queryClient])
 
     const handleInstallPlugin = useCallback(async () => {
@@ -315,7 +319,7 @@ export default function ExtensionsPage() {
                                             </div>
                                             <button
                                                 type="button"
-                                                onClick={() => handleUninstallSkill(skill.name)}
+                                                onClick={() => setUninstallTarget({ type: 'skill', name: skill.name })}
                                                 disabled={installing === skill.name}
                                                 className="ml-2 shrink-0 inline-flex items-center gap-1 rounded-(--hp-radius-sm) px-2 py-1 text-xs transition-colors disabled:opacity-50 text-(--hp-danger)"
                                             >
@@ -487,7 +491,7 @@ export default function ExtensionsPage() {
                                     </div>
                                     <button
                                         type="button"
-                                        onClick={() => handleUninstallPlugin(plugin.id)}
+                                        onClick={() => setUninstallTarget({ type: 'plugin', name: plugin.id })}
                                         className="ml-2 shrink-0 rounded-(--hp-radius-sm) px-2 py-1 text-xs text-(--hp-danger) hover:opacity-80"
                                     >
                                         {t('extensions.remove')}
@@ -498,6 +502,23 @@ export default function ExtensionsPage() {
                     )}
                 </div>
             )}
+
+            <ConfirmDialog
+                isOpen={uninstallTarget !== null}
+                onClose={() => setUninstallTarget(null)}
+                title={t('extensions.remove')}
+                description={t('extensions.removeConfirm', { name: uninstallTarget?.name ?? '' })}
+                confirmLabel={t('extensions.remove')}
+                confirmingLabel={t('extensions.remove') + '…'}
+                onConfirm={() => {
+                    if (!uninstallTarget) return Promise.resolve()
+                    return uninstallTarget.type === 'skill'
+                        ? handleUninstallSkill(uninstallTarget.name)
+                        : handleUninstallPlugin(uninstallTarget.name)
+                }}
+                isPending={uninstalling}
+                destructive
+            />
         </SubPageLayout>
     )
 }
