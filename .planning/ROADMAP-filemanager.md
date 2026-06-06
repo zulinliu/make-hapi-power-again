@@ -170,4 +170,4 @@ Full-featured global file manager replacing the existing `/browse` page. Mobile-
 | 35-03 | UI behavior convergence | Done | Single New action, real move/copy UI, session directories reuse FileManager |
 | 35-04 | Preview/edit hardening | Done | Global file route, hash metadata, conflict recovery, light editor fallback |
 | 35-05 | Transfer and search | Done | File upload, single/batch download, local filter, recursive name/content search |
-| 35-06 | Quality gates | Pending | tests, build, audit, release checklist |
+| 35-06 | Quality gates | Done | typecheck, full tests, build, brand check, release checklist |

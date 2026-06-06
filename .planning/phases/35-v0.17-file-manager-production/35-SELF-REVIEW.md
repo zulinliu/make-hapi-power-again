@@ -380,3 +380,84 @@ git diff --check
 3. 下载目录 zip 未实现，当前不会显示目录下载入口。
 4. 覆盖确认未实现，上传同名文件会失败并提示；后续可加 overwrite confirm。
 5. 搜索条增加了界面高度，35.6 需要在移动端做一次视觉密度自审。
+
+## Phase 35.6 Review: 测试、自审和发布准备
+
+**状态**: 完成。
+
+### 本阶段交付
+
+1. 运行 v0.17 文件管理器专项完整质量门禁。
+2. 补充 release checklist，明确已完成项、剩余非阻断风险和发布前动作。
+3. 更新 ROADMAP、ROADMAP-filemanager、STATE，将 35-06 标记为完成。
+4. 执行品牌残留扫描，确认无旧品牌和第三方品牌残留。
+5. 汇总 v0.17 文件管理器专项最终验收状态。
+
+### 用户反馈覆盖
+
+| 用户问题 | 最终状态 | 说明 |
+|---|---|---|
+| 没有返回上一级 | 已解决 | 显性上一级按钮 + Backspace 快捷键 |
+| 新建文件/文件夹多处冗余 | 已解决 | 单一“新建”入口，弹窗选择类型 |
+| 显示隐藏文件不可用 | 已解决 | Web → Hub → RPC → CLI 全链路支持 `showHidden` |
+| 除浏览和新建会话外其他功能几乎不可用 | 已解决基础生产闭环 | CRUD、预览编辑、上传、下载、搜索均可用 |
+| 编辑入口找不到，点击文件无反应 | 已解决 | `/browse` 点击文件进入全局文件页，支持预览/编辑/保存 |
+
+### 是否引入新空壳入口
+
+未发现新的空壳入口。未实现的能力（目录 zip 下载、目录上传、大文件 streaming、Monaco）没有作为可点击承诺暴露给用户。
+
+### 全局和会话一致性
+
+- 全局 `/browse` 和 session directory tab 共用 FileManager。
+- machine mode 不依赖 session，可完整管理 workspaceRoots 内文件。
+- session mode 保留 Git changes/diff 作为增强能力。
+- 文件页仍有重复实现，但行为一致，后续可抽公共 FileViewer。
+
+### 移动端触控和可访问性
+
+- 移动端底部栏保留新建、上传、会话三项高频动作。
+- 关键操作目标保持 44px 左右，底部栏按钮 48px。
+- 错误、上传进度、保存冲突均有明确文案和恢复动作。
+
+### 质量门禁
+
+```bash
+bun run typecheck
+# PASS
+
+bun run test:shared
+# PASS: 37 tests
+
+bun run test:hub
+# PASS: 299 tests
+
+bun run test:web
+# PASS: 79 files, 672 tests
+
+bun run test:cli
+# PASS: 88 files passed, 1 skipped; 772 passed, 12 skipped
+
+bun run test
+# PASS: cli + hub + web + shared
+
+bun run build
+# PASS
+
+scripts/brand-check.sh
+# PASS
+
+git diff --check
+# PASS
+```
+
+### 剩余风险
+
+1. 上传和内容搜索已达基础生产闭环，但大文件和超大仓库性能仍需后续增强。
+2. Monaco 未落地，当前是稳定轻编辑，不是 IDE 级编辑器。
+3. FileViewer 代码重复可维护性一般，建议下一版本抽公共组件。
+4. 仍建议人工在真实 iOS Safari/PWA 中手动验证上传、下载、搜索、保存冲突。
+
+### 结论
+
+v0.17.0 文件管理器专项已经把 `/browse` 从目录选择器升级为 machine-scoped 全局文件管理器，并关闭用户指出的 5 个核心问题。当前状态满足“生产稳定基础全功能文件管理器模块”的发布门槛，剩余项属于性能、体验和编辑器增强，不阻断 v0.17.0。
