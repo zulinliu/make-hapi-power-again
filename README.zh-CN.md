@@ -40,11 +40,32 @@
 ## 截图
 
 <p align="center">
-  <img src="docs/assets/screenshot-desktop.png" alt="桌面端：多代理工作台" width="720">
+  <img src="docs/assets/screenshot-desktop.png" alt="桌面端：登录页" width="720">
 </p>
 
+<table align="center">
+  <tr>
+    <td align="center"><b>会话列表</b></td>
+    <td align="center"><b>新建会话 — 选择 AI 代理</b></td>
+  </tr>
+  <tr>
+    <td><img src="docs/assets/screenshot-sessions.png" alt="会话列表" width="360"></td>
+    <td><img src="docs/assets/screenshot-new-session.png" alt="多代理选择" width="360"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>设置与模型供应商</b></td>
+    <td align="center"><b>暗色模式</b></td>
+  </tr>
+  <tr>
+    <td><img src="docs/assets/screenshot-settings.png" alt="供应商配置" width="360"></td>
+    <td><img src="docs/assets/screenshot-dark.png" alt="暗色模式" width="360"></td>
+  </tr>
+</table>
+
 <p align="center">
-  <img src="docs/assets/screenshot-mobile.png" alt="移动端：滑动审批变更" height="400">
+  <img src="docs/assets/screenshot-mobile.png" alt="移动端：登录" height="360">
+  &nbsp;&nbsp;
+  <img src="docs/assets/screenshot-mobile-sessions.png" alt="移动端：会话" height="360">
 </p>
 
 ---

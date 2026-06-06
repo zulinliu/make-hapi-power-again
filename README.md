@@ -40,11 +40,32 @@ Most AI coding tools lock you into one agent, one terminal, one machine. Hapi Po
 ## Screenshots
 
 <p align="center">
-  <img src="docs/assets/screenshot-desktop.png" alt="Desktop: Multi-agent workbench" width="720">
+  <img src="docs/assets/screenshot-desktop.png" alt="Desktop: Login Page" width="720">
 </p>
 
+<table align="center">
+  <tr>
+    <td align="center"><b>Session List</b></td>
+    <td align="center"><b>Create Session — Pick Your Agent</b></td>
+  </tr>
+  <tr>
+    <td><img src="docs/assets/screenshot-sessions.png" alt="Session list" width="360"></td>
+    <td><img src="docs/assets/screenshot-new-session.png" alt="Multi-agent selection" width="360"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Settings & Model Providers</b></td>
+    <td align="center"><b>Dark Mode</b></td>
+  </tr>
+  <tr>
+    <td><img src="docs/assets/screenshot-settings.png" alt="Provider configuration" width="360"></td>
+    <td><img src="docs/assets/screenshot-dark.png" alt="Dark mode" width="360"></td>
+  </tr>
+</table>
+
 <p align="center">
-  <img src="docs/assets/screenshot-mobile.png" alt="Mobile: Swipe to approve changes" height="400">
+  <img src="docs/assets/screenshot-mobile.png" alt="Mobile: Login" height="360">
+  &nbsp;&nbsp;
+  <img src="docs/assets/screenshot-mobile-sessions.png" alt="Mobile: Sessions" height="360">
 </p>
 
 ---
