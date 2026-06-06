@@ -8,38 +8,29 @@ export const DialogTrigger = DialogPrimitive.Trigger
 export const DialogContent = React.forwardRef<
     HTMLDivElement,
     React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
->(({ className, ...props }, ref) => {
-    const handleOpenAutoFocus = React.useCallback((e: Event) => {
-        // Prevent Radix from auto-focusing inputs inside dialog on mobile,
-        // which can trigger iOS zoom and virtual keyboard before user interaction.
-        e.preventDefault()
-    }, [])
-
-    return (
-        <DialogPrimitive.Portal>
-            <DialogPrimitive.Overlay className="fixed inset-0 z-50 animate-fade-in" style={{ background: 'var(--app-overlay-bg)', backdropFilter: 'blur(var(--app-overlay-blur))', WebkitBackdropFilter: 'blur(var(--app-overlay-blur))' }} />
-            <div className="fixed inset-0 z-50 overflow-y-auto overscroll-contain dialog-container-ios-safe">
-                <div className="min-h-[100dvh] flex items-start sm:items-center justify-center p-2 pt-[max(0.5rem,env(safe-area-inset-top))] sm:p-4 pointer-events-none">
-                    <DialogPrimitive.Content
-                        ref={ref}
-                        className={cn(
-                            'pointer-events-auto animate-scale-in relative w-full sm:max-w-lg max-h-[85dvh] sm:max-h-[calc(100dvh_-_32px)] overflow-y-auto',
-                            'p-5 sm:p-6 overscroll-contain',
-                            className
-                        )}
-                        style={{
-                            borderRadius: 'var(--hp-radius-lg)',
-                            background: 'var(--app-dialog-bg)',
-                            boxShadow: 'var(--hp-shadow-xl)',
-                        }}
-                        onOpenAutoFocus={handleOpenAutoFocus}
-                        {...props}
-                    />
-                </div>
+>(({ className, ...props }, ref) => (
+    <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 animate-fade-in" style={{ background: 'var(--app-overlay-bg)', backdropFilter: 'blur(var(--app-overlay-blur))', WebkitBackdropFilter: 'blur(var(--app-overlay-blur))' }} />
+        <div className="fixed inset-0 z-50 overflow-y-auto overscroll-contain dialog-container-ios-safe">
+            <div className="min-h-[100dvh] flex items-center justify-center p-4 sm:p-6 pointer-events-none">
+                <DialogPrimitive.Content
+                    ref={ref}
+                    className={cn(
+                        'pointer-events-auto animate-scale-in relative w-full sm:max-w-lg max-h-[85dvh] sm:max-h-[calc(100dvh_-_48px)] overflow-y-auto',
+                        'p-5 sm:p-6 overscroll-contain',
+                        className
+                    )}
+                    style={{
+                        borderRadius: 'var(--hp-radius-lg)',
+                        background: 'var(--app-dialog-bg)',
+                        boxShadow: 'var(--hp-shadow-xl)',
+                    }}
+                    {...props}
+                />
             </div>
-        </DialogPrimitive.Portal>
-    )
-})
+        </div>
+    </DialogPrimitive.Portal>
+))
 DialogContent.displayName = 'DialogContent'
 
 export const DialogClose = DialogPrimitive.Close
