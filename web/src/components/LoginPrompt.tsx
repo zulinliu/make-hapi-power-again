@@ -36,9 +36,8 @@ function TerminalIcon() {
 function LogoIcon() {
     return (
         <svg viewBox="0 0 32 32" fill="none">
-            <path d="M16 4L6 10v12l10 6 10-6V10L16 4z" fill="currentColor" opacity="0.2" />
-            <path d="M16 4L6 10v12l10 6 10-6V10L16 4z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-            <path d="M16 4v24M6 10l10 6 10-6" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+            <path d="M16 3 L27 20 L21 20 L16 11 L11 20 L5 20 Z" fill="currentColor" />
+            <rect x="3" y="22" width="26" height="5" rx="1" fill="currentColor" />
         </svg>
     )
 }
@@ -238,7 +237,7 @@ export function LoginPrompt(props: LoginPromptProps) {
                     {!isBindMode && (
                         <div className="login-links">
                             <a
-                                href={`${props.serverUrl || props.baseUrl}/docs`}
+                                href="https://github.com/zulinliu/make-hapi-power-again"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="login-link"

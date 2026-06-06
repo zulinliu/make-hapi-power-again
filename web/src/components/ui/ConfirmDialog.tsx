@@ -60,33 +60,39 @@ export function ConfirmDialog(props: ConfirmDialogProps) {
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && !isPending && onClose()}>
-            <DialogContent style={{ maxWidth: '400px' }}>
-                <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2.5">
+            <DialogContent className="confirm-dialog" style={{ maxWidth: 400 }}>
+                {destructive && (
+                    <div className="confirm-dialog-danger-strip" aria-hidden="true" />
+                )}
+
+                <DialogHeader className={destructive ? 'pt-1' : undefined}>
+                    <DialogTitle className="flex items-center gap-3">
                         {destructive && (
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                                className="shrink-0" style={{ color: 'var(--hp-danger)' }}>
-                                <circle cx="12" cy="12" r="10" />
-                                <line x1="12" y1="8" x2="12" y2="12" />
-                                <line x1="12" y1="16" x2="12.01" y2="16" />
-                            </svg>
+                            <span className="confirm-dialog-icon" aria-hidden="true">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2Z"
+                                        fill="var(--hp-danger-subtle)" stroke="var(--hp-danger)"
+                                        strokeWidth="1.5" />
+                                    <path d="M12 7v5" stroke="var(--hp-danger)" strokeWidth="2"
+                                        strokeLinecap="round" />
+                                    <circle cx="12" cy="16.5" r="1.2" fill="var(--hp-danger)" />
+                                </svg>
+                            </span>
                         )}
-                        {title}
+                        <span>{title}</span>
                     </DialogTitle>
-                    <DialogDescription className="mt-1.5">
+                    <DialogDescription className="mt-1.5 leading-relaxed">
                         {description}
                     </DialogDescription>
                 </DialogHeader>
 
                 {error && (
-                    <div className="mt-3 rounded-(--hp-radius-sm) px-3 py-2 text-sm"
-                        style={{ color: 'var(--hp-danger)', background: 'var(--hp-danger-subtle)' }}>
+                    <div className="confirm-dialog-error">
                         {error}
                     </div>
                 )}
 
-                <DialogFooter>
+                <DialogFooter className={destructive ? 'confirm-dialog-footer-danger' : undefined}>
                     <Button
                         type="button"
                         variant="outline"
@@ -103,7 +109,17 @@ export function ConfirmDialog(props: ConfirmDialogProps) {
                         disabled={isPending}
                         className="min-h-[44px] flex-1 sm:flex-none"
                     >
-                        {isPending ? confirmingLabel : confirmLabel}
+                        {isPending ? (
+                            <span className="flex items-center gap-2">
+                                <svg className="confirm-dialog-spinner" width="16" height="16"
+                                    viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                    <circle cx="12" cy="12" r="10" stroke="currentColor"
+                                        strokeWidth="3" strokeDasharray="31.4 31.4"
+                                        strokeLinecap="round" />
+                                </svg>
+                                {confirmingLabel}
+                            </span>
+                        ) : confirmLabel}
                     </Button>
                 </DialogFooter>
             </DialogContent>

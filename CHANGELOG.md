@@ -4,6 +4,19 @@ All notable changes to Hapi Power will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.15.0] - 2026-06-06
+
+### Changed
+
+- Brand redesign: new "Power Hub" logo (energy chevron on platform)
+- Color system migrated from Ink Teal to Electric Orange (oklch 68% 0.18 55)
+- Unified design system across Web App and Marketing Website
+- New slogan: "随时AI，编程自在" / "Code free, powered by AI"
+- Typography: removed Source Serif 4, unified on Geist Sans
+- Updated all SVG/PNG icon assets (favicon, PWA, Apple touch icons)
+- Updated website visual style: from Neo-Brutalist to Power Geometry
+- Updated all locale files (en, zh) with new brand copy
+
 ## [0.10.0] - 2026-06-04
 
 ### Changed

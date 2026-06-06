@@ -44,7 +44,7 @@ function SessionsEmptyState(props: {
                 Welcome to Hapi Power
             </div>
             <div className="max-w-md text-sm text-(--hp-text-tertiary)">
-                Your AI-powered development workstation. Clone a repo, code with AI, review and push.
+                One workbench for every AI coding agent. Clone a repo, code with AI, review and push.
             </div>
 
             <div className="flex gap-4 mt-4">

@@ -12,10 +12,10 @@ export function SEO({ title, description, image, url }: SEOProps) {
   const { i18n } = useTranslation();
   const currentLang = i18n.language;
   
-  const siteTitle = "Hapi Power - Vibe Coding Anytime, Anywhere";
-  const defaultDescription = "The local-first AI agent platform for developers who love freedom. Go for a hike, grab a coffee, or just relax. Your AI agents work in the background.";
-  const siteUrl = "https://YOUR_DOMAIN";
-  const defaultImage = "/images/og-image.png"; // We need to create this or use an existing one
+  const siteTitle = "Hapi Power - Code Free, Powered by AI";
+  const defaultDescription = "One workbench for every AI coding agent. Code free, powered by AI.";
+  const siteUrl = "https://hapi-power.liuzl.asia";
+  const defaultImage = "/images/og-image.png";
 
   const metaTitle = title ? `${title} | Hapi Power` : siteTitle;
   const metaDescription = description || defaultDescription;
@@ -35,7 +35,7 @@ export function SEO({ title, description, image, url }: SEOProps) {
       "priceCurrency": "USD"
     },
     "description": metaDescription,
-    "softwareVersion": "0.3.1"
+    "softwareVersion": "0.15.0"
   };
 
   return (

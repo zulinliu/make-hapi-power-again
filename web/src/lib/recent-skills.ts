@@ -1,7 +1,18 @@
-const RECENT_SKILLS_KEY = 'hapi-recent-skills'
+const RECENT_SKILLS_KEY = 'hapi-power-recent-skills'
+const RECENT_SKILLS_KEY_LEGACY = 'hapi-recent-skills'
 const MAX_RECENT_SKILLS = 200
 
 type RecentSkillsMap = Record<string, number>
+
+function migrateRecentSkillsStorage(): void {
+    const newValue = localStorage.getItem(RECENT_SKILLS_KEY)
+    if (newValue !== null) return
+    const legacyValue = localStorage.getItem(RECENT_SKILLS_KEY_LEGACY)
+    if (legacyValue !== null) {
+        localStorage.setItem(RECENT_SKILLS_KEY, legacyValue)
+        localStorage.removeItem(RECENT_SKILLS_KEY_LEGACY)
+    }
+}
 
 function safeParseJson(value: string): unknown {
     try {
@@ -14,6 +25,7 @@ function safeParseJson(value: string): unknown {
 export function getRecentSkills(): RecentSkillsMap {
     if (typeof window === 'undefined') return {}
     try {
+        migrateRecentSkillsStorage()
         const raw = localStorage.getItem(RECENT_SKILLS_KEY)
         if (!raw) return {}
         const parsed = safeParseJson(raw)

@@ -54,7 +54,7 @@ export default defineConfig({
     },
     server: {
         host: true,
-        allowedHosts: ['hapidev.weishu.me', 'test.liuzl.asia'],
+        allowedHosts: ['test.liuzl.asia'],
         proxy: {
             '/api': {
                 target: hubTarget,
@@ -84,10 +84,10 @@ export default defineConfig({
             manifest: {
                 name: 'Hapi Power',
                 short_name: 'Hapi Power',
-                description: 'AI-powered development assistant',
+                description: '随时AI，编程自在 — AI编程工作台',
                 categories: ['developer tools', 'productivity'],
-                theme_color: '#2B6B7A',
-                background_color: '#F5F4F0',
+                theme_color: '#F97316',
+                background_color: '#FFF8F3',
                 display: 'standalone',
                 orientation: 'portrait',
                 scope: base,

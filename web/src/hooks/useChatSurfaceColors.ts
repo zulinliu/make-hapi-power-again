@@ -8,8 +8,10 @@ export type ChatSurfaceColorPreference = 'default' | 'preset:soft-blue' | 'prese
 
 export const DEFAULT_CHAT_SURFACE_COLOR_PREFERENCE: ChatSurfaceColorPreference = 'default'
 
-const TOOL_GROUP_BG_STORAGE_KEY = 'hapi-tool-group-bg'
-const USER_MESSAGE_BG_STORAGE_KEY = 'hapi-user-message-bg'
+const TOOL_GROUP_BG_STORAGE_KEY = 'hapi-power-tool-group-bg'
+const USER_MESSAGE_BG_STORAGE_KEY = 'hapi-power-user-message-bg'
+const TOOL_GROUP_BG_STORAGE_KEY_LEGACY = 'hapi-tool-group-bg'
+const USER_MESSAGE_BG_STORAGE_KEY_LEGACY = 'hapi-user-message-bg'
 const TOOL_GROUP_BG_CSS_VAR = '--app-tool-group-bg'
 const USER_MESSAGE_BG_CSS_VAR = '--app-chat-user-surface-bg'
 const DEFAULT_PICKER_COLOR = '#f2f4f6'
@@ -139,11 +141,23 @@ function resolveSurfaceColor(pref: ChatSurfaceColorPreference, theme: ThemeMode,
     return mixHex(base, accent, ratio)
 }
 
+function migrateStorageKey(oldKey: string, newKey: string): void {
+    const newValue = safeGetItem(newKey)
+    if (newValue !== null) return
+    const legacyValue = safeGetItem(oldKey)
+    if (legacyValue !== null) {
+        safeSetItem(newKey, legacyValue)
+        safeRemoveItem(oldKey)
+    }
+}
+
 function readStoredToolGroupBackground(): ChatSurfaceColorPreference {
+    migrateStorageKey(TOOL_GROUP_BG_STORAGE_KEY_LEGACY, TOOL_GROUP_BG_STORAGE_KEY)
     return parseChatSurfaceColorPreference(safeGetItem(TOOL_GROUP_BG_STORAGE_KEY))
 }
 
 function readStoredUserMessageBackground(): ChatSurfaceColorPreference {
+    migrateStorageKey(USER_MESSAGE_BG_STORAGE_KEY_LEGACY, USER_MESSAGE_BG_STORAGE_KEY)
     return parseChatSurfaceColorPreference(safeGetItem(USER_MESSAGE_BG_STORAGE_KEY))
 }
 

@@ -1,6 +1,6 @@
 /**
  * Login Page — Split Layout (45/55)
- * Hapi Power "精密工具" design language
+ * Hapi Power "Power Geometry" design language
  * Uses --hp-* design tokens from tokens.css
  */
 
@@ -30,7 +30,7 @@
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse 80% 60% at 30% 40%, oklch(42% 0.08 200 / 0.12), transparent),
+    radial-gradient(ellipse 80% 60% at 30% 40%, oklch(42% 0.08 55 / 0.12), transparent),
     radial-gradient(ellipse 60% 50% at 70% 70%, oklch(72% 0.06 75 / 0.08), transparent);
   pointer-events: none;
 }
@@ -63,7 +63,7 @@
   margin: 0 auto 24px;
   border-radius: var(--hp-radius-xl);
   background: var(--hp-primary);
-  box-shadow: 0 8px 24px oklch(42% 0.14 200 / 0.25);
+  box-shadow: 0 8px 24px oklch(42% 0.14 55 / 0.25);
 }
 
 .login-brand-logo svg {
@@ -73,7 +73,7 @@
 }
 
 .login-brand-headline {
-  font-family: var(--hp-font-display), Georgia, serif;
+  font-family: var(--hp-font-sans), 'Geist Sans', sans-serif;
   font-size: clamp(1.75rem, 1.4rem + 1.5vw, 2.5rem);
   font-weight: 700;
   color: var(--hp-text-primary);
@@ -156,7 +156,7 @@
 
 /* Form title inside right panel */
 .login-form-title {
-  font-family: var(--hp-font-display), Georgia, serif;
+  font-family: var(--hp-font-sans), 'Geist Sans', sans-serif;
   font-size: 1.5rem;
   font-weight: 600;
   color: var(--hp-text-primary);
@@ -313,12 +313,12 @@
 
 /* === Dark mode brand panel === */
 [data-theme="dark"] .login-brand-panel {
-  background: oklch(10% 0.01 200);
+  background: oklch(10% 0.01 55);
 }
 
 [data-theme="dark"] .login-brand-panel::before {
   background:
-    radial-gradient(ellipse 80% 60% at 30% 40%, oklch(72% 0.06 200 / 0.10), transparent),
+    radial-gradient(ellipse 80% 60% at 30% 40%, oklch(72% 0.06 55 / 0.10), transparent),
     radial-gradient(ellipse 60% 50% at 70% 70%, oklch(75% 0.04 75 / 0.06), transparent);
 }
 
@@ -351,7 +351,7 @@ body[data-login-active] .fixed.inset-0.bg-black\/60 {
 }
 
 .login-dialog-content h2 {
-  font-family: var(--hp-font-display), Georgia, serif;
+  font-family: var(--hp-font-sans), 'Geist Sans', sans-serif;
   font-size: 18px !important;
   font-weight: 600 !important;
   letter-spacing: -0.01em;
@@ -483,12 +483,11 @@ body[data-login-active] .fixed.inset-0.bg-black\/60 {
 @media (max-width: 767px) {
   .login-page {
     grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr;
+    grid-template-rows: 1fr;
   }
 
   .login-brand-panel {
-    padding: 0;
-    min-height: 0;
+    display: none;
   }
 
   .login-brand-panel::before,
@@ -505,47 +504,45 @@ body[data-login-active] .fixed.inset-0.bg-black\/60 {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 40px 20px 24px;
-    padding-top: max(40px, calc(env(safe-area-inset-top, 0px) + 20px));
-    background: var(--hp-surface-0);
+    padding: 0 20px 28px;
   }
 
   .login-brand-mobile-logo {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 48px;
-    height: 48px;
-    border-radius: var(--hp-radius-lg);
+    width: 56px;
+    height: 56px;
+    border-radius: var(--hp-radius-xl);
     background: var(--hp-primary);
-    box-shadow: 0 4px 12px oklch(42% 0.14 200 / 0.20);
-    margin-bottom: 12px;
+    box-shadow: 0 6px 20px oklch(42% 0.14 55 / 0.22);
+    margin-bottom: 14px;
   }
 
   .login-brand-mobile-logo svg {
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
     color: var(--hp-primary-text);
   }
 
   .login-brand-mobile-name {
-    font-family: var(--hp-font-display), Georgia, serif;
-    font-size: 1.25rem;
+    font-family: var(--hp-font-sans), 'Geist Sans', sans-serif;
+    font-size: 1.375rem;
     font-weight: 700;
     color: var(--hp-text-primary);
     letter-spacing: -0.02em;
   }
 
   .login-brand-mobile-tagline {
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
     color: var(--hp-text-tertiary);
-    margin-top: 4px;
+    margin-top: 6px;
   }
 
   .login-form-panel {
-    justify-content: flex-start;
-    padding: 0 20px 20px;
-    padding-bottom: max(20px, env(safe-area-inset-bottom, 8px));
+    justify-content: center;
+    padding: 0 24px;
+    padding-bottom: max(24px, env(safe-area-inset-bottom, 12px));
     background: var(--hp-surface-0);
   }
 
@@ -571,7 +568,7 @@ body[data-login-active] .fixed.inset-0.bg-black\/60 {
   }
 
   .login-input {
-    height: 44px;
+    height: 48px;
     font-size: 16px;
   }
 
@@ -582,19 +579,19 @@ body[data-login-active] .fixed.inset-0.bg-black\/60 {
   }
 
   .login-btn {
-    height: 44px;
+    height: 48px;
     margin-top: 14px;
     font-size: 15px;
   }
 
   .login-links {
-    margin-top: 20px;
-    padding-top: 16px;
+    margin-top: 24px;
+    padding-top: 20px;
   }
 
   .login-footer {
     position: static;
-    padding-top: 16px;
+    padding-top: 20px;
     font-size: 11px;
   }
 
@@ -614,12 +611,12 @@ body[data-login-active] .fixed.inset-0.bg-black\/60 {
 
 @media (max-width: 400px) {
   .login-form-panel {
-    padding: 0 16px 16px;
+    padding: 0 16px;
+    padding-bottom: max(16px, env(safe-area-inset-bottom, 8px));
   }
 
   .login-brand-mobile {
-    padding: 32px 16px 20px;
-    padding-top: max(32px, calc(env(safe-area-inset-top, 0px) + 16px));
+    padding: 0 16px 24px;
   }
 }
 

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAppContext } from '@/lib/app-context'
 import { useTranslation } from '@/lib/use-translation'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 
 interface GitRemoteManagerProps {
     sessionId: string
@@ -34,6 +35,8 @@ export function GitRemoteManager({ sessionId, onRemotesLoaded }: { sessionId: st
     const [newName, setNewName] = useState('')
     const [newUrl, setNewUrl] = useState('')
     const [error, setError] = useState('')
+    const [removeTarget, setRemoveTarget] = useState<string | null>(null)
+    const [removing, setRemoving] = useState(false)
 
     const fetchRemotes = useCallback(async () => {
         setLoading(true)
@@ -69,11 +72,16 @@ export function GitRemoteManager({ sessionId, onRemotesLoaded }: { sessionId: st
 
     async function handleRemove(name: string) {
         setError('')
-        const result = await api.removeGitRemote(sessionId, name)
-        if (result.success) {
-            fetchRemotes()
-        } else {
-            setError(result.error ?? 'Failed to remove remote')
+        setRemoving(true)
+        try {
+            const result = await api.removeGitRemote(sessionId, name)
+            if (result.success) {
+                fetchRemotes()
+            } else {
+                setError(result.error ?? 'Failed to remove remote')
+            }
+        } finally {
+            setRemoving(false)
         }
     }
 
@@ -106,7 +114,7 @@ export function GitRemoteManager({ sessionId, onRemotesLoaded }: { sessionId: st
                             </div>
                             <button
                                 type="button"
-                                onClick={() => handleRemove(remote.name)}
+                                onClick={() => setRemoveTarget(remote.name)}
                                 className="ml-2 shrink-0 rounded-(--hp-radius-sm) px-2 py-1 text-xs text-(--hp-danger) hover:opacity-80"
                             >
                                 {t('git.remote.remove')}
@@ -143,6 +151,18 @@ export function GitRemoteManager({ sessionId, onRemotesLoaded }: { sessionId: st
                     </button>
                 </div>
             </div>
+
+            <ConfirmDialog
+                isOpen={removeTarget !== null}
+                onClose={() => setRemoveTarget(null)}
+                title={t('git.remote.remove')}
+                description={t('git.remote.removeConfirm', { name: removeTarget ?? '' })}
+                confirmLabel={t('git.remote.remove')}
+                confirmingLabel={t('git.remote.remove') + '…'}
+                onConfirm={() => removeTarget ? handleRemove(removeTarget) : Promise.resolve()}
+                isPending={removing}
+                destructive
+            />
         </div>
     )
 }

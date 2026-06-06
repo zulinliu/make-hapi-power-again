@@ -11,9 +11,8 @@ export function getTerminalToolDisplayModeOptions(): ReadonlyArray<{ value: Term
     ]
 }
 
-function getTerminalToolDisplayModeStorageKey(): string {
-    return 'hapi-terminal-tool-display-mode'
-}
+const TERMINAL_TOOL_DISPLAY_MODE_STORAGE_KEY = 'hapi-power-terminal-tool-display-mode'
+const TERMINAL_TOOL_DISPLAY_MODE_STORAGE_KEY_LEGACY = 'hapi-terminal-tool-display-mode'
 
 function isBrowser(): boolean {
     return typeof window !== 'undefined' && typeof document !== 'undefined'
@@ -59,8 +58,19 @@ function parseTerminalToolDisplayMode(raw: string | null): TerminalToolDisplayMo
     return DEFAULT_TERMINAL_TOOL_DISPLAY_MODE
 }
 
+function migrateTerminalToolDisplayModeStorage(): void {
+    const newValue = safeGetItem(TERMINAL_TOOL_DISPLAY_MODE_STORAGE_KEY)
+    if (newValue !== null) return
+    const legacyValue = safeGetItem(TERMINAL_TOOL_DISPLAY_MODE_STORAGE_KEY_LEGACY)
+    if (legacyValue !== null) {
+        safeSetItem(TERMINAL_TOOL_DISPLAY_MODE_STORAGE_KEY, legacyValue)
+        safeRemoveItem(TERMINAL_TOOL_DISPLAY_MODE_STORAGE_KEY_LEGACY)
+    }
+}
+
 export function getInitialTerminalToolDisplayMode(): TerminalToolDisplayMode {
-    return parseTerminalToolDisplayMode(safeGetItem(getTerminalToolDisplayModeStorageKey()))
+    migrateTerminalToolDisplayModeStorage()
+    return parseTerminalToolDisplayMode(safeGetItem(TERMINAL_TOOL_DISPLAY_MODE_STORAGE_KEY))
 }
 
 export function useTerminalToolDisplayMode(): {
@@ -75,7 +85,7 @@ export function useTerminalToolDisplayMode(): {
         }
 
         const onStorage = (event: StorageEvent) => {
-            if (event.key !== getTerminalToolDisplayModeStorageKey()) {
+            if (event.key !== TERMINAL_TOOL_DISPLAY_MODE_STORAGE_KEY) {
                 return
             }
             setTerminalToolDisplayModeState(parseTerminalToolDisplayMode(event.newValue))
@@ -89,9 +99,9 @@ export function useTerminalToolDisplayMode(): {
         setTerminalToolDisplayModeState(mode)
 
         if (mode === DEFAULT_TERMINAL_TOOL_DISPLAY_MODE) {
-            safeRemoveItem(getTerminalToolDisplayModeStorageKey())
+            safeRemoveItem(TERMINAL_TOOL_DISPLAY_MODE_STORAGE_KEY)
         } else {
-            safeSetItem(getTerminalToolDisplayModeStorageKey(), mode)
+            safeSetItem(TERMINAL_TOOL_DISPLAY_MODE_STORAGE_KEY, mode)
         }
     }, [])
 
