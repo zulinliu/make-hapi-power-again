@@ -21,6 +21,9 @@ export interface DirectoryViewProps {
     onToggleSelect: (path: string, shiftKey: boolean, ctrlKey: boolean) => void
     onSelectAll: () => void
     highlightPath: string | null
+    emptyTitle?: string
+    emptyHint?: string
+    showCreateInEmpty?: boolean
 }
 
 type Translate = (key: string, params?: Record<string, string | number>) => string
@@ -224,7 +227,19 @@ function SortHeader({ sort, t, onSortChange, allSelected, onSelectAll }: { sort:
     )
 }
 
-function EmptyState({ t, onCreate }: { t: Translate; onCreate: () => void }) {
+function EmptyState({
+    t,
+    onCreate,
+    title,
+    hint,
+    showCreate,
+}: {
+    t: Translate
+    onCreate: () => void
+    title?: string
+    hint?: string
+    showCreate: boolean
+}) {
     return (
         <div className="fm-state" style={{ display: 'flex', minHeight: 300, flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 'var(--hp-space-8) var(--hp-space-5)', gap: 12, textAlign: 'center' }}>
             <div style={{ width: 56, height: 56, display: 'grid', placeItems: 'center', borderRadius: 'var(--hp-radius-lg)', background: 'var(--hp-primary-subtle)', color: 'var(--hp-primary)' }}>
@@ -232,9 +247,11 @@ function EmptyState({ t, onCreate }: { t: Translate; onCreate: () => void }) {
                     <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
                 </svg>
             </div>
-            <div style={{ fontSize: 15, fontWeight: 650, color: 'var(--hp-text-primary)' }}>{t('fm.empty.title')}</div>
-            <div style={{ fontSize: 13, color: 'var(--hp-text-secondary)', maxWidth: 340, lineHeight: 1.55 }}>{t('fm.empty.hintDetailed')}</div>
-            <button type="button" className="fm-primary-button" onClick={onCreate} style={{ marginTop: 4 }}>{t('fm.toolbar.new')}</button>
+            <div style={{ fontSize: 15, fontWeight: 650, color: 'var(--hp-text-primary)' }}>{title ?? t('fm.empty.title')}</div>
+            <div style={{ fontSize: 13, color: 'var(--hp-text-secondary)', maxWidth: 340, lineHeight: 1.55 }}>{hint ?? t('fm.empty.hintDetailed')}</div>
+            {showCreate ? (
+                <button type="button" className="fm-primary-button" onClick={onCreate} style={{ marginTop: 4 }}>{t('fm.toolbar.new')}</button>
+            ) : null}
         </div>
     )
 }
@@ -259,6 +276,7 @@ function ErrorState({ message, t, onRetry }: { message: string; t: Translate; on
 export default function DirectoryView({
     entries, isLoading, error, sort, onSortChange, onOpenDirectory, onOpenFile, onContextMenu,
     selectedPath, onSelect, onRetry, onCreate, selectedPaths, onToggleSelect, onSelectAll, highlightPath,
+    emptyTitle, emptyHint, showCreateInEmpty = true,
 }: DirectoryViewProps) {
     const { t, locale } = useTranslation()
     const sorted = entries
@@ -276,7 +294,7 @@ export default function DirectoryView({
             ) : error ? (
                 <ErrorState message={error} t={t} onRetry={onRetry} />
             ) : sorted.length === 0 ? (
-                <EmptyState t={t} onCreate={onCreate} />
+                <EmptyState t={t} onCreate={onCreate} title={emptyTitle} hint={emptyHint} showCreate={showCreateInEmpty} />
             ) : (
                 <div role="list" aria-label={t('fm.directoryContents')}>
                     {sorted.map((entry, index) => (

@@ -311,3 +311,72 @@ git diff --check
 3. 全局和会话文件页重复较多，35.6 质量收敛时应评估是否抽组件。
 4. Monaco 懒加载未落地，当前轻编辑可用但不满足历史“代码编辑器”理想形态。
 5. 文件保存大小仍受 Hub `writeFileSchema` 5MB 限制，上传阶段需要明确限制和错误文案。
+
+## Phase 35.5 Review: 上传下载和搜索
+
+**状态**: 完成。
+
+### 本阶段交付
+
+1. FileManager 顶部工具栏和移动端底部栏重新接入真实“上传”入口，上传文件写入当前目录。
+2. 上传支持多文件选择、5MB 单文件限制、上传进度、失败提示和重试；默认不覆盖已有文件。
+3. 文件右键菜单接入真实下载，读取 session/machine 文件内容后以浏览器 Blob 下载。
+4. 桌面批量栏增加下载动作，自动过滤目录，仅下载选中的文件。
+5. FileManager 增加本地名称过滤，适合大目录内快速缩小列表。
+6. Hub 新增 machine 文件搜索路由 `GET /api/machines/:id/files`，支持从当前目录递归名称搜索和内容搜索。
+7. 内容搜索跳过 1MB 以上文件，避免在浏览器请求链路上读取过大文件。
+8. 搜索结果可点击打开文件或进入文件夹，并提供清晰的结果数量、空状态和错误状态。
+9. 新增 Hub route 测试覆盖 machine 名称搜索和内容搜索。
+
+### 用户反馈覆盖
+
+| 用户问题 | 状态 | 说明 |
+|---|---|---|
+| 大量功能不可用或占位 | 已进一步解决 | 上传、下载、搜索均接入真实能力 |
+| 上传提示下一阶段提供 | 已解决 | 上传入口已恢复为真实上传，不再是占位 toast |
+| 文件管理除浏览外不可用 | 已显著解决 | CRUD、预览编辑、上传下载、搜索均已具备基础闭环 |
+| 移动端入口可见性 | 已改善 | 移动端底部栏提供新建、上传、启动会话 |
+| session 和全局割裂 | 部分解决 | FileManager 同时覆盖 session/machine 上传下载，搜索以 machine scoped 路由为主 |
+
+### 是否引入新空壳入口
+
+没有新增空壳入口。目录 zip 下载、目录上传、覆盖确认和断点续传未做成按钮，避免暴露不可用能力。
+
+### 全局和会话一致性
+
+- 上传和下载在 session mode 与 machine mode 均通过真实 file API 执行。
+- 搜索使用 machine scoped API，因此 session directory tab 也可基于当前 machine/path 搜索；session 原有 Git changes 搜索仍保留在 session files 外层。
+- 批量下载只下载文件，不尝试 zip 目录，这是明确限制而非空壳。
+
+### 移动端触控和可访问性
+
+- 上传入口在移动端底部栏可见，触控目标保持 48px。
+- 搜索输入和按钮最小高度 40px，主要移动操作仍满足 44px 底部栏标准。
+- 上传失败恢复按钮为显性按钮，避免依赖不可见交互。
+
+### 质量门禁
+
+```bash
+bun run typecheck
+# PASS
+
+cd hub && bun test src/web/routes/machines.test.ts src/sync/rpcGateway.test.ts
+# PASS: 9 tests
+
+cd web && bun test src/lib/file-manager-api.test.ts src/lib/files-i18n.test.ts
+# PASS: 7 tests
+
+bun run test:web
+# PASS: 79 files, 672 tests
+
+git diff --check
+# PASS
+```
+
+### 剩余风险
+
+1. 上传仍采用 5MB base64 写入链路，不是 multipart/streaming；生产大文件上传需要后续单独增强。
+2. 内容搜索是 Hub 递归调用 machine list/read 的轻量实现，不如 ripgrep 高性能，适合 v0.17 基础闭环，超大仓库需后续优化。
+3. 下载目录 zip 未实现，当前不会显示目录下载入口。
+4. 覆盖确认未实现，上传同名文件会失败并提示；后续可加 overwrite confirm。
+5. 搜索条增加了界面高度，35.6 需要在移动端做一次视觉密度自审。

@@ -29,6 +29,7 @@ import {
   moveEntry as apiMoveEntry,
 } from '@/lib/file-manager-api'
 import type { ApiClient } from '@/api/client'
+import type { FileSearchItem } from '@/types/api'
 import type { FileEntry, FileManagerMode, SortOption, SortField, BreadcrumbSegment } from './types'
 
 export interface FileManagerProps {
@@ -60,6 +61,12 @@ function sortEntries(entries: FileEntry[], sort: SortOption): FileEntry[] {
 
 type CreateKind = 'file' | 'folder'
 type TransferOperation = 'move' | 'copy'
+type SearchMode = 'name' | 'content'
+
+type UploadState =
+  | { status: 'idle' }
+  | { status: 'uploading'; fileName: string; progress: number }
+  | { status: 'error'; fileName: string; error: string }
 
 type DialogState =
   | { type: 'create' }
@@ -122,6 +129,52 @@ async function copyToClipboard(text: string, t: Translate) {
   }
 }
 
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer)
+  const chunkSize = 0x8000
+  let binary = ''
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    const chunk = bytes.subarray(i, i + chunkSize)
+    binary += String.fromCharCode(...chunk)
+  }
+  return btoa(binary)
+}
+
+function readBrowserFileAsBase64(file: File, onProgress: (progress: number) => void): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onprogress = (event) => {
+      if (!event.lengthComputable) return
+      onProgress(Math.round((event.loaded / event.total) * 100))
+    }
+    reader.onerror = () => reject(reader.error ?? new Error('Failed to read file'))
+    reader.onload = () => {
+      if (!(reader.result instanceof ArrayBuffer)) {
+        reject(new Error('Failed to read file'))
+        return
+      }
+      onProgress(100)
+      resolve(arrayBufferToBase64(reader.result))
+    }
+    reader.readAsArrayBuffer(file)
+  })
+}
+
+function downloadBase64File(content: string, fileName: string): void {
+  const byteCharacters = atob(content)
+  const byteNumbers = new Uint8Array(byteCharacters.length)
+  for (let i = 0; i < byteCharacters.length; i++) {
+    byteNumbers[i] = byteCharacters.charCodeAt(i)
+  }
+  const blob = new Blob([byteNumbers])
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = fileName
+  link.click()
+  setTimeout(() => URL.revokeObjectURL(url), 5000)
+}
+
 export function FileManager({ api, machineId, sessionId, initialPath }: FileManagerProps = {}) {
   const navigate = useNavigate()
   const { t } = useTranslation()
@@ -141,7 +194,21 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
   const [highlightPath, setHighlightPath] = useState<string | null>(null)
   const [selectedPaths, setSelectedPaths] = useState<Set<string>>(new Set())
   const [navKey, setNavKey] = useState(0)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchMode, setSearchMode] = useState<SearchMode>('name')
+  const [searchResults, setSearchResults] = useState<FileSearchItem[] | null>(null)
+  const [searchLoading, setSearchLoading] = useState(false)
+  const [searchError, setSearchError] = useState<string | null>(null)
+  const [uploadState, setUploadState] = useState<UploadState>({ status: 'idle' })
+  const [lastUploadFiles, setLastUploadFiles] = useState<File[]>([])
+  const uploadInputRef = useRef<HTMLInputElement>(null)
   const sortedEntries = useMemo(() => sortEntries(entries, sort), [entries, sort])
+  const normalizedSearch = searchQuery.trim().toLowerCase()
+  const visibleEntries = useMemo(() => {
+    if (!normalizedSearch) return sortedEntries
+    return sortedEntries.filter((entry) => entry.name.toLowerCase().includes(normalizedSearch))
+  }, [normalizedSearch, sortedEntries])
+  const searchFilterActive = normalizedSearch.length > 0
   const rootPath = useMemo(() => normalizePath(initialPath ?? DEFAULT_ROOT), [initialPath])
   const parentPath = useMemo(() => getParentPath(currentPath, rootPath), [currentPath, rootPath])
   const mountedRef = useRef(false)
@@ -190,6 +257,12 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
     return () => clearTimeout(timer)
   }, [highlightPath])
 
+  useEffect(() => {
+    setSearchResults(null)
+    setSearchError(null)
+    setSelectedPaths(new Set())
+  }, [currentPath, searchQuery, searchMode])
+
   const breadcrumbs: BreadcrumbSegment[] = useMemo(() => buildBreadcrumbs(currentPath, 'project', t('fm.projectRoot')), [currentPath, t])
 
   const handleNavigate = useCallback((path: string) => {
@@ -219,8 +292,133 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
     showToast(t(mode === 'machine' ? 'fm.toast.machineUnavailable' : 'fm.toast.operationFailed'), 'error')
   }, [sessionId, machineId, navigate, t, mode])
 
+  const handleDownload = useCallback(async (paths: string[]) => {
+    if (paths.length === 0) return
+    if (!api || !machineId) {
+      showToast(t('fm.toast.machineUnavailable'), 'error')
+      return
+    }
+
+    const filePaths = paths.filter((path) => {
+      const entry = entries.find((candidate) => candidate.path === path)
+      return entry?.type !== 'directory'
+    })
+
+    if (filePaths.length === 0) {
+      showToast(t('fm.toast.downloadNoFiles'), 'error')
+      return
+    }
+
+    try {
+      for (const filePath of filePaths) {
+        const res = sessionId
+          ? await api.readSessionFile(sessionId, filePath)
+          : await api.readMachineFile(machineId, filePath)
+        if (!res.success || !res.content) {
+          throw new Error(res.error ?? t('fm.toast.downloadFailed'))
+        }
+        downloadBase64File(res.content, basename(filePath))
+      }
+      showToast(filePaths.length === 1
+        ? t('fm.toast.downloaded.one')
+        : t('fm.toast.downloaded', { count: filePaths.length }))
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : t('fm.toast.downloadFailed'), 'error')
+    }
+  }, [api, entries, machineId, sessionId, t])
+
+  const uploadFiles = useCallback(async (files: File[]) => {
+    if (files.length === 0) return
+    if (!api || !machineId) {
+      showToast(t('fm.toast.machineUnavailable'), 'error')
+      return
+    }
+
+    setLastUploadFiles(files)
+    const maxBytes = 5 * 1024 * 1024
+
+    try {
+      for (const file of files) {
+        if (file.size > maxBytes) {
+          throw new Error(t('file.upload.tooLarge'))
+        }
+        setUploadState({ status: 'uploading', fileName: file.name, progress: 0 })
+        const content = await readBrowserFileAsBase64(file, (progress) => {
+          setUploadState({ status: 'uploading', fileName: file.name, progress })
+        })
+        const targetPath = joinPath(currentPath, file.name)
+        const res = sessionId
+          ? await api.writeSessionFile(sessionId, targetPath, content)
+          : await api.writeMachineFile(machineId, targetPath, content)
+        if (!res.success) {
+          throw new Error(res.error ?? t('file.upload.error'))
+        }
+        setHighlightPath(targetPath)
+      }
+      setUploadState({ status: 'idle' })
+      showToast(files.length === 1
+        ? t('fm.toast.uploaded.one')
+        : t('fm.toast.uploaded', { count: files.length }))
+      reload()
+    } catch (error) {
+      const message = error instanceof Error ? error.message : t('file.upload.error')
+      const fileName = files[0]?.name ?? t('fm.upload.unknownFile')
+      setUploadState({ status: 'error', fileName, error: message })
+      showToast(message, 'error')
+    }
+  }, [api, currentPath, machineId, reload, sessionId, t])
+
+  const handleUploadClick = useCallback(() => {
+    uploadInputRef.current?.click()
+  }, [])
+
+  const handleUploadInputChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files ?? [])
+    event.target.value = ''
+    void uploadFiles(files)
+  }, [uploadFiles])
+
+  const handleRetryUpload = useCallback(() => {
+    void uploadFiles(lastUploadFiles)
+  }, [lastUploadFiles, uploadFiles])
+
+  const handleDeepSearch = useCallback(async () => {
+    const query = searchQuery.trim()
+    if (!query) return
+    if (!api || !machineId) {
+      setSearchError(t('fm.toast.machineUnavailable'))
+      return
+    }
+    setSearchLoading(true)
+    setSearchError(null)
+    try {
+      const res = await api.searchMachineFiles(machineId, currentPath, query, {
+        mode: searchMode,
+        limit: 100,
+        showHidden
+      })
+      if (!res.success) {
+        throw new Error(res.error ?? t('fm.search.failed'))
+      }
+      setSearchResults(res.files ?? [])
+    } catch (error) {
+      setSearchResults([])
+      setSearchError(error instanceof Error ? error.message : t('fm.search.failed'))
+    } finally {
+      setSearchLoading(false)
+    }
+  }, [api, currentPath, machineId, searchMode, searchQuery, showHidden, t])
+
+  const handleOpenSearchResult = useCallback((item: FileSearchItem) => {
+    if (item.fileType === 'folder') {
+      handleOpenDirectory(item.fullPath)
+      return
+    }
+    handleOpenFile(item.fullPath)
+  }, [handleOpenDirectory, handleOpenFile])
+
   const handleContextMenu = useCallback(
-    (path: string, _type: 'file' | 'directory', point: { x: number; y: number }) => {
+    (path: string, type: 'file' | 'directory', point: { x: number; y: number }) => {
       if (isLoading) return
       setSelectedPath(path)
       const name = path.split('/').pop() ?? ''
@@ -228,6 +426,7 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
         { label: t('fm.context.rename'), icon: 'rename', onClick: () => { setInputValue(name); setDialog({ type: 'rename', name, path }) } },
         { label: t('fm.context.move'), icon: 'move', onClick: () => { setInputValue(currentPath); setDialog({ type: 'transfer', operation: 'move', paths: [path] }) } },
         { label: t('fm.context.copy'), icon: 'copy', onClick: () => { setInputValue(currentPath); setDialog({ type: 'transfer', operation: 'copy', paths: [path] }) } },
+        ...(type === 'file' ? [{ label: t('fm.context.download'), icon: 'download' as const, onClick: () => { void handleDownload([path]) } }] : []),
         { label: t('fm.context.copyPath'), icon: 'copyPath', onClick: () => { copyToClipboard(path, t) } },
       ]
       items.push({
@@ -238,7 +437,7 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
       })
       ctxMenu.show(point.x, point.y, items)
     },
-    [ctxMenu, currentPath, isLoading, t],
+    [ctxMenu, currentPath, handleDownload, isLoading, t],
   )
 
   // Batch selection
@@ -246,7 +445,7 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
     setSelectedPaths((prev) => {
       const next = new Set(prev)
       if (shiftKey && prev.size > 0) {
-        const paths = sortedEntries.map((e) => e.path)
+        const paths = visibleEntries.map((e) => e.path)
         const lastSelected = [...prev].pop()!
         const fromIdx = paths.indexOf(lastSelected)
         const toIdx = paths.indexOf(path)
@@ -260,14 +459,14 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
       else next.add(path)
       return next
     })
-  }, [sortedEntries])
+  }, [visibleEntries])
 
   const handleSelectAll = useCallback(() => {
     setSelectedPaths((prev) => {
-      if (prev.size === sortedEntries.length) return new Set()
-      return new Set(sortedEntries.map((e) => e.path))
+      if (prev.size === visibleEntries.length) return new Set()
+      return new Set(visibleEntries.map((e) => e.path))
     })
-  }, [sortedEntries])
+  }, [visibleEntries])
 
   // Dialog submit
   const handleDialogSubmit = useCallback(async () => {
@@ -472,8 +671,22 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
     return () => window.removeEventListener('keydown', handler)
   }, [dialog, selectedPath, selectedPaths, breadcrumbs, handleSelectAll, handleBatchDelete, handleNavigate, handleContextMenu, entries, t])
 
+  const itemCountLabel = searchFilterActive
+    ? t('fm.itemCount.filtered', { shown: visibleEntries.length, total: entries.length })
+    : entries.length === 1 ? t('fm.itemCount.one') : t('fm.itemCount', { n: entries.length })
+
   return (
     <div className="flex h-full flex-col">
+      <input
+        ref={uploadInputRef}
+        type="file"
+        multiple
+        className="hidden"
+        onChange={handleUploadInputChange}
+        aria-hidden="true"
+        tabIndex={-1}
+      />
+
       {/* Toolbar */}
       <div
         className="fm-toolbar"
@@ -572,9 +785,37 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
           <span>{t('fm.toolbar.new')}</span>
         </button>
 
+        <button
+          type="button"
+          onClick={handleUploadClick}
+          aria-label={t('fm.toolbar.upload')}
+          className="fm-toolbar-button"
+          style={{
+            minHeight: 40,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '0 var(--hp-space-3)',
+            borderRadius: 'var(--hp-radius-md)',
+            fontSize: 12,
+            fontWeight: 650,
+            border: '1px solid var(--hp-border)',
+            cursor: 'pointer',
+            color: 'var(--hp-text-secondary)',
+            background: 'var(--hp-surface-1)',
+          }}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="17 8 12 3 7 8" />
+            <line x1="12" x2="12" y1="3" y2="15" />
+          </svg>
+          <span className="hidden sm:inline">{t('fm.toolbar.upload')}</span>
+        </button>
+
         <div className="min-w-0 flex-1" />
         <span
-          title={entries.length === 1 ? t('fm.itemCount.one') : t('fm.itemCount', { n: entries.length })}
+          title={itemCountLabel}
           style={{
             maxWidth: 96,
             overflow: 'hidden',
@@ -585,15 +826,146 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
             fontFamily: 'var(--hp-font-mono, ui-monospace, monospace)',
           }}
         >
-          {entries.length === 1 ? t('fm.itemCount.one') : t('fm.itemCount', { n: entries.length })}
+          {itemCountLabel}
         </span>
       </div>
 
+      <div
+        className="fm-search-strip"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          borderBottom: '1px solid var(--hp-divider)',
+          padding: '8px var(--hp-space-3)',
+          background: 'var(--hp-surface-0)',
+          flexShrink: 0,
+        }}
+      >
+        <input
+          type="search"
+          value={searchQuery}
+          onChange={(event) => setSearchQuery(event.target.value)}
+          onKeyDown={(event) => { if (event.key === 'Enter') void handleDeepSearch() }}
+          placeholder={t('fm.search.placeholder')}
+          aria-label={t('fm.search.placeholder')}
+          autoCapitalize="none"
+          autoCorrect="off"
+          style={{
+            minHeight: 40,
+            minWidth: 0,
+            flex: 1,
+            borderRadius: 'var(--hp-radius-md)',
+            border: '1px solid var(--hp-border)',
+            background: 'var(--hp-canvas)',
+            color: 'var(--hp-text-primary)',
+            padding: '0 12px',
+            fontSize: 13,
+          }}
+        />
+        <select
+          value={searchMode}
+          onChange={(event) => setSearchMode(event.target.value as SearchMode)}
+          aria-label={t('fm.search.mode')}
+          style={{
+            minHeight: 40,
+            borderRadius: 'var(--hp-radius-md)',
+            border: '1px solid var(--hp-border)',
+            background: 'var(--hp-surface-1)',
+            color: 'var(--hp-text-secondary)',
+            padding: '0 8px',
+            fontSize: 12,
+            fontWeight: 650,
+          }}
+        >
+          <option value="name">{t('fm.search.mode.name')}</option>
+          <option value="content">{t('fm.search.mode.content')}</option>
+        </select>
+        <button
+          type="button"
+          onClick={() => void handleDeepSearch()}
+          disabled={!searchQuery.trim() || searchLoading}
+          className="fm-toolbar-button"
+          style={{
+            minHeight: 40,
+            padding: '0 var(--hp-space-3)',
+            borderRadius: 'var(--hp-radius-md)',
+            border: '1px solid var(--hp-border)',
+            background: 'var(--hp-surface-1)',
+            color: 'var(--hp-text-secondary)',
+            fontSize: 12,
+            fontWeight: 650,
+            cursor: !searchQuery.trim() || searchLoading ? 'not-allowed' : 'pointer',
+            opacity: !searchQuery.trim() || searchLoading ? 0.55 : 1,
+          }}
+        >
+          {searchLoading ? t('fm.search.searching') : t('fm.search.deep')}
+        </button>
+      </div>
+
+      {uploadState.status !== 'idle' ? (
+        <div className={`border-b border-(--hp-divider) px-3 py-2 text-xs ${uploadState.status === 'error' ? 'bg-(--hp-danger-subtle) text-(--hp-danger)' : 'bg-(--hp-primary-subtle) text-(--hp-primary)'}`}>
+          <div className="flex items-center gap-2">
+            <span className="min-w-0 flex-1 truncate">
+              {uploadState.status === 'error'
+                ? t('fm.upload.errorDetail', { name: uploadState.fileName, error: uploadState.error })
+                : t('fm.upload.progress', { name: uploadState.fileName, progress: uploadState.progress })}
+            </span>
+            {uploadState.status === 'error' && lastUploadFiles.length > 0 ? (
+              <button type="button" onClick={handleRetryUpload} className="min-h-[32px] rounded bg-(--hp-surface-1) px-2 py-1 text-xs text-(--hp-text-secondary)">
+                {t('fm.upload.retry')}
+              </button>
+            ) : null}
+          </div>
+          {uploadState.status === 'uploading' ? (
+            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-(--hp-surface-2)">
+              <div className="h-full rounded-full bg-(--hp-primary)" style={{ width: `${uploadState.progress}%` }} />
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+
       <BreadcrumbNav segments={breadcrumbs} onNavigate={handleNavigate} onCopyPath={(path) => copyToClipboard(path, t)} />
+
+      {searchResults !== null || searchError ? (
+        <div className="border-b border-(--hp-divider) bg-(--hp-surface-0)">
+          <div className="flex items-center gap-2 px-3 py-2 text-xs">
+            <span className="font-semibold text-(--hp-text-primary)">
+              {searchMode === 'content' ? t('fm.search.contentResults') : t('fm.search.nameResults')}
+            </span>
+            <span className="flex-1 text-(--hp-text-tertiary)">
+              {searchError ? searchError : t('fm.search.resultCount', { count: searchResults?.length ?? 0 })}
+            </span>
+            <button type="button" onClick={() => { setSearchResults(null); setSearchError(null) }}
+              className="min-h-[32px] rounded px-2 text-(--hp-text-tertiary) hover:bg-(--hp-surface-1)">
+              {t('fm.search.close')}
+            </button>
+          </div>
+          {!searchError && searchResults?.length === 0 ? (
+            <div className="px-3 pb-3 text-xs text-(--hp-text-tertiary)">{t('fm.search.empty')}</div>
+          ) : null}
+          {!searchError && searchResults && searchResults.length > 0 ? (
+            <div className="max-h-64 overflow-y-auto border-t border-(--hp-divider)">
+              {searchResults.map((item) => (
+                <button
+                  key={item.fullPath}
+                  type="button"
+                  onClick={() => handleOpenSearchResult(item)}
+                  className="flex min-h-[44px] w-full items-center gap-2 border-b border-(--hp-divider) px-3 text-left hover:bg-(--hp-surface-1) focus-visible:outline-2 focus-visible:outline-(--hp-primary) focus-visible:outline-offset-[-2px]"
+                >
+                  <span className="text-xs font-semibold text-(--hp-text-primary)">{item.fileName}</span>
+                  <span className="min-w-0 flex-1 truncate text-xs text-(--hp-text-tertiary)">{item.fullPath}</span>
+                  <span className="text-[11px] text-(--hp-text-tertiary)">{item.fileType === 'folder' ? t('fm.search.folder') : t('fm.search.file')}</span>
+                </button>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="min-h-0 flex-1 overflow-y-auto" key={navKey}>
         <DirectoryView
-            entries={sortedEntries}
+            entries={visibleEntries}
             isLoading={isLoading}
             error={error}
             sort={sort}
@@ -609,6 +981,9 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
             onToggleSelect={handleToggleSelect}
             onSelectAll={handleSelectAll}
             highlightPath={highlightPath}
+            emptyTitle={searchFilterActive ? t('fm.search.noLocalMatches') : undefined}
+            emptyHint={searchFilterActive ? t('fm.search.noLocalMatchesHint') : undefined}
+            showCreateInEmpty={!searchFilterActive}
         />
       </div>
 
@@ -619,6 +994,7 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
           onDelete={handleBatchDelete}
           onMove={() => handleTransfer('move', [...selectedPaths])}
           onCopy={() => handleTransfer('copy', [...selectedPaths])}
+          onDownload={() => { void handleDownload([...selectedPaths]) }}
           onStartSession={() => {
             if (machineId && selectedPaths.size === 1) {
               const path = [...selectedPaths][0]
@@ -635,6 +1011,7 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
       {/* Bottom toolbar (mobile) */}
       <div className="flex items-center justify-around border-t border-(--hp-border) md:hidden" style={{ height: 56, background: 'var(--hp-surface-0)', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
         <ToolbarButton label={t('fm.toolbar.newShort')} icon="+" onClick={() => handleCreate('file')} />
+        <ToolbarButton label={t('fm.toolbar.uploadShort')} icon="⇧" onClick={handleUploadClick} />
         <ToolbarButton label={t('fm.toolbar.sessionShort')} icon="▶" onClick={() => {
           navigate({ to: '/sessions/new', search: { directory: currentPath, ...(machineId ? { machineId } : {}) } })
         }} />

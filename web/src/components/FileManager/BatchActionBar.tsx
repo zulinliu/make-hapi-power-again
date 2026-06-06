@@ -6,6 +6,7 @@ export interface BatchActionBarProps {
   onDelete: () => void
   onMove: () => void
   onCopy: () => void
+  onDownload: () => void
   onStartSession: () => void
 }
 
@@ -14,6 +15,7 @@ export function BatchActionBar({
   onDelete,
   onMove,
   onCopy,
+  onDownload,
   onStartSession,
 }: BatchActionBarProps) {
   const { t } = useTranslation()
@@ -101,6 +103,7 @@ export function BatchActionBar({
         <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
           <ActionBtn label={t('fm.batch.move')} onClick={onMove} />
           <ActionBtn label={t('fm.batch.copy')} onClick={onCopy} />
+          <ActionBtn label={t('fm.batch.download')} onClick={onDownload} />
           <ActionBtn label={t('fm.batch.delete')} onClick={onDelete} danger />
         </div>
       </div>

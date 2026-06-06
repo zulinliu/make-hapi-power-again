@@ -357,6 +357,31 @@ export class ApiClient {
         return await this.request<FileSearchResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/files${qs ? `?${qs}` : ''}`)
     }
 
+    async searchMachineFiles(
+        machineId: string,
+        path: string,
+        query: string,
+        options?: { mode?: 'name' | 'content'; limit?: number; showHidden?: boolean }
+    ): Promise<FileSearchResponse> {
+        const params = new URLSearchParams()
+        params.set('path', path)
+        if (query) {
+            params.set('query', query)
+        }
+        if (options?.mode) {
+            params.set('mode', options.mode)
+        }
+        if (options?.limit !== undefined) {
+            params.set('limit', `${options.limit}`)
+        }
+        if (options?.showHidden !== undefined) {
+            params.set('showHidden', `${options.showHidden}`)
+        }
+        return await this.request<FileSearchResponse>(
+            `/api/machines/${encodeURIComponent(machineId)}/files?${params.toString()}`
+        )
+    }
+
     async getGeneratedImageBlob(sessionId: string, imageId: string, attempt: number = 0, overrideToken?: string | null): Promise<Blob> {
         const headers = new Headers()
         const liveToken = this.getToken ? this.getToken() : null

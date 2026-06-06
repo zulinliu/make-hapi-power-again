@@ -294,4 +294,64 @@ describe('machines routes', () => {
 
         expect(response.status).toBe(400)
     })
+
+    it('searches machine files by name and content', async () => {
+        const machine = createMachine()
+        const engine = {
+            getMachine: () => machine,
+            getMachineByNamespace: () => machine,
+            listMachineDirectory: async (_machineId: string, path: string) => {
+                if (path === '/repo') {
+                    return {
+                        success: true,
+                        entries: [
+                            { name: 'src', type: 'directory' },
+                            { name: 'README.md', type: 'file', size: 20 }
+                        ]
+                    }
+                }
+                if (path === '/repo/src') {
+                    return {
+                        success: true,
+                        entries: [
+                            { name: 'feature.ts', type: 'file', size: 30 },
+                            { name: 'large.log', type: 'file', size: 2_000_000 }
+                        ]
+                    }
+                }
+                return { success: true, entries: [] }
+            },
+            readMachineFile: async (_machineId: string, path: string) => {
+                if (path === '/repo/src/feature.ts') {
+                    return { success: true, content: Buffer.from('export const marker = true').toString('base64') }
+                }
+                return { success: true, content: Buffer.from('hello').toString('base64') }
+            }
+        } as Partial<SyncEngine>
+
+        const app = new Hono<WebAppEnv>()
+        app.use('*', async (c, next) => {
+            c.set('namespace', 'default')
+            await next()
+        })
+        app.route('/api', createMachinesRoutes(() => engine as SyncEngine, mockStore))
+
+        const nameResponse = await app.request('/api/machines/machine-1/files?path=' + encodeURIComponent('/repo') + '&query=read&mode=name')
+        expect(nameResponse.status).toBe(200)
+        expect(await nameResponse.json()).toEqual({
+            success: true,
+            files: [
+                { fileName: 'README.md', filePath: '/repo', fullPath: '/repo/README.md', fileType: 'file' }
+            ]
+        })
+
+        const contentResponse = await app.request('/api/machines/machine-1/files?path=' + encodeURIComponent('/repo') + '&query=marker&mode=content')
+        expect(contentResponse.status).toBe(200)
+        expect(await contentResponse.json()).toEqual({
+            success: true,
+            files: [
+                { fileName: 'feature.ts', filePath: '/repo/src', fullPath: '/repo/src/feature.ts', fileType: 'file' }
+            ]
+        })
+    })
 })

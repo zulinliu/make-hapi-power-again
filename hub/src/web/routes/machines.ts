@@ -15,6 +15,14 @@ const machineFileQuerySchema = z.object({
     path: z.string().min(1)
 })
 
+const machineFileSearchSchema = z.object({
+    path: z.string().min(1),
+    query: z.string().optional(),
+    mode: z.enum(['name', 'content']).optional().default('name'),
+    limit: z.coerce.number().int().min(1).max(200).optional().default(100),
+    showHidden: z.enum(['true', 'false']).optional()
+})
+
 const machineWriteFileSchema = z.object({
     path: z.string().min(1),
     content: z.string(),
@@ -41,6 +49,91 @@ const machineCreateDirectorySchema = z.object({
     path: z.string().min(1),
     recursive: z.boolean().optional()
 })
+
+type MachineFileSearchItem = {
+    fileName: string
+    filePath: string
+    fullPath: string
+    fileType: 'file' | 'folder'
+}
+
+function joinMachinePath(dirPath: string, name: string): string {
+    const normalized = dirPath.replace(/[\\/]+$/, '')
+    if (!normalized) return name
+    return normalized === '/' ? `/${name}` : `${normalized}/${name}`
+}
+
+function splitMachinePath(path: string): { fileName: string; filePath: string } {
+    const normalized = path.replace(/\\/g, '/')
+    const index = normalized.lastIndexOf('/')
+    if (index === -1) {
+        return { fileName: path, filePath: '' }
+    }
+    return {
+        fileName: normalized.slice(index + 1) || path,
+        filePath: normalized.slice(0, index)
+    }
+}
+
+async function searchMachineFiles(
+    engine: SyncEngine,
+    machineId: string,
+    options: { path: string; query: string; mode: 'name' | 'content'; limit: number; showHidden: boolean }
+): Promise<{ success: true; files: MachineFileSearchItem[] } | { success: false; error: string }> {
+    const query = options.query.trim().toLowerCase()
+    if (!query) return { success: true, files: [] }
+
+    const files: MachineFileSearchItem[] = []
+    const queue: string[] = [options.path]
+    const visited = new Set<string>()
+    const maxVisited = 3000
+    const maxContentBytes = 1_000_000
+
+    while (queue.length > 0 && files.length < options.limit && visited.size < maxVisited) {
+        const current = queue.shift()
+        if (!current || visited.has(current)) continue
+        visited.add(current)
+
+        const listing = await engine.listMachineDirectory(machineId, current, options.showHidden)
+        if (!listing.success) {
+            if (visited.size === 1) {
+                return { success: false, error: listing.error ?? 'Failed to search files' }
+            }
+            continue
+        }
+
+        for (const entry of listing.entries ?? []) {
+            if (files.length >= options.limit) break
+            if (entry.type !== 'file' && entry.type !== 'directory') continue
+            if (!options.showHidden && entry.name.startsWith('.')) continue
+
+            const fullPath = joinMachinePath(current, entry.name)
+            const { fileName, filePath } = splitMachinePath(fullPath)
+            const fileType = entry.type === 'directory' ? 'folder' : 'file'
+
+            if (options.mode === 'name' && entry.name.toLowerCase().includes(query)) {
+                files.push({ fileName, filePath, fullPath, fileType })
+            }
+
+            if (entry.type === 'directory') {
+                queue.push(fullPath)
+                continue
+            }
+
+            if (options.mode === 'content') {
+                if ((entry.size ?? 0) > maxContentBytes) continue
+                const read = await engine.readMachineFile(machineId, fullPath)
+                if (!read.success || !read.content) continue
+                const content = Buffer.from(read.content, 'base64').toString('utf8').toLowerCase()
+                if (content.includes(query)) {
+                    files.push({ fileName, filePath, fullPath, fileType })
+                }
+            }
+        }
+    }
+
+    return { success: true, files }
+}
 
 export function createMachinesRoutes(getSyncEngine: () => SyncEngine | null, store: Store): Hono<WebAppEnv> {
     const app = new Hono<WebAppEnv>()
@@ -131,6 +224,29 @@ export function createMachinesRoutes(getSyncEngine: () => SyncEngine | null, sto
         } catch (error) {
             return c.json({ error: error instanceof Error ? error.message : 'Failed to list directory' }, 500)
         }
+    })
+
+    app.get('/machines/:id/files', async (c) => {
+        const engine = getSyncEngine()
+        if (!engine) return c.json({ error: 'Not connected' }, 503)
+
+        const machineId = c.req.param('id')
+        const machine = requireMachine(c, engine, machineId)
+        if (machine instanceof Response) return machine
+
+        const parsed = machineFileSearchSchema.safeParse(c.req.query())
+        if (!parsed.success) {
+            return c.json({ error: 'Invalid query', details: parsed.error.flatten() }, 400)
+        }
+
+        const result = await searchMachineFiles(engine, machineId, {
+            path: parsed.data.path,
+            query: parsed.data.query ?? '',
+            mode: parsed.data.mode,
+            limit: parsed.data.limit,
+            showHidden: parsed.data.showHidden === 'true'
+        })
+        return c.json(result)
     })
 
     app.get('/machines/:id/file', async (c) => {
