@@ -438,7 +438,7 @@ Plans:
 - [ ] **Phase 31: Git 管理优化** — i18n + bug 修复 + commit UI + fetch UI
 - [ ] **Phase 32: 文件管理全栈 CRUD** — 文件操作 + 预览增强 + iOS 适配
 - [ ] **Phase 33: Skill/Plugin 管理增强** — 多平台搜索 + 真实安装 + 市场
-- [ ] **Phase 34: 文件预览 / 编辑闭环** — FileManager 打开文件、预览、编辑、保存、失败恢复、Dirty 离开保护
+- [x] **Phase 34: 文件预览 / 编辑闭环** — FileManager 打开文件、预览、编辑、保存、失败恢复、Dirty 离开保护
 
 ### Phase 31: Git 管理优化
 **Goal**: 修复 Git 管理的核心体验问题：i18n 缺失、已知 bug、补齐 commit/fetch UI
@@ -521,9 +521,9 @@ Plans:
 **Plans**: 1 vertical MVP plan
 
 Plans:
-- [ ] 34-01: 文件预览 / 编辑垂直闭环（打开→预览→编辑→保存→失败恢复→Dirty 离开保护）
+- [x] 34-01: 文件预览 / 编辑垂直闭环（打开→预览→编辑→保存→失败恢复→Dirty 离开保护）
 
 ---
 
 *Roadmap created: 2026-05-30*
-*Last updated: 2026-06-06 — Phase 34 文件预览 / 编辑闭环已规划*
+*Last updated: 2026-06-06 — Phase 34 文件预览 / 编辑闭环已完成，audit 18/20*
