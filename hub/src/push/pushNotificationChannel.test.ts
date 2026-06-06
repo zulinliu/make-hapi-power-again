@@ -15,7 +15,7 @@ function createSession(overrides: Partial<Session> = {}): Session {
 }
 
 describe('PushNotificationChannel', () => {
-    it('sends task notifications to visible web clients before falling back to push', async () => {
+    it('sends task notifications to visible web clients and keeps Web Push fallback', async () => {
         const pushed: Array<{ namespace: string; payload: PushPayload }> = []
         const toasts: unknown[] = []
         const channel = new PushNotificationChannel(
@@ -42,7 +42,8 @@ describe('PushNotificationChannel', () => {
         })
 
         expect(toasts).toHaveLength(1)
-        expect(pushed).toHaveLength(0)
+        expect(pushed).toHaveLength(1)
+        expect(pushed[0].payload.data?.type).toBe('task-notification')
     })
 
     it('does not reuse one replacement tag for all task notifications in a session', async () => {

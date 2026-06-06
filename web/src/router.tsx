@@ -10,6 +10,7 @@ import {
     useMatchRoute,
     useNavigate,
     useParams,
+    useRouterState,
 } from '@tanstack/react-router'
 import { getScrollRestorationKey } from '@/lib/scrollRestorationKey'
 import { App } from '@/App'
@@ -17,7 +18,7 @@ import { SessionChat } from '@/components/SessionChat'
 import { SessionHeader } from '@/components/SessionHeader'
 import { SessionList } from '@/components/SessionList'
 import { NewSession } from '@/components/NewSession'
-import { WorkspaceBrowser } from '@/components/WorkspaceBrowser'
+import { FileManager } from '@/components/FileManager/FileManager'
 import { LoadingState } from '@/components/LoadingState'
 import { useAppContext } from '@/lib/app-context'
 import { useAppGoBack } from '@/hooks/useAppGoBack'
@@ -583,19 +584,14 @@ function NewSessionPage() {
 }
 
 function BrowsePage() {
-    const { api } = useAppContext()
-    const navigate = useNavigate()
-    const goBack = useAppGoBack()
-    const { machines, isLoading: machinesLoading } = useMachines(api, true)
     const { t } = useTranslation()
-    const { machineId: initialMachineId } = browseRoute.useSearch()
-
-    const handleStartSession = useCallback((machineId: string, directory: string) => {
-        navigate({
-            to: '/sessions/new',
-            search: { directory, machineId }
-        })
-    }, [navigate])
+    const goBack = useAppGoBack()
+    const { api } = useAppContext()
+    const search = useRouterState({ select: (s) => s.location.search as { machineId?: string } })
+    const { machines } = useMachines(api, true)
+    const machineId = search.machineId ?? machines[0]?.id ?? null
+    const machine = machines.find(m => m.id === machineId)
+    const workspaceRoot = machine?.metadata?.workspaceRoots?.[0]
 
     return (
         <div className="flex h-full min-h-0 flex-col">
@@ -614,13 +610,13 @@ function BrowsePage() {
             </div>
 
             <div className="flex-1 min-h-0">
-                <WorkspaceBrowser
-                    api={api}
-                    machines={machines}
-                    machinesLoading={machinesLoading}
-                    onStartSession={handleStartSession}
-                    initialMachineId={initialMachineId}
-                />
+                {workspaceRoot ? (
+                    <FileManager api={api} machineId={machineId} initialPath={workspaceRoot} />
+                ) : (
+                    <div className="flex items-center justify-center h-full">
+                        <div className="animate-pulse text-(--hp-text-tertiary)">{t('session.loading')}</div>
+                    </div>
+                )}
             </div>
         </div>
     )

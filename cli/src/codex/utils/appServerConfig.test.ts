@@ -9,7 +9,7 @@ import {
 import { codexSystemPrompt } from './systemPrompt';
 
 describe('appServerConfig', () => {
-    const mcpServers = { hapi-power: { command: 'node', args: ['mcp'] } };
+    const mcpServers = { 'hapi-power': { command: 'node', args: ['mcp'] } };
     const withCollaborationInstructions = (developerInstructions: string): string => {
         return `${developerInstructions}\n\n${codexCollaborationSpawnAgentInstructions}`;
     };

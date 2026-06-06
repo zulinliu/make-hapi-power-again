@@ -62,7 +62,7 @@ describe('codexLocal', () => {
             path: 'C:\\workspace\\project',
             onSessionFound: vi.fn(),
             mcpServers: {
-                hapi-power: {
+                'hapi-power': {
                     command: 'C:\\Users\\test\\AppData\\Local\\hapi-power.exe',
                     args: ['mcp', '--url', 'http://127.0.0.1:63995/']
                 }

@@ -4,13 +4,21 @@ import type { SyncEngine } from '../../sync/syncEngine'
 import type { WebAppEnv } from '../middleware/auth'
 import { requireSessionFromParam, requireSyncEngine } from './guards'
 
-const skillInstallSchema = z.object({
-    name: z.string().min(1).max(200),
-    repo: z.string().min(1).max(200),
-    path: z.string().optional(),
-})
+const skillNameSchema = z.string()
+    .min(1)
+    .max(200)
+    .regex(/^[a-zA-Z0-9._-]+$/, 'Invalid skill name')
 
-const skillNameSchema = z.string().min(1).max(200)
+const skillRepoSchema = z.string()
+    .min(1)
+    .max(200)
+    .regex(/^[a-zA-Z0-9._-]+\/[a-zA-Z0-9._-]+$/, 'Invalid repo format')
+
+const skillInstallSchema = z.object({
+    name: skillNameSchema,
+    repo: skillRepoSchema,
+    path: z.string().min(1).max(500).optional(),
+})
 
 function runRpc<T>(fn: () => Promise<T>): Promise<T | { success: false; error: string }> {
     return fn().catch((error) => ({ success: false as const, error: error instanceof Error ? error.message : String(error) }))
