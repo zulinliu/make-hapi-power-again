@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useTranslation } from '@/lib/use-translation'
+import { encodeBase64 } from '@/lib/utils'
 import { BreadcrumbNav, buildBreadcrumbs } from './BreadcrumbNav'
 import DirectoryView from './DirectoryView'
 import { ContextMenu, useContextMenu } from './ContextMenu'
@@ -157,9 +158,15 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
     loadDirectory(path, showHidden)
   }, [loadDirectory, showHidden])
 
-  const handleOpenFile = useCallback((_path: string) => {
-    // Phase 5+: file preview
-  }, [])
+  const handleOpenFile = useCallback((filePath: string) => {
+    if (sessionId) {
+      navigate({
+        to: '/sessions/$sessionId/file',
+        params: { sessionId },
+        search: { path: encodeBase64(filePath) },
+      })
+    }
+  }, [sessionId, navigate])
 
   const handleUnavailableAction = useCallback((label: string) => {
     showToast(t('fm.toast.unavailableAction', { action: label }))

@@ -263,6 +263,20 @@ export default {
   'file.page.loadingDiff': 'Loading diff...',
   'file.page.modified': 'Modified',
   'file.page.readOnly': 'Read-only preview',
+  'file.page.unsavedChanges': 'Unsaved changes',
+  'file.page.changesSaved': 'Changes saved',
+  'file.page.retry': 'Retry',
+  'file.page.discardChanges': 'Discard changes',
+  'file.page.largeFile': 'This file is large. Editing is limited to prevent performance issues.',
+  'file.page.opening': 'Opening file…',
+  'file.page.saveErrorDetail': 'Save failed: {error}',
+
+  // File viewer leave guard
+  'file.viewer.leaveTitle': 'Discard unsaved changes?',
+  'file.viewer.leaveBody': 'Your edits to {name} have not been saved.',
+  'file.viewer.stay': 'Stay',
+  'file.viewer.discardAndLeave': 'Discard changes',
+
   'file.error.readFailed': 'Failed to read file.',
   'file.error.readFailedWithDetail': 'Failed to read file: {error}',
   'file.error.diffUnavailable': 'Diff unavailable.',

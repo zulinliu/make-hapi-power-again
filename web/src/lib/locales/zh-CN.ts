@@ -265,6 +265,20 @@ export default {
   'file.page.loadingDiff': '正在加载差异...',
   'file.page.modified': '已修改',
   'file.page.readOnly': '只读预览',
+  'file.page.unsavedChanges': '有未保存修改',
+  'file.page.changesSaved': '修改已保存',
+  'file.page.retry': '重试',
+  'file.page.discardChanges': '放弃修改',
+  'file.page.largeFile': '文件较大，已限制编辑以防止性能问题。',
+  'file.page.opening': '正在打开文件…',
+  'file.page.saveErrorDetail': '保存失败：{error}',
+
+  // 文件查看器离开确认
+  'file.viewer.leaveTitle': '要放弃未保存的修改吗？',
+  'file.viewer.leaveBody': '对 {name} 的修改尚未保存。',
+  'file.viewer.stay': '留下',
+  'file.viewer.discardAndLeave': '放弃修改',
+
   'file.error.readFailed': '读取文件失败。',
   'file.error.readFailedWithDetail': '读取文件失败：{error}',
   'file.error.diffUnavailable': 'Diff 不可用。',
