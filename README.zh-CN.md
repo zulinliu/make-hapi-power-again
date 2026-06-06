@@ -74,13 +74,13 @@
 
 **多代理统一编排** — Claude Code、OpenAI Codex、Google Gemini、Cursor Agent、OpenCode、Kimi 并行运行。按会话切换代理，每个代理支持独立权限模式——从只读到全自动，灵活掌控。
 
-**变更审查与精细撤销** — AI 代理的每次文件变更按对话轮次分组展示。逐文件查看 Diff，支持单个或批量通过/驳回。支持会话、步骤、文件三种粒度回滚，并提供影响预览。
+**变更审查与审批** — AI 代理的每次文件变更按对话轮次分组展示。逐文件查看 Diff，支持单个或批量通过/驳回。
 
 **可视化 Git + 文件管理** — 在浏览器中完成 commit、diff、分支管理、push、pull、clone。浏览目录树，新建、重命名、移动、复制、上传、下载、搜索文件——全部通过上下文菜单操作。
 
 **自定义模型 Provider** — 配置第三方 API 端点，自动发现可用模型，按会话绑定 Provider。API 密钥以 AES-256-GCM 加密存储。
 
-**移动端优先 PWA** — 专属移动端路由、滑动手势审批变更、只读终端、针对 iOS 深度优化 PWA 体验。随时随地用手机审批 AI 代理的代码变更。
+**移动端优先 PWA** — 响应式移动端 UI、滑动手势审批变更、只读终端、针对 iOS 深度优化 PWA 体验。随时随地用手机审批 AI 代理的代码变更。
 
 **单文件部署** — 构建产物为内嵌 Web 资源的自包含可执行文件——一个文件即完整平台，零外部依赖，秒级部署到任意服务器。
 
@@ -91,8 +91,6 @@
 
 **变更审查** — AI 代理的文件变更按对话轮次分组展示。逐文件查看 Diff，支持单个或批量通过/驳回。上下文 Token 用量条实时显示代理的上下文消耗状态（正常、警告、临界）。
 
-**精细撤销** — 支持会话、步骤、文件三种粒度的回滚操作，并提供影响预览——执行前可确认将还原哪些文件。完整快照历史，确保回滚安全可靠。
-
 **上下文用量监控** — 实时 Token 用量进度条，颜色状态提示（正常、警告、临界）帮助判断何时需要压缩上下文或开启新会话。
 
 ### 平台特色
@@ -101,9 +99,9 @@
 
 **权限模式** — 每种代理支持独立的权限模式，实现细粒度操作控制。例如 Claude 支持 default、acceptEdits、bypassPermissions、plan 四种模式；Codex 支持 default、read-only、safe-yolo、yolo 模式。
 
-**移动端优先 PWA** — 专属 `/m/*` 路由，滑动手势审批变更，只读终端，针对 iOS 深度优化 PWA 体验，支持安装引导和离线访问。
+**移动端优先 PWA** — 响应式移动端 UI，滑动手势审批变更，只读终端，针对 iOS 深度优化 PWA 体验，支持安装引导和离线访问。
 
-**端到端加密中继** — 基于 WireGuard 的安全隧道，CLI 通过 `--relay` 单一参数即可连接 Hub，实现零配置安全远程访问。
+**加密中继** — 安全隧道用于 CLI 到 Hub 的远程连接。通过 `hub --relay` 参数启动，零配置安全远程访问。
 
 **单文件部署** — 构建产物为内嵌 Web 资源的自包含可执行文件，支持 macOS（ARM/x64）、Linux（ARM/x64）、Windows 跨平台构建。
 
@@ -129,12 +127,12 @@
 
 从 [GitHub Releases](https://github.com/zulinliu/make-hapi-power-again/releases) 下载最新版本。
 
-### Homebrew（macOS / Linux）
+### Homebrew（macOS / Linux）— 即将支持
 
-```bash
+<!-- ```bash
 brew tap zulinliu/hapi-power
 brew install hapi-power
-```
+``` -->
 
 ### 从源码构建
 
@@ -156,7 +154,7 @@ bun install
 bun run dev
 ```
 
-Hub 监听 `http://localhost:3016`，Web UI 监听 `http://localhost:5173`。
+Hub API 监听 `http://localhost:3016`，Web UI 监听 `http://localhost:5173`（Vite 开发服务器）。
 
 ### 2. 连接 AI 代理
 
@@ -176,7 +174,7 @@ hapi-power hub --relay
 
 ### 3. 打开浏览器
 
-桌面端访问 `http://localhost:5173`，或在手机上打开同一地址，随时随地编程。
+桌面端访问 `http://localhost:5173`，或在手机上打开同一地址，随时随地编程。生产模式（单文件部署）下，Web UI 由 Hub 直接提供，访问端口 `3016`。
 
 ### 4. 构建单文件可执行程序
 
@@ -192,15 +190,18 @@ bun run build:single-exe
 
 | 命令 | 说明 |
 |------|------|
-| `start hub` | 使用 Claude Code 连接到 Hub |
-| `start codex` | 启动 Codex 模式 |
-| `start gemini` | 启动 Gemini 模式 |
-| `start cursor` | 启动 Cursor Agent 模式 |
-| `start opencode` | 启动 OpenCode 模式 |
-| `start kimi` | 启动 Kimi 模式 |
-| `start hub --relay` | 通过 E2E 加密中继连接 |
+| *（默认）* | 使用 Claude Code 连接到 Hub |
+| `codex` | 启动 Codex 模式 |
+| `gemini` | 启动 Gemini 模式 |
+| `cursor` | 启动 Cursor Agent 模式 |
+| `opencode` | 启动 OpenCode 模式 |
+| `kimi` | 启动 Kimi 模式 |
+| `hub` / `server` | 启动 Hub 服务器 |
+| `hub --relay` | 启动带加密中继的 Hub |
 | `runner start` | 启动后台 Runner 守护进程 |
-| `hub` | 启动 Hub 服务器 |
+| `resume` | 恢复之前的会话 |
+| `doctor` | 运行诊断检查 |
+| `mcp` | MCP 服务器管理 |
 | `auth` | 管理认证 |
 
 ### 环境变量
@@ -210,12 +211,15 @@ bun run build:single-exe
 | 变量 | 说明 | 默认值 |
 |------|------|--------|
 | `HAPI_POWER_LISTEN_PORT` | Hub 监听端口 | `3016` |
-| `HUB_TOKEN` | Hub 认证令牌 | — |
-| `OPENAI_API_KEY` | Whisper 语音转录 | — |
-| `VAPID_PUBLIC_KEY` | Web Push 公钥 | — |
-| `VAPID_PRIVATE_KEY` | Web Push 私钥 | — |
-| `ALLOWED_ORIGINS` | CORS 允许的来源 | — |
-| `DATA_DIR` | 数据存储目录 | `~/.hapi-power` |
+| `HAPI_POWER_LISTEN_HOST` | Hub 监听地址 | `127.0.0.1` |
+| `CLI_API_TOKEN` | CLI 和 Web 认证的共享密钥 | 自动生成 |
+| `HAPI_POWER_HOME` | 数据存储目录 | `~/.hapi-power` |
+| `CORS_ORIGINS` | CORS 允许的来源（逗号分隔） | — |
+| `HAPI_POWER_PUBLIC_URL` | 外部访问的公网 URL | — |
+| `TELEGRAM_BOT_TOKEN` | Telegram Bot API 令牌（用于认证） | — |
+| `VAPID_SUBJECT` | Web Push 联系方式（邮箱或 URL） | `mailto:admin@YOUR_DOMAIN` |
+| `HAPI_POWER_RELAY_API` | 加密中继 API 域名 | — |
+| `HAPI_POWER_RELAY_AUTH` | 中继认证密钥 | — |
 
 **CLI：**
 
@@ -223,7 +227,9 @@ bun run build:single-exe
 |------|------|--------|
 | `HAPI_POWER_API_URL` | Hub 地址 | `http://localhost:3016` |
 | `CLI_API_TOKEN` | CLI 认证令牌 | 自动生成 |
+| `HAPI_POWER_HOME` | 数据存储目录 | `~/.hapi-power` |
 | `ANTHROPIC_API_KEY` | Claude API 密钥 | — |
+| `OPENAI_API_KEY` | OpenAI API 密钥（Codex、Whisper） | — |
 
 ### 自定义模型 Provider
 
@@ -243,21 +249,21 @@ API 密钥使用 AES-256-GCM 加密，永远不会明文存储。
 ```
 ┌─────────┐  Socket.IO(/cli)  ┌──────────────────┐  REST/SSE  ┌─────────┐
 │   CLI   │ ────────────────  │       Hub        │ ────────── │   Web   │
-│ (代理)   │                   │ (Hono + Socket.IO)│            │ (React) │
+│ (代理)   │                   │ (Hono + Socket.IO)│  Socket.IO │ (React) │
 └─────────┘                   └──────────────────┘            └─────────┘
     │                               │       │                       │
     ├─ 代理封装                      ├─ SQLite 持久化               ├─ TanStack Router
     │  (Claude/Codex/Gemini/        ├─ 会话缓存                    ├─ TanStack Query
     │   OpenCode/Cursor/Kimi)       ├─ RPC 网关                    ├─ Monaco Editor
     ├─ Socket.IO 客户端             ├─ 推送通知                     ├─ xterm.js
-    └─ RPC 处理器                    └─ EventBus                   └─ Socket.IO 客户端
+    └─ RPC 处理器                    └─ EventPublisher             └─ Socket.IO 客户端
 ```
 
 三层 Monorepo 架构，通过 Socket.IO 和 REST/SSE 连接：
 
 1. **CLI** 启动 AI 代理进程，通过 Socket.IO `/cli` 命名空间连接 Hub
 2. **Hub** 持久化数据到 SQLite，通过 SSE 广播事件，路由 RPC 调用
-3. **Web** 订阅 SSE 接收实时更新，通过 Hub REST API 发送用户操作
+3. **Web** 订阅 SSE 接收实时更新，使用 Socket.IO 传输终端和二进制数据，通过 Hub REST API 发送用户操作
 
 ---
 
@@ -266,7 +272,7 @@ API 密钥使用 AES-256-GCM 加密，永远不会明文存储。
 | 层 | 技术 |
 |----|------|
 | 运行时 | [Bun](https://bun.sh) |
-| 后端 | [Hono](https://hono.dev) + Socket.IO + better-sqlite3 |
+| 后端 | [Hono](https://hono.dev) + Socket.IO + bun:sqlite |
 | 前端 | [React 19](https://react.dev) + TanStack Router + TanStack Query + Tailwind CSS |
 | 代码编辑 | Monaco Editor + Shiki |
 | 终端 | xterm.js + Bun.Subprocess |
@@ -306,6 +312,6 @@ Hapi Power 基于 [AGPL-3.0](./LICENSE) 许可证开源：
 
 ## 致谢
 
-Hapi Power 是 [hapi](https://github.com/twsxtd/hapi) 项目的修改版本，感谢 twsxtd 团队在代理通信协议和 Web UI 方面的出色工作。
+Hapi Power 是 [hapi](https://github.com/nicepkg/hapi) 项目的修改版本，感谢 nicepkg 团队在代理通信协议和 Web UI 方面的出色工作。
 
 CLI 模块包含源自 [happy-cli](https://github.com/slopus/happy-cli)（作者 Kirill Dubovitskiy，MIT 许可证）的代码。

@@ -74,13 +74,13 @@ Most AI coding tools lock you into one agent, one terminal, one machine. Hapi Po
 
 **Multi-Agent Orchestration** — Run Claude Code, OpenAI Codex, Google Gemini, Cursor Agent, OpenCode, and Kimi side by side. Switch agents per session, each with its own permission modes — from read-only to autopilot.
 
-**Change Review & Granular Undo** — Every AI file change grouped by conversation turn. Review diffs file by file, approve or reject individually or in bulk. Undo at session, step, or file granularity with impact preview.
+**Change Review & Approval** — Every AI file change grouped by conversation turn. Review diffs file by file, approve or reject individually or in bulk.
 
 **Visual Git + File Management** — Commit, diff, branch, push, pull, and clone from the browser. Browse directory trees, create, rename, move, copy, upload, download, and search files — all via an intuitive context menu.
 
 **Custom Model Providers** — Configure third-party API endpoints, auto-discover available models, and bind providers per session. API keys stored with AES-256-GCM encryption.
 
-**Mobile-First PWA** — Dedicated mobile routes with swipe-to-approve gestures, read-only terminal, and iOS-optimized PWA experience. Review and approve AI agent changes from your phone, anytime, anywhere.
+**Mobile-First PWA** — Responsive mobile UI with swipe-to-approve gestures, read-only terminal, and iOS-optimized PWA experience. Review and approve AI agent changes from your phone, anytime, anywhere.
 
 **Single Binary Deploy** — Build a self-contained executable with embedded web assets. One file, full platform, zero dependencies. Deploy on any server in seconds.
 
@@ -91,8 +91,6 @@ Most AI coding tools lock you into one agent, one terminal, one machine. Hapi Po
 
 **Change Review** — File changes grouped by agent conversation turn. Review diffs file by file, approve or reject individually or in bulk. Context window token usage bar shows how much context your agent has consumed (normal, warning, critical).
 
-**Granular Undo** — Undo at session, step, or file granularity with impact preview. Confirm what will be reverted before executing. Full snapshot history with diff-based rollback.
-
 **Context Monitoring** — Real-time token usage bar with color-coded status (normal, warning, critical) so you know when to compact or start a fresh session.
 
 ### Platform
@@ -101,9 +99,9 @@ Most AI coding tools lock you into one agent, one terminal, one machine. Hapi Po
 
 **Permission Modes** — Each agent supports its own permission modes. Claude: default, acceptEdits, bypassPermissions, plan. Codex: default, read-only, safe-yolo, yolo.
 
-**Mobile-First PWA** — Dedicated `/m/*` routes with swipe gestures for change review, read-only terminal, iOS-optimized install guidance, and offline support via service worker.
+**Mobile-First PWA** — Responsive mobile UI with swipe gestures for change review, read-only terminal, iOS-optimized install guidance, and offline support via service worker.
 
-**E2E Encrypted Relay** — WireGuard-based secure tunnel for remote CLI-to-Hub connections. Connect with `--relay` — no configuration needed.
+**Encrypted Relay** — Secure tunnel for remote CLI-to-Hub connections. Connect with `hub --relay` — no manual configuration needed.
 
 **Single Binary Deploy** — Self-contained executable with embedded web assets. Cross-platform builds for macOS (ARM/x64), Linux (ARM/x64), and Windows.
 
@@ -129,12 +127,12 @@ Most AI coding tools lock you into one agent, one terminal, one machine. Hapi Po
 
 Download the latest release for your platform from [GitHub Releases](https://github.com/zulinliu/make-hapi-power-again/releases).
 
-### Homebrew (macOS / Linux)
+### Homebrew (macOS / Linux) — Coming Soon
 
-```bash
+<!-- ```bash
 brew tap zulinliu/hapi-power
 brew install hapi-power
-```
+``` -->
 
 ### Build from Source
 
@@ -156,7 +154,7 @@ bun install
 bun run dev
 ```
 
-Hub runs at `http://localhost:3016`, Web UI at `http://localhost:5173`.
+Hub API at `http://localhost:3016`, Web UI at `http://localhost:5173` (Vite dev server).
 
 ### 2. Connect an AI Agent
 
@@ -176,7 +174,7 @@ hapi-power hub --relay
 
 ### 3. Open in Browser
 
-Visit `http://localhost:5173` on your desktop, or open it on your phone for coding on mobile.
+Visit `http://localhost:5173` on your desktop, or open it on your phone for coding on mobile. In production (single binary), Web UI is served directly by Hub at port `3016`.
 
 ### 4. Build Single Binary
 
@@ -192,15 +190,18 @@ bun run build:single-exe
 
 | Command | Description |
 |---------|-------------|
-| `start hub` | Connect to Hub with Claude Code |
-| `start codex` | Start Codex mode |
-| `start gemini` | Start Gemini mode |
-| `start cursor` | Start Cursor Agent mode |
-| `start opencode` | Start OpenCode mode |
-| `start kimi` | Start Kimi mode |
-| `start hub --relay` | Connect via E2E encrypted relay |
+| *(default)* | Connect to Hub with Claude Code |
+| `codex` | Start Codex mode |
+| `gemini` | Start Gemini mode |
+| `cursor` | Start Cursor Agent mode |
+| `opencode` | Start OpenCode mode |
+| `kimi` | Start Kimi mode |
+| `hub` / `server` | Start Hub server |
+| `hub --relay` | Start Hub with encrypted relay |
 | `runner start` | Start background Runner daemon |
-| `hub` | Start Hub server |
+| `resume` | Resume a previous session |
+| `doctor` | Run diagnostics |
+| `mcp` | MCP server management |
 | `auth` | Manage authentication |
 
 ### Environment Variables
@@ -210,12 +211,15 @@ bun run build:single-exe
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `HAPI_POWER_LISTEN_PORT` | Hub listen port | `3016` |
-| `HUB_TOKEN` | Hub authentication token | — |
-| `OPENAI_API_KEY` | Whisper voice transcription | — |
-| `VAPID_PUBLIC_KEY` | Web Push public key | — |
-| `VAPID_PRIVATE_KEY` | Web Push private key | — |
-| `ALLOWED_ORIGINS` | CORS allowed origins | — |
-| `DATA_DIR` | Data storage directory | `~/.hapi-power` |
+| `HAPI_POWER_LISTEN_HOST` | Hub listen host | `127.0.0.1` |
+| `CLI_API_TOKEN` | Shared secret for CLI and Web authentication | auto-generated |
+| `HAPI_POWER_HOME` | Data storage directory | `~/.hapi-power` |
+| `CORS_ORIGINS` | CORS allowed origins (comma-separated) | — |
+| `HAPI_POWER_PUBLIC_URL` | Public URL for external access | — |
+| `TELEGRAM_BOT_TOKEN` | Telegram Bot API token for auth | — |
+| `VAPID_SUBJECT` | Contact info for Web Push (email or URL) | `mailto:admin@YOUR_DOMAIN` |
+| `HAPI_POWER_RELAY_API` | Relay API domain for encrypted tunnel | — |
+| `HAPI_POWER_RELAY_AUTH` | Relay authentication key | — |
 
 **CLI:**
 
@@ -223,7 +227,9 @@ bun run build:single-exe
 |----------|-------------|---------|
 | `HAPI_POWER_API_URL` | Hub address | `http://localhost:3016` |
 | `CLI_API_TOKEN` | CLI authentication token | auto-generated |
+| `HAPI_POWER_HOME` | Data storage directory | `~/.hapi-power` |
 | `ANTHROPIC_API_KEY` | Claude API key | — |
+| `OPENAI_API_KEY` | OpenAI API key (for Codex, Whisper) | — |
 
 ### Custom Model Providers
 
@@ -243,21 +249,21 @@ API keys are encrypted with AES-256-GCM and never stored in plaintext.
 ```
 ┌─────────┐  Socket.IO(/cli)  ┌──────────────────┐  REST/SSE  ┌─────────┐
 │   CLI   │ ────────────────  │       Hub        │ ────────── │   Web   │
-│ (Agent) │                   │ (Hono + Socket.IO)│            │ (React) │
+│ (Agent) │                   │ (Hono + Socket.IO)│  Socket.IO │ (React) │
 └─────────┘                   └──────────────────┘            └─────────┘
     │                               │       │                       │
     ├─ Agent wrappers               ├─ SQLite persistence          ├─ TanStack Router
     │  (Claude/Codex/Gemini/        ├─ Session cache               ├─ TanStack Query
     │   OpenCode/Cursor/Kimi)       ├─ RPC Gateway                 ├─ Monaco Editor
     ├─ Socket.IO client             ├─ Push notifications          ├─ xterm.js
-    └─ RPC handlers                 └─ EventBus                   └─ Socket.IO client
+    └─ RPC handlers                 └─ EventPublisher             └─ Socket.IO client
 ```
 
 Three-layer monorepo connected via Socket.IO and REST/SSE:
 
 1. **CLI** starts an AI agent process and connects to Hub via Socket.IO `/cli` namespace
 2. **Hub** persists data to SQLite, broadcasts events via SSE, and routes RPC calls
-3. **Web** subscribes to SSE for real-time updates, sends user actions to Hub REST API
+3. **Web** subscribes to SSE for real-time updates, uses Socket.IO for terminal and binary transfer, and sends user actions to Hub REST API
 
 ---
 
@@ -266,7 +272,7 @@ Three-layer monorepo connected via Socket.IO and REST/SSE:
 | Layer | Technology |
 |-------|-----------|
 | Runtime | [Bun](https://bun.sh) |
-| Backend | [Hono](https://hono.dev) + Socket.IO + better-sqlite3 |
+| Backend | [Hono](https://hono.dev) + Socket.IO + bun:sqlite |
 | Frontend | [React 19](https://react.dev) + TanStack Router + TanStack Query + Tailwind CSS |
 | Code Editor | Monaco Editor + Shiki |
 | Terminal | xterm.js + Bun.Subprocess |
@@ -306,6 +312,6 @@ Hapi Power is licensed under [AGPL-3.0](./LICENSE). What this means:
 
 ## Acknowledgments
 
-Hapi Power is a modified version of [hapi](https://github.com/twsxtd/hapi) by the twsxtd team. Their work on the agent communication protocol and web UI provided the foundation for this project.
+Hapi Power is a modified version of [hapi](https://github.com/nicepkg/hapi) by the nicepkg team. Their work on the agent communication protocol and web UI provided the foundation for this project.
 
 The CLI module includes code derived from [happy-cli](https://github.com/slopus/happy-cli) by Kirill Dubovitskiy, licensed under the MIT License.
