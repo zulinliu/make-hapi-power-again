@@ -157,31 +157,35 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
     // Phase 5+: file preview
   }, [])
 
+  const handleUnavailableAction = useCallback((label: string) => {
+    showToast(`${label} will ship in the next file workflow phase`)
+  }, [])
+
   const handleContextMenu = useCallback(
     (path: string, type: 'file' | 'directory', point: { x: number; y: number }) => {
       if (isLoading) return
       setSelectedPath(path)
       const name = path.split('/').pop() ?? ''
       const items: ContextMenuItem[] = [
-        { label: 'New File', icon: '📄', onClick: () => { setInputValue(''); setDialog({ type: 'newFile' }) } },
-        { label: 'New Folder', icon: '📁', onClick: () => { setInputValue(''); setDialog({ type: 'newFolder' }) } },
-        { label: 'Rename', icon: '✏️', onClick: () => { setInputValue(name); setDialog({ type: 'rename', name, path }) } },
-        { label: 'Copy Path', icon: '📋', onClick: () => { copyToClipboard(path) } },
-        { label: 'Move…', icon: '↗️', onClick: () => {} },
-        { label: 'Copy…', icon: '⊂', onClick: () => {} },
+        { label: 'New File', icon: 'file', onClick: () => { setInputValue(''); setDialog({ type: 'newFile' }) } },
+        { label: 'New Folder', icon: 'folder', onClick: () => { setInputValue(''); setDialog({ type: 'newFolder' }) } },
+        { label: 'Rename', icon: 'rename', onClick: () => { setInputValue(name); setDialog({ type: 'rename', name, path }) } },
+        { label: 'Copy Path', icon: 'copyPath', onClick: () => { copyToClipboard(path) } },
+        { label: 'Move…', icon: 'move', onClick: () => handleUnavailableAction('Move') },
+        { label: 'Copy…', icon: 'copy', onClick: () => handleUnavailableAction('Copy') },
       ]
       if (type === 'file') {
-        items.push({ label: 'Download', icon: '⬇️', onClick: () => {} })
+        items.push({ label: 'Download', icon: 'download', onClick: () => handleUnavailableAction('Download') })
       }
       items.push({
         label: 'Delete',
-        icon: '🗑️',
+        icon: 'delete',
         danger: true,
         onClick: () => setDialog({ type: 'delete', name, path }),
       })
       ctxMenu.show(point.x, point.y, items)
     },
-    [ctxMenu, isLoading],
+    [ctxMenu, handleUnavailableAction, isLoading],
   )
 
   // Batch selection
@@ -312,6 +316,16 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
     setDialog({ type: 'newFile' })
   }, [])
 
+  const handleToolbarNewFolder = useCallback(() => {
+    setInputValue('')
+    setDialog({ type: 'newFolder' })
+  }, [])
+
+
+  const handleSelectPath = useCallback((path: string) => {
+    setSelectedPath(path)
+  }, [])
+
   const handleBatchDelete = useCallback(() => {
     if (selectedPaths.size === 0) return
     setDialog({ type: 'batchDelete', paths: [...selectedPaths] })
@@ -373,16 +387,48 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
         copyToClipboard(selectedPath)
       }
     }
-    window.addEventListener('keydown', handler, true)
-    return () => window.removeEventListener('keydown', handler, true)
-  }, [dialog, selectedPath, selectedPaths, breadcrumbs, handleSelectAll, handleBatchDelete, handleNavigate])
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [dialog, selectedPath, selectedPaths, breadcrumbs, handleSelectAll, handleBatchDelete, handleNavigate, handleContextMenu, entries])
 
   return (
     <div className="flex h-full flex-col">
       {/* Toolbar */}
-      <div className="flex items-center gap-2 border-b border-(--hp-border) px-3" style={{ height: 44, background: 'var(--hp-surface-0)' }}>
-        <button type="button" onClick={() => setShowHidden((v) => !v)} aria-label={showHidden ? 'Hide dotfiles' : 'Show dotfiles'}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', borderRadius: 8, fontSize: 12, fontWeight: 500, border: 'none', cursor: 'pointer', color: showHidden ? 'var(--hp-primary)' : 'var(--hp-text-tertiary)', background: showHidden ? 'var(--hp-primary-subtle)' : 'var(--hp-surface-1)', transition: 'all 0.15s' }}>
+      <div
+        className="fm-toolbar"
+        style={{
+          minHeight: 48,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          borderBottom: '1px solid var(--hp-border)',
+          padding: '0 var(--hp-space-3)',
+          background: 'var(--hp-surface-0)',
+          flexShrink: 0,
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => setShowHidden((v) => !v)}
+          aria-label={showHidden ? 'Hide dotfiles' : 'Show dotfiles'}
+          title={showHidden ? 'Hide dotfiles' : 'Show dotfiles'}
+          className="fm-toolbar-button"
+          style={{
+            minHeight: 40,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 7,
+            padding: '0 var(--hp-space-3)',
+            borderRadius: 'var(--hp-radius-md)',
+            fontSize: 12,
+            fontWeight: 650,
+            border: `1px solid ${showHidden ? 'var(--hp-primary)' : 'var(--hp-border)'}`,
+            cursor: 'pointer',
+            color: showHidden ? 'var(--hp-primary)' : 'var(--hp-text-secondary)',
+            background: showHidden ? 'var(--hp-primary-subtle)' : 'var(--hp-surface-1)',
+            transition: 'background var(--hp-duration-fast) var(--hp-ease-out), border-color var(--hp-duration-fast) var(--hp-ease-out), color var(--hp-duration-fast) var(--hp-ease-out)',
+          }}
+        >
           <svg xmlns="http://www.w3.org/2000/svg" width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             {showHidden ? <><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" /><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" /><line x1="1" y1="1" x2="23" y2="23" /></>
               : <><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></>}
@@ -390,19 +436,74 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
           <span className="hidden sm:inline">{showHidden ? 'Hide dotfiles' : 'Show dotfiles'}</span>
         </button>
 
-        <button type="button" onClick={handleToolbarNew} aria-label="New file"
-          style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, border: 'none', cursor: 'pointer', color: 'oklch(100% 0 0)', background: 'var(--hp-primary)' }}>
-          <span style={{ fontSize: 14, lineHeight: 1 }}>+</span>
-          <span className="hidden sm:inline">New</span>
+        <button
+          type="button"
+          onClick={handleToolbarNew}
+          aria-label="New file"
+          className="fm-toolbar-primary"
+          style={{
+            minHeight: 40,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '0 var(--hp-space-4)',
+            borderRadius: 'var(--hp-radius-md)',
+            fontSize: 12,
+            fontWeight: 700,
+            border: '1px solid var(--hp-primary)',
+            cursor: 'pointer',
+            color: 'var(--hp-primary-text)',
+            background: 'var(--hp-primary)',
+          }}
+        >
+          <span style={{ fontSize: 15, lineHeight: 1 }} aria-hidden="true">+</span>
+          <span className="hidden sm:inline">New file</span>
+          <span className="sm:hidden">File</span>
         </button>
 
-        <div className="flex-1" />
-        <span style={{ fontSize: 11, color: 'var(--hp-text-tertiary)', fontFamily: 'var(--hp-font-mono, ui-monospace, monospace)' }}>
+        <button
+          type="button"
+          onClick={handleToolbarNewFolder}
+          aria-label="New folder"
+          className="fm-toolbar-button hidden sm:inline-flex"
+          style={{
+            minHeight: 40,
+            alignItems: 'center',
+            gap: 6,
+            padding: '0 var(--hp-space-3)',
+            borderRadius: 'var(--hp-radius-md)',
+            fontSize: 12,
+            fontWeight: 650,
+            border: '1px solid var(--hp-border)',
+            cursor: 'pointer',
+            color: 'var(--hp-text-primary)',
+            background: 'var(--hp-surface-0)',
+          }}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+          </svg>
+          <span>New folder</span>
+        </button>
+
+        <div className="min-w-0 flex-1" />
+        <span
+          title={`${entries.length} item${entries.length !== 1 ? 's' : ''}`}
+          style={{
+            maxWidth: 96,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            fontSize: 11,
+            color: 'var(--hp-text-secondary)',
+            fontFamily: 'var(--hp-font-mono, ui-monospace, monospace)',
+          }}
+        >
           {entries.length} item{entries.length !== 1 ? 's' : ''}
         </span>
       </div>
 
-      <BreadcrumbNav segments={breadcrumbs} onNavigate={handleNavigate} />
+      <BreadcrumbNav segments={breadcrumbs} onNavigate={handleNavigate} onCopyPath={copyToClipboard} />
 
       <div className="min-h-0 flex-1 overflow-y-auto" key={navKey}>
         <DirectoryView
@@ -415,8 +516,10 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
             onOpenFile={handleOpenFile}
             onContextMenu={handleContextMenu}
             selectedPath={selectedPath}
-            onSelect={setSelectedPath}
+            onSelect={handleSelectPath}
             onRetry={reload}
+            onCreateFile={handleToolbarNew}
+            onCreateFolder={handleToolbarNewFolder}
             selectedPaths={selectedPaths}
             onToggleSelect={handleToggleSelect}
             onSelectAll={handleSelectAll}
@@ -429,8 +532,8 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
         <BatchActionBar
           selectedCount={selectedPaths.size}
           onDelete={handleBatchDelete}
-          onMove={() => {}}
-          onCopy={() => {}}
+          onMove={() => handleUnavailableAction('Move')}
+          onCopy={() => handleUnavailableAction('Copy')}
           onStartSession={() => {
             if (machineId && selectedPaths.size === 1) {
               const path = [...selectedPaths][0]
@@ -446,9 +549,9 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
 
       {/* Bottom toolbar (mobile) */}
       <div className="flex items-center justify-around border-t border-(--hp-border) md:hidden" style={{ height: 56, background: 'var(--hp-surface-0)', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
-        <ToolbarButton label="New" icon="+" onClick={handleToolbarNew} />
-        <ToolbarButton label="Paste" icon="⊂" />
-        <ToolbarButton label="Upload" icon="↑" />
+        <ToolbarButton label="File" icon="+" onClick={handleToolbarNew} />
+        <ToolbarButton label="Folder" icon="folder" onClick={handleToolbarNewFolder} />
+        <ToolbarButton label="Upload" icon="↑" onClick={() => handleUnavailableAction('Upload')} />
         <ToolbarButton label="Session" icon="▶" onClick={() => {
           navigate({ to: '/sessions/new', search: { directory: currentPath, ...(machineId ? { machineId } : {}) } })
         }} />
@@ -491,9 +594,16 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
 function ToolbarButton({ label, icon, onClick }: { label: string; icon: string; onClick?: () => void }) {
   return (
     <button type="button" onClick={onClick} aria-label={label}
-      style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, padding: '4px 12px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--hp-text-tertiary)', borderRadius: 8, minWidth: 56, transition: 'color 0.15s' }}
-      onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--hp-text-primary)' }} onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--hp-text-tertiary)' }}>
-      <span style={{ fontSize: 18, lineHeight: 1 }}>{icon}</span>
+      className="fm-mobile-toolbar-button"
+      style={{ minHeight: 48, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2, padding: '4px 10px', background: 'transparent', border: '1px solid transparent', cursor: 'pointer', color: 'var(--hp-text-secondary)', borderRadius: 'var(--hp-radius-md)', minWidth: 58, transition: 'background var(--hp-duration-fast) var(--hp-ease-out), color var(--hp-duration-fast) var(--hp-ease-out)' }}
+      onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--hp-text-primary)' }} onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--hp-text-secondary)' }}>
+      <span style={{ width: 20, height: 20, display: 'grid', placeItems: 'center', fontSize: 18, lineHeight: 1 }} aria-hidden="true">
+        {icon === 'folder' ? (
+          <svg xmlns="http://www.w3.org/2000/svg" width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+          </svg>
+        ) : icon}
+      </span>
       <span style={{ fontSize: 10, fontWeight: 500 }}>{label}</span>
     </button>
   )

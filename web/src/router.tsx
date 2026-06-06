@@ -614,7 +614,7 @@ function BrowsePage() {
                     <FileManager api={api} machineId={machineId} initialPath={workspaceRoot} />
                 ) : (
                     <div className="flex items-center justify-center h-full">
-                        <div className="animate-pulse text-(--hp-text-tertiary)">{t('session.loading', 'Loading...')}</div>
+                        <div className="animate-pulse text-(--hp-text-tertiary)">{t('session.loading')}</div>
                     </div>
                 )}
             </div>

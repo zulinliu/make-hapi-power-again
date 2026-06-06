@@ -41,12 +41,13 @@ export function BatchActionBar({
         zIndex: 10,
         alignItems: 'center',
         justifyContent: 'space-between',
-        height: 40,
-        padding: '0 12px',
-        background: 'var(--hp-surface-1)',
+        minHeight: 48,
+        padding: '0 var(--hp-space-4)',
+        background: 'var(--hp-surface-0)',
         borderTop: '1px solid var(--hp-border)',
         transform: 'translateY(100%)',
-        transition: 'transform 200ms ease-out',
+        boxShadow: 'var(--hp-shadow-xs)',
+        transition: 'transform var(--hp-duration-normal) var(--hp-ease-overlay)',
         flexShrink: 0,
       }}
     >
@@ -57,21 +58,21 @@ export function BatchActionBar({
         style={{
           display: 'inline-flex',
           alignItems: 'center',
-          height: 32,
-          padding: '0 14px',
-          borderRadius: 8,
+          minHeight: 40,
+          padding: '0 var(--hp-space-4)',
+          borderRadius: 'var(--hp-radius-md)',
           border: 'none',
           background: 'var(--hp-primary)',
-          color: 'oklch(100% 0 0)',
+          color: 'var(--hp-primary-text)',
           fontSize: 13,
-          fontWeight: 600,
+          fontWeight: 650,
           cursor: 'pointer',
-          transition: 'opacity 0.15s',
+          transition: 'background var(--hp-duration-fast) var(--hp-ease-out), transform var(--hp-duration-instant) var(--hp-ease-out)',
         }}
-        onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.9' }}
-        onMouseLeave={(e) => { e.currentTarget.style.opacity = '1' }}
+        onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hp-primary-hover)' }}
+        onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--hp-primary)' }}
       >
-        启动会话
+        Start session
       </button>
 
       {/* Right: count + actions */}
@@ -81,14 +82,14 @@ export function BatchActionBar({
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
-            height: 22,
-            minWidth: 22,
-            padding: '0 6px',
-            borderRadius: 11,
+            height: 24,
+            minWidth: 24,
+            padding: '0 7px',
+            borderRadius: 'var(--hp-radius-full)',
             background: 'var(--hp-primary-subtle)',
             color: 'var(--hp-primary)',
             fontSize: 12,
-            fontWeight: 600,
+            fontWeight: 650,
           }}
         >
           {selectedCount}
@@ -121,22 +122,24 @@ function ActionBtn({
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
-        height: 32,
+        minHeight: 40,
         padding: '0 12px',
-        borderRadius: 8,
+        borderRadius: 'var(--hp-radius-md)',
         border: '1px solid var(--hp-border)',
         background: 'transparent',
         color: danger ? 'var(--hp-danger)' : 'var(--hp-text-secondary)',
         fontSize: 13,
         fontWeight: 500,
         cursor: 'pointer',
-        transition: 'background 0.15s, color 0.15s',
+        transition: 'background var(--hp-duration-fast) var(--hp-ease-out), border-color var(--hp-duration-fast) var(--hp-ease-out), color var(--hp-duration-fast) var(--hp-ease-out)',
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.background = 'var(--hp-surface-2)'
+        e.currentTarget.style.background = danger ? 'var(--hp-danger-subtle)' : 'var(--hp-surface-2)'
+        e.currentTarget.style.borderColor = danger ? 'var(--hp-danger)' : 'var(--hp-border-hover)'
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.background = 'transparent'
+        e.currentTarget.style.borderColor = 'var(--hp-border)'
       }}
     >
       {label}

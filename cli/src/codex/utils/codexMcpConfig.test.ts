@@ -9,7 +9,7 @@ describe('codexMcpConfig', () => {
     describe('buildMcpServerConfigArgs', () => {
         it('builds config args for a single MCP server', () => {
             const mcpServers = {
-                hapi-power: {
+                'hapi-power': {
                     command: 'hapi-power',
                     args: ['mcp', '--url', 'http://localhost:3000']
                 }
@@ -25,7 +25,7 @@ describe('codexMcpConfig', () => {
 
         it('builds config args for multiple MCP servers', () => {
             const mcpServers = {
-                hapi-power: { command: 'hapi-power', args: ['mcp'] },
+                'hapi-power': { command: 'hapi-power', args: ['mcp'] },
                 other: { command: 'node', args: ['server.js'] }
             };
 

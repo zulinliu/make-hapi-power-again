@@ -4,9 +4,10 @@ import type { BreadcrumbSegment } from './types'
 export interface BreadcrumbNavProps {
   segments: BreadcrumbSegment[]
   onNavigate: (path: string) => void
+  onCopyPath?: (path: string) => void
 }
 
-export function BreadcrumbNav({ segments, onNavigate }: BreadcrumbNavProps) {
+export function BreadcrumbNav({ segments, onNavigate, onCopyPath }: BreadcrumbNavProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = useCallback(() => {
@@ -20,18 +21,28 @@ export function BreadcrumbNav({ segments, onNavigate }: BreadcrumbNavProps) {
 
   if (segments.length === 0) return null
 
+  const displaySegments = segments.length > 4
+    ? [segments[0], { name: '…', path: segments[Math.max(0, segments.length - 3)].path }, ...segments.slice(-2)]
+    : segments
+
   return (
-    <nav aria-label="Breadcrumb" style={{
-      height: 40,
-      background: 'var(--hp-surface-1)',
-      borderBottom: '1px solid var(--hp-border)',
-      display: 'flex',
-      alignItems: 'center',
-      padding: '0 16px',
-    }}>
+    <nav
+      aria-label="Breadcrumb"
+      className="fm-breadcrumb"
+      style={{
+        minHeight: 44,
+        background: 'var(--hp-surface-1)',
+        borderBottom: '1px solid var(--hp-border)',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        padding: '0 var(--hp-space-3)',
+      }}
+    >
       <div
         ref={scrollRef}
         role="list"
+        aria-label={segments.map((segment) => segment.name).join('/')}
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -41,35 +52,64 @@ export function BreadcrumbNav({ segments, onNavigate }: BreadcrumbNavProps) {
           scrollbarWidth: 'none',
           whiteSpace: 'nowrap',
           minWidth: 0,
+          flex: 1,
         }}
       >
-        {segments.map((segment, index) => {
-          const isLast = index === segments.length - 1
+        {displaySegments.map((segment, index) => {
+          const isLast = index === displaySegments.length - 1
+          const isEllipsis = segment.name === '…'
 
           return (
-            <span key={segment.path} role="listitem" style={{ display: 'flex', alignItems: 'center', gap: 4, scrollSnapAlign: isLast ? 'end' : undefined }}>
+            <span
+              key={`${segment.path}-${index}`}
+              role="listitem"
+              style={{ display: 'flex', alignItems: 'center', gap: 4, minWidth: 0, scrollSnapAlign: isLast ? 'end' : undefined }}
+            >
               {index > 0 && (
                 <span style={{ color: 'var(--hp-text-tertiary)', fontSize: 11, flexShrink: 0 }} aria-hidden="true">/</span>
               )}
               {isLast ? (
-                <span aria-current="page" style={{ color: 'var(--hp-primary)', fontWeight: 600, fontSize: 13, flexShrink: 0 }}>
+                <span
+                  aria-current="page"
+                  title={segment.name}
+                  style={{
+                    color: 'var(--hp-primary)',
+                    fontWeight: 650,
+                    fontSize: 13,
+                    maxWidth: 'min(42vw, 280px)',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 1,
+                  }}
+                >
                   {segment.name}
                 </span>
               ) : (
                 <button
                   type="button"
                   onClick={() => onNavigate(segment.path)}
+                  aria-label={isEllipsis ? 'Jump toward parent folders' : `Open ${segment.name}`}
+                  title={isEllipsis ? segment.path : segment.name}
                   style={{
-                    background: 'none',
-                    border: 'none',
-                    padding: 0,
+                    minHeight: 44,
+                    minWidth: 44,
+                    maxWidth: isEllipsis ? 44 : 'min(34vw, 180px)',
+                    background: isEllipsis ? 'var(--hp-surface-2)' : 'transparent',
+                    border: isEllipsis ? '1px solid var(--hp-border)' : '1px solid transparent',
+                    borderRadius: 'var(--hp-radius-sm)',
+                    padding: isEllipsis ? '0 10px' : '0 8px',
                     color: 'var(--hp-text-secondary)',
                     fontSize: 13,
                     cursor: 'pointer',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
                     flexShrink: 0,
+                    transition: 'background var(--hp-duration-fast) var(--hp-ease-out), color var(--hp-duration-fast) var(--hp-ease-out)',
                   }}
-                  onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--hp-text-primary)' }}
-                  onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--hp-text-secondary)' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hp-surface-2)'; e.currentTarget.style.color = 'var(--hp-text-primary)' }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = isEllipsis ? 'var(--hp-surface-2)' : 'transparent'; e.currentTarget.style.color = 'var(--hp-text-secondary)' }}
                 >
                   {segment.name}
                 </button>
@@ -78,6 +118,34 @@ export function BreadcrumbNav({ segments, onNavigate }: BreadcrumbNavProps) {
           )
         })}
       </div>
+
+      {onCopyPath && (
+        <button
+          type="button"
+          onClick={() => onCopyPath(segments[segments.length - 1]?.path ?? '')}
+          aria-label="Copy current path"
+          title="Copy current path"
+          style={{
+            width: 44,
+            minWidth: 44,
+            height: 44,
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: 'var(--hp-radius-md)',
+            border: '1px solid var(--hp-border)',
+            background: 'var(--hp-surface-0)',
+            color: 'var(--hp-text-secondary)',
+            fontSize: 14,
+            cursor: 'pointer',
+          }}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <rect x="9" y="9" width="11" height="11" rx="2" />
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+          </svg>
+        </button>
+      )}
     </nav>
   )
 }
@@ -98,11 +166,11 @@ export function buildBreadcrumbs(path: string, rootLabel: string): BreadcrumbSeg
   const afterRoot = clean.slice(rootEnd)
 
   if (!afterRoot) {
-    return [{ name: '~', path: rootPath }]
+    return [{ name: 'Project root', path: rootPath }]
   }
 
   const parts = afterRoot.split('/').filter(Boolean)
-  const segments: BreadcrumbSegment[] = [{ name: '~', path: rootPath }]
+  const segments: BreadcrumbSegment[] = [{ name: 'Project root', path: rootPath }]
 
   let currentPath = rootPath
   for (const part of parts) {

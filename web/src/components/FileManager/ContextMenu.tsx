@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useInsertionEffect } from 'react'
 
 export interface ContextMenuItem {
   label: string
-  icon?: string
+  icon?: 'file' | 'folder' | 'rename' | 'copyPath' | 'move' | 'copy' | 'download' | 'delete'
   danger?: boolean
   disabled?: boolean
   onClick: () => void
@@ -13,6 +13,29 @@ export interface ContextMenuState {
   x: number
   y: number
   items: ContextMenuItem[]
+}
+
+const STYLESHEET = `
+.fm-context-menu-item:focus-visible {
+  outline: 2px solid var(--hp-primary);
+  outline-offset: -2px;
+}
+@media (max-width: 767px) {
+  .fm-context-menu { min-width: min(260px, calc(100vw - 24px)) !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fm-context-menu { animation: none !important; }
+}
+`
+
+function useContextMenuStyles() {
+  useInsertionEffect(() => {
+    if (document.querySelector('style[data-fm-context-menu]')) return
+    const el = document.createElement('style')
+    el.setAttribute('data-fm-context-menu', '')
+    el.textContent = STYLESHEET
+    document.head.appendChild(el)
+  }, [])
 }
 
 export function useContextMenu() {
@@ -39,7 +62,37 @@ export interface ContextMenuProps {
   onClose: () => void
 }
 
+function MenuIcon({ icon, danger }: { icon: ContextMenuItem['icon']; danger?: boolean }) {
+  if (!icon) return null
+  const common = {
+    width: 16,
+    height: 16,
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 1.8,
+    strokeLinecap: 'round' as const,
+    strokeLinejoin: 'round' as const,
+  }
+  const color = danger ? 'var(--hp-danger)' : 'var(--hp-text-secondary)'
+  return (
+    <span style={{ width: 18, height: 18, display: 'grid', placeItems: 'center', color, flexShrink: 0 }}>
+      <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" {...common}>
+        {icon === 'file' && <><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6" /></>}
+        {icon === 'folder' && <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />}
+        {icon === 'rename' && <><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></>}
+        {icon === 'copyPath' && <><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></>}
+        {icon === 'move' && <><path d="M7 17 17 7" /><path d="M7 7h10v10" /></>}
+        {icon === 'copy' && <><path d="M8 7h9a2 2 0 0 1 2 2v9" /><rect x="5" y="4" width="11" height="11" rx="2" /></>}
+        {icon === 'download' && <><path d="M12 3v12" /><path d="m7 10 5 5 5-5" /><path d="M5 21h14" /></>}
+        {icon === 'delete' && <><path d="M3 6h18" /><path d="M8 6V4h8v2" /><path d="M19 6l-1 14H6L5 6" /><path d="M10 11v5" /><path d="M14 11v5" /></>}
+      </svg>
+    </span>
+  )
+}
+
 export function ContextMenu({ state, onClose }: ContextMenuProps) {
+  useContextMenuStyles()
   const menuRef = useRef<HTMLDivElement>(null)
   const [position, setPosition] = useState({ x: state.x, y: state.y })
 
@@ -126,6 +179,7 @@ export function ContextMenu({ state, onClose }: ContextMenuProps) {
       role="menu"
       aria-label="Context menu"
       tabIndex={-1}
+      className="fm-context-menu"
       style={{
         position: 'fixed',
         left: position.x,
@@ -135,10 +189,10 @@ export function ContextMenu({ state, onClose }: ContextMenuProps) {
         maxWidth: 260,
         background: 'var(--hp-surface-0)',
         border: '1px solid var(--hp-border)',
-        borderRadius: 10,
-        boxShadow: '0 8px 30px oklch(0 0 0 / 0.25), 0 2px 8px oklch(0 0 0 / 0.12)',
-        padding: '4px 0',
-        animation: reducedMotion ? 'none' : 'fm-menu-in 0.12s ease-out',
+        borderRadius: 'var(--hp-radius-md)',
+        boxShadow: 'var(--hp-shadow-lg)',
+        padding: 'var(--hp-space-1) 0',
+        animation: reducedMotion ? 'none' : 'fm-menu-in var(--hp-duration-fast) var(--hp-ease-overlay)',
         outline: 'none',
       }}
     >
@@ -152,6 +206,7 @@ export function ContextMenu({ state, onClose }: ContextMenuProps) {
             item.onClick()
             onClose()
           }}
+          className="fm-context-menu-item"
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -171,7 +226,7 @@ export function ContextMenu({ state, onClose }: ContextMenuProps) {
             fontWeight: 500,
             textAlign: 'left',
             opacity: item.disabled ? 0.5 : 1,
-            transition: 'background 0.1s',
+            transition: 'background var(--hp-duration-fast) var(--hp-ease-out), color var(--hp-duration-fast) var(--hp-ease-out)',
             outline: 'none',
           }}
           onFocus={(e) => { if (!item.disabled) e.currentTarget.style.background = 'var(--hp-surface-1)' }}
@@ -179,11 +234,7 @@ export function ContextMenu({ state, onClose }: ContextMenuProps) {
           onMouseEnter={(e) => { if (!item.disabled) e.currentTarget.style.background = 'var(--hp-surface-1)' }}
           onMouseLeave={(e) => { e.currentTarget.style.background = 'none' }}
         >
-          {item.icon && (
-            <span style={{ width: 18, textAlign: 'center', fontSize: 14, flexShrink: 0 }} aria-hidden="true">
-              {item.icon}
-            </span>
-          )}
+          <MenuIcon icon={item.icon} danger={item.danger} />
           <span style={{ flex: 1 }}>{item.label}</span>
         </button>
       ))}

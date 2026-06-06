@@ -271,7 +271,7 @@ export async function opencodeLocalLauncher(
         logger.debug(`[opencode-local]: Started hapi MCP server at ${happyServer.url}`);
 
         // Generate opencode.json config with MCP server and instructions
-        const { configPath } = ensureOpencodeConfig(opencodeConfigDir, bridge.mcpServers.hapi-power, TITLE_INSTRUCTION);
+        const { configPath } = ensureOpencodeConfig(opencodeConfigDir, bridge.mcpServers['hapi-power'], TITLE_INSTRUCTION);
         opencodeConfigPath = configPath;
     } catch (error) {
         logger.debug('[opencode-local]: Failed to start hapi MCP server (change_title will be unavailable)', error);

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useInsertionEffect, useRef } from 'react'
 
 interface DialogProps {
   title: string
@@ -12,7 +12,38 @@ interface DialogProps {
 
 const FOCUSABLE = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
 
+const STYLESHEET = `
+.fm-dialog-button:focus-visible,
+.fm-dialog-input:focus-visible {
+  outline: 2px solid var(--hp-primary);
+  outline-offset: 2px;
+}
+.fm-dialog-button:hover:not(:disabled) {
+  filter: brightness(0.98);
+}
+@media (max-width: 480px) {
+  .fm-dialog-panel { max-width: calc(100vw - 24px) !important; }
+  .fm-dialog-footer { flex-direction: column-reverse; }
+  .fm-dialog-footer button { width: 100%; min-height: 44px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fm-dialog-backdrop,
+  .fm-dialog-panel { animation: none !important; }
+}
+`
+
+function useDialogStyles() {
+  useInsertionEffect(() => {
+    if (document.querySelector('style[data-fm-dialog]')) return
+    const el = document.createElement('style')
+    el.setAttribute('data-fm-dialog', '')
+    el.textContent = STYLESHEET
+    document.head.appendChild(el)
+  }, [])
+}
+
 export function Dialog({ title, children, onClose, onSubmit, submitLabel, submitDanger, loading }: DialogProps) {
+  useDialogStyles()
   const dialogRef = useRef<HTMLDivElement>(null)
   const prevFocusRef = useRef<HTMLElement | null>(null)
 
@@ -60,6 +91,7 @@ export function Dialog({ title, children, onClose, onSubmit, submitLabel, submit
 
   return (
     <div
+      className="fm-dialog-backdrop"
       style={{
         position: 'fixed',
         inset: 0,
@@ -69,34 +101,35 @@ export function Dialog({ title, children, onClose, onSubmit, submitLabel, submit
         justifyContent: 'center',
         background: 'oklch(0 0 0 / 0.5)',
         animation: reducedMotion ? 'none' : 'fm-dialog-backdrop-in 0.15s ease-out',
-        padding: 16,
+        padding: 'max(12px, env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px)) max(12px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px))',
       }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
       <div
         ref={dialogRef}
         role="dialog"
+        className="fm-dialog-panel"
         aria-label={title}
         aria-modal="true"
         style={{
           width: '100%',
-          maxWidth: 380,
+          maxWidth: 400,
           background: 'var(--hp-surface-0)',
           border: '1px solid var(--hp-border)',
-          borderRadius: 14,
-          boxShadow: '0 16px 50px oklch(0 0 0 / 0.3)',
+          borderRadius: 'var(--hp-radius-lg)',
+          boxShadow: 'var(--hp-shadow-xl)',
           animation: reducedMotion ? 'none' : 'fm-dialog-in 0.2s ease-out',
           overflow: 'hidden',
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div style={{ padding: '16px 20px 0', fontSize: 15, fontWeight: 600, color: 'var(--hp-text-primary)' }}>
+        <div style={{ padding: '18px 20px 0', fontSize: 15, fontWeight: 650, color: 'var(--hp-text-primary)' }}>
           {title}
         </div>
-        <div style={{ padding: '12px 20px 16px' }}>
+        <div style={{ padding: '12px 20px 18px' }}>
           {children}
         </div>
-        <div style={{
+        <div className="fm-dialog-footer" style={{
           display: 'flex',
           gap: 8,
           padding: '12px 20px',
@@ -108,15 +141,17 @@ export function Dialog({ title, children, onClose, onSubmit, submitLabel, submit
             type="button"
             onClick={onClose}
             disabled={loading}
+            className="fm-dialog-button"
             style={{
-              padding: '8px 16px',
+              minHeight: 40,
+              padding: '0 16px',
               fontSize: 13,
               fontWeight: 500,
-              borderRadius: 8,
+              borderRadius: 'var(--hp-radius-md)',
               border: '1px solid var(--hp-border)',
               background: 'var(--hp-surface-0)',
               color: 'var(--hp-text-primary)',
-              cursor: 'pointer',
+              cursor: loading ? 'not-allowed' : 'pointer',
             }}
           >
             Cancel
@@ -127,14 +162,16 @@ export function Dialog({ title, children, onClose, onSubmit, submitLabel, submit
               data-submit
               onClick={onSubmit}
               disabled={loading}
+              className="fm-dialog-button"
               style={{
-                padding: '8px 16px',
+                minHeight: 40,
+                padding: '0 16px',
                 fontSize: 13,
                 fontWeight: 600,
-                borderRadius: 8,
+                borderRadius: 'var(--hp-radius-md)',
                 border: 'none',
                 background: submitDanger ? 'var(--hp-danger)' : 'var(--hp-primary)',
-                color: 'oklch(100% 0 0)',
+                color: 'var(--hp-text-inverse)',
                 cursor: loading ? 'not-allowed' : 'pointer',
                 opacity: loading ? 0.7 : 1,
               }}
@@ -176,11 +213,12 @@ export function InputField({ value, onChange, placeholder, autoFocus, onKeyDown 
         fontSize: 14,
         fontFamily: 'var(--hp-font-mono, ui-monospace, monospace)',
         border: '1px solid var(--hp-border)',
-        borderRadius: 8,
+        borderRadius: 'var(--hp-radius-md)',
         background: 'var(--hp-surface-0)',
         color: 'var(--hp-text-primary)',
         outline: 'none',
       }}
+      className="fm-dialog-input"
       onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--hp-primary)' }}
       onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--hp-border)' }}
     />
@@ -193,7 +231,7 @@ interface ConfirmMessageProps {
 
 export function ConfirmMessage({ message }: ConfirmMessageProps) {
   return (
-    <div style={{ fontSize: 13, color: 'var(--hp-text-secondary)', lineHeight: 1.5 }}>
+    <div style={{ fontSize: 13, color: 'var(--hp-text-secondary)', lineHeight: 1.55, overflowWrap: 'anywhere' }}>
       {message}
     </div>
   )

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState } from 'react'
 
 interface Toast {
   id: number
@@ -26,10 +26,7 @@ export function showToast(message: string, type: 'success' | 'error' = 'success'
 
 export function ToastContainer() {
   const [items, setItems] = useState<Toast[]>([])
-  const mountedRef = useRef(false)
-
   useEffect(() => {
-    mountedRef.current = true
     listeners.add(setItems)
     return () => { listeners.delete(setItems) }
   }, [])
@@ -44,8 +41,8 @@ export function ToastContainer() {
       style={{
         position: 'fixed',
         bottom: 'calc(72px + env(safe-area-inset-bottom, 0px))',
-        left: '50%',
-        transform: 'translateX(-50%)',
+        left: 'max(12px, env(safe-area-inset-left, 0px))',
+        right: 'max(12px, env(safe-area-inset-right, 0px))',
         zIndex: 'var(--hp-z-toast, 60)',
         display: 'flex',
         flexDirection: 'column',
@@ -58,15 +55,19 @@ export function ToastContainer() {
           key={t.id}
           role="status"
           style={{
-            padding: '10px 20px',
-            borderRadius: 10,
+            width: 'fit-content',
+            maxWidth: 'min(520px, 100%)',
+            margin: '0 auto',
+            padding: '10px 16px',
+            borderRadius: 'var(--hp-radius-md)',
             fontSize: 13,
             fontWeight: 500,
-            color: 'oklch(100% 0 0)',
-            background: t.type === 'error' ? 'var(--hp-danger)' : 'oklch(45% 0.16 55)',
-            boxShadow: '0 4px 16px oklch(0 0 0 / 0.2)',
+            color: t.type === 'error' ? 'var(--hp-danger)' : 'var(--hp-text-primary)',
+            background: 'var(--hp-surface-0)',
+            border: `1px solid ${t.type === 'error' ? 'var(--hp-danger)' : 'var(--hp-border)'}`,
+            boxShadow: 'var(--hp-shadow-md)',
             animation: reducedMotion ? 'none' : 'fm-toast-in 0.2s ease-out',
-            whiteSpace: 'nowrap',
+            overflowWrap: 'anywhere',
           }}
         >
           {t.message}
