@@ -523,7 +523,38 @@ Plans:
 Plans:
 - [x] 34-01: 文件预览 / 编辑垂直闭环（打开→预览→编辑→保存→失败恢复→Dirty 离开保护）
 
+
+### Phase 35: v0.17.0 全功能文件管理器生产化
+**Goal**: 将全局 `/browse` 和会话文件页收敛为生产稳定的全功能文件管理器，修复无会话 CRUD 不可用、隐藏文件不可用、文件点击无反应、入口冗余和上传下载占位等问题。
+**Depends on**: Phase 32, Phase 34
+**Requirements**: FM-ARCH-01, FM-MACH-01, FM-NAV-01, FM-HIDDEN-01, FM-OPEN-01, FM-CREATE-01, FM-CRUD-01, FM-EDIT-01, FM-UPLOAD-01, FM-DOWNLOAD-01
+**Success Criteria**:
+  1. `/browse` 无需活动会话即可浏览、返回上一级、显示隐藏文件。
+  2. `/browse` 支持新建、重命名、删除、移动、复制等真实文件操作。
+  3. 文件点击打开预览或编辑，不再静默无动作。
+  4. `/sessions/:id/files` 复用统一文件管理核心，保留 Git 增强能力。
+  5. 上传和下载单文件真实可用，不再暴露占位入口。
+  6. 文件保存具备失败恢复和冲突保护。
+  7. 移动端核心操作可见，触控目标不小于 44px。
+  8. typecheck、test、build、i18n parity 和分阶段自审全部通过。
+**Planning Artifacts**:
+  - `.planning/phases/35-v0.17-file-manager-production/35-CONTEXT.md`
+  - `.planning/phases/35-v0.17-file-manager-production/35-PRD.md`
+  - `.planning/phases/35-v0.17-file-manager-production/35-UX-SHAPE.md`
+  - `.planning/phases/35-v0.17-file-manager-production/35-PLAN.md`
+  - `.planning/phases/35-v0.17-file-manager-production/35-SELF-REVIEW.md`
+**Plans**: 7 staged plans
+
+Plans:
+- [x] 35-00: 方案文档、UX Shape、阶段计划和自审机制
+- [ ] 35-01: 统一数据源接口、上一级、隐藏文件、文件打开基础
+- [ ] 35-02: Machine 文件 CRUD API 和 workspaceRoots 安全边界
+- [ ] 35-03: UI 行为收敛，去除重复入口和空壳按钮
+- [ ] 35-04: 预览编辑生产化，hash 冲突检测，Monaco 懒加载
+- [ ] 35-05: 上传下载和搜索
+- [ ] 35-06: 测试、自审、发布准备
+
 ---
 
 *Roadmap created: 2026-05-30*
-*Last updated: 2026-06-06 — Phase 34 文件预览 / 编辑闭环已完成，audit 18/20*
+*Last updated: 2026-06-06 — Phase 35 v0.17.0 文件管理器生产化专项已启动*

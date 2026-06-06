@@ -447,3 +447,37 @@ Phase 19 (PWA 更新机制修复) 引入了三个叠加问题：
 *状态更新: 2026-06-05 (v0.12.1 Tab切换自动刷新修复 — 实施完成，待手动验证)*
 *状态更新: 2026-06-04 (v0.12.0 功能精简完成 — 9 项非核心功能已删除)*
 *状态更新: 2026-06-03 (v9 UI统一优化规划完成)*
+
+## v0.17.0 进行中 — 全功能文件管理器生产化
+
+### 启动原因
+
+用户审查确认文件管理器仍存在多个生产阻断问题：没有显性返回上一级，新建文件和新建文件夹入口冗余，显示隐藏文件不可用，除目录浏览和从目录新建会话外大量文件操作不可用，文件编辑入口不清晰且全局浏览点击文件无反应。
+
+### 本轮核心决策
+
+| 决策 | 结果 |
+|---|---|
+| `$gsd-new-project` | 项目已初始化，不重建 `.planning/PROJECT.md`，改为既有项目 v0.17 专项规划 |
+| 文件管理器定位 | machine scoped 全局文件系统工作台，session 是增强上下文 |
+| UI 方向 | 统一 FileManager core，去除 `/browse` 和 session files 的行为割裂 |
+| API 方向 | 新增 machine 文件 CRUD API，限制在 workspaceRoots 内 |
+| 自审 | 每阶段更新 `35-SELF-REVIEW.md` 并提交 Git |
+
+### 规划文档
+
+- `.planning/phases/35-v0.17-file-manager-production/35-CONTEXT.md`
+- `.planning/phases/35-v0.17-file-manager-production/35-PRD.md`
+- `.planning/phases/35-v0.17-file-manager-production/35-UX-SHAPE.md`
+- `.planning/phases/35-v0.17-file-manager-production/35-PLAN.md`
+- `.planning/phases/35-v0.17-file-manager-production/35-SELF-REVIEW.md`
+
+### 当前状态
+
+- [x] 35-00: 方案文档、UX Shape、阶段计划和自审机制
+- [ ] 35-01: 统一数据源接口、上一级、隐藏文件、文件打开基础
+- [ ] 35-02: Machine 文件 CRUD API 和 workspaceRoots 安全边界
+- [ ] 35-03: UI 行为收敛，去除重复入口和空壳按钮
+- [ ] 35-04: 预览编辑生产化，hash 冲突检测，Monaco 懒加载
+- [ ] 35-05: 上传下载和搜索
+- [ ] 35-06: 测试、自审、发布准备

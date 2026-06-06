@@ -133,3 +133,41 @@ Full-featured global file manager replacing the existing `/browse` page. Mobile-
 7. Large files are protected from accidental expensive editing.
 8. All new copy is bilingual and passes locale parity.
 9. Harden → polish → audit closes the feature at 16+/20, target 18+/20.
+
+
+---
+
+## v0.17.0 Production Completion Plan
+
+**Source Artifacts:**
+
+- `.planning/phases/35-v0.17-file-manager-production/35-CONTEXT.md`
+- `.planning/phases/35-v0.17-file-manager-production/35-PRD.md`
+- `.planning/phases/35-v0.17-file-manager-production/35-UX-SHAPE.md`
+- `.planning/phases/35-v0.17-file-manager-production/35-PLAN.md`
+- `.planning/phases/35-v0.17-file-manager-production/35-SELF-REVIEW.md`
+
+**Why this plan exists:** previous FileManager phases delivered useful UI foundation and session file operations, but the product is still not a production full-featured global file manager. `/browse` remains mostly read-only because it has no `sessionId`, hidden files are filtered before the UI sees them, and several visible actions are placeholders.
+
+### v0.17 must close these gaps
+
+1. Global `/browse` works without active session.
+2. Machine-scoped file operations are implemented under workspaceRoots.
+3. Hidden files toggle is real.
+4. Parent navigation is visible.
+5. File click opens preview/edit.
+6. Create, rename, delete, move, copy, upload, download are real or intentionally hidden until implemented.
+7. Session files and global files share one core interaction model.
+8. Every phase has self-review and Git commit.
+
+### v0.17 staged delivery
+
+| Plan | Name | Status | Output |
+|---|---|---|---|
+| 35-00 | Planning baseline | Done | PRD, UX Shape, PLAN, SELF-REVIEW |
+| 35-01 | Navigation and hidden files | Pending | Parent button, showHidden chain, no-op file click removed |
+| 35-02 | Machine CRUD API | Pending | Machine read/write/delete/rename/copy/move/mkdir |
+| 35-03 | UI behavior convergence | Pending | Remove duplicate/placeholder actions, shared session/global UI |
+| 35-04 | Preview/edit hardening | Pending | hash metadata, conflict state, Monaco lazy path |
+| 35-05 | Transfer and search | Pending | Upload, download, search |
+| 35-06 | Quality gates | Pending | tests, build, audit, release checklist |
