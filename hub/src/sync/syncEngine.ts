@@ -878,6 +878,34 @@ export class SyncEngine {
         return await this.rpcGateway.listMachineDirectory(machineId, path, showHidden)
     }
 
+    async readMachineFile(machineId: string, path: string): Promise<RpcReadFileResponse> {
+        return await this.rpcGateway.readMachineFile(machineId, path)
+    }
+
+    async writeMachineFile(machineId: string, options: { path: string; content: string; expectedHash?: string; forceOverwrite?: boolean }): Promise<RpcCommandResponse> {
+        return await this.rpcGateway.writeMachineFile(machineId, options)
+    }
+
+    async deleteMachineFile(machineId: string, path: string, recursive?: boolean): Promise<RpcCommandResponse> {
+        return await this.rpcGateway.deleteMachineFile(machineId, path, recursive)
+    }
+
+    async renameMachineFile(machineId: string, oldPath: string, newPath: string): Promise<RpcCommandResponse> {
+        return await this.rpcGateway.renameMachineFile(machineId, oldPath, newPath)
+    }
+
+    async copyMachineFile(machineId: string, sourcePath: string, destinationPath: string): Promise<RpcCommandResponse> {
+        return await this.rpcGateway.copyMachineFile(machineId, sourcePath, destinationPath)
+    }
+
+    async moveMachineFile(machineId: string, sourcePath: string, destinationPath: string): Promise<RpcCommandResponse> {
+        return await this.rpcGateway.moveMachineFile(machineId, sourcePath, destinationPath)
+    }
+
+    async createMachineDirectory(machineId: string, path: string, recursive?: boolean): Promise<RpcCommandResponse> {
+        return await this.rpcGateway.createMachineDirectory(machineId, path, recursive)
+    }
+
     async getGitStatus(sessionId: string, cwd?: string): Promise<RpcCommandResponse> {
         return await this.rpcGateway.getGitStatus(sessionId, cwd)
     }

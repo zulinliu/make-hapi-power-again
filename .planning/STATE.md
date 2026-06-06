@@ -476,8 +476,19 @@ Phase 19 (PWA 更新机制修复) 引入了三个叠加问题：
 
 - [x] 35-00: 方案文档、UX Shape、阶段计划和自审机制
 - [x] 35-01: 统一数据源接口、上一级、隐藏文件、文件打开基础
-- [ ] 35-02: Machine 文件 CRUD API 和 workspaceRoots 安全边界
+- [x] 35-02: Machine 文件 CRUD API 和 workspaceRoots 安全边界
 - [ ] 35-03: UI 行为收敛，去除重复入口和空壳按钮
 - [ ] 35-04: 预览编辑生产化，hash 冲突检测，Monaco 懒加载
 - [ ] 35-05: 上传下载和搜索
 - [ ] 35-06: 测试、自审、发布准备
+
+### 35.2 完成记录
+
+- CLI machine client 已覆盖 machine 级 `ReadFile`、`WriteFile`、`DeleteFile`、`RenameFile`、`CopyFile`、`MoveFile`、`CreateDirectory` RPC handler。
+- Hub `machines` 路由新增 machine 文件 REST API：读、写、删、重命名、复制、移动、建目录。
+- Web API client 和 FileManager 基础 create/delete/rename 已支持无 `sessionId` 的 machine 模式。
+- workspaceRoots 安全边界覆盖绝对路径要求、越界路径、null byte、符号链接逃逸、已有文件冲突和 hash/force 覆盖策略。
+- 已新增 CLI machine file operation 测试和 Hub machine file route 测试。
+
+---
+*状态更新: 2026-06-07 (v0.17 Phase 35.2 Machine 文件 CRUD API 完成 — 进入 35.3 UI 行为收敛)*

@@ -3,13 +3,14 @@
  */
 
 import { io, type Socket } from 'socket.io-client'
-import { readdir, realpath, stat } from 'node:fs/promises'
+import { cp, mkdir, readFile, readdir, realpath, rename, rm, rmdir, stat, writeFile } from 'node:fs/promises'
 import { realpathSync } from 'node:fs'
+import { createHash } from 'node:crypto'
 import { basename, dirname, isAbsolute, join, relative, resolve as resolvePath } from 'node:path'
 import { logger } from '@/ui/logger'
 import { configuration } from '@/configuration'
 import type { ClientToServerEvents, ServerToClientEvents, Update, UpdateMachineBody } from '@hapipower/protocol'
-import type { MachineDirectoryEntry, MachineListDirectoryResponse, PathExistsResponse } from '@hapipower/protocol/apiTypes'
+import type { FileReadResponse, MachineDirectoryEntry, MachineListDirectoryResponse, PathExistsResponse } from '@hapipower/protocol/apiTypes'
 import { RPC_METHODS } from '@hapipower/protocol/rpcMethods'
 import type { RunnerState, Machine, MachineMetadata } from './types'
 import { RunnerStateSchema, MachineMetadataSchema } from './types'
@@ -40,6 +41,52 @@ interface ListMachineDirectoryRequest {
     path: string
     showHidden?: boolean
 }
+
+interface MachineReadFileRequest {
+    path: string
+}
+
+interface MachineWriteFileRequest {
+    path: string
+    content: string
+    expectedHash?: string | null
+    forceOverwrite?: boolean
+}
+
+interface MachineDeleteFileRequest {
+    path: string
+    recursive?: boolean
+}
+
+interface MachineRenameFileRequest {
+    oldPath: string
+    newPath: string
+}
+
+interface MachineCopyFileRequest {
+    sourcePath: string
+    destinationPath: string
+}
+
+interface MachineMoveFileRequest {
+    sourcePath: string
+    destinationPath: string
+}
+
+interface MachineCreateDirectoryRequest {
+    path: string
+    recursive?: boolean
+}
+
+type MachineCommandResponse = {
+    success: boolean
+    hash?: string
+    error?: string
+}
+
+type ResolvedWorkspacePath =
+    | { success: true; path: string }
+    | { success: false; error: string }
 
 function normalizeWorkspaceRoots(paths?: string[]): string[] | undefined {
     if (!paths?.length) {
@@ -115,21 +162,11 @@ export class ApiMachineClient {
         })
 
         this.rpcHandlerManager.registerHandler<ListMachineDirectoryRequest, MachineListDirectoryResponse>(RPC_METHODS.ListMachineDirectory, async (params) => {
-            if (!this.normalizedWorkspaceRoots?.length) {
-                return { success: false, error: 'Workspace browsing is not enabled for this machine' }
-            }
-
-            const rawPath = typeof params?.path === 'string' ? params.path.trim() : ''
-            if (!rawPath) {
-                return { success: false, error: 'Path is required' }
-            }
-
-            const targetPath = await this.resolveForWorkspaceCheck(rawPath)
-            if (!this.isWithinWorkspaceRoots(targetPath)) {
-                return { success: false, error: 'Path is outside workspace roots' }
-            }
+            const resolved = await this.resolveWorkspaceFilePath(params?.path)
+            if (!resolved.success) return resolved
 
             try {
+                const targetPath = resolved.path
                 const dirStat = await stat(targetPath)
                 if (!dirStat.isDirectory()) {
                     return { success: false, error: 'Path is not a directory' }
@@ -186,6 +223,8 @@ export class ApiMachineClient {
             }
         })
 
+        this.registerWorkspaceFileHandlers()
+
         // OpenCode model discovery spawns an `opencode acp` subprocess scoped to the
         // requested cwd, so it must obey the same workspace-root containment as
         // `list-directory` and `spawn-happy-session`. Re-register the handler that
@@ -216,6 +255,199 @@ export class ApiMachineClient {
         return this.normalizedWorkspaceRoots.some((workspaceRoot) => {
             const rel = relative(workspaceRoot, absolutePath)
             return rel === '' || (!rel.startsWith('..') && !isAbsolute(rel))
+        })
+    }
+
+    private async pathExists(path: string): Promise<boolean> {
+        try {
+            await stat(path)
+            return true
+        } catch (error) {
+            const nodeError = error as NodeJS.ErrnoException
+            if (nodeError.code === 'ENOENT') return false
+            throw error
+        }
+    }
+
+    private async resolveWorkspaceFilePath(rawPath: unknown): Promise<ResolvedWorkspacePath> {
+        if (!this.normalizedWorkspaceRoots?.length) {
+            return { success: false, error: 'Workspace browsing is not enabled for this machine' }
+        }
+
+        const path = typeof rawPath === 'string' ? rawPath.trim() : ''
+        if (!path) {
+            return { success: false, error: 'Path is required' }
+        }
+        if (path.includes('\0')) {
+            return { success: false, error: 'Path must not contain null bytes' }
+        }
+        if (!isAbsolute(path)) {
+            return { success: false, error: 'Path must be absolute' }
+        }
+
+        const targetPath = await this.resolveForWorkspaceCheck(path)
+        if (!this.isWithinWorkspaceRoots(targetPath)) {
+            return { success: false, error: 'Path is outside workspace roots' }
+        }
+
+        return { success: true, path: targetPath }
+    }
+
+    private registerWorkspaceFileHandlers(): void {
+        this.rpcHandlerManager.registerHandler<MachineReadFileRequest, FileReadResponse>(RPC_METHODS.ReadFile, async (params) => {
+            const resolved = await this.resolveWorkspaceFilePath(params?.path)
+            if (!resolved.success) return resolved
+
+            try {
+                const fileStat = await stat(resolved.path)
+                if (fileStat.isDirectory()) {
+                    return { success: false, error: 'Path is a directory' }
+                }
+
+                const buffer = await readFile(resolved.path)
+                const hash = createHash('sha256').update(buffer).digest('hex')
+                return {
+                    success: true,
+                    content: buffer.toString('base64'),
+                    hash,
+                    size: fileStat.size,
+                    modified: fileStat.mtime.getTime()
+                }
+            } catch (error) {
+                return { success: false, error: error instanceof Error ? error.message : 'Failed to read file' }
+            }
+        })
+
+        this.rpcHandlerManager.registerHandler<MachineWriteFileRequest, MachineCommandResponse>(RPC_METHODS.WriteFile, async (params) => {
+            const resolved = await this.resolveWorkspaceFilePath(params?.path)
+            if (!resolved.success) return resolved
+
+            try {
+                if (params.forceOverwrite) {
+                    // Explicit overwrite requested.
+                } else if (params.expectedHash !== null && params.expectedHash !== undefined) {
+                    try {
+                        const existingBuffer = await readFile(resolved.path)
+                        const existingHash = createHash('sha256').update(existingBuffer).digest('hex')
+                        if (existingHash !== params.expectedHash) {
+                            return { success: false, error: `File hash mismatch. Expected: ${params.expectedHash}, Actual: ${existingHash}` }
+                        }
+                    } catch (error) {
+                        const nodeError = error as NodeJS.ErrnoException
+                        if (nodeError.code !== 'ENOENT') throw error
+                        return { success: false, error: 'File does not exist but hash was provided' }
+                    }
+                } else if (await this.pathExists(resolved.path)) {
+                    return { success: false, error: 'File already exists but was expected to be new' }
+                }
+
+                const buffer = Buffer.from(typeof params.content === 'string' ? params.content : '', 'base64')
+                await writeFile(resolved.path, buffer)
+                const hash = createHash('sha256').update(buffer).digest('hex')
+                return { success: true, hash }
+            } catch (error) {
+                return { success: false, error: error instanceof Error ? error.message : 'Failed to write file' }
+            }
+        })
+
+        this.rpcHandlerManager.registerHandler<MachineDeleteFileRequest, MachineCommandResponse>(RPC_METHODS.DeleteFile, async (params) => {
+            const resolved = await this.resolveWorkspaceFilePath(params?.path)
+            if (!resolved.success) return resolved
+
+            try {
+                const targetStat = await stat(resolved.path)
+                if (targetStat.isDirectory()) {
+                    if (params.recursive) {
+                        await rm(resolved.path, { recursive: true, force: false })
+                    } else {
+                        await rmdir(resolved.path)
+                    }
+                } else {
+                    await rm(resolved.path, { force: false })
+                }
+                return { success: true }
+            } catch (error) {
+                return { success: false, error: error instanceof Error ? error.message : 'Failed to delete file' }
+            }
+        })
+
+        this.rpcHandlerManager.registerHandler<MachineRenameFileRequest, MachineCommandResponse>(RPC_METHODS.RenameFile, async (params) => {
+            const source = await this.resolveWorkspaceFilePath(params?.oldPath)
+            if (!source.success) return source
+            const destination = await this.resolveWorkspaceFilePath(params?.newPath)
+            if (!destination.success) return destination
+
+            try {
+                if (!(await this.pathExists(source.path))) {
+                    return { success: false, error: 'Source path does not exist' }
+                }
+                if (await this.pathExists(destination.path)) {
+                    return { success: false, error: 'Destination path already exists' }
+                }
+                await mkdir(dirname(destination.path), { recursive: true })
+                await rename(source.path, destination.path)
+                return { success: true }
+            } catch (error) {
+                return { success: false, error: error instanceof Error ? error.message : 'Failed to rename file' }
+            }
+        })
+
+        this.rpcHandlerManager.registerHandler<MachineCopyFileRequest, MachineCommandResponse>(RPC_METHODS.CopyFile, async (params) => {
+            const source = await this.resolveWorkspaceFilePath(params?.sourcePath)
+            if (!source.success) return source
+            const destination = await this.resolveWorkspaceFilePath(params?.destinationPath)
+            if (!destination.success) return destination
+
+            try {
+                if (!(await this.pathExists(source.path))) {
+                    return { success: false, error: 'Source path does not exist' }
+                }
+                if (await this.pathExists(destination.path)) {
+                    return { success: false, error: 'Destination path already exists' }
+                }
+                const sourceStat = await stat(source.path)
+                await mkdir(dirname(destination.path), { recursive: true })
+                await cp(source.path, destination.path, { recursive: sourceStat.isDirectory() })
+                return { success: true }
+            } catch (error) {
+                return { success: false, error: error instanceof Error ? error.message : 'Failed to copy file' }
+            }
+        })
+
+        this.rpcHandlerManager.registerHandler<MachineMoveFileRequest, MachineCommandResponse>(RPC_METHODS.MoveFile, async (params) => {
+            const source = await this.resolveWorkspaceFilePath(params?.sourcePath)
+            if (!source.success) return source
+            const destination = await this.resolveWorkspaceFilePath(params?.destinationPath)
+            if (!destination.success) return destination
+
+            try {
+                if (!(await this.pathExists(source.path))) {
+                    return { success: false, error: 'Source path does not exist' }
+                }
+                if (await this.pathExists(destination.path)) {
+                    return { success: false, error: 'Destination path already exists' }
+                }
+                await mkdir(dirname(destination.path), { recursive: true })
+                await rename(source.path, destination.path)
+                return { success: true }
+            } catch (error) {
+                return { success: false, error: error instanceof Error ? error.message : 'Failed to move file' }
+            }
+        })
+
+        this.rpcHandlerManager.registerHandler<MachineCreateDirectoryRequest, MachineCommandResponse>(RPC_METHODS.CreateDirectory, async (params) => {
+            const resolved = await this.resolveWorkspaceFilePath(params?.path)
+            if (!resolved.success) return resolved
+
+            try {
+                if (await this.pathExists(resolved.path)) {
+                    return { success: false, error: 'Directory already exists' }
+                }
+                await mkdir(resolved.path, { recursive: params.recursive !== false })
+                return { success: true }
+            } catch (error) {
+                return { success: false, error: error instanceof Error ? error.message : 'Failed to create directory' }
+            }
         })
     }
 

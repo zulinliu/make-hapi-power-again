@@ -108,3 +108,73 @@ git diff --check
 2. 全局文件预览仍未真实接入，需 machine read API 和统一 viewer。
 3. 上一级按钮以 initialPath 作为 root 边界，后续多 workspace root 切换时需要联动 root selector。
 
+## Phase 35.2 Review: Machine 文件 CRUD API
+
+**状态**: 完成。
+
+### 本阶段交付
+
+1. CLI machine client 覆盖 common file handlers，注册 workspaceRoots 受限的 `ReadFile`、`WriteFile`、`DeleteFile`、`RenameFile`、`CopyFile`、`MoveFile`、`CreateDirectory`。
+2. Machine `readFile` 返回 `content`、`hash`、`size`、`modified`，为后续预览编辑冲突检测打底。
+3. Machine `writeFile` 默认拒绝覆盖已有文件，支持 `expectedHash` 安全保存和显式 `forceOverwrite`。
+4. Machine CRUD 路径统一经过 workspaceRoots containment，拒绝相对路径、null byte、workspace 外路径和符号链接逃逸。
+5. Hub SyncEngine/RpcGateway 增加 machine 文件操作转发方法。
+6. Hub `/api/machines/:id` 增加 machine 文件 REST API：读、写、删、重命名、复制、移动、建目录。
+7. Web ApiClient 增加 machine file methods。
+8. FileManager 的新建文件、新建文件夹、删除、批量删除、重命名在无 `sessionId` 时已走 machine API，不再要求活动会话。
+9. 新增 CLI machine file operation 测试，覆盖隐藏文件、读写删、越界拒绝、mkdir/copy/move/rename、hash 冲突、force 覆盖、相对路径、null byte、符号链接逃逸。
+10. 新增 Hub machine file route 测试，覆盖 REST route 转发和无效 payload 拒绝。
+
+### 用户反馈覆盖
+
+| 用户问题 | 状态 | 说明 |
+|---|---|---|
+| 除浏览和新建会话外，其他功能几乎不可用 | 部分解决 | `/browse` 新建、删除、重命名、批量删除已可在 machine mode 工作；移动、复制 UI 待 35.3 接入 |
+| 新建文件/文件夹提示没有活动会话 | 已解决基础链路 | 无 `sessionId` 时调用 machine write/mkdir |
+| 删除、重命名提示没有活动会话 | 已解决基础链路 | 无 `sessionId` 时调用 machine delete/rename |
+| 显示隐藏文件不可用 | 已保持解决 | 35.1 链路继续由测试覆盖 |
+| 文件点击无反应和编辑入口不清晰 | 未完全解决 | 35.2 提供 machine read API，真实 preview/edit 进入 35.4 |
+
+### 是否引入新空壳入口
+
+没有新增空壳入口。本阶段只把已有基础 CRUD 入口接到真实 machine API。移动、复制、上传、下载仍未接 UI，必须在 35.3 隐藏/禁用占位或接入真实能力。
+
+### 全局和会话一致性
+
+- 全局 `/browse` 的 create/delete/rename 已与 session mode 的基础行为对齐。
+- 会话文件页仍是旧 `/sessions/:id/files` 页面，未复用统一 FileManager core，属于 35.3。
+- Machine copy/move API 已具备，但 FileManager 右键和批量栏尚未调用，属于 35.3。
+
+### 移动端触控和可访问性
+
+本阶段主要是后端和 API 链路，未新增移动端小触控目标。既有 FileManager toolbar、context menu、dialog 的触控目标和 focus-visible 样式保持不变。
+
+### 质量门禁
+
+```bash
+bun run typecheck
+# PASS
+
+cd cli && bun test src/api/apiMachine.fileOperations.test.ts
+# PASS: 6 tests
+
+cd hub && bun test src/web/routes/machines.test.ts src/sync/rpcGateway.test.ts
+# PASS: 8 tests
+
+bun run test:shared
+# PASS: 37 tests
+
+bun run test:web
+# PASS: 78 files, 669 tests
+
+git diff --check
+# PASS
+```
+
+### 剩余风险
+
+1. Machine API 已可复制/移动，但 UI 仍显示 unavailable toast，下一阶段必须接入或隐藏。
+2. 上传、下载仍是占位入口，不能在 v0.17 最终状态保留。
+3. 全局文件点击仍未真实打开预览编辑，需 35.4 使用 machine read/write/hash API 接入。
+4. 会话文件页仍与全局 FileManager 割裂，35.3 必须收敛操作模型。
+5. session common read handler 还未返回 `hash/size/modified`，35.4 需要补齐以实现统一冲突检测。

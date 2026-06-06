@@ -548,7 +548,7 @@ Plans:
 Plans:
 - [x] 35-00: 方案文档、UX Shape、阶段计划和自审机制
 - [x] 35-01: 统一数据源接口、上一级、隐藏文件、文件打开基础
-- [ ] 35-02: Machine 文件 CRUD API 和 workspaceRoots 安全边界
+- [x] 35-02: Machine 文件 CRUD API 和 workspaceRoots 安全边界
 - [ ] 35-03: UI 行为收敛，去除重复入口和空壳按钮
 - [ ] 35-04: 预览编辑生产化，hash 冲突检测，Monaco 懒加载
 - [ ] 35-05: 上传下载和搜索
@@ -557,4 +557,4 @@ Plans:
 ---
 
 *Roadmap created: 2026-05-30*
-*Last updated: 2026-06-06 — Phase 35 v0.17.0 文件管理器生产化专项已启动*
+*Last updated: 2026-06-07 — Phase 35.2 Machine CRUD API 已完成*

@@ -166,7 +166,7 @@ Full-featured global file manager replacing the existing `/browse` page. Mobile-
 |---|---|---|---|
 | 35-00 | Planning baseline | Done | PRD, UX Shape, PLAN, SELF-REVIEW |
 | 35-01 | Navigation and hidden files | Done | Parent button, showHidden chain, no-op file click removed |
-| 35-02 | Machine CRUD API | Pending | Machine read/write/delete/rename/copy/move/mkdir |
+| 35-02 | Machine CRUD API | Done | Machine read/write/delete/rename/copy/move/mkdir with workspaceRoots guard |
 | 35-03 | UI behavior convergence | Pending | Remove duplicate/placeholder actions, shared session/global UI |
 | 35-04 | Preview/edit hardening | Pending | hash metadata, conflict state, Monaco lazy path |
 | 35-05 | Transfer and search | Pending | Upload, download, search |

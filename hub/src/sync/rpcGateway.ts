@@ -164,6 +164,38 @@ export class RpcGateway {
         return result as RpcListDirectoryResponse
     }
 
+    async readMachineFile(machineId: string, path: string): Promise<RpcReadFileResponse> {
+        const result = await this.machineRpc(machineId, RPC_METHODS.ReadFile, { path }) as RpcReadFileResponse | unknown
+        if (!result || typeof result !== 'object') {
+            return { success: false, error: 'Unexpected read-file result' }
+        }
+        return result as RpcReadFileResponse
+    }
+
+    async writeMachineFile(machineId: string, options: { path: string; content: string; expectedHash?: string; forceOverwrite?: boolean }): Promise<RpcCommandResponse> {
+        return await this.machineRpc(machineId, RPC_METHODS.WriteFile, options) as RpcCommandResponse
+    }
+
+    async deleteMachineFile(machineId: string, path: string, recursive?: boolean): Promise<RpcCommandResponse> {
+        return await this.machineRpc(machineId, RPC_METHODS.DeleteFile, { path, recursive }) as RpcCommandResponse
+    }
+
+    async renameMachineFile(machineId: string, oldPath: string, newPath: string): Promise<RpcCommandResponse> {
+        return await this.machineRpc(machineId, RPC_METHODS.RenameFile, { oldPath, newPath }) as RpcCommandResponse
+    }
+
+    async copyMachineFile(machineId: string, sourcePath: string, destinationPath: string): Promise<RpcCommandResponse> {
+        return await this.machineRpc(machineId, RPC_METHODS.CopyFile, { sourcePath, destinationPath }) as RpcCommandResponse
+    }
+
+    async moveMachineFile(machineId: string, sourcePath: string, destinationPath: string): Promise<RpcCommandResponse> {
+        return await this.machineRpc(machineId, RPC_METHODS.MoveFile, { sourcePath, destinationPath }) as RpcCommandResponse
+    }
+
+    async createMachineDirectory(machineId: string, path: string, recursive?: boolean): Promise<RpcCommandResponse> {
+        return await this.machineRpc(machineId, RPC_METHODS.CreateDirectory, { path, recursive }) as RpcCommandResponse
+    }
+
     async checkPathsExist(machineId: string, paths: string[]): Promise<Record<string, boolean>> {
         const result = await this.machineRpc(machineId, RPC_METHODS.PathExists, { paths }) as RpcPathExistsResponse | unknown
         if (!result || typeof result !== 'object') {

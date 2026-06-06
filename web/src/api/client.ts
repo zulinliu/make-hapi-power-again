@@ -601,6 +601,62 @@ export class ApiClient {
         )
     }
 
+    async readMachineFile(machineId: string, path: string): Promise<FileReadResponse> {
+        const params = new URLSearchParams()
+        params.set('path', path)
+        return await this.request<FileReadResponse>(
+            `/api/machines/${encodeURIComponent(machineId)}/file?${params.toString()}`
+        )
+    }
+
+    async writeMachineFile(machineId: string, path: string, content: string, expectedHash?: string, forceOverwrite?: boolean): Promise<{ success: boolean; error?: string; hash?: string }> {
+        return await this.request<{ success: boolean; error?: string; hash?: string }>(`/api/machines/${encodeURIComponent(machineId)}/file`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path, content, expectedHash, forceOverwrite })
+        })
+    }
+
+    async deleteMachineFile(machineId: string, path: string, recursive?: boolean): Promise<{ success: boolean; error?: string }> {
+        return await this.request<{ success: boolean; error?: string }>(`/api/machines/${encodeURIComponent(machineId)}/file`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path, recursive })
+        })
+    }
+
+    async renameMachineFile(machineId: string, oldPath: string, newPath: string): Promise<{ success: boolean; error?: string }> {
+        return await this.request<{ success: boolean; error?: string }>(`/api/machines/${encodeURIComponent(machineId)}/rename`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ oldPath, newPath })
+        })
+    }
+
+    async copyMachineFile(machineId: string, sourcePath: string, destinationPath: string): Promise<{ success: boolean; error?: string }> {
+        return await this.request<{ success: boolean; error?: string }>(`/api/machines/${encodeURIComponent(machineId)}/copy`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sourcePath, destinationPath })
+        })
+    }
+
+    async moveMachineFile(machineId: string, sourcePath: string, destinationPath: string): Promise<{ success: boolean; error?: string }> {
+        return await this.request<{ success: boolean; error?: string }>(`/api/machines/${encodeURIComponent(machineId)}/move`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sourcePath, destinationPath })
+        })
+    }
+
+    async createMachineDirectory(machineId: string, path: string, recursive?: boolean): Promise<{ success: boolean; error?: string }> {
+        return await this.request<{ success: boolean; error?: string }>(`/api/machines/${encodeURIComponent(machineId)}/mkdir`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path, recursive })
+        })
+    }
+
     async checkMachinePathsExists(
         machineId: string,
         paths: string[]

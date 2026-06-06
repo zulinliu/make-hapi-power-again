@@ -31,6 +31,15 @@ function createMachine(overrides?: Partial<Machine>): Machine {
     }
 }
 
+type MachineFileRouteCall =
+    | { operation: 'read'; machineId: string; path: string }
+    | { operation: 'write'; machineId: string; options: { path: string; content: string; expectedHash?: string; forceOverwrite?: boolean } }
+    | { operation: 'delete'; machineId: string; path: string; recursive?: boolean }
+    | { operation: 'rename'; machineId: string; oldPath: string; newPath: string }
+    | { operation: 'copy'; machineId: string; sourcePath: string; destinationPath: string }
+    | { operation: 'move'; machineId: string; sourcePath: string; destinationPath: string }
+    | { operation: 'mkdir'; machineId: string; path: string; recursive?: boolean }
+
 describe('machines routes', () => {
     it('returns Codex models for an online machine', async () => {
         const machine = createMachine()
@@ -160,5 +169,129 @@ describe('machines routes', () => {
             ],
             currentModelId: 'composer-2.5'
         })
+    })
+
+    it('forwards machine file routes to SyncEngine', async () => {
+        const machine = createMachine()
+        const calls: MachineFileRouteCall[] = []
+        const engine = {
+            getMachine: () => machine,
+            getMachineByNamespace: () => machine,
+            readMachineFile: async (machineId: string, path: string) => {
+                calls.push({ operation: 'read', machineId, path })
+                return { success: true, content: Buffer.from('hello').toString('base64') }
+            },
+            writeMachineFile: async (machineId: string, options: { path: string; content: string; expectedHash?: string; forceOverwrite?: boolean }) => {
+                calls.push({ operation: 'write', machineId, options })
+                return { success: true }
+            },
+            deleteMachineFile: async (machineId: string, path: string, recursive?: boolean) => {
+                calls.push({ operation: 'delete', machineId, path, recursive })
+                return { success: true }
+            },
+            renameMachineFile: async (machineId: string, oldPath: string, newPath: string) => {
+                calls.push({ operation: 'rename', machineId, oldPath, newPath })
+                return { success: true }
+            },
+            copyMachineFile: async (machineId: string, sourcePath: string, destinationPath: string) => {
+                calls.push({ operation: 'copy', machineId, sourcePath, destinationPath })
+                return { success: true }
+            },
+            moveMachineFile: async (machineId: string, sourcePath: string, destinationPath: string) => {
+                calls.push({ operation: 'move', machineId, sourcePath, destinationPath })
+                return { success: true }
+            },
+            createMachineDirectory: async (machineId: string, path: string, recursive?: boolean) => {
+                calls.push({ operation: 'mkdir', machineId, path, recursive })
+                return { success: true }
+            }
+        } as Partial<SyncEngine>
+
+        const app = new Hono<WebAppEnv>()
+        app.use('*', async (c, next) => {
+            c.set('namespace', 'default')
+            await next()
+        })
+        app.route('/api', createMachinesRoutes(() => engine as SyncEngine, mockStore))
+
+        const read = await app.request('/api/machines/machine-1/file?path=' + encodeURIComponent('/repo/a.txt'))
+        expect(read.status).toBe(200)
+        expect(await read.json()).toEqual({ success: true, content: Buffer.from('hello').toString('base64') })
+
+        const write = await app.request('/api/machines/machine-1/file', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path: '/repo/a.txt', content: 'aGVsbG8=', expectedHash: 'hash-1', forceOverwrite: false })
+        })
+        expect(write.status).toBe(200)
+
+        const deleteResponse = await app.request('/api/machines/machine-1/file', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path: '/repo/a.txt', recursive: false })
+        })
+        expect(deleteResponse.status).toBe(200)
+
+        const rename = await app.request('/api/machines/machine-1/rename', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ oldPath: '/repo/a.txt', newPath: '/repo/b.txt' })
+        })
+        expect(rename.status).toBe(200)
+
+        const copy = await app.request('/api/machines/machine-1/copy', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sourcePath: '/repo/b.txt', destinationPath: '/repo/c.txt' })
+        })
+        expect(copy.status).toBe(200)
+
+        const move = await app.request('/api/machines/machine-1/move', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sourcePath: '/repo/c.txt', destinationPath: '/repo/d.txt' })
+        })
+        expect(move.status).toBe(200)
+
+        const mkdir = await app.request('/api/machines/machine-1/mkdir', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path: '/repo/new-dir', recursive: true })
+        })
+        expect(mkdir.status).toBe(200)
+
+        expect(calls).toEqual([
+            { operation: 'read', machineId: 'machine-1', path: '/repo/a.txt' },
+            { operation: 'write', machineId: 'machine-1', options: { path: '/repo/a.txt', content: 'aGVsbG8=', expectedHash: 'hash-1', forceOverwrite: false } },
+            { operation: 'delete', machineId: 'machine-1', path: '/repo/a.txt', recursive: false },
+            { operation: 'rename', machineId: 'machine-1', oldPath: '/repo/a.txt', newPath: '/repo/b.txt' },
+            { operation: 'copy', machineId: 'machine-1', sourcePath: '/repo/b.txt', destinationPath: '/repo/c.txt' },
+            { operation: 'move', machineId: 'machine-1', sourcePath: '/repo/c.txt', destinationPath: '/repo/d.txt' },
+            { operation: 'mkdir', machineId: 'machine-1', path: '/repo/new-dir', recursive: true }
+        ])
+    })
+
+    it('rejects invalid machine file route payloads', async () => {
+        const machine = createMachine()
+        const engine = {
+            getMachine: () => machine,
+            getMachineByNamespace: () => machine,
+            writeMachineFile: async () => ({ success: true })
+        } as Partial<SyncEngine>
+
+        const app = new Hono<WebAppEnv>()
+        app.use('*', async (c, next) => {
+            c.set('namespace', 'default')
+            await next()
+        })
+        app.route('/api', createMachinesRoutes(() => engine as SyncEngine, mockStore))
+
+        const response = await app.request('/api/machines/machine-1/file', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path: '', content: 'aGVsbG8=' })
+        })
+
+        expect(response.status).toBe(400)
     })
 })

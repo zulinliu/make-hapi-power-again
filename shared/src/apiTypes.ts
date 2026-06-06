@@ -222,6 +222,9 @@ export type GitCommandResponse = CommandResponse
 export type FileReadResponse = {
     success: boolean
     content?: string
+    hash?: string
+    size?: number
+    modified?: number
     error?: string
 }
 

@@ -39,13 +39,19 @@ export async function listDirectory(
 
 export async function createFile(
   api: ApiClient,
-  _machineId: string,
-  sessionId: string,
+  machineId: string,
+  sessionId: string | null,
   dirPath: string,
   name: string,
 ): Promise<FileEntry> {
   const fullPath = `${dirPath.replace(/\/+$/, '')}/${name}`
-  await api.writeSessionFile(sessionId, fullPath, '')
+  if (sessionId) {
+    const res = await api.writeSessionFile(sessionId, fullPath, '')
+    if (!res.success) throw new Error(res.error ?? `Failed to create "${name}"`)
+  } else {
+    const res = await api.writeMachineFile(machineId, fullPath, '')
+    if (!res.success) throw new Error(res.error ?? `Failed to create "${name}"`)
+  }
   return {
     name,
     path: fullPath,
@@ -58,13 +64,16 @@ export async function createFile(
 
 export async function createFolder(
   api: ApiClient,
-  _machineId: string,
-  sessionId: string,
+  machineId: string,
+  sessionId: string | null,
   dirPath: string,
   name: string,
 ): Promise<FileEntry> {
   const fullPath = `${dirPath.replace(/\/+$/, '')}/${name}`
-  await api.createDirectory(sessionId, fullPath, true)
+  const res = sessionId
+    ? await api.createDirectory(sessionId, fullPath, true)
+    : await api.createMachineDirectory(machineId, fullPath, true)
+  if (!res.success) throw new Error(res.error ?? `Failed to create "${name}"`)
   return {
     name,
     path: fullPath,
@@ -77,28 +86,32 @@ export async function createFolder(
 
 export async function deleteEntry(
   api: ApiClient,
-  _machineId: string,
-  sessionId: string,
+  machineId: string,
+  sessionId: string | null,
   _dirPath: string,
   name: string,
   path: string,
   type: 'file' | 'directory',
 ): Promise<void> {
-  const res = await api.deleteSessionFile(sessionId, path, type === 'directory')
+  const res = sessionId
+    ? await api.deleteSessionFile(sessionId, path, type === 'directory')
+    : await api.deleteMachineFile(machineId, path, type === 'directory')
   if (!res.success) throw new Error(res.error ?? `Failed to delete "${name}"`)
 }
 
 export async function renameEntry(
   api: ApiClient,
-  _machineId: string,
-  sessionId: string,
+  machineId: string,
+  sessionId: string | null,
   dirPath: string,
   oldName: string,
   newName: string,
 ): Promise<FileEntry> {
   const oldPath = `${dirPath.replace(/\/+$/, '')}/${oldName}`
   const newPath = `${dirPath.replace(/\/+$/, '')}/${newName}`
-  const res = await api.renameSessionFile(sessionId, oldPath, newPath)
+  const res = sessionId
+    ? await api.renameSessionFile(sessionId, oldPath, newPath)
+    : await api.renameMachineFile(machineId, oldPath, newPath)
   if (!res.success) throw new Error(res.error ?? `Failed to rename "${oldName}"`)
   return {
     name: newName,

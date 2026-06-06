@@ -262,12 +262,11 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
     setDialogLoading(true)
     try {
       const mid = machineId ?? ''
-      const sid = sessionId ?? ''
       switch (dialog.type) {
         case 'newFile': {
           const name = inputValue.trim()
-          if (useRealApi && api && sid) {
-            await apiCreateFile(api, mid, sid, currentPath, name)
+          if (useRealApi && api && mid) {
+            await apiCreateFile(api, mid, sessionId ?? null, currentPath, name)
           } else if (!useRealApi) {
             await mockCreateFile(currentPath, name)
           } else {
@@ -279,8 +278,8 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
         }
         case 'newFolder': {
           const name = inputValue.trim()
-          if (useRealApi && api && sid) {
-            await apiCreateFolder(api, mid, sid, currentPath, name)
+          if (useRealApi && api && mid) {
+            await apiCreateFolder(api, mid, sessionId ?? null, currentPath, name)
           } else if (!useRealApi) {
             await mockCreateFolder(currentPath, name)
           } else {
@@ -292,8 +291,8 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
         }
         case 'rename': {
           const name = inputValue.trim()
-          if (useRealApi && api && sid) {
-            await apiRenameEntry(api, mid, sid, currentPath, dialog.name, name)
+          if (useRealApi && api && mid) {
+            await apiRenameEntry(api, mid, sessionId ?? null, currentPath, dialog.name, name)
           } else if (!useRealApi) {
             await mockRename(currentPath, dialog.name, name)
           } else {
@@ -303,9 +302,9 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
           break
         }
         case 'delete': {
-          if (useRealApi && api && sid) {
+          if (useRealApi && api && mid) {
             const entry = entries.find(e => e.path === dialog.path)
-            await apiDeleteEntry(api, mid, sid, currentPath, dialog.name, dialog.path, entry?.type ?? 'file')
+            await apiDeleteEntry(api, mid, sessionId ?? null, currentPath, dialog.name, dialog.path, entry?.type ?? 'file')
           } else if (!useRealApi) {
             await mockDelete(currentPath, dialog.name)
           } else {
@@ -318,9 +317,9 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
         case 'batchDelete': {
           for (const p of dialog.paths) {
             const name = p.split('/').pop() ?? ''
-            if (useRealApi && api && sid) {
+            if (useRealApi && api && mid) {
               const entry = entries.find(e => e.path === p)
-              await apiDeleteEntry(api, mid, sid, currentPath, name, p, entry?.type ?? 'file')
+              await apiDeleteEntry(api, mid, sessionId ?? null, currentPath, name, p, entry?.type ?? 'file')
             } else if (!useRealApi) {
               await mockDelete(currentPath, name)
             } else {
