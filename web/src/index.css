@@ -4,6 +4,7 @@
 @import "./styles/typography.css";
 @import "./styles/login.css";
 @import "./styles/file-manager.css";
+@import "./styles/git-portal.css";
 @config "../tailwind.config.ts";
 
 /* ===================================================

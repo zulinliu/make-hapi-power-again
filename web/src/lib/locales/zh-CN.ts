@@ -885,4 +885,122 @@ export default {
   'fm.date.daysAgo': '{count} 天前',
   'fm.directoryContents': '目录内容',
 
+  // ── Git Portal ──────────────────────────────────────────
+  'gitPortal.name': 'Git 传送门',
+  'gitPortal.title': 'Git 传送门',
+  'gitPortal.slogan': '通向你的代码宇宙',
+  'gitPortal.description': '克隆任意 Git 仓库，秒级开启 AI 编程之旅',
+  'gitPortal.close': '关闭',
+  'gitPortal.toolbar.button': 'Git 传送门',
+  'gitPortal.mobileBtn': '克隆',
+  'gitPortal.sessionCard.title': '从 Git 导入',
+  'gitPortal.sessionCard.desc': '克隆远程仓库并开启新会话',
+
+  // URL 输入
+  'gitPortal.url.placeholder': '粘贴 Git 仓库地址',
+  'gitPortal.url.invalid': '请输入有效的 Git 地址',
+  'gitPortal.url.supported': '支持 HTTPS、SSH 和 git@ 格式',
+  'gitPortal.url.detected': '检测到 {platform} 仓库 {owner}/{repo}',
+
+  // 历史
+  'gitPortal.history.title': '最近传送',
+  'gitPortal.history.empty': '暂无克隆记录',
+  'gitPortal.history.more': '查看更多',
+  'gitPortal.history.clear': '清除历史',
+  'gitPortal.favorites.title': '收藏',
+  'gitPortal.favorites.empty': '还没有收藏的仓库',
+
+  // 配置
+  'gitPortal.advancedOptions': '高级选项',
+  'gitPortal.start': '开始传送',
+  'gitPortal.config.title': '克隆设置',
+  'gitPortal.config.targetProject': '目标项目',
+  'gitPortal.config.cloneTo': '克隆到目录',
+  'gitPortal.config.changeDir': '更改目录',
+  'gitPortal.config.branch': '分支',
+  'gitPortal.config.branch.default': '默认分支',
+  'gitPortal.config.depth': '克隆深度',
+  'gitPortal.config.depth.full': '完整克隆',
+  'gitPortal.config.depth.shallow': '浅克隆（仅最新提交）',
+  'gitPortal.config.depth.custom': '自定义深度',
+
+  // 认证
+  'gitPortal.auth.title': '仓库认证',
+  'gitPortal.auth.privateRepo': '{platform} 私有仓库',
+  'gitPortal.auth.required': '此仓库需要认证',
+  'gitPortal.auth.username': '用户名',
+  'gitPortal.auth.usernamePlaceholder': '输入用户名',
+  'gitPortal.auth.password': '密码',
+  'gitPortal.auth.passwordPlaceholder': '输入密码',
+  'gitPortal.auth.token': 'Token',
+  'gitPortal.auth.tokenPlaceholder': '输入访问令牌',
+  'gitPortal.auth.usePassword': '使用账号密码',
+  'gitPortal.auth.useToken': '使用 Token',
+  'gitPortal.auth.hint.github': 'GitHub 已不支持密码认证，建议使用 Personal Access Token',
+  'gitPortal.auth.hint.gitlab': '输入你的 GitLab 用户名和密码',
+  'gitPortal.auth.hint.bitbucket': '输入你的 Bitbucket 用户名和 App Password',
+  'gitPortal.auth.hint.generic': '输入仓库的用户名和密码',
+  'gitPortal.auth.howToToken': '如何获取 {platform} Token',
+  'gitPortal.auth.sshDetected': '使用服务器已配置的 SSH 密钥',
+  'gitPortal.auth.showPassword': '显示密码',
+  'gitPortal.auth.hidePassword': '隐藏密码',
+
+  // 进度
+  'gitPortal.progress.connecting': '正在连接服务器...',
+  'gitPortal.progress.transferring': '正在传输数据... {received}',
+  'gitPortal.progress.transferringWithTotal': '正在传输数据... {received} / {total}',
+  'gitPortal.progress.unpacking': '正在解包项目文件...',
+  'gitPortal.progress.filesExtracted': '已解包 {count} 个文件',
+  'gitPortal.progress.cancel': '取消传送',
+  'gitPortal.progress.cancelling': '正在取消...',
+
+  // 结果
+  'gitPortal.result.success': '传送完成!',
+  'gitPortal.result.repoInfo': '{repo} / {branch} / {size}',
+  'gitPortal.result.fileCount': '{count} 个文件',
+  'gitPortal.result.openDir': '打开目录',
+  'gitPortal.result.startSession': '开启 AI 会话',
+  'gitPortal.result.favorite': '收藏此仓库',
+  'gitPortal.result.unfavorite': '取消收藏',
+  'gitPortal.result.favorited': '已收藏',
+
+  // 空状态
+  'gitPortal.empty.noHistory.title': '还没有传送记录',
+  'gitPortal.empty.noHistory.hint': '粘贴 Git 仓库地址开始第一次传送',
+  'gitPortal.empty.noFavorites.title': '还没有收藏的仓库',
+  'gitPortal.empty.noFavorites.hint': '克隆完成后可以收藏常用仓库',
+  'gitPortal.empty.firstUse.title': '快速开始',
+  'gitPortal.empty.firstUse.hint': '粘贴一个 GitHub 仓库地址试试',
+
+  // 确认
+  'gitPortal.confirm.cancelClone': '确定取消传送？已传输的数据将丢失。',
+  'gitPortal.confirm.closeDuringClone': '传送尚未完成，确定关闭吗？',
+
+  // Toast
+  'gitPortal.toast.cloneStarted': '传送已开始',
+  'gitPortal.toast.dirRefreshed': '目录已刷新',
+  'gitPortal.toast.favorited': '已添加到收藏',
+  'gitPortal.toast.unfavorited': '已取消收藏',
+  'gitPortal.toast.historyCleared': '克隆历史已清除',
+
+  // 错误
+  'gitPortal.error.authFailed': '认证失败，请检查凭据',
+  'gitPortal.error.tokenExpired': 'Token 可能已过期',
+  'gitPortal.error.networkError': '无法连接到服务器',
+  'gitPortal.error.dirExists': '目录已存在，请选择其他路径',
+  'gitPortal.error.diskFull': '磁盘空间不足。预估大小: {size}',
+  'gitPortal.error.sshKeyMissing': '服务器未找到对应的 SSH 公钥',
+  'gitPortal.error.retry': '重试',
+  'gitPortal.error.switchToToken': '切换到 Token 认证',
+
+  // 加载
+  'gitPortal.loading.history': '正在加载克隆历史...',
+  'gitPortal.loading.branches': '正在加载分支列表...',
+  'gitPortal.loading.validating': '正在校验地址...',
+
+  // 无障碍
+  'gitPortal.a11y.historyList': '最近克隆历史',
+  'gitPortal.a11y.progressAnimation': '克隆进度动画',
+  'gitPortal.a11y.urlInput': '输入要克隆的 Git 仓库地址',
+
 } as const
