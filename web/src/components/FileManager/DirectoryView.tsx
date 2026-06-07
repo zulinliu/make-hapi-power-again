@@ -25,6 +25,8 @@ export interface DirectoryViewProps {
     emptyHint?: string
     showCreateInEmpty?: boolean
     animateRows?: boolean
+    /** Mobile edit mode: clicking rows toggles selection instead of opening */
+    isEditMode?: boolean
 }
 
 type Translate = (key: string, params?: Record<string, string | number>) => string
@@ -68,6 +70,7 @@ interface FileRowProps {
     isSelected: boolean
     isChecked: boolean
     isNew: boolean
+    isEditMode: boolean
     t: Translate
     locale: Locale
     onOpenDirectory: (path: string) => void
@@ -78,12 +81,16 @@ interface FileRowProps {
     animateRows: boolean
 }
 
-function FileRow({ entry, index, isSelected, isChecked, isNew, t, locale, onOpenDirectory, onOpenFile, onContextMenu, onToggleSelect, onSelect, animateRows }: FileRowProps) {
+function FileRow({ entry, index, isSelected, isChecked, isNew, isEditMode, t, locale, onOpenDirectory, onOpenFile, onContextMenu, onToggleSelect, onSelect, animateRows }: FileRowProps) {
     const handleClick = useCallback(() => {
+        if (isEditMode) {
+            onToggleSelect(entry.path, false, false)
+            return
+        }
         onSelect(entry.path)
         if (entry.type === 'directory') onOpenDirectory(entry.path)
         else onOpenFile(entry.path)
-    }, [entry.path, entry.type, onOpenDirectory, onOpenFile, onSelect])
+    }, [entry.path, entry.type, isEditMode, onOpenDirectory, onOpenFile, onSelect, onToggleSelect])
 
     const handleContextMenu = useCallback(
         (e: React.MouseEvent) => {
@@ -120,16 +127,17 @@ function FileRow({ entry, index, isSelected, isChecked, isNew, t, locale, onOpen
             onMouseEnter={(e) => { if (!isSelected && !isChecked) e.currentTarget.style.background = 'var(--hp-surface-1)' }}
             onMouseLeave={(e) => { if (!isSelected && !isChecked) e.currentTarget.style.background = '' }}
         >
-            {/* Desktop checkbox */}
+            {/* Desktop checkbox / Mobile edit-mode checkbox */}
             <label
                 className="fm-row-checkbox"
                 onClick={(e) => e.stopPropagation()}
                 style={{
-                    display: 'none',
+                    display: isEditMode ? 'flex' : 'none',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    width: 32,
+                    width: isEditMode ? 44 : 32,
                     height: 44,
+                    minWidth: isEditMode ? 44 : 32,
                     flexShrink: 0,
                     cursor: 'pointer',
                 }}
@@ -143,7 +151,7 @@ function FileRow({ entry, index, isSelected, isChecked, isNew, t, locale, onOpen
                         onToggleSelect(entry.path, ne.shiftKey, ne.ctrlKey || ne.metaKey)
                     }}
                     className="fm-checkbox"
-                    style={{ width: 18, height: 18, accentColor: 'var(--hp-primary)', cursor: 'pointer' }}
+                    style={{ width: isEditMode ? 22 : 18, height: isEditMode ? 22 : 18, accentColor: 'var(--hp-primary)', cursor: 'pointer' }}
                 />
             </label>
 
@@ -187,6 +195,7 @@ function FileRow({ entry, index, isSelected, isChecked, isNew, t, locale, onOpen
                 </div>
             </button>
 
+            {!isEditMode && (
             <button
                 type="button"
                 onClick={handleContextMenu}
@@ -198,6 +207,7 @@ function FileRow({ entry, index, isSelected, isChecked, isNew, t, locale, onOpen
             >
                 &#8943;
             </button>
+            )}
         </div>
     )
 }
@@ -280,7 +290,7 @@ function ErrorState({ message, t, onRetry }: { message: string; t: Translate; on
 export default function DirectoryView({
     entries, isLoading, error, sort, onSortChange, onOpenDirectory, onOpenFile, onContextMenu,
     selectedPath, onSelect, onRetry, onCreate, selectedPaths, onToggleSelect, onSelectAll, highlightPath,
-    emptyTitle, emptyHint, showCreateInEmpty = true, animateRows = true,
+    emptyTitle, emptyHint, showCreateInEmpty = true, animateRows = true, isEditMode = false,
 }: DirectoryViewProps) {
     const { t, locale } = useTranslation()
     const sorted = entries
@@ -309,6 +319,7 @@ export default function DirectoryView({
                             isSelected={selectedPath === entry.path}
                             isChecked={selectedPaths.has(entry.path)}
                             isNew={highlightPath === entry.path}
+                            isEditMode={isEditMode}
                             t={t}
                             locale={locale}
                             onOpenDirectory={onOpenDirectory}

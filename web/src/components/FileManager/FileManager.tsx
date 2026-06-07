@@ -422,6 +422,8 @@ export function FileManager({ api, machineId, sessionId, initialPath, rootPath: 
   const [createKind, setCreateKind] = useState<CreateKind>('file')
   const [highlightPath, setHighlightPath] = useState<string | null>(null)
   const [selectedPaths, setSelectedPaths] = useState<Set<string>>(new Set())
+  const [isEditMode, setIsEditMode] = useState(false)
+  const [moreMenuVisible, setMoreMenuVisible] = useState(false)
   const [navKey, setNavKey] = useState(0)
   const [searchQuery, setSearchQuery] = useState('')
   const [searchMode, setSearchMode] = useState<SearchMode>('name')
@@ -490,6 +492,7 @@ export function FileManager({ api, machineId, sessionId, initialPath, rootPath: 
     setSearchResults(null)
     setSearchError(null)
     setSelectedPaths(new Set())
+    setIsEditMode(false)
   }, [currentPath, searchQuery, searchMode])
 
   const breadcrumbs: BreadcrumbSegment[] = useMemo(() => buildBreadcrumbs(currentPath, 'project', t('fm.projectRoot')), [currentPath, t])
@@ -840,6 +843,38 @@ export function FileManager({ api, machineId, sessionId, initialPath, rootPath: 
     setDialog({ type: 'batchDelete', paths: [...selectedPaths] })
   }, [selectedPaths])
 
+  // Edit mode handlers
+  const handleEnterEditMode = useCallback(() => {
+    if (visibleEntries.length === 0) return
+    setIsEditMode(true)
+  }, [visibleEntries.length])
+
+  const handleExitEditMode = useCallback(() => {
+    setIsEditMode(false)
+    setSelectedPaths(new Set())
+    setMoreMenuVisible(false)
+  }, [])
+
+  const handleToggleSelectAllEdit = useCallback(() => {
+    setSelectedPaths((prev) => {
+      if (prev.size === visibleEntries.length) return new Set()
+      return new Set(visibleEntries.map((e) => e.path))
+    })
+  }, [visibleEntries])
+
+  const handleCopySelectedPaths = useCallback(() => {
+    const paths = [...selectedPaths].join('\n')
+    void copyToClipboard(paths, t)
+  }, [selectedPaths, t])
+
+  // Close more menu on outside click
+  useEffect(() => {
+    if (!moreMenuVisible) return
+    const handleClick = () => setMoreMenuVisible(false)
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [moreMenuVisible])
+
   // Keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -908,7 +943,7 @@ export function FileManager({ api, machineId, sessionId, initialPath, rootPath: 
     && visibleEntries.length > LARGE_DIRECTORY_WARNING_THRESHOLD
 
   return (
-    <div className="flex h-full flex-col">
+    <div className={`flex h-full flex-col${isEditMode ? ' fm-edit-mode' : ''}`}>
       <input
         ref={uploadInputRef}
         type="file"
@@ -1223,6 +1258,7 @@ export function FileManager({ api, machineId, sessionId, initialPath, rootPath: 
             emptyHint={searchFilterActive ? t('fm.search.noLocalMatchesHint') : undefined}
             showCreateInEmpty={!searchFilterActive}
             animateRows={animateRows}
+            isEditMode={isEditMode}
         />
       </div>
 
@@ -1248,8 +1284,9 @@ export function FileManager({ api, machineId, sessionId, initialPath, rootPath: 
         />
       )}
 
-      {/* Bottom toolbar (mobile) */}
-      <div className="flex items-center justify-around border-t border-(--hp-border) md:hidden" style={{ height: 56, background: 'var(--hp-surface-0)', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+      {/* Bottom toolbar (mobile) - normal mode */}
+      {!isEditMode && (
+      <div className="fm-mobile-toolbar flex items-center justify-around border-t border-(--hp-border) md:hidden" style={{ height: 56, background: 'var(--hp-surface-0)', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
         <ToolbarButton label={t('fm.toolbar.newShort')} icon="new" onClick={() => handleCreate('file')} />
         <ToolbarButton label={t('fm.toolbar.uploadShort')} icon="upload" onClick={handleUploadClick} />
         <ToolbarButton label={t('fm.toolbar.sessionShort')} icon="session" onClick={() => {
@@ -1262,7 +1299,255 @@ export function FileManager({ api, machineId, sessionId, initialPath, rootPath: 
             }
           })
         }} />
+        <ToolbarButton
+          label={t('fm.edit.mode')}
+          icon="edit"
+          onClick={handleEnterEditMode}
+          disabled={visibleEntries.length === 0}
+        />
       </div>
+      )}
+
+      {/* Edit mode action bar (mobile) */}
+      {isEditMode && (
+      <div
+        className="fm-edit-action-bar md:hidden"
+        style={{
+          display: 'flex',
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: 56,
+          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+          background: 'var(--hp-surface-0)',
+          borderTop: '1px solid var(--hp-border)',
+          alignItems: 'center',
+          padding: '0 8px',
+          zIndex: 10,
+          gap: 4,
+        }}
+      >
+        <button
+          type="button"
+          onClick={handleToggleSelectAllEdit}
+          style={{
+            minHeight: 44,
+            minWidth: 44,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '0 10px',
+            border: '1px solid var(--hp-border)',
+            borderRadius: 'var(--hp-radius-md)',
+            background: visibleEntries.length > 0 && selectedPaths.size === visibleEntries.length ? 'var(--hp-primary-subtle)' : 'transparent',
+            color: visibleEntries.length > 0 && selectedPaths.size === visibleEntries.length ? 'var(--hp-primary)' : 'var(--hp-text-secondary)',
+            fontSize: 13,
+            fontWeight: 600,
+            cursor: 'pointer',
+          }}
+        >
+          {visibleEntries.length > 0 && selectedPaths.size === visibleEntries.length ? '✓' : ''} {t('fm.edit.selectAll')}
+        </button>
+        <span
+          style={{
+            fontSize: 12,
+            fontWeight: 600,
+            color: 'var(--hp-primary)',
+            minWidth: 40,
+            textAlign: 'center',
+          }}
+        >
+          {selectedPaths.size === 0 ? '' : selectedPaths.size === 1 ? t('fm.edit.selected.one') : t('fm.edit.selected', { count: selectedPaths.size })}
+        </span>
+        <button
+          type="button"
+          disabled={selectedPaths.size === 0}
+          onClick={() => handleTransfer('move', [...selectedPaths])}
+          style={{
+            minHeight: 44,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '0 10px',
+            border: '1px solid var(--hp-border)',
+            borderRadius: 'var(--hp-radius-md)',
+            background: 'transparent',
+            color: selectedPaths.size === 0 ? 'var(--hp-text-tertiary)' : 'var(--hp-text-secondary)',
+            fontSize: 13,
+            fontWeight: 500,
+            cursor: selectedPaths.size === 0 ? 'not-allowed' : 'pointer',
+            opacity: selectedPaths.size === 0 ? 0.5 : 1,
+          }}
+        >
+          {t('fm.batch.move')}
+        </button>
+        <button
+          type="button"
+          disabled={selectedPaths.size === 0}
+          onClick={() => handleTransfer('copy', [...selectedPaths])}
+          style={{
+            minHeight: 44,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '0 10px',
+            border: '1px solid var(--hp-border)',
+            borderRadius: 'var(--hp-radius-md)',
+            background: 'transparent',
+            color: selectedPaths.size === 0 ? 'var(--hp-text-tertiary)' : 'var(--hp-text-secondary)',
+            fontSize: 13,
+            fontWeight: 500,
+            cursor: selectedPaths.size === 0 ? 'not-allowed' : 'pointer',
+            opacity: selectedPaths.size === 0 ? 0.5 : 1,
+          }}
+        >
+          {t('fm.batch.copy')}
+        </button>
+        <div style={{ position: 'relative' }}>
+          <button
+            type="button"
+            disabled={selectedPaths.size === 0}
+            onClick={(e) => {
+              e.stopPropagation()
+              setMoreMenuVisible((v) => !v)
+            }}
+            style={{
+              minHeight: 44,
+              minWidth: 44,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '0 8px',
+              border: '1px solid var(--hp-border)',
+              borderRadius: 'var(--hp-radius-md)',
+              background: 'transparent',
+              color: selectedPaths.size === 0 ? 'var(--hp-text-tertiary)' : 'var(--hp-text-secondary)',
+              fontSize: 13,
+              fontWeight: 500,
+              cursor: selectedPaths.size === 0 ? 'not-allowed' : 'pointer',
+              opacity: selectedPaths.size === 0 ? 0.5 : 1,
+            }}
+          >
+            {t('fm.edit.more')}
+          </button>
+          {moreMenuVisible && selectedPaths.size > 0 && (
+            <div
+              role="menu"
+              className="fm-edit-more-menu"
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                position: 'absolute',
+                bottom: '100%',
+                right: 0,
+                marginBottom: 4,
+                minWidth: 160,
+                background: 'var(--hp-surface-0)',
+                border: '1px solid var(--hp-border)',
+                borderRadius: 'var(--hp-radius-md)',
+                boxShadow: 'var(--hp-shadow-lg)',
+                padding: '4px 0',
+                zIndex: 60,
+                animation: 'fm-menu-in var(--hp-duration-fast) var(--hp-ease-overlay)',
+              }}
+            >
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => { handleBatchDelete(); setMoreMenuVisible(false) }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  width: '100%',
+                  height: 44,
+                  padding: '0 14px',
+                  border: 'none',
+                  background: 'none',
+                  cursor: 'pointer',
+                  color: 'var(--hp-danger)',
+                  fontSize: 13,
+                  fontWeight: 500,
+                  textAlign: 'left',
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hp-danger-subtle)' }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'none' }}
+              >
+                {t('fm.edit.deleteSelected')}
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => { handleCopySelectedPaths(); setMoreMenuVisible(false) }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  width: '100%',
+                  height: 44,
+                  padding: '0 14px',
+                  border: 'none',
+                  background: 'none',
+                  cursor: 'pointer',
+                  color: 'var(--hp-text-primary)',
+                  fontSize: 13,
+                  fontWeight: 500,
+                  textAlign: 'left',
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hp-surface-1)' }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'none' }}
+              >
+                {t('fm.edit.copyPaths')}
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => setMoreMenuVisible(false)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  width: '100%',
+                  height: 44,
+                  padding: '0 14px',
+                  border: 'none',
+                  background: 'none',
+                  cursor: 'pointer',
+                  color: 'var(--hp-text-secondary)',
+                  fontSize: 13,
+                  fontWeight: 500,
+                  textAlign: 'left',
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hp-surface-1)' }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'none' }}
+              >
+                {t('fm.edit.cancel')}
+              </button>
+            </div>
+          )}
+        </div>
+        <div style={{ flex: 1 }} />
+        <button
+          type="button"
+          onClick={handleExitEditMode}
+          style={{
+            minHeight: 44,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '0 12px',
+            border: 'none',
+            borderRadius: 'var(--hp-radius-md)',
+            background: 'var(--hp-primary)',
+            color: 'var(--hp-primary-text)',
+            fontSize: 13,
+            fontWeight: 650,
+            cursor: 'pointer',
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hp-primary-hover)' }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--hp-primary)' }}
+        >
+          {t('fm.edit.done')}
+        </button>
+      </div>
+      )}
 
       <ContextMenu state={ctxMenu.state} onClose={ctxMenu.hide} />
 
@@ -1352,14 +1637,14 @@ export function FileManager({ api, machineId, sessionId, initialPath, rootPath: 
   )
 }
 
-type ToolbarIcon = 'new' | 'upload' | 'session'
+type ToolbarIcon = 'new' | 'upload' | 'session' | 'edit'
 
-function ToolbarButton({ label, icon, onClick }: { label: string; icon: ToolbarIcon; onClick?: () => void }) {
+function ToolbarButton({ label, icon, onClick, disabled }: { label: string; icon: ToolbarIcon; onClick?: () => void; disabled?: boolean }) {
   return (
-    <button type="button" onClick={onClick} aria-label={label}
+    <button type="button" onClick={onClick} aria-label={label} disabled={disabled}
       className="fm-mobile-toolbar-button"
-      style={{ minHeight: 48, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2, padding: '4px 10px', background: 'transparent', border: '1px solid transparent', cursor: 'pointer', color: 'var(--hp-text-secondary)', borderRadius: 'var(--hp-radius-md)', minWidth: 58, transition: 'background var(--hp-duration-fast) var(--hp-ease-out), color var(--hp-duration-fast) var(--hp-ease-out)' }}
-      onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--hp-text-primary)' }} onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--hp-text-secondary)' }}>
+      style={{ minHeight: 48, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2, padding: '4px 10px', background: 'transparent', border: '1px solid transparent', cursor: disabled ? 'not-allowed' : 'pointer', color: disabled ? 'var(--hp-text-tertiary)' : 'var(--hp-text-secondary)', borderRadius: 'var(--hp-radius-md)', minWidth: 58, opacity: disabled ? 0.4 : 1, transition: 'background var(--hp-duration-fast) var(--hp-ease-out), color var(--hp-duration-fast) var(--hp-ease-out)' }}
+      onMouseEnter={(e) => { if (!disabled) e.currentTarget.style.color = 'var(--hp-text-primary)' }} onMouseLeave={(e) => { if (!disabled) e.currentTarget.style.color = 'var(--hp-text-secondary)' }}>
       <span style={{ width: 20, height: 20, display: 'grid', placeItems: 'center', fontSize: 18, lineHeight: 1 }} aria-hidden="true">
         {icon === 'new' ? (
           <svg xmlns="http://www.w3.org/2000/svg" width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -1371,6 +1656,11 @@ function ToolbarButton({ label, icon, onClick }: { label: string; icon: ToolbarI
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
             <path d="M17 8 12 3 7 8" />
             <path d="M12 3v12" />
+          </svg>
+        ) : icon === 'edit' ? (
+          <svg xmlns="http://www.w3.org/2000/svg" width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+            <path d="m15 5 4 4" />
           </svg>
         ) : (
           <svg xmlns="http://www.w3.org/2000/svg" width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">

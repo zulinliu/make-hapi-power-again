@@ -179,6 +179,26 @@
     }
     .fm-state { min-height: 360px !important; }
     .fm-context-menu { min-width: min(260px, calc(100vw - 24px)) !important; }
+
+    /* Mobile edit mode: show checkbox */
+    .fm-edit-mode .fm-row-checkbox {
+        display: flex !important;
+        width: 44px;
+        min-width: 44px;
+        height: 44px;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .fm-row-checkbox {
+        transition: width var(--hp-duration-normal, 0.15s) var(--hp-ease-overlay, ease-out);
+        overflow: hidden;
+    }
+
+    /* Edit mode: hide normal mobile toolbar */
+    .fm-edit-mode .fm-mobile-toolbar {
+        display: none !important;
+    }
 }
 
 @media (max-width: 480px) {
@@ -213,7 +233,8 @@
     .fm-icon-button,
     .fm-sort-button,
     .fm-primary-button,
-    .fm-secondary-button {
+    .fm-secondary-button,
+    .fm-row-checkbox {
         transition: none !important;
     }
 }
