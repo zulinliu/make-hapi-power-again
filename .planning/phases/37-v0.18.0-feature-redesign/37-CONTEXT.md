@@ -55,7 +55,7 @@
 
 **核心问题**：现有页面按 Git 命令分类，用户在 AI 会话中需要的是“我现在能不能安全提交/同步/回看 agent 改了什么”。应重构为 Git 决策舱。
 
-### 3.3 会话中的“排队 / 引导”双模式
+### 3.3 会话中的“排队 / 立即引导”双模式
 
 | 层级 | 文件 | 发现 |
 |---|---|---|
@@ -84,7 +84,7 @@
 
 #### tsintergy / GLM-5.1 实测记录
 
-- 配置来源：`~/.claude/settings.json`，仅读取非密字段 `ANTHROPIC_BASE_URL=http://new-api.saas-vpp.tsintergy.com`、`ANTHROPIC_MODEL=glm-5.1`；`ANTHROPIC_AUTH_TOKEN` 未打印、未写入文档。
+- 配置来源：`~/.claude/settings.json`，仅读取非密字段 `ANTHROPIC_BASE_URL=<tsintergy-base-url-redacted>`、`ANTHROPIC_MODEL=glm-5.1`；`ANTHROPIC_AUTH_TOKEN` 未打印、未写入文档。
 - 测试时间：2026-06-08。
 - 请求：Anthropic-compatible `POST /v1/messages`，`model=glm-5.1`，极小 prompt。
 - 结果：HTTP 200，响应包含顶层 `usage`，usage keys 包含 `input_tokens`、`output_tokens`、`cache_read_input_tokens`、`server_tool_use`、`service_tier`。
@@ -136,4 +136,9 @@
 | `37-REQUIREMENTS.md` | 可验收需求列表与验收标准。 |
 | `37-ROADMAP.md` | 后续实施阶段拆分与质量门禁。 |
 | `37-README-BRAND-COPY.md` | README 与文档同步的中英品牌文案草稿。 |
+| `37-DEEP-REVIEW.md` | 多子代理全方位评审结论。 |
+| `37-BRAND-CONTRACT.md` | 评审后 canonical naming、五节点顺序和 signature moment 门禁。 |
+| `37-PROTOCOL-ADDENDUM.md` | Guide Beam 和消息队列协议前置门禁。 |
+| `37-SECURITY-ADDENDUM.md` | Provider、Export、Git、Guide 安全隐私门禁。 |
+| `37-UX-ACCEPTANCE-MATRIX.md` | iOS PWA、A11y、动效和视口验收矩阵。 |
 | `.planning/research/2026-06-08-feature-redesign-references.md` | 外部参考和 tsintergy 用量测试记录。 |

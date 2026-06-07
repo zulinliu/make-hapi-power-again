@@ -9,37 +9,37 @@
 Hapi Power 不应只是“把多个工具塞进浏览器”，而应成为 **AI 编码代理的移动控制舱**。五个新增/优化方向共同形成一个闭环：
 
 1. **接入模型能源**：API 供应商不只是配置 key，而是让不同模型通道像星图一样接入。
-2. **看清代码脉络**：Git 不只是命令，而是把 agent 改动、分支、提交、同步风险可视化。
-3. **实时纠偏代理**：会话工作中可选择排队或立即引导，让用户保持驾驶权。
-4. **守住上下文清醒度**：上下文用量是可靠性的温度计，必须一眼看懂。
+2. **实时纠偏代理**：会话工作中可选择排队或立即引导，让用户保持驾驶权。
+3. **守住上下文清醒度**：上下文用量是可靠性的温度计，必须一眼看懂。
+4. **看清代码脉络**：Git 不只是命令，而是把 agent 改动、分支、提交、同步风险可视化。
 5. **沉淀会话资产**：大纲升级为导出、复盘、提炼，让每次对话变成可复用经验。
 
 总 Slogan：
 
-> **让 AI 编码从“对话”变成“可驾驶、可回看、可沉淀的工作流”。**
+> **让 AI 编码从“对话”变成“可驾驶、可观测、可复盘的工程闭环”。**
 
 英文传播：
 
-> **Drive every agent, trace every change, preserve every lesson.**
+> **Connect trusted models, steer running agents, watch context risk, trace every change, preserve every lesson.**
 
 ## 2. 功能品牌矩阵
 
 | 需求 | 品牌名（中文） | 英文名 | 一句话定位 | Slogan | 建议图标 |
 |---|---|---|---|---|---|
-| API 供应商 | **API 星桥** | **Model Nexus** | 把第三方模型通道接成可观测、可分配、可诊断的模型网络。 | **把模型接成星图。** | 三个节点由橙色桥线连接，中间是闪电核心。 |
-| Git 工具页 | **Git 脉络** | **Git Atlas** | 让分支、变更、提交、同步风险像地图一样清楚。 | **让每一次分支可看见。** | 分支线叠加等高线/地图折线，末端带提交点。 |
+| API 供应商 | **模型星桥** | **Model Nexus** | 把第三方模型通道接成可观测、可分配、可诊断的模型网络。 | **把模型接成星图。** | 三个节点由橙色桥线连接，中间是闪电核心。 |
 | 对话引导模式 | **引导光标** | **Guide Beam** | agent 偏航时，轻点打断并立即纠偏。 | **偏航时，轻点纠正。** | 光标射出橙色光束，穿过正在旋转的圆环。 |
 | 上下文用量 | **上下文脉冲** | **Context Pulse** | 用 60/80 阈值提示上下文污染风险。 | **上下文清醒，代理更可靠。** | 分段脉冲环，60/80 两个刻度，颜色随阈值变化。 |
+| Git 工具页 | **Git 脉络** | **Git Atlas** | 让分支、变更、提交、同步风险像地图一样清楚。 | **让每一次分支可看见。** | 分支线叠加等高线/地图折线，末端带提交点。 |
 | 大纲导出提炼 | **会话织锦** | **Session Loom** | 把原始对话、关键决策、设计方案织成 Markdown 资产。 | **把对话沉淀成资产。** | 一卷文档被线束编织，线头连接用户/AI 双气泡。 |
 
 ## 3. 品牌文化与语气
 
-### 3.1 API 星桥 / Model Nexus
+### 3.1 模型星桥 / Model Nexus
 
 - **文化关键词**：连接、信任、观测、治理。
 - **避免**：把它叫“供应商列表”“API Key 管理”。这些都太后台。
 - **应表达**：用户在搭建模型供给网络，Hapi Power 帮他做健康检查、能力识别和 agent 分配。
-- **页面标题**：`API 星桥` / `Model Nexus`。
+- **页面标题**：`模型星桥` / `Model Nexus`。
 - **子文案**：`统一接入模型通道，检测健康状态，并为每个 Agent 分配默认模型。`
 - **Logo 概念**：中心电光橙节点代表 Hapi Power；外部节点代表 OpenAI/Anthropic/GLM/自定义网关；桥线有方向，表示请求流。
 - **动效**：新增/检测供应商时，节点从暗态点亮，桥线 160ms 扫光；失败节点停留为虚线红边。
@@ -59,10 +59,10 @@ Hapi Power 不应只是“把多个工具塞进浏览器”，而应成为 **AI 
 - **文化关键词**：驾驶权、纠偏、即时、可恢复。
 - **避免**：把引导做成危险的“强制中断”按钮或隐藏命令。
 - **应表达**：用户始终掌握方向盘；默认排队，必要时引导。
-- **组件名**：`排队 / 引导` 双模式发送。
+- **组件名**：`排队 / 立即引导` 双模式发送。
 - **子文案**：`排队会等当前任务完成；引导会打断当前任务并立即发送纠偏。`
 - **Logo 概念**：一个光标箭头发出橙色 beam，穿过蓝色 agent 思考环，环未破碎，表示不破坏会话。
-- **动效**：切到引导时橙色光束 120ms 掠过发送按钮；发送后出现 `已引导` 事件条。
+- **动效**：切到立即引导时橙色光束 120ms 掠过发送按钮；发送后出现 `已引导` 事件条。
 
 ### 3.4 上下文脉冲 / Context Pulse
 
@@ -88,29 +88,29 @@ Hapi Power 不应只是“把多个工具塞进浏览器”，而应成为 **AI 
 
 | 位置 | 当前 | 建议中文 | 建议英文 | Icon 方向 |
 |---|---|---|---|---|
-| Settings Provider 区块 | API 供应商 | API 星桥 | Model Nexus | 节点桥接/星图 |
+| Settings Provider 区块 | API 供应商 | 模型星桥 | Model Nexus | 节点桥接/星图 |
 | Session Header Git | Git | Git 脉络 | Git Atlas | 分支地图 |
-| Composer thinking 模式 | 无 | 排队 / 引导 | Queue / Guide | 队列线 / 光束 |
+| Composer thinking 模式 | 无 | 排队 / 立即引导 | Queue / Guide now | 队列线 / 光束 |
 | StatusBar context | ctx ... | 上下文：40% | Context: 40% | 脉冲点/小环 |
-| Outline panel | 大纲 | 大纲 · 会话织锦 | Outline · Session Loom | 列表 + 织线文档 |
+| Outline panel | 大纲 | 会话织锦（大纲为 Tab） | Session Loom | 列表 + 织线文档 |
 
 ## 5. README 传播主张
 
 ### 中文主张
 
-> **Hapi Power 是 AI 编码代理的移动控制舱。** 你可以接入不同模型供应商，看清 Agent 的 Git 改动，工作中随时排队或引导纠偏，监控上下文清醒度，并把整段会话沉淀成 Markdown 设计资产。
+> **Hapi Power 把 AI 编码对话变成可驾驶、可观测、可复盘的工程闭环。** 你可以接入可信模型通道，工作中即时纠偏，观察上下文风险，追踪每次代码变化，并把会话沉淀为项目记忆。
 
 ### English positioning
 
-> **Hapi Power is a mobile command deck for AI coding agents.** Connect model providers, steer running agents, inspect Git changes, monitor context usage, and turn conversations into reusable Markdown project assets.
+> **Hapi Power turns agent chats into a controllable engineering loop.** Connect trusted models, steer running agents, watch context risk, trace every code change, and preserve the session as project memory.
 
 ## 6. 品牌落地检查清单
 
 - [ ] README/README.zh-CN 新增五个品牌功能名，不只写技术名。
-- [ ] 设置页导航与页面标题从 `API Providers` 升级为 `Model Nexus / API 星桥`。
+- [ ] 设置页导航与页面标题从 `API Providers` 升级为 `Model Nexus / 模型星桥`。
 - [ ] Git 页标题与空状态使用 `Git Atlas / Git 脉络`。
-- [ ] Composer 文案明确 `Queue / Guide` 区别，中文默认优先。
+- [ ] Composer 文案明确 `Queue / Guide now` 区别，中文默认使用 `排队 / 立即引导`。
 - [ ] Context 文案统一为 `上下文：{percent}%`，英文为 `Context: {percent}%`。
-- [ ] 大纲 Panel 内增加 `Session Loom / 会话织锦` 品牌区，但 header 工具仍可保留短名“大纲”。
+- [ ] 大纲 Panel 主标题升级为 `Session Loom / 会话织锦`，`大纲` 只作为第一个 Tab。
 - [ ] 所有 icon 均使用统一 stroke、圆角、橙色激活态，避免 emoji 或第三方品牌图形。
-- [ ] 宣传图中五个功能可组成一个“Power Geometry”五节点环：模型、代码、引导、上下文、资产。
+- [ ] 宣传图中五个功能可组成一个“Power Geometry”五节点环：接入、驾驶、观测、追踪、沉淀。

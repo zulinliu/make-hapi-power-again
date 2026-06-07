@@ -581,10 +581,16 @@ Plans:
   - `.planning/phases/37-v0.18.0-feature-redesign/37-ROADMAP.md`
   - `.planning/phases/37-v0.18.0-feature-redesign/37-README-BRAND-COPY.md`
   - `.planning/research/2026-06-08-feature-redesign-references.md`
+  - `.planning/phases/37-v0.18.0-feature-redesign/37-DEEP-REVIEW.md`
+  - `.planning/phases/37-v0.18.0-feature-redesign/37-BRAND-CONTRACT.md`
+  - `.planning/phases/37-v0.18.0-feature-redesign/37-PROTOCOL-ADDENDUM.md`
+  - `.planning/phases/37-v0.18.0-feature-redesign/37-SECURITY-ADDENDUM.md`
+  - `.planning/phases/37-v0.18.0-feature-redesign/37-UX-ACCEPTANCE-MATRIX.md`
 **Plans**: 1 design-only plan
 
 Plans:
 - [x] 37-00: 五大特色功能全新设计与品牌系统沉淀
+- [x] 37-01: 按深度评审补充协议、安全、UX、品牌前置门禁
 
 ---
-*Last updated: 2026-06-08 — Phase 37 v0.18.0 特色功能重塑设计完成*
+*Last updated: 2026-06-08 — Phase 37 v0.18.0 特色功能重塑设计与评审后门禁补充完成*

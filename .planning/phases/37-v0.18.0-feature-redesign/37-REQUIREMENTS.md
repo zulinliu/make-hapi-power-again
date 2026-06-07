@@ -2,16 +2,16 @@
 
 > 范围：设计完成后的后续实施需求基线。本文不是实现记录。
 
-## PROVIDER — API 星桥 / Model Nexus
+## PROVIDER — 模型星桥 / Model Nexus
 
 | ID | 需求 | 验收标准 |
 |---|---|---|
-| PROVIDER-01 | 将设置页 API 供应商从列表重构为“API 星桥”控制舱。 | 首屏包含健康总览、Provider 卡片、Agent 分配矩阵、最近检测状态；空状态可引导新增。 |
+| PROVIDER-01 | 将设置页 API 供应商从列表重构为“模型星桥”控制舱。 | 首屏包含健康总览、Provider 卡片、Agent 分配矩阵、最近检测状态；空状态可引导新增。 |
 | PROVIDER-02 | 新增 Provider Wizard。 | 支持协议选择、连接输入、能力检测、Agent 分配四步；移动端为 bottom/fullscreen sheet。 |
 | PROVIDER-03 | Provider 健康与能力检测。 | 能检测模型 endpoint、基础消息 endpoint、usage 返回、context window、延迟和错误原因；不泄露 key。 |
 | PROVIDER-04 | Agent 分配矩阵。 | 可一处查看和修改每个 Agent 的默认 Provider/模型；替代零散 chip 操作。 |
 | PROVIDER-05 | 安全治理。 | HTTP/内网/重定向/鉴权失败/usage 缺失有明确风险提示；删除 Provider 前展示影响。 |
-| PROVIDER-06 | 品牌落地。 | 页面标题、空状态、README、icon、i18n 使用 `API 星桥 / Model Nexus`。 |
+| PROVIDER-06 | 品牌落地。 | 页面标题、空状态、README、icon、i18n 使用 `模型星桥 / Model Nexus`。 |
 
 ## GIT — Git 脉络 / Git Atlas
 
@@ -29,7 +29,7 @@
 
 | ID | 需求 | 验收标准 |
 |---|---|---|
-| GUIDE-01 | Composer 在 agent thinking 时显示 `排队 / 引导` 双模式。 | 默认排队；引导有说明；非 thinking 时不增加复杂度。 |
+| GUIDE-01 | Composer 在 agent thinking 时显示 `排队 / 立即引导` 双模式。 | 默认排队；引导有说明；非 thinking 时不增加复杂度。 |
 | GUIDE-02 | SendMessage 支持 deliveryMode。 | REST schema、Web hook、Hub message meta、CLI update 均能区分 queue/guide。 |
 | GUIDE-03 | Guide 中断当前 turn 并优先发送。 | Claude/Codex 等支持的 agent 在 guide 后尽快收到纠偏；guide 消息优先于普通 queued。 |
 | GUIDE-04 | 保留普通队列。 | Guide 不清空已有 queued messages；失败时降级为 queue。 |
@@ -44,7 +44,7 @@
 | CTX-02 | 颜色阈值。 | `<60%` 绿色，`60–80%` 黄色，`>80%` 红色；边界测试覆盖 59/60/80/81。 |
 | CTX-03 | Popover 诊断。 | 可查看 used/max、cache、model、数据来源、更新时间、不可用原因。 |
 | CTX-04 | 不可用不静默。 | 无 usage 或无 context window 时显示 `上下文：--`，并说明原因。 |
-| CTX-05 | Provider 联动。 | API 星桥可检测并记录 provider 是否返回 usage；Context Pulse 可引用该诊断。 |
+| CTX-05 | Provider 联动。 | 模型星桥可检测并记录 provider 是否返回 usage；Context Pulse 可引用该诊断。 |
 | CTX-06 | GLM/tsintergy 验证。 | 实施阶段复测 direct API 与 Claude Code stream-json 两条路径，确认 usage 丢失点。 |
 
 ## LOOM — 会话织锦 / Session Loom
@@ -68,6 +68,18 @@
 | BRAND-02 | README 更新。 | README/README.zh-CN 使用新品牌叙事，不只写功能列表。 |
 | BRAND-03 | 文档统一。 | PRODUCT、规划、用户文档、release notes 中相关描述统一。 |
 | BRAND-04 | 视觉一致。 | Icon stroke、颜色、动效时长、卡片半径遵守 Hapi Power tokens。 |
+
+## 特色功能验收门禁
+
+| ID | 需求 | 验收标准 |
+|---|---|---|
+| BRAND-05 | 不可退化门禁。 | 任一功能首屏不得退化为 CRUD 列表、命令 Tab、普通状态条或下载按钮，必须呈现对应品牌的 signature moment。 |
+| BRAND-06 | 五节点传播顺序。 | README、README.zh-CN、PRODUCT、release notes 使用同一套顺序：接入 → 驾驶 → 观测 → 追踪 → 沉淀。 |
+| BRAND-07 | 命名契约。 | 所有新增 i18n key 必须符合 `37-BRAND-CONTRACT.md`，并通过 en/zh-CN parity 测试。 |
+| BRAND-08 | 可截图品牌瞬间。 | 每个功能至少有一个可传播截图：星桥点亮、立即引导、上下文风险诊断、分支态势、会话织成资产。 |
+| DOC-ADDENDUM-01 | 协议补充门禁。 | Guide Beam 实施前必须通过 `37-PROTOCOL-ADDENDUM.md` 的 capability、queue、fallback、幂等要求。 |
+| DOC-ADDENDUM-02 | 安全补充门禁。 | Provider、Export、Git、Guide 实施前必须通过 `37-SECURITY-ADDENDUM.md` 的安全清单。 |
+| DOC-ADDENDUM-03 | UX 验收矩阵。 | 前端实现必须按 `37-UX-ACCEPTANCE-MATRIX.md` 覆盖视口、焦点、safe-area、reduced motion。 |
 
 ## 全局质量门禁
 

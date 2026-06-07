@@ -553,7 +553,7 @@ Phase 19 (PWA 更新机制修复) 引入了三个叠加问题：
 |---|---|
 | 设计方式 | 使用 `$impeccable` 产品界面原则与 GSD 既有项目规划方式；不重建 `.planning/PROJECT.md`。 |
 | 实施边界 | 本轮只做设计文档，不修改 `web/`、`hub/`、`cli/`、`shared/` 源码。 |
-| 品牌体系 | 五个特色功能命名为 API 星桥、Git 脉络、引导光标、上下文脉冲、会话织锦。 |
+| 品牌体系 | 五个特色功能命名为 模型星桥、Git 脉络、引导光标、上下文脉冲、会话织锦。 |
 | 引导模式原则 | 默认排队；引导必须中断当前 turn 并优先发送，但不得清空普通 queued messages；失败降级为排队。 |
 | 上下文诊断 | tsintergy/GLM-5.1 direct `/v1/messages` 实测返回 usage，因此不可用问题需继续排查 stream-json、normalizer、context window、分页等路径。 |
 | 大纲升级 | 大纲从导航面板升级为 Session Loom，会话资产工作台，支持导出、提炼、下载、i18n、iOS PWA。 |
@@ -568,11 +568,19 @@ Phase 19 (PWA 更新机制修复) 引入了三个叠加问题：
 - `.planning/phases/37-v0.18.0-feature-redesign/37-ROADMAP.md`
 - `.planning/phases/37-v0.18.0-feature-redesign/37-README-BRAND-COPY.md`
 - `.planning/research/2026-06-08-feature-redesign-references.md`
+- `.planning/phases/37-v0.18.0-feature-redesign/37-DEEP-REVIEW.md`
+- `.planning/phases/37-v0.18.0-feature-redesign/37-BRAND-CONTRACT.md`
+- `.planning/phases/37-v0.18.0-feature-redesign/37-PROTOCOL-ADDENDUM.md`
+- `.planning/phases/37-v0.18.0-feature-redesign/37-SECURITY-ADDENDUM.md`
+- `.planning/phases/37-v0.18.0-feature-redesign/37-UX-ACCEPTANCE-MATRIX.md`
 
 ### 当前状态
 
 - [x] 37-00: 代码检索、外部参考、品牌系统、UX Shape、技术设计、需求清单、README 文案草稿全部完成。
+- [x] 37-01: 按评审结论补充前置门禁：深度评审、品牌契约、协议补充、安全补充、UX 验收矩阵。
 - [ ] 后续实施：按 `37-ROADMAP.md` 拆分 Model Nexus、Git Atlas、Guide Beam + Context Pulse、Session Loom、品牌整合阶段。
 
 ---
 *状态更新: 2026-06-08 (v0.18.0 五大特色功能品牌化重塑设计完成 — 仅设计，未实施源码)*
+
+*状态更新: 2026-06-08 (v0.18.0 Phase 37.1 评审后协议/安全/UX/品牌门禁补充完成 — 仅文档，未实施源码)*

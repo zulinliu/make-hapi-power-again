@@ -20,7 +20,7 @@
 
 - 文件：`~/.claude/settings.json`
 - 非密字段：
-  - `ANTHROPIC_BASE_URL=http://new-api.saas-vpp.tsintergy.com`
+  - `ANTHROPIC_BASE_URL=<tsintergy-base-url-redacted>`
   - `ANTHROPIC_MODEL=glm-5.1`
 - 密钥字段：`ANTHROPIC_AUTH_TOKEN` 存在，但未打印、未写入文档。
 

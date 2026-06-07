@@ -2,7 +2,18 @@
 
 > 本文只定义未来实施方向，不改源码。所有接口命名需在实施前与现有 shared schema 对齐。
 
-## 1. API 星桥 / Model Nexus
+## 0. 评审后前置门禁
+
+本技术设计必须与以下补充文档一起使用：
+
+- `37-PROTOCOL-ADDENDUM.md`：Guide Beam capability、queue isolate、fallback、幂等。
+- `37-SECURITY-ADDENDUM.md`：Provider namespace/SSRF/redaction、Export 隐私、Git 危险操作。
+- `37-UX-ACCEPTANCE-MATRIX.md`：iOS PWA、A11y、动效、视口验收。
+- `37-BRAND-CONTRACT.md`：canonical naming、五节点顺序、signature moment。
+
+任何 Phase 38+ 实施不得绕过这些前置门禁。
+
+## 1. 模型星桥 / Model Nexus
 
 ### 1.1 数据模型扩展
 
@@ -277,7 +288,7 @@ type ContextUsageView = {
 
 1. 在 Claude Code stream-json 日志中确认 `glm-5.1` assistant message 是否也包含 usage。
 2. 若 stream-json 丢 usage，问题在 Claude Code/代理层，而不是 provider direct API。
-3. API 星桥 health check 应保存“direct API usage ✓”，Context Pulse popover 可提示“Provider 支持 usage，但当前会话尚未收到 agent usage”。
+3. 模型星桥 health check 应保存“direct API usage ✓”，Context Pulse popover 可提示“Provider 支持 usage，但当前会话尚未收到 agent usage”。
 
 ### 4.4 测试建议
 

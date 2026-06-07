@@ -13,7 +13,19 @@
 - [x] 技术设计：API、数据、事件、CLI queue、导出任务。
 - [x] 需求与验收标准。
 
-## 38 — API 星桥 / Model Nexus
+## 37-01 — 评审后前置门禁补充（本次）
+
+目标：在任何源码实现前，将深度评审中的阻断项转为 docs-only 门禁。
+
+- [x] `37-DEEP-REVIEW.md`：多子代理全方位评审结论。
+- [x] `37-BRAND-CONTRACT.md`：canonical naming、五节点顺序、signature moment。
+- [x] `37-PROTOCOL-ADDENDUM.md`：Guide Beam capability、queue isolate、fallback、幂等。
+- [x] `37-SECURITY-ADDENDUM.md`：Provider SSRF、namespace、redaction、Export 隐私、Git 危险操作。
+- [x] `37-UX-ACCEPTANCE-MATRIX.md`：iOS PWA、A11y、reduced motion、视口矩阵。
+
+质量门禁：Phase 38+ 不得绕过 37-01 的前置约束。
+
+## 38 — 模型星桥 / Model Nexus
 
 目标：先重做 Settings Provider，因为它是模型、usage、context 的基础设施。
 
