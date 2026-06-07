@@ -60,24 +60,24 @@ export function GitPortalProgress({ phase, progress, onCancel, isMobile }: GitPo
       {/* Progress text */}
       <div className="text-center space-y-1">
         {phase === 'connecting' && (
-          <p className="text-sm text-[var(--hp-text)] animate-pulse">
+          <p className="text-sm text-[var(--hp-text-primary)] animate-pulse">
             {t('gitPortal.progress.connecting', { host: '' })}
           </p>
         )}
         {phase === 'transferring' && (
           <>
-            <p className="text-sm text-[var(--hp-text)]">
+            <p className="text-sm text-[var(--hp-text-primary)]">
               {t('gitPortal.progress.transferring', { received: formatBytes(progress.bytesReceived) })}
             </p>
             {progress.bytesTotal && (
-              <p className="text-xs text-[var(--hp-text-muted)]">
+              <p className="text-xs text-[var(--hp-text-tertiary)]">
                 {formatBytes(progress.bytesReceived)} / {formatBytes(progress.bytesTotal)}
               </p>
             )}
           </>
         )}
         {phase === 'unpacking' && (
-          <p className="text-sm text-[var(--hp-text)]">
+          <p className="text-sm text-[var(--hp-text-primary)]">
             {t('gitPortal.progress.unpacking')}
           </p>
         )}
@@ -92,7 +92,7 @@ export function GitPortalProgress({ phase, progress, onCancel, isMobile }: GitPo
               />
             </div>
             {progress.percent > 0 && (
-              <p className="text-xs text-[var(--hp-text-muted)] mt-1">{progress.percent}%</p>
+              <p className="text-xs text-[var(--hp-text-tertiary)] mt-1">{progress.percent}%</p>
             )}
           </div>
         )}
@@ -102,7 +102,7 @@ export function GitPortalProgress({ phase, progress, onCancel, isMobile }: GitPo
       {isCloning && (
         <button
           type="button"
-          className="px-4 py-2 text-sm rounded-md border border-[var(--hp-border)] text-[var(--hp-text-muted)] hover:text-[var(--hp-danger)] hover:border-[var(--hp-danger)] transition-colors"
+          className="px-4 py-2 text-sm rounded-md border border-[var(--hp-border)] text-[var(--hp-text-tertiary)] hover:text-[var(--hp-danger)] hover:border-[var(--hp-danger)] transition-colors"
           onClick={onCancel}
         >
           {t('gitPortal.progress.cancel')}

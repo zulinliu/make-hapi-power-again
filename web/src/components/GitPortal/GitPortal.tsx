@@ -104,8 +104,8 @@ export function GitPortal({
       className={cn(
         'p-1.5 rounded-md transition-colors',
         isCloning
-          ? 'text-[var(--hp-text-muted)] cursor-not-allowed'
-          : 'text-[var(--hp-text-muted)] hover:text-[var(--hp-text)] hover:bg-[var(--hp-surface-2)]'
+          ? 'text-[var(--hp-text-tertiary)] cursor-not-allowed'
+          : 'text-[var(--hp-text-tertiary)] hover:text-[var(--hp-text-primary)] hover:bg-[var(--hp-surface-2)]'
       )}
       disabled={isCloning}
       onClick={onClose}
@@ -120,7 +120,7 @@ export function GitPortal({
 
   const header = (
     <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--hp-border)]">
-      <h3 className="text-sm font-semibold text-[var(--hp-text)]">
+      <h3 className="text-sm font-semibold text-[var(--hp-text-primary)]">
         {t('gitPortal.title')}
       </h3>
       {closeBtn}
@@ -161,7 +161,7 @@ export function GitPortal({
   if (isMobile) {
     return (
       <div
-        className="gp-portal gp-portal-mobile fixed inset-0 z-50 bg-[var(--hp-surface)] flex flex-col"
+        className="gp-portal gp-portal-mobile fixed inset-0 z-50 bg-[var(--hp-surface-0)] flex flex-col"
         style={{
           paddingTop: 'max(0px, env(safe-area-inset-top))',
           paddingBottom: 'max(0px, env(safe-area-inset-bottom))',
@@ -179,7 +179,7 @@ export function GitPortal({
   return (
     <div className="gp-portal-backdrop fixed inset-0 z-40" onClick={handleBackdropClick}>
       <div
-        className="gp-portal gp-portal-desktop absolute top-0 right-0 h-full w-[420px] bg-[var(--hp-surface)] border-l border-[var(--hp-border)] shadow-lg flex flex-col animate-in slide-in-from-right duration-200"
+        className="gp-portal gp-portal-desktop absolute top-0 right-0 h-full w-[420px] bg-[var(--hp-surface-0)] border-l border-[var(--hp-border)] shadow-lg flex flex-col animate-in slide-in-from-right duration-200"
         role="dialog"
         aria-modal="true"
         aria-label={t('gitPortal.title')}

@@ -61,7 +61,7 @@ export function GitPortalHistory({ onSelect, onToggleFavorite }: GitPortalHistor
             'flex-1 pb-2 text-xs font-medium transition-colors border-b-2',
             activeTab === 'recent'
               ? 'text-[var(--hp-primary)] border-[var(--hp-primary)]'
-              : 'text-[var(--hp-text-muted)] border-transparent hover:text-[var(--hp-text)]'
+              : 'text-[var(--hp-text-tertiary)] border-transparent hover:text-[var(--hp-text-primary)]'
           )}
           onClick={() => setActiveTab('recent')}
         >
@@ -73,7 +73,7 @@ export function GitPortalHistory({ onSelect, onToggleFavorite }: GitPortalHistor
             'flex-1 pb-2 text-xs font-medium transition-colors border-b-2',
             activeTab === 'favorites'
               ? 'text-[var(--hp-primary)] border-[var(--hp-primary)]'
-              : 'text-[var(--hp-text-muted)] border-transparent hover:text-[var(--hp-text)]'
+              : 'text-[var(--hp-text-tertiary)] border-transparent hover:text-[var(--hp-text-primary)]'
           )}
           onClick={() => setActiveTab('favorites')}
         >
@@ -135,15 +135,15 @@ function HistoryCard({
     return (
       <button
         type="button"
-        className="gp-history-card flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-lg border border-[var(--hp-border)] bg-[var(--hp-surface)] hover:border-[var(--hp-primary)] transition-colors text-left min-w-[140px] max-w-[200px]"
+        className="gp-history-card flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-lg border border-[var(--hp-border)] bg-[var(--hp-surface-0)] hover:border-[var(--hp-primary)] transition-colors text-left min-w-[140px] max-w-[200px]"
         onClick={() => onSelect(entry.url, entry.targetDir, entry.branch)}
       >
         <PlatformBadge platform={platform} />
         <div className="flex-1 min-w-0">
-          <p className="text-xs font-medium text-[var(--hp-text)] truncate">
+          <p className="text-xs font-medium text-[var(--hp-text-primary)] truncate">
             {entry.repoName}
           </p>
-          <p className="text-[10px] text-[var(--hp-text-muted)] truncate">
+          <p className="text-[10px] text-[var(--hp-text-tertiary)] truncate">
             {entry.owner}
           </p>
         </div>
@@ -158,25 +158,25 @@ function HistoryCard({
   return (
     <button
       type="button"
-      className="gp-history-card w-full flex items-center gap-3 px-3 py-2.5 rounded-lg border border-[var(--hp-border)] bg-[var(--hp-surface)] hover:border-[var(--hp-primary)] transition-colors text-left"
+      className="gp-history-card w-full flex items-center gap-3 px-3 py-2.5 rounded-lg border border-[var(--hp-border)] bg-[var(--hp-surface-0)] hover:border-[var(--hp-primary)] transition-colors text-left"
       onClick={() => onSelect(entry.url, entry.targetDir, entry.branch)}
     >
       <PlatformBadge platform={platform} />
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-[var(--hp-text)] truncate">
+        <p className="text-sm font-medium text-[var(--hp-text-primary)] truncate">
           {entry.owner}/{entry.repoName}
         </p>
         <div className="flex items-center gap-2 mt-0.5">
           {entry.branch && (
-            <span className="text-[10px] text-[var(--hp-text-muted)]">
+            <span className="text-[10px] text-[var(--hp-text-tertiary)]">
               {entry.branch}
             </span>
           )}
-          <span className="text-[10px] text-[var(--hp-text-muted)]">
+          <span className="text-[10px] text-[var(--hp-text-tertiary)]">
             {formatRelativeTime(entry.lastClonedAt, t)}
           </span>
           {entry.cloneCount > 1 && (
-            <span className="text-[10px] text-[var(--hp-text-muted)]">
+            <span className="text-[10px] text-[var(--hp-text-tertiary)]">
               x{entry.cloneCount}
             </span>
           )}
@@ -195,7 +195,7 @@ function PlatformBadge({ platform }: { platform: GitPlatform }) {
     <span className={cn(
       'flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-md bg-[var(--hp-surface-2)]',
     )}>
-      <svg className="w-4 h-4 text-[var(--hp-text-muted)]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <svg className="w-4 h-4 text-[var(--hp-text-tertiary)]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
         <path d={PLATFORM_ICON[platform]} />
       </svg>
     </span>
@@ -211,7 +211,7 @@ function FavoriteStar({ isFavorite, onClick }: { isFavorite: boolean; onClick: (
         'flex-shrink-0 p-0.5 rounded transition-colors',
         isFavorite
           ? 'text-amber-500 hover:text-amber-600'
-          : 'text-[var(--hp-text-muted)] hover:text-amber-500'
+          : 'text-[var(--hp-text-tertiary)] hover:text-amber-500'
       )}
       onClick={onClick}
       tabIndex={-1}

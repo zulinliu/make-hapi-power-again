@@ -48,7 +48,7 @@ export function GitPortalResult({ clonedPath, repoInfo, onClose, onOpenDir, onSt
           type="button"
           className={cn(
             'absolute -top-1 -right-3 p-1 rounded-full transition-colors',
-            isFavorite ? 'text-yellow-500' : 'text-[var(--hp-text-muted)] hover:text-yellow-500'
+            isFavorite ? 'text-yellow-500' : 'text-[var(--hp-text-tertiary)] hover:text-yellow-500'
           )}
           onClick={handleToggleFavorite}
           aria-label={isFavorite ? t('gitPortal.result.unfavorite') : t('gitPortal.result.favorite')}
@@ -70,11 +70,11 @@ export function GitPortalResult({ clonedPath, repoInfo, onClose, onOpenDir, onSt
 
       {/* Success text */}
       <div className="text-center space-y-1">
-        <p className="text-base font-semibold text-[var(--hp-text)]">
+        <p className="text-base font-semibold text-[var(--hp-text-primary)]">
           {t('gitPortal.result.success')}
         </p>
         {repoInfo && (
-          <p className="text-sm text-[var(--hp-text-muted)]">
+          <p className="text-sm text-[var(--hp-text-tertiary)]">
             {repoInfo.name} / {repoInfo.branch} / {formatBytes(repoInfo.sizeBytes)}
           </p>
         )}
@@ -91,7 +91,7 @@ export function GitPortalResult({ clonedPath, repoInfo, onClose, onOpenDir, onSt
         </button>
         <button
           type="button"
-          className="w-full px-4 py-2 text-sm rounded-lg border border-[var(--hp-border)] text-[var(--hp-text-muted)] hover:text-[var(--hp-text)] hover:border-[var(--hp-text-muted)] transition-colors"
+          className="w-full px-4 py-2 text-sm rounded-lg border border-[var(--hp-border)] text-[var(--hp-text-tertiary)] hover:text-[var(--hp-text-primary)] hover:border-[var(--hp-text-tertiary)] transition-colors"
           onClick={() => onOpenDir(clonedPath)}
         >
           {t('gitPortal.result.openDir')}
