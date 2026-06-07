@@ -840,6 +840,8 @@ export function FileManager({ api, machineId, sessionId, initialPath, rootPath: 
 
   const handleBatchDelete = useCallback(() => {
     if (selectedPaths.size === 0) return
+    setIsEditMode(false)
+    setMoreMenuVisible(false)
     setDialog({ type: 'batchDelete', paths: [...selectedPaths] })
   }, [selectedPaths])
 
@@ -1324,7 +1326,7 @@ export function FileManager({ api, machineId, sessionId, initialPath, rootPath: 
           borderTop: '1px solid var(--hp-border)',
           alignItems: 'center',
           padding: '0 8px',
-          zIndex: 10,
+          zIndex: 5,
           gap: 4,
         }}
       >
@@ -1454,7 +1456,7 @@ export function FileManager({ api, machineId, sessionId, initialPath, rootPath: 
               <button
                 type="button"
                 role="menuitem"
-                onClick={() => { handleBatchDelete(); setMoreMenuVisible(false) }}
+                onClick={() => { setMoreMenuVisible(false); handleBatchDelete() }}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -1473,29 +1475,6 @@ export function FileManager({ api, machineId, sessionId, initialPath, rootPath: 
                 onMouseLeave={(e) => { e.currentTarget.style.background = 'none' }}
               >
                 {t('fm.edit.deleteSelected')}
-              </button>
-              <button
-                type="button"
-                role="menuitem"
-                onClick={() => { handleCopySelectedPaths(); setMoreMenuVisible(false) }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  width: '100%',
-                  height: 44,
-                  padding: '0 14px',
-                  border: 'none',
-                  background: 'none',
-                  cursor: 'pointer',
-                  color: 'var(--hp-text-primary)',
-                  fontSize: 13,
-                  fontWeight: 500,
-                  textAlign: 'left',
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hp-surface-1)' }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = 'none' }}
-              >
-                {t('fm.edit.copyPaths')}
               </button>
               <button
                 type="button"

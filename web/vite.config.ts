@@ -54,7 +54,7 @@ export default defineConfig({
     },
     server: {
         host: true,
-        allowedHosts: ['test.liuzl.asia'],
+        allowedHosts: ['test.liuzl.asia', '172.30.1.63'],
         proxy: {
             '/api': {
                 target: hubTarget,
