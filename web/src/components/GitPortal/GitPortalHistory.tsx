@@ -17,25 +17,26 @@ const PLATFORM_ICON: Record<GitPlatform, string> = {
   other: 'M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75v3.75m0 3.75h.008v.008H12v-.008z',
 }
 
-function formatRelativeTime(dateStr: string): string {
+function formatRelativeTime(dateStr: string, t: (key: string, params?: Record<string, string | number>) => string): string {
   const diff = Date.now() - new Date(dateStr).getTime()
   const minutes = Math.floor(diff / 60000)
-  if (minutes < 1) return 'just now'
-  if (minutes < 60) return `${minutes}m ago`
+  if (minutes < 1) return t('gitPortal.time.justNow')
+  if (minutes < 60) return t('gitPortal.time.minutesAgo', { count: minutes })
   const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours}h ago`
+  if (hours < 24) return t('gitPortal.time.hoursAgo', { count: hours })
   const days = Math.floor(hours / 24)
-  if (days < 30) return `${days}d ago`
-  return `${Math.floor(days / 30)}mo ago`
+  if (days < 30) return t('gitPortal.time.daysAgo', { count: days })
+  return t('gitPortal.time.monthsAgo', { count: Math.floor(days / 30) })
 }
 
 export function GitPortalHistory({ onSelect, onToggleFavorite }: GitPortalHistoryProps) {
   const { t } = useTranslation()
   const [expanded, setExpanded] = useState(false)
   const [activeTab, setActiveTab] = useState<'recent' | 'favorites'>('recent')
+  const [refreshKey, setRefreshKey] = useState(0)
 
-  const history = useMemo(() => getHistory(50), [activeTab])
-  const favorites = useMemo(() => getFavorites(), [activeTab])
+  const history = useMemo(() => getHistory(50), [activeTab, refreshKey])
+  const favorites = useMemo(() => getFavorites(), [activeTab, refreshKey])
 
   const items = activeTab === 'recent'
     ? (expanded ? history : history.slice(0, 4))
@@ -45,6 +46,7 @@ export function GitPortalHistory({ onSelect, onToggleFavorite }: GitPortalHistor
     e.stopPropagation()
     toggleFavorite(entryId)
     onToggleFavorite(entryId)
+    setRefreshKey(k => k + 1)
   }, [onToggleFavorite])
 
   const hasItems = items.length > 0
@@ -126,6 +128,7 @@ function HistoryCard({
   onSelect: (url: string, targetDir: string, branch?: string) => void
   onToggleFavorite: (e: React.MouseEvent, entryId: string) => void
 }) {
+  const { t } = useTranslation()
   const platform = entry.platform ?? detectPlatform(entry.url)
 
   if (compact) {
@@ -170,7 +173,7 @@ function HistoryCard({
             </span>
           )}
           <span className="text-[10px] text-[var(--hp-text-muted)]">
-            {formatRelativeTime(entry.lastClonedAt)}
+            {formatRelativeTime(entry.lastClonedAt, t)}
           </span>
           {entry.cloneCount > 1 && (
             <span className="text-[10px] text-[var(--hp-text-muted)]">
@@ -190,13 +193,9 @@ function HistoryCard({
 function PlatformBadge({ platform }: { platform: GitPlatform }) {
   return (
     <span className={cn(
-      'flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-md',
-      platform === 'github' && 'bg-[var(--hp-surface-2)]',
-      platform === 'gitlab' && 'bg-[var(--hp-surface-2)]',
-      platform === 'bitbucket' && 'bg-[var(--hp-surface-2)]',
-      platform === 'other' && 'bg-[var(--hp-surface-2)]',
+      'flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-md bg-[var(--hp-surface-2)]',
     )}>
-      <svg className="w-4 h-4 text-[var(--hp-text-muted)]" viewBox="0 0 24 24" fill="currentColor">
+      <svg className="w-4 h-4 text-[var(--hp-text-muted)]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
         <path d={PLATFORM_ICON[platform]} />
       </svg>
     </span>
@@ -218,7 +217,7 @@ function FavoriteStar({ isFavorite, onClick }: { isFavorite: boolean; onClick: (
       tabIndex={-1}
       aria-label={isFavorite ? t('gitPortal.result.unfavorite') : t('gitPortal.result.favorite')}
     >
-      <svg className="w-4 h-4" viewBox="0 0 24 24" fill={isFavorite ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg className="w-4 h-4" viewBox="0 0 24 24" fill={isFavorite ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
       </svg>
     </button>

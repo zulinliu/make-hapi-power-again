@@ -908,6 +908,13 @@ export default {
   'gitPortal.history.more': '查看更多',
   'gitPortal.history.less': '收起',
   'gitPortal.history.clear': '清除历史',
+
+  // 相对时间
+  'gitPortal.time.justNow': '刚刚',
+  'gitPortal.time.minutesAgo': '{count} 分钟前',
+  'gitPortal.time.hoursAgo': '{count} 小时前',
+  'gitPortal.time.daysAgo': '{count} 天前',
+  'gitPortal.time.monthsAgo': '{count} 个月前',
   'gitPortal.favorites.title': '收藏',
   'gitPortal.favorites.empty': '还没有收藏的仓库',
 

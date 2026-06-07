@@ -55,6 +55,9 @@ export function useGitClone({ api, machineId, sessionId, currentPath, onCloneCom
     const abortRef = useRef(false)
     const onCloneCompleteRef = useRef(onCloneComplete)
     onCloneCompleteRef.current = onCloneComplete
+    const stateRef = useRef(state)
+    stateRef.current = state
+    const completeTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
     // Call this from the parent's SSE onEvent handler when clone-progress events arrive
     const handleProgressEvent = useCallback((event: { type: string; data?: CloneProgressEvent }) => {
@@ -84,7 +87,9 @@ export function useGitClone({ api, machineId, sessionId, currentPath, onCloneCom
                     ? `${prev.config.targetDir}/${repoName}`
                     : repoName
 
-                setTimeout(() => onCloneCompleteRef.current?.(clonedPath), 0)
+                completeTimerRef.current = setTimeout(() => {
+                    if (!abortRef.current) onCloneCompleteRef.current?.(clonedPath)
+                }, 0)
 
                 return {
                     ...prev,
@@ -141,19 +146,20 @@ export function useGitClone({ api, machineId, sessionId, currentPath, onCloneCom
     }, [])
 
     const startClone = useCallback(async () => {
-        if (!api || !state.url) return
+        const current = stateRef.current
+        if (!api || !current.url) return
 
         const cloneId = crypto.randomUUID()
         cloneIdRef.current = cloneId
         abortRef.current = false
 
         const request: CloneRequest = {
-            url: state.url,
-            targetDir: state.config.targetDir || undefined,
-            branch: state.config.branch || undefined,
-            depth: state.config.depth ?? undefined,
+            url: current.url,
+            targetDir: current.config.targetDir || undefined,
+            branch: current.config.branch || undefined,
+            depth: current.config.depth ?? undefined,
             cloneId,
-            auth: state.auth ?? undefined
+            auth: current.auth ?? undefined
         }
 
         setState(prev => ({
@@ -192,11 +198,12 @@ export function useGitClone({ api, machineId, sessionId, currentPath, onCloneCom
                 error: err instanceof Error ? err.message : String(err)
             }))
         }
-    }, [api, machineId, sessionId, state.url, state.config, state.auth])
+    }, [api, machineId, sessionId])
 
     const reset = useCallback(() => {
         abortRef.current = true
         cloneIdRef.current = ''
+        if (completeTimerRef.current) clearTimeout(completeTimerRef.current)
         setState({
             ...INITIAL_STATE,
             config: { targetDir: currentPath ?? '', branch: '', depth: null }
@@ -205,6 +212,7 @@ export function useGitClone({ api, machineId, sessionId, currentPath, onCloneCom
 
     const cancel = useCallback(() => {
         abortRef.current = true
+        if (completeTimerRef.current) clearTimeout(completeTimerRef.current)
         setState(prev => ({
             ...prev,
             phase: 'input',

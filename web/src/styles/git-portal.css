@@ -2,15 +2,6 @@
 
 /* ── Portal Animation ─────────────────────────────────────── */
 
-@keyframes gp-pulse-glow {
-    0%, 100% {
-        box-shadow: 0 0 8px var(--hp-primary-alpha-20, rgba(232, 130, 41, 0.2));
-    }
-    50% {
-        box-shadow: 0 0 20px var(--hp-primary-alpha-40, rgba(232, 130, 41, 0.4));
-    }
-}
-
 @keyframes gp-portal-breathe {
     0%, 100% {
         transform: scale(1);
@@ -49,26 +40,6 @@
     }
 }
 
-@keyframes gp-fade-in {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes gp-slide-in-right {
-    from { transform: translateX(100%); }
-    to { transform: translateX(0); }
-}
-
-@keyframes gp-slide-out-right {
-    from { transform: translateX(0); }
-    to { transform: translateX(100%); }
-}
-
-@keyframes gp-push-up {
-    from { transform: translateY(100%); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-}
-
 @keyframes gp-shake {
     0%, 100% { transform: translateX(0); }
     20% { transform: translateX(-4px); }
@@ -85,24 +56,6 @@
 @keyframes gp-progress-stripe {
     0% { background-position: 1rem 0; }
     100% { background-position: 0 0; }
-}
-
-/* ── Panel transition ─────────────────────────────────────── */
-
-.gp-panel-enter {
-    animation: gp-slide-in-right 300ms cubic-bezier(0.32, 0.72, 0, 1) forwards;
-}
-
-.gp-panel-exit {
-    animation: gp-slide-out-right 250ms ease-in forwards;
-}
-
-.gp-page-enter {
-    animation: gp-fade-in 200ms ease forwards;
-}
-
-.gp-page-push {
-    animation: gp-push-up 300ms ease-out forwards;
 }
 
 /* ── Portal SVG Animation ─────────────────────────────────── */
@@ -152,42 +105,6 @@
     animation: gp-star-spin 300ms ease-out;
 }
 
-/* ── Responsive ───────────────────────────────────────────── */
-
-@media (max-width: 767px) {
-    .gp-panel {
-        position: fixed;
-        inset: 0;
-        z-index: 50;
-        width: 100%;
-        height: 100dvh;
-        padding-top: max(0.75rem, env(safe-area-inset-top));
-        padding-bottom: max(1rem, env(safe-area-inset-bottom));
-    }
-}
-
-@media (min-width: 768px) {
-    .gp-panel {
-        position: fixed;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 50;
-        width: 420px;
-        max-width: 100vw;
-        box-shadow: -4px 0 16px rgba(0, 0, 0, 0.1);
-    }
-}
-
-@media (max-width: 479px) {
-    .gp-history-grid {
-        display: none;
-    }
-    .gp-cta-button {
-        width: 100%;
-    }
-}
-
 /* ── Reduced motion ───────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
@@ -205,10 +122,7 @@
         background-image: none;
     }
 
-    .gp-panel-enter,
-    .gp-panel-exit,
-    .gp-page-enter,
-    .gp-page-push {
+    .gp-star-active {
         animation: none;
     }
 

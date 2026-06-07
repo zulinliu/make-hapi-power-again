@@ -75,6 +75,7 @@ export function GitPortalStepInput({
                   : 'border-[var(--hp-danger)] focus:ring-[var(--hp-danger)]'
             )}
             placeholder={t('gitPortal.input.urlPlaceholder')}
+            aria-label={t('gitPortal.input.urlPlaceholder')}
             value={state.url}
             onChange={handleUrlChange}
             onKeyDown={handleKeyDown}
@@ -140,10 +141,11 @@ export function GitPortalStepInput({
         {showAdvanced && (
           <div className="gp-advanced-options mt-3 space-y-2.5 pl-1">
             <div>
-              <label className="block text-xs text-[var(--hp-text-muted)] mb-1">
+              <label className="block text-xs text-[var(--hp-text-muted)] mb-1" htmlFor="gp-target-dir">
                 {t('gitPortal.input.targetDir')}
               </label>
               <input
+                id="gp-target-dir"
                 type="text"
                 className="gp-input w-full px-3 py-1.5 text-sm rounded-md border border-[var(--hp-border)] bg-[var(--hp-surface)] text-[var(--hp-text)] placeholder:text-[var(--hp-text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--hp-primary)]"
                 value={state.config.targetDir}
@@ -152,10 +154,11 @@ export function GitPortalStepInput({
               />
             </div>
             <div>
-              <label className="block text-xs text-[var(--hp-text-muted)] mb-1">
+              <label className="block text-xs text-[var(--hp-text-muted)] mb-1" htmlFor="gp-branch">
                 {t('gitPortal.input.branch')}
               </label>
               <input
+                id="gp-branch"
                 type="text"
                 className="gp-input w-full px-3 py-1.5 text-sm rounded-md border border-[var(--hp-border)] bg-[var(--hp-surface)] text-[var(--hp-text)] placeholder:text-[var(--hp-text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--hp-primary)]"
                 value={state.config.branch}
@@ -164,10 +167,11 @@ export function GitPortalStepInput({
               />
             </div>
             <div>
-              <label className="block text-xs text-[var(--hp-text-muted)] mb-1">
+              <label className="block text-xs text-[var(--hp-text-muted)] mb-1" htmlFor="gp-depth">
                 {t('gitPortal.input.depth')}
               </label>
               <input
+                id="gp-depth"
                 type="number"
                 min={1}
                 className="gp-input w-full px-3 py-1.5 text-sm rounded-md border border-[var(--hp-border)] bg-[var(--hp-surface)] text-[var(--hp-text)] placeholder:text-[var(--hp-text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--hp-primary)]"
