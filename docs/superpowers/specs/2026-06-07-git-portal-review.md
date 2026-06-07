@@ -113,7 +113,49 @@
 ## 5. 后续建议
 
 1. **DNS 解析验证** — 当前 SSRF 防护基于字符串匹配，可考虑增加 DNS 解析后 IP 检查
-2. **Intl.RelativeTimeFormat** — 替换手动 formatRelativeTime 实现自动国际化
-3. **History refreshKey** — 解决外部更新不触发重渲染的问题
+2. ~~**Intl.RelativeTimeFormat** — 替换手动 formatRelativeTime 实现自动国际化~~ 已通过 gitPortal.time.* i18n 键解决
+3. ~~**History refreshKey** — 解决外部更新不触发重渲染的问题~~ 已添加 refreshKey 状态
 4. **Clone 进度字节级** — 当前进度基于对象数百分比，可细化到字节数
 5. **E2E 测试** — 需要实际 git clone 场景的端到端测试覆盖
+6. **SSE shouldSend 路由** — SSEManager.shouldSend 检查顶级 sessionId/machineId，但 clone-progress 事件这些字段在 data 内，非 all 订阅无法收到
+7. **FileManager onProgressEvent** — 未连接 SSE 进度订阅到 GitPortal，clone 期间用户只看到静态"连接中"
+8. **焦点陷阱** — 对话框缺少 Tab 键焦点循环限制
+9. **git push/pull/fetch 参数验证** — 原有 git handler 的 remote/branch/startPoint 未做格式校验（非 Git Portal 新增，但建议后续修复）
+
+---
+
+## 6. 五维度审查补充 (cd303c6)
+
+**审查方式**: 并行 5 个专业子代理
+
+| 维度 | 判定 | 关键发现 | 已修复 |
+|------|------|----------|--------|
+| 安全 | 4 CRITICAL | SSRF 八进制绕过、spawn error 信息泄露 | 2/4 (其余为原有代码) |
+| 前端质量 | 2 HIGH | stale closure、setTimeout 泄漏 | 全部 |
+| CSS/无障碍 | 8 CRITICAL | CSS 死代码、ARIA 缺失、安全区域 | 全部 |
+| i18n/品牌 | 6 WARNING | formatRelativeTime 硬编码、平台名硬编码 | 1/6 (其余为 LOW) |
+| 架构集成 | 2 FAIL | SSE 路由不匹配、FileManager 未连接进度 | 0/2 (需架构改动) |
+
+### 已修复清单
+
+- SSRF 八进制编码 IP 检测
+- spawn error 返回经 sanitizeGitUrl 清理
+- startClone 使用 stateRef 消除 stale closure
+- setTimeout 在 reset/cancel 时清理
+- onCloneComplete 添加 abortRef 检查
+- 移动端/桌面端补全 role="dialog" + aria-modal
+- 移动端 iOS 安全区域处理
+- label/input htmlFor/id 关联
+- formatRelativeTime 国际化 (5 个新 i18n 键)
+- SSE 订阅添加 unsubscribe 清理
+- History 添加 refreshKey 解决新条目不显示
+- CSS 删除 8 处死代码
+- GitPortal.tsx 去重移动/桌面渲染树
+- prefers-reduced-motion 补全 gp-star-active
+
+### 未修复（需后续迭代）
+
+- SSE shouldSend 路由（需改 SSEManager 架构）
+- FileManager onProgressEvent 连接（需改 FileManager props 传递）
+- 焦点陷阱（需引入 focus-trap-react 或手写）
+- git push/pull/fetch 参数验证（非 Git Portal 新增）
