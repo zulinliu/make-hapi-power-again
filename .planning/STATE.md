@@ -540,3 +540,39 @@ Phase 19 (PWA 更新机制修复) 引入了三个叠加问题：
 
 ---
 *状态更新: 2026-06-07 (v0.17 Phase 35.6 质量门禁完成 — 文件管理器生产化专项已完成，feat/v0.17.0 已推送，待合并/发版)*
+
+## v0.18.0 设计完成 — 五大特色功能品牌化重塑
+
+### 启动原因
+
+用户要求在不实施代码的前提下，综合检索 Hapi Power 当前项目，对以下五类能力进行全新整体设计：设置页 API 供应商、会话 Git 工具页、会话工作中的排队/引导双模式、上下文用量 UI 与不可用排查、以及大纲扩展为会话导出和总结提炼。
+
+### 本轮核心决策
+
+| 决策 | 结果 |
+|---|---|
+| 设计方式 | 使用 `$impeccable` 产品界面原则与 GSD 既有项目规划方式；不重建 `.planning/PROJECT.md`。 |
+| 实施边界 | 本轮只做设计文档，不修改 `web/`、`hub/`、`cli/`、`shared/` 源码。 |
+| 品牌体系 | 五个特色功能命名为 API 星桥、Git 脉络、引导光标、上下文脉冲、会话织锦。 |
+| 引导模式原则 | 默认排队；引导必须中断当前 turn 并优先发送，但不得清空普通 queued messages；失败降级为排队。 |
+| 上下文诊断 | tsintergy/GLM-5.1 direct `/v1/messages` 实测返回 usage，因此不可用问题需继续排查 stream-json、normalizer、context window、分页等路径。 |
+| 大纲升级 | 大纲从导航面板升级为 Session Loom，会话资产工作台，支持导出、提炼、下载、i18n、iOS PWA。 |
+
+### 规划文档
+
+- `.planning/phases/37-v0.18.0-feature-redesign/37-CONTEXT.md`
+- `.planning/phases/37-v0.18.0-feature-redesign/37-BRAND-SYSTEM.md`
+- `.planning/phases/37-v0.18.0-feature-redesign/37-UX-SHAPE.md`
+- `.planning/phases/37-v0.18.0-feature-redesign/37-TECH-DESIGN.md`
+- `.planning/phases/37-v0.18.0-feature-redesign/37-REQUIREMENTS.md`
+- `.planning/phases/37-v0.18.0-feature-redesign/37-ROADMAP.md`
+- `.planning/phases/37-v0.18.0-feature-redesign/37-README-BRAND-COPY.md`
+- `.planning/research/2026-06-08-feature-redesign-references.md`
+
+### 当前状态
+
+- [x] 37-00: 代码检索、外部参考、品牌系统、UX Shape、技术设计、需求清单、README 文案草稿全部完成。
+- [ ] 后续实施：按 `37-ROADMAP.md` 拆分 Model Nexus、Git Atlas、Guide Beam + Context Pulse、Session Loom、品牌整合阶段。
+
+---
+*状态更新: 2026-06-08 (v0.18.0 五大特色功能品牌化重塑设计完成 — 仅设计，未实施源码)*
