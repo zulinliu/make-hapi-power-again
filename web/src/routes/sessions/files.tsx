@@ -317,7 +317,7 @@ export default function FilesPage() {
                             value={searchQuery}
                             onChange={(event) => setSearchQuery(event.target.value)}
                             placeholder={t('files.page.searchPlaceholder')}
-                            className="w-full rounded-[var(--hp-radius-sm,6px)] border border-(--hp-border) bg-(--hp-canvas) py-2 pl-9 pr-3 text-sm text-(--hp-text-primary) placeholder:text-(--hp-text-tertiary) focus:outline-none focus:ring-2 focus:ring-(--hp-primary)"
+                            className="min-h-[44px] w-full rounded-[var(--hp-radius-sm,6px)] border border-(--hp-border) bg-(--hp-canvas) py-2 pl-9 pr-3 text-sm text-(--hp-text-primary) placeholder:text-(--hp-text-tertiary) focus:outline-none focus:ring-2 focus:ring-(--hp-primary)"
                             autoCapitalize="none"
                             autoCorrect="off"
                         />
@@ -325,7 +325,7 @@ export default function FilesPage() {
                     <button
                         type="button"
                         onClick={handleRefresh}
-                        className="flex h-8 w-8 items-center justify-center rounded-full text-(--hp-text-secondary) transition-colors hover:bg-(--hp-surface-1) hover:text-(--hp-text-primary)"
+                        className="flex h-11 w-11 items-center justify-center rounded-full text-(--hp-text-secondary) transition-colors hover:bg-(--hp-surface-1) hover:text-(--hp-text-primary)"
                         title={t('files.page.refresh')}
                     >
                         <RefreshIcon />
@@ -375,7 +375,7 @@ export default function FilesPage() {
                     </div>
                 )
             ) : activeTab === 'directories' ? (
-                <div className="h-[calc(100dvh-190px)] min-h-[520px]">
+                <div className="h-[calc(100dvh-190px)] min-h-[360px] md:min-h-[520px]">
                     {api && session?.metadata?.machineId && session?.metadata?.path ? (
                         <FileManager
                             key={directoryRefreshKey}

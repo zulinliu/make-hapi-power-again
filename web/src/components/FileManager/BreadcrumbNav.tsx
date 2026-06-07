@@ -148,7 +148,7 @@ export function BreadcrumbNav({ segments, onNavigate, onCopyPath }: BreadcrumbNa
             <rect x="9" y="9" width="11" height="11" rx="2" />
             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
           </svg>
-          <span>{t('fm.breadcrumb.copyPathAction')}</span>
+          <span className="fm-breadcrumb-copy-label">{t('fm.breadcrumb.copyPathAction')}</span>
         </button>
       )}
     </nav>

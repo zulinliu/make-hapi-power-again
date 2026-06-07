@@ -223,3 +223,48 @@ scope:
 You can ask me to run these one at a time, all at once, or in any order you prefer.
 
 Re-run `$impeccable audit` after fixes to see your score improve.
+
+## Follow-up Optimization Review: 2026-06-07
+
+### 优化范围
+
+按本审计建议继续落地了 P1 和关键 P2：
+
+1. 移动端触控目标统一：FileManager 工具栏、搜索区、批量操作条、上传重试、搜索结果关闭、transfer picker、Dialog footer、文件预览复制/下载和保存冲突恢复按钮均提升到 44px 级别。
+2. 移动/复制目录选择器硬化：目录行点击只负责进入目录，目标确认改由“选择当前文件夹”完成，避免“进入”和“选择”混在一次点击里。
+3. 大目录性能缓解：超过 200 行关闭逐行动画；超过 500 项显示性能提示；目录行启用 `content-visibility: auto` 和 `contain-intrinsic-size` 降低滚动渲染压力。
+4. 搜索、新建、底部会话入口文案澄清：搜索框改为“过滤当前目录”，深度搜索改为“搜索子目录”，新建弹窗改为“新建文件或文件夹”，底部“会话”改为“启动”。
+5. 保存冲突恢复硬化：全局和会话文件页的保存错误恢复区移动端改为分组按钮，所有按钮 44px；“强制覆盖”新增二次确认。
+6. 会话文件页移动布局：搜索和刷新按钮提升到 44px，目录 Tab 最小高度降低移动端溢出风险。
+7. 设计系统收口：FileManager Dialog 使用 `aria-labelledby`，overlay 改用 token fallback；底部工具栏字符图标替换为一致 SVG。
+
+### 复审评分
+
+| # | Dimension | Before | After | Notes |
+|---|---:|---:|---:|---|
+| Accessibility | 3/4 | 4/4 | Dialog 标题关联、触控目标和危险操作确认已补齐 |
+| Performance | 2/4 | 3/4 | 已做大目录动画关闭和 content-visibility；虚拟列表仍是后续增强 |
+| Responsive Design | 2/4 | 3/4 | 主要移动触控问题关闭，session files 高度仍可继续结构化重构 |
+| Theming | 3/4 | 4/4 | overlay token 化，新增 UI 继续使用 hp/app tokens |
+| Anti-Patterns | 4/4 | 4/4 | 保持产品工具 UI 克制，无新增 slop |
+| **Total** | **14/20** | **18/20** | **Excellent，剩余主要是性能增强和结构化布局优化** |
+
+### 已关闭的原审计问题
+
+- [x] P1 移动端低于 44px 触控目标。
+- [x] P1 移动/复制目录选择器“进入”和“选择”行为混淆。
+- [x] P2 搜索区文案混淆。
+- [x] P2 新建弹窗“新建项目”语义偏大。
+- [x] P2 底部“会话”按钮不够具体。
+- [x] P2 路径栏复制按钮极窄屏挤压风险已缓解。
+- [x] P2 Browse file 顶部复制/下载按钮触控偏小。
+- [x] P2 保存冲突恢复操作移动端过密。
+- [x] P2 Dialog 标题语义未显式关联。
+- [x] P3 overlay 硬编码色。
+- [x] P3 底部 toolbar 字符图标不统一。
+
+### 剩余建议
+
+1. **虚拟列表 / 分页**：当前只是缓解大目录滚动压力，真正超大目录仍建议引入 virtualization。
+2. **Session files 高度结构化**：本轮降低了移动端 min-height，但彻底消除 magic number 需要 SubPageLayout 支持 full-height content slot。
+3. **内联样式系统化**：FileManager 已稳定，但长期建议抽取 toolbar/button/picker 样式组件。

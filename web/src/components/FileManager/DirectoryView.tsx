@@ -24,6 +24,7 @@ export interface DirectoryViewProps {
     emptyTitle?: string
     emptyHint?: string
     showCreateInEmpty?: boolean
+    animateRows?: boolean
 }
 
 type Translate = (key: string, params?: Record<string, string | number>) => string
@@ -74,9 +75,10 @@ interface FileRowProps {
     onContextMenu: (path: string, type: 'file' | 'directory', point: { x: number; y: number }) => void
     onToggleSelect: (path: string, shiftKey: boolean, ctrlKey: boolean) => void
     onSelect: (path: string) => void
+    animateRows: boolean
 }
 
-function FileRow({ entry, index, isSelected, isChecked, isNew, t, locale, onOpenDirectory, onOpenFile, onContextMenu, onToggleSelect, onSelect }: FileRowProps) {
+function FileRow({ entry, index, isSelected, isChecked, isNew, t, locale, onOpenDirectory, onOpenFile, onContextMenu, onToggleSelect, onSelect, animateRows }: FileRowProps) {
     const handleClick = useCallback(() => {
         onSelect(entry.path)
         if (entry.type === 'directory') onOpenDirectory(entry.path)
@@ -92,7 +94,7 @@ function FileRow({ entry, index, isSelected, isChecked, isNew, t, locale, onOpen
         [entry.path, entry.type, onContextMenu],
     )
 
-    const animClass = isNew ? 'fm-row-new' : 'fm-row-enter'
+    const animClass = animateRows ? (isNew ? 'fm-row-new' : 'fm-row-enter') : ''
     const selectedClass = isChecked || isSelected ? ' fm-file-row-selected' : ''
     const bg = isChecked ? 'var(--hp-primary-subtle)' : isSelected ? 'var(--hp-primary-subtle)' : undefined
     const modifiedLabel = formatDate(entry.modified, t, locale)
@@ -111,7 +113,9 @@ function FileRow({ entry, index, isSelected, isChecked, isNew, t, locale, onOpen
                 cursor: 'pointer',
                 position: 'relative',
                 background: bg,
-                animationDelay: `${Math.min(index, 10) * 18}ms`,
+                animationDelay: animateRows ? `${Math.min(index, 10) * 18}ms` : undefined,
+                contentVisibility: 'auto',
+                containIntrinsicSize: '56px',
             }}
             onMouseEnter={(e) => { if (!isSelected && !isChecked) e.currentTarget.style.background = 'var(--hp-surface-1)' }}
             onMouseLeave={(e) => { if (!isSelected && !isChecked) e.currentTarget.style.background = '' }}
@@ -276,7 +280,7 @@ function ErrorState({ message, t, onRetry }: { message: string; t: Translate; on
 export default function DirectoryView({
     entries, isLoading, error, sort, onSortChange, onOpenDirectory, onOpenFile, onContextMenu,
     selectedPath, onSelect, onRetry, onCreate, selectedPaths, onToggleSelect, onSelectAll, highlightPath,
-    emptyTitle, emptyHint, showCreateInEmpty = true,
+    emptyTitle, emptyHint, showCreateInEmpty = true, animateRows = true,
 }: DirectoryViewProps) {
     const { t, locale } = useTranslation()
     const sorted = entries
@@ -309,10 +313,11 @@ export default function DirectoryView({
                             locale={locale}
                             onOpenDirectory={onOpenDirectory}
                             onOpenFile={onOpenFile}
-                            onContextMenu={onContextMenu}
-                            onToggleSelect={onToggleSelect}
-                            onSelect={onSelect}
-                        />
+                        onContextMenu={onContextMenu}
+                        onToggleSelect={onToggleSelect}
+                        onSelect={onSelect}
+                        animateRows={animateRows}
+                    />
                     ))}
                 </div>
             )}

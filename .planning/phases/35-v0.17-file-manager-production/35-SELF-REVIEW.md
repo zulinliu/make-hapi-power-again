@@ -542,3 +542,52 @@ scripts/brand-check.sh
 1. 本轮未做真实 iOS PWA 手动操作验证，仍建议在发布前手测：会话返回、文件预览返回、移动复制目录选择、复制路径 fallback。
 2. TransferDirectoryPicker 当前基于当前目录即时列表，没有虚拟滚动；超大目录下后续可加搜索或分页。
 3. 目录上传、目录 zip 下载仍是未来增强，不在本轮交互回归范围。
+
+## Phase 35 Mobile UX Optimization Review
+
+**状态**: 完成。
+
+### 本轮目标
+
+按 `35-MOBILE-UX-AUDIT.md` 的下一步建议，继续优化移动端视觉、触控细节、功能交互易用性和简洁性，并做复审。
+
+### 本轮交付
+
+1. FileManager 工具栏、搜索区、批量操作条、上传重试、搜索关闭、Dialog、移动/复制选择器等触控目标提升到 44px。
+2. 移动/复制目录选择器拆分“进入目录”和“选择当前文件夹”，降低误操作。
+3. 大目录关闭逐行动画，添加 `content-visibility`，并显示性能提示。
+4. 搜索、新建、底部启动会话文案优化，减少理解成本。
+5. 全局和会话文件页保存冲突恢复区改为移动端友好的分组按钮，并为强制覆盖增加确认。
+6. Browse file 和 session file 顶部复制/下载按钮提升触控面积。
+7. Session files 搜索与刷新按钮提升触控面积，目录 Tab 移动端高度约束降低。
+8. FileManager Dialog 增强 `aria-labelledby`，overlay 使用 token fallback。
+9. 底部 toolbar 字符图标替换为一致 SVG。
+10. 移动 UX 审计复评分从 14/20 提升到 18/20。
+
+### 质量门禁
+
+```bash
+bun run typecheck
+# PASS
+
+cd web && bun run test src/lib/files-i18n.test.ts src/lib/return-navigation.test.ts src/lib/clipboard.test.ts src/lib/file-manager-api.test.ts
+# PASS: 13 tests
+
+bun run test:web
+# PASS: 80 files, 675 tests
+
+git diff --check
+# PASS
+
+bun run build:web
+# PASS，保留既有 Browserslist / CSS optimizer / KaTeX / chunk-size warning
+
+scripts/brand-check.sh
+# PASS
+```
+
+### 剩余风险
+
+1. 大目录性能已缓解但未上虚拟列表，超大目录仍建议作为后续专项。
+2. Session files 的 full-height 内容布局仍有 magic number，彻底解决需要改 SubPageLayout 的内容槽结构。
+3. FileManager inline style 仍偏多，后续可做样式系统化重构。

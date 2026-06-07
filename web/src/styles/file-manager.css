@@ -190,6 +190,14 @@
     }
 }
 
+@media (max-width: 360px) {
+    .fm-breadcrumb-copy-label {
+        max-width: 4.5em;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .fm-row-enter,
     .fm-row-new,

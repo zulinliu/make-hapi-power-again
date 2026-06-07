@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useId, useRef } from 'react'
 import { useTranslation } from '@/lib/use-translation'
 
 interface DialogProps {
@@ -17,6 +17,7 @@ export function Dialog({ title, children, onClose, onSubmit, submitLabel, submit
   const { t } = useTranslation()
   const dialogRef = useRef<HTMLDivElement>(null)
   const prevFocusRef = useRef<HTMLElement | null>(null)
+  const titleId = useId()
 
   // Restore focus on unmount
   useEffect(() => {
@@ -70,7 +71,7 @@ export function Dialog({ title, children, onClose, onSubmit, submitLabel, submit
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'oklch(0 0 0 / 0.5)',
+        background: 'var(--app-overlay-bg, oklch(0 0 0 / 0.5))',
         animation: reducedMotion ? 'none' : 'fm-dialog-backdrop-in 0.15s ease-out',
         padding: 'max(12px, env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px)) max(12px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px))',
       }}
@@ -80,7 +81,7 @@ export function Dialog({ title, children, onClose, onSubmit, submitLabel, submit
         ref={dialogRef}
         role="dialog"
         className="fm-dialog-panel"
-        aria-label={title}
+        aria-labelledby={titleId}
         aria-modal="true"
         style={{
           width: '100%',
@@ -94,7 +95,7 @@ export function Dialog({ title, children, onClose, onSubmit, submitLabel, submit
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div style={{ padding: '18px 20px 0', fontSize: 15, fontWeight: 650, color: 'var(--hp-text-primary)' }}>
+        <div id={titleId} style={{ padding: '18px 20px 0', fontSize: 15, fontWeight: 650, color: 'var(--hp-text-primary)' }}>
           {title}
         </div>
         <div style={{ padding: '12px 20px 18px' }}>
@@ -114,7 +115,7 @@ export function Dialog({ title, children, onClose, onSubmit, submitLabel, submit
             disabled={loading}
             className="fm-dialog-button"
             style={{
-              minHeight: 40,
+              minHeight: 44,
               padding: '0 16px',
               fontSize: 13,
               fontWeight: 500,
@@ -135,7 +136,7 @@ export function Dialog({ title, children, onClose, onSubmit, submitLabel, submit
               disabled={loading}
               className="fm-dialog-button"
               style={{
-                minHeight: 40,
+                minHeight: 44,
                 padding: '0 16px',
                 fontSize: 13,
                 fontWeight: 600,

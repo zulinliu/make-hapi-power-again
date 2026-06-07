@@ -74,6 +74,7 @@ export default function FilePage() {
     const [isSaving, setIsSaving] = useState(false)
     const [saveError, setSaveError] = useState<string | null>(null)
     const [pendingNavigation, setPendingNavigation] = useState<(() => void) | null>(null)
+    const [forceConfirmOpen, setForceConfirmOpen] = useState(false)
     const saveButtonRef = useRef<HTMLButtonElement>(null)
 
     const isDirty = localContent !== serverContent
@@ -345,14 +346,14 @@ export default function FilePage() {
                         </span>
                     )}
                     <button type="button" onClick={() => copyPath(filePath)}
-                        className="shrink-0 rounded p-1.5 text-(--hp-text-tertiary) hover:bg-(--hp-surface-1) hover:text-(--hp-text-primary) focus-visible:outline-2 focus-visible:outline-(--hp-primary) focus-visible:outline-offset-1 transition-colors"
+                        className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded p-1.5 text-(--hp-text-tertiary) transition-colors hover:bg-(--hp-surface-1) hover:text-(--hp-text-primary) focus-visible:outline-2 focus-visible:outline-(--hp-primary) focus-visible:outline-offset-1"
                         title={t('file.page.copyPath')}
                         aria-label={t('file.page.copyPath')}>
                         {pathCopied ? <CheckIcon className="h-3.5 w-3.5" /> : <CopyIcon className="h-3.5 w-3.5" />}
                     </button>
                     {fileContentResult?.success && fileContentResult.content && (
                         <button type="button" onClick={handleDownload}
-                            className="shrink-0 rounded p-1.5 text-(--hp-text-tertiary) hover:bg-(--hp-surface-1) hover:text-(--hp-text-primary) focus-visible:outline-2 focus-visible:outline-(--hp-primary) focus-visible:outline-offset-1 transition-colors"
+                            className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded p-1.5 text-(--hp-text-tertiary) transition-colors hover:bg-(--hp-surface-1) hover:text-(--hp-text-primary) focus-visible:outline-2 focus-visible:outline-(--hp-primary) focus-visible:outline-offset-1"
                             title={t('file.page.download')}
                             aria-label={t('file.page.download')}>
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -525,26 +526,28 @@ export default function FilePage() {
                             )}
                         </div>
                         {saveError && (
-                            <div className="px-3 py-2 bg-(--hp-danger-subtle) border-b border-(--hp-divider) flex items-center gap-2 shrink-0">
+                            <div className="flex shrink-0 flex-col gap-2 border-b border-(--hp-divider) bg-(--hp-danger-subtle) px-3 py-2 md:flex-row md:items-center">
                                 <span className="flex-1 text-xs text-(--hp-danger) break-words" role="alert">
                                         {t('file.page.saveErrorDetail', { error: saveError })}
                                     </span>
-                                <button type="button" onClick={handleSave}
-                                    className="px-2 py-1 rounded text-xs font-semibold bg-(--hp-primary) text-(--hp-primary-text) min-h-[32px]">
-                                    {t('file.page.retry')}
-                                </button>
-                                <button type="button" onClick={handleReloadFromDisk}
-                                    className="px-2 py-1 rounded text-xs bg-(--hp-surface-1) text-(--hp-text-secondary) min-h-[32px]">
-                                    {t('file.page.reloadFromDisk')}
-                                </button>
-                                <button type="button" onClick={handleForceSave}
-                                    className="px-2 py-1 rounded text-xs bg-(--hp-danger-subtle) text-(--hp-danger) min-h-[32px]">
-                                    {t('file.page.forceOverwrite')}
-                                </button>
-                                <button type="button" onClick={() => copyContent(localContent)}
-                                    className="px-2 py-1 rounded text-xs bg-(--hp-surface-1) text-(--hp-text-secondary) min-h-[32px]">
-                                    {t('file.page.copyContent')}
-                                </button>
+                                <div className="grid grid-cols-2 gap-2 md:flex md:items-center">
+                                    <button type="button" onClick={handleSave}
+                                        className="min-h-[44px] rounded bg-(--hp-primary) px-3 py-1 text-xs font-semibold text-(--hp-primary-text)">
+                                        {t('file.page.retry')}
+                                    </button>
+                                    <button type="button" onClick={() => copyContent(localContent)}
+                                        className="min-h-[44px] rounded bg-(--hp-surface-1) px-3 py-1 text-xs text-(--hp-text-secondary)">
+                                        {t('file.page.copyContent')}
+                                    </button>
+                                    <button type="button" onClick={handleReloadFromDisk}
+                                        className="min-h-[44px] rounded bg-(--hp-surface-1) px-3 py-1 text-xs text-(--hp-text-secondary)">
+                                        {t('file.page.reloadFromDisk')}
+                                    </button>
+                                    <button type="button" onClick={() => setForceConfirmOpen(true)}
+                                        className="min-h-[44px] rounded bg-(--hp-danger-subtle) px-3 py-1 text-xs text-(--hp-danger)">
+                                        {t('file.page.forceOverwrite')}
+                                    </button>
+                                </div>
                             </div>
                         )}
                         <textarea
@@ -585,6 +588,24 @@ export default function FilePage() {
                         </Button>
                         <Button type="button" variant="destructive" onClick={handleLeaveDiscard} className="min-h-[44px] flex-1 sm:flex-none">
                             {t('file.viewer.discardAndLeave')}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+            <Dialog open={forceConfirmOpen} onOpenChange={setForceConfirmOpen}>
+                <DialogContent style={{ maxWidth: 420 }}>
+                    <DialogHeader>
+                        <DialogTitle>{t('file.page.forceOverwriteTitle')}</DialogTitle>
+                        <DialogDescription className="mt-1.5 leading-relaxed">
+                            {t('file.page.forceOverwriteBody', { name: fileName })}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button type="button" variant="outline" onClick={() => setForceConfirmOpen(false)} className="min-h-[44px] flex-1 sm:flex-none">
+                            {t('fm.dialog.cancel')}
+                        </Button>
+                        <Button type="button" variant="destructive" onClick={() => { setForceConfirmOpen(false); void handleForceSave() }} className="min-h-[44px] flex-1 sm:flex-none">
+                            {t('file.page.forceOverwrite')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
