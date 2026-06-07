@@ -254,8 +254,12 @@ export class RpcGateway {
         return await this.sessionRpc(sessionId, RPC_METHODS.GitCommit, options) as RpcCommandResponse
     }
 
-    async gitClone(sessionId: string, options: { cwd?: string; url: string; targetDir?: string; branch?: string; cloneId?: string }): Promise<RpcCommandResponse> {
+    async gitClone(sessionId: string, options: { cwd?: string; url: string; targetDir?: string; branch?: string; depth?: number; cloneId?: string; auth?: { type: 'password' | 'token' | 'ssh'; username?: string; password?: string } }): Promise<RpcCommandResponse> {
         return await this.sessionRpc(sessionId, RPC_METHODS.GitClone, { ...options }, 600_000) as RpcCommandResponse
+    }
+
+    async gitCloneMachine(machineId: string, options: { cwd?: string; url: string; targetDir?: string; branch?: string; depth?: number; cloneId?: string; auth?: { type: 'password' | 'token' | 'ssh'; username?: string; password?: string } }): Promise<RpcCommandResponse> {
+        return await this.machineRpc(machineId, RPC_METHODS.MachineGitClone, { ...options }, 600_000) as RpcCommandResponse
     }
 
     async getGitRemoteList(sessionId: string, cwd?: string): Promise<RpcCommandResponse> {

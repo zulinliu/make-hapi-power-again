@@ -35,7 +35,13 @@ const cloneSchema = z.object({
     url: z.string().min(1).regex(/^(https:\/\/|ssh:\/\/|git@)/, 'Only https://, ssh://, and git@ URLs are allowed'),
     targetDir: z.string().optional(),
     branch: z.string().optional(),
-    cloneId: z.string().optional()
+    depth: z.number().int().min(1).optional(),
+    cloneId: z.string().optional(),
+    auth: z.object({
+        type: z.enum(['password', 'token', 'ssh']),
+        username: z.string().optional(),
+        password: z.string().optional()
+    }).optional()
 })
 
 const remoteAddSchema = z.object({
@@ -273,7 +279,9 @@ export function createGitRoutes(getSyncEngine: () => SyncEngine | null): Hono<We
             url: parsed.data.url,
             targetDir: parsed.data.targetDir,
             branch: parsed.data.branch,
-            cloneId: parsed.data.cloneId
+            depth: parsed.data.depth,
+            cloneId: parsed.data.cloneId,
+            auth: parsed.data.auth
         }))
         return c.json(result)
     })

@@ -194,11 +194,14 @@ export type CloneProgressPhase = 'counting' | 'compressing' | 'writing' | 'resol
 export interface CloneProgressPayload {
     cloneId: string
     sessionId: string
+    machineId?: string
     phase: CloneProgressPhase
     progress?: number
     message?: string
     objectsReceived?: number
     objectsTotal?: number
+    bytesReceived?: number
+    bytesTotal?: number
 }
 
 export interface ServerToClientEvents {

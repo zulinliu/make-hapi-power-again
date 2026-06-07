@@ -946,8 +946,12 @@ export class SyncEngine {
         return await this.rpcGateway.createGitCommit(sessionId, options)
     }
 
-    async gitClone(sessionId: string, options: { cwd?: string; url: string; targetDir?: string; branch?: string; cloneId?: string }): Promise<RpcCommandResponse> {
+    async gitClone(sessionId: string, options: { cwd?: string; url: string; targetDir?: string; branch?: string; depth?: number; cloneId?: string; auth?: { type: 'password' | 'token' | 'ssh'; username?: string; password?: string } }): Promise<RpcCommandResponse> {
         return await this.rpcGateway.gitClone(sessionId, options)
+    }
+
+    async gitCloneMachine(machineId: string, options: { cwd?: string; url: string; targetDir?: string; branch?: string; depth?: number; cloneId?: string; auth?: { type: 'password' | 'token' | 'ssh'; username?: string; password?: string } }): Promise<RpcCommandResponse> {
+        return await this.rpcGateway.gitCloneMachine(machineId, options)
     }
 
     async getGitRemoteList(sessionId: string, cwd?: string): Promise<RpcCommandResponse> {

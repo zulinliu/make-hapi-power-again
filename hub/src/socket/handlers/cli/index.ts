@@ -5,6 +5,7 @@ import type { SyncEvent } from '../../../sync/syncEngine'
 import type { TerminalRegistry } from '../../terminalRegistry'
 import type { CliSocketWithData, SocketServer } from '../../socketTypes'
 import type { AccessErrorReason, AccessResult } from './types'
+import type { CloneProgressPayload } from '@hapipower/protocol/socket'
 import { registerMachineHandlers } from './machineHandlers'
 import { registerRpcHandlers } from './rpcHandlers'
 import { registerSessionHandlers } from './sessionHandlers'
@@ -127,6 +128,25 @@ export function registerCliHandlers(socket: CliSocketWithData, deps: CliHandlers
 
     socket.on('ping', (callback: () => void) => {
         callback()
+    })
+
+    socket.on('clone:progress', (data: CloneProgressPayload) => {
+        onWebappEvent?.({
+            type: 'clone-progress',
+            namespace: namespace ?? undefined,
+            data: {
+                cloneId: data.cloneId,
+                sessionId: data.sessionId || undefined,
+                machineId: data.machineId || undefined,
+                phase: data.phase,
+                progress: data.progress,
+                message: data.message,
+                objectsReceived: data.objectsReceived,
+                objectsTotal: data.objectsTotal,
+                bytesReceived: data.bytesReceived,
+                bytesTotal: data.bytesTotal
+            }
+        })
     })
 
     socket.on('disconnect', () => {

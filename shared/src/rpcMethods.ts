@@ -23,6 +23,7 @@ export const RPC_METHODS = {
     GitAdd: 'git-add',
     GitAutoCommit: 'git-auto-commit',
     GitClone: 'git-clone',
+    MachineGitClone: 'machine-git-clone',
     GitRemoteList: 'git-remote-list',
     GitRemoteAdd: 'git-remote-add',
     GitRemoteRemove: 'git-remote-remove',

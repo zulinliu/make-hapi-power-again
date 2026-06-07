@@ -521,6 +521,11 @@ export function useSSE(options: {
                 }
             }
 
+            if (event.type === 'clone-progress') {
+                onEventRef.current(event)
+                return
+            }
+
             onEventRef.current(event)
         }
 

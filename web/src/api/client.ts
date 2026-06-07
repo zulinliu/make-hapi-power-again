@@ -295,8 +295,16 @@ export class ApiClient {
         })
     }
 
-    async gitClone(sessionId: string, options: { url: string; targetDir?: string; branch?: string; cloneId?: string }): Promise<GitCommandResponse> {
+    async gitClone(sessionId: string, options: { url: string; targetDir?: string; branch?: string; depth?: number; cloneId?: string; auth?: { type: 'password' | 'token' | 'ssh'; username?: string; password?: string } }): Promise<GitCommandResponse> {
         return await this.request<GitCommandResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/git-clone`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(options)
+        })
+    }
+
+    async gitCloneMachine(machineId: string, options: { url: string; targetDir?: string; branch?: string; depth?: number; cloneId?: string; auth?: { type: 'password' | 'token' | 'ssh'; username?: string; password?: string } }): Promise<GitCommandResponse> {
+        return await this.request<GitCommandResponse>(`/api/machines/${encodeURIComponent(machineId)}/git-clone`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(options)

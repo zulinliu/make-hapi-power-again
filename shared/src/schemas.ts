@@ -362,6 +362,21 @@ export const SyncEventSchema = z.discriminatedUnion('type', [
             status: z.string(),
             subscriptionId: z.string().optional()
         }).optional()
+    }),
+    SessionEventBaseSchema.extend({
+        type: z.literal('clone-progress'),
+        data: z.object({
+            cloneId: z.string(),
+            sessionId: z.string().optional(),
+            machineId: z.string().optional(),
+            phase: z.string(),
+            progress: z.number().optional(),
+            message: z.string().optional(),
+            objectsReceived: z.number().optional(),
+            objectsTotal: z.number().optional(),
+            bytesReceived: z.number().optional(),
+            bytesTotal: z.number().optional()
+        })
     })
 ])
 

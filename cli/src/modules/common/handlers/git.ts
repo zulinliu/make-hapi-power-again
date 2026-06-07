@@ -1,6 +1,8 @@
 import { execFile, spawn, type ExecFileOptions } from 'child_process'
 import { promisify } from 'util'
 import { randomUUID } from 'crypto'
+import { writeFileSync, unlinkSync, chmodSync } from 'fs'
+import { join } from 'path'
 import type { CommandResponse } from '@hapipower/protocol/apiTypes'
 import { RPC_METHODS } from '@hapipower/protocol/rpcMethods'
 import type { RpcHandlerManager } from '@/api/rpc/RpcHandlerManager'
@@ -87,8 +89,14 @@ interface GitCloneRequest {
     url: string
     targetDir?: string
     branch?: string
+    depth?: number
     cloneId?: string
     timeout?: number
+    auth?: {
+        type: 'password' | 'token' | 'ssh'
+        username?: string
+        password?: string
+    }
 }
 
 interface GitRemoteListRequest {
@@ -135,10 +143,46 @@ type GitCommandResponse = CommandResponse
 function validateCloneUrl(url: string): string | null {
     if (!url || typeof url !== 'string') return 'Clone URL required'
     if (url.startsWith('file://')) return 'file:// protocol is not allowed'
-    if (!url.startsWith('https://') && !url.startsWith('ssh://') && !url.includes('@')) {
+
+    // Reject URLs with embedded credentials
+    if (/:\/\/[^/@]+:[^/@]+@/.test(url)) return 'URL must not contain embedded credentials'
+
+    // Determine protocol
+    const isHttps = url.startsWith('https://')
+    const isSsh = url.startsWith('ssh://') || url.startsWith('git@')
+
+    if (!isHttps && !isSsh) {
         return 'Only https://, ssh://, and git@ URLs are allowed'
     }
+
+    // SSRF protection for HTTPS URLs
+    if (isHttps) {
+        try {
+            const parsed = new URL(url)
+            const hostname = parsed.hostname
+            // Block private/loopback/link-local addresses
+            if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '0.0.0.0') {
+                return 'Cannot clone from localhost'
+            }
+            if (/^10\./.test(hostname) || /^172\.(1[6-9]|2\d|3[01])\./.test(hostname) || /^192\.168\./.test(hostname)) {
+                return 'Cannot clone from private network addresses'
+            }
+            if (/^169\.254\./.test(hostname)) {
+                return 'Cannot clone from link-local addresses'
+            }
+            if (/^0\./.test(hostname)) {
+                return 'Invalid hostname'
+            }
+        } catch {
+            return 'Invalid URL format'
+        }
+    }
+
     return null
+}
+
+function sanitizeGitUrl(url: string): string {
+    return url.replace(/:\/\/[^@]+@/, '://***@')
 }
 
 const CLONE_PROGRESS_RE = /(\d+)%\s*\((\d+)\/(\d+)\)/
@@ -173,17 +217,32 @@ function runGitCloneStreaming(
     url: string,
     targetDir: string,
     branch: string | undefined,
+    depth: number | undefined,
     cloneId: string,
-    rpcHandlerManager: RpcHandlerManager
+    rpcHandlerManager: RpcHandlerManager,
+    auth?: GitCloneRequest['auth']
 ): Promise<GitCommandResponse> {
     return new Promise((resolve) => {
         const args = ['clone', '--progress']
         if (branch) args.push('--branch', branch)
+        if (depth && depth > 0) args.push('--depth', String(depth))
         args.push(url, targetDir)
+
+        const env: Record<string, string> = { ...process.env as Record<string, string>, LANG: 'C', LC_ALL: 'C' }
+        let askpassScript: string | undefined
+
+        if (auth && auth.type !== 'ssh' && auth.password) {
+            askpassScript = join('/tmp', `gp-askpass-${cloneId}.sh`)
+            writeFileSync(askpassScript, `#!/bin/sh\necho "${auth.password.replace(/"/g, '\\"')}"\n`, { mode: 0o600 })
+            chmodSync(askpassScript, 0o600)
+            env.GIT_ASKPASS = askpassScript
+            env.GIT_TERMINAL_PROMPT = '0'
+        }
 
         const child = spawn('git', args, {
             cwd: targetDir,
-            timeout: 600_000
+            timeout: 600_000,
+            env
         })
 
         let stdout = ''
@@ -202,17 +261,21 @@ function runGitCloneStreaming(
             stderr += text
             const parsed = parseClonePhase(text)
             if (parsed) {
-                emitProgress({ ...parsed, message: text.trim() })
+                emitProgress({ ...parsed, message: sanitizeGitUrl(text.trim()) })
             }
         })
 
         child.on('close', (code) => {
+            if (askpassScript) {
+                try { unlinkSync(askpassScript) } catch { /* ignore */ }
+            }
+
             if (code === 0) {
                 emitProgress({ phase: 'done', message: 'Clone completed successfully' })
                 resolve({
                     success: true,
-                    stdout,
-                    stderr,
+                    stdout: sanitizeGitUrl(stdout),
+                    stderr: sanitizeGitUrl(stderr),
                     exitCode: 0
                 })
             } else {
@@ -220,20 +283,23 @@ function runGitCloneStreaming(
                 resolve({
                     success: false,
                     error: `git clone failed (exit code ${code})`,
-                    stdout,
-                    stderr,
+                    stdout: sanitizeGitUrl(stdout),
+                    stderr: sanitizeGitUrl(stderr),
                     exitCode: code ?? 1
                 })
             }
         })
 
         child.on('error', (err) => {
-            emitProgress({ phase: 'error', message: err.message })
+            if (askpassScript) {
+                try { unlinkSync(askpassScript) } catch { /* ignore */ }
+            }
+            emitProgress({ phase: 'error', message: sanitizeGitUrl(err.message) })
             resolve({
                 success: false,
                 error: err.message,
                 stdout,
-                stderr,
+                stderr: sanitizeGitUrl(stderr),
                 exitCode: -1
             })
         })
@@ -445,7 +511,7 @@ export function registerGitHandlers(rpcHandlerManager: RpcHandlerManager, workin
         return await runGitCommand(['commit', '-m', data.message], resolved.cwd, data.timeout)
     })
 
-    // Git Clone — streaming with progress
+    // Git Clone — streaming with progress, ASKPASS auth, depth support
     rpcHandlerManager.registerHandler<GitCloneRequest, GitCommandResponse>(RPC_METHODS.GitClone, async (data) => {
         const resolved = resolveCwd(data.cwd, workingDirectory)
         if (resolved.error) return rpcError(resolved.error)
@@ -462,8 +528,34 @@ export function registerGitHandlers(rpcHandlerManager: RpcHandlerManager, workin
             data.url,
             targetDir,
             data.branch,
+            data.depth,
             data.cloneId ?? randomUUID(),
-            rpcHandlerManager
+            rpcHandlerManager,
+            data.auth
+        )
+    })
+
+    // Machine Git Clone — same handler with machine scope context
+    rpcHandlerManager.registerHandler<GitCloneRequest, GitCommandResponse>(RPC_METHODS.MachineGitClone, async (data) => {
+        const resolved = resolveCwd(data.cwd, workingDirectory)
+        if (resolved.error) return rpcError(resolved.error)
+        if (!data.url) return rpcError('Clone URL required')
+
+        const urlError = validateCloneUrl(data.url)
+        if (urlError) return rpcError(urlError)
+
+        const targetDir = data.targetDir
+            ? require('path').resolve(resolved.cwd, data.targetDir)
+            : resolved.cwd
+
+        return await runGitCloneStreaming(
+            data.url,
+            targetDir,
+            data.branch,
+            data.depth,
+            data.cloneId ?? randomUUID(),
+            rpcHandlerManager,
+            data.auth
         )
     })
 
