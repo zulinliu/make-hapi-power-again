@@ -192,6 +192,10 @@ function validateCloneUrl(url: string): string | null {
             if (/^\d{8,}$/.test(hostname)) {
                 return 'Cannot clone from local addresses'
             }
+            // Block octal encoded IPs (e.g., 0177.0.0.1 = 127.0.0.1)
+            if (/^0[0-7]+\./.test(hostname) || /\.\d*\.\d*\.\d*$/.test(hostname) && /^0[0-7]/.test(hostname.split('.')[0])) {
+                return 'Cannot clone from local addresses'
+            }
         } catch {
             return 'Invalid URL format'
         }
@@ -318,7 +322,7 @@ function runGitCloneStreaming(
             emitProgress({ phase: 'error', message: sanitizeGitUrl(err.message) })
             resolve({
                 success: false,
-                error: err.message,
+                error: sanitizeGitUrl(err.message),
                 stdout,
                 stderr: sanitizeGitUrl(stderr),
                 exitCode: -1

@@ -906,6 +906,13 @@ export default {
   'gitPortal.history.more': 'Show more',
   'gitPortal.history.less': 'Show less',
   'gitPortal.history.clear': 'Clear history',
+
+  // Relative time
+  'gitPortal.time.justNow': 'just now',
+  'gitPortal.time.minutesAgo': '{count}m ago',
+  'gitPortal.time.hoursAgo': '{count}h ago',
+  'gitPortal.time.daysAgo': '{count}d ago',
+  'gitPortal.time.monthsAgo': '{count}mo ago',
   'gitPortal.favorites.title': 'Favorites',
   'gitPortal.favorites.empty': 'No favorite repositories yet',
 
