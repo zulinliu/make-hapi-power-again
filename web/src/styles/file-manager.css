@@ -85,7 +85,8 @@
 .fm-breadcrumb button:focus-visible,
 .fm-context-menu-item:focus-visible,
 .fm-dialog-button:focus-visible,
-.fm-dialog-input:focus-visible {
+.fm-dialog-input:focus-visible,
+.fm-transfer-picker-row:focus-visible {
     outline: 2px solid var(--hp-primary);
     outline-offset: 2px;
 }
@@ -96,6 +97,10 @@
 
 .fm-dialog-button:hover:not(:disabled) {
     filter: brightness(0.98);
+}
+
+.fm-transfer-picker-row:hover {
+    background: var(--hp-surface-1) !important;
 }
 
 .fm-primary-button,
@@ -144,12 +149,17 @@
     color: var(--hp-text-primary) !important;
 }
 
+.fm-desktop-action {
+    display: none !important;
+}
+
 .fm-primary-button:active,
 .fm-secondary-button:active {
     transform: translateY(1px);
 }
 
 @media (min-width: 768px) {
+    .fm-desktop-action { display: inline-flex !important; }
     .fm-sort-header { display: flex !important; }
     .fm-file-row { min-height: 48px !important; }
     .fm-file-row-skeleton { min-height: 48px !important; }

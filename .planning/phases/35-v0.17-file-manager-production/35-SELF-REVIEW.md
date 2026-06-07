@@ -461,3 +461,84 @@ git diff --check
 ### 结论
 
 v0.17.0 文件管理器专项已经把 `/browse` 从目录选择器升级为 machine-scoped 全局文件管理器，并关闭用户指出的 5 个核心问题。当前状态满足“生产稳定基础全功能文件管理器模块”的发布门槛，剩余项属于性能、体验和编辑器增强，不阻断 v0.17.0。
+
+## Phase 35 Follow-up Review: 文件管理器交互回归修复
+
+**状态**: 完成。
+
+### 本轮触发
+
+用户在 v0.17.0 继续检查时反馈 6 个交互问题：新建会话返回来源丢失、移动端新建/上传入口重复、`/browse` 与 `/browse/file` 返回循环、移动/复制缺少目录选择、复制路径不可用、路径栏复制按钮语义不清。
+
+### 根因确认
+
+1. `/sessions/new` 没有来源参数，取消和顶部返回固定导航 `/sessions`。
+2. 顶部新建/上传按钮使用内联 `display: inline-flex`，移动端没有隐藏，和底部工具栏重复。
+3. `/browse/file` 返回 `/browse` 时 push 新历史项，`/browse` 顶部返回又 fallback 到 `history.back()`，形成循环。
+4. `/browse?path=父目录` 返回后，FileManager 把当前目录误当根目录，导致上一级按钮禁用。
+5. transfer dialog 只有路径输入，没有普通用户需要的文件夹浏览选择。
+6. FileManager 没有使用项目已有 `safeCopyToClipboard`，缺少 legacy fallback。
+7. Breadcrumb 复制按钮只有图标，移动端没有可见语义。
+
+### 本轮交付
+
+1. 新增 `returnTo` 安全返回链路，FileManager 启动会话时携带来源；`/sessions/new` 取消和顶部返回优先 replace 回来源。
+2. 新增 `parseSafeReturnTo`，只允许 `/browse`、`/sessions`、`/sessions/:id/files`，避免开放重定向。
+3. `/browse/file` 返回 `/browse` 改为 `replace: true`。
+4. `useAppGoBack` 对 `/browse` 增加显式返回 `/sessions`，不再依赖 history fallback。
+5. FileManager 增加 `rootPath` prop，`/browse` 传 workspace root，`initialPath` 只表示当前目录。
+6. 移动端隐藏顶部“新建 / 上传”，保留底部主操作。
+7. 移动/复制弹窗新增通用 `TransferDirectoryPicker`，支持上一级、根目录、使用当前文件夹、子目录浏览选择，同时保留路径输入。
+8. FileManager 复制路径改用 `safeCopyToClipboard`，获得 Clipboard API + execCommand fallback。
+9. 路径栏复制按钮改为“图标 + 复制路径”，成功/失败文案更明确。
+10. 新增 `web/src/lib/return-navigation.test.ts`。
+
+### 6 个问题逐条关闭
+
+| 问题 | 状态 | 说明 |
+|---|---|---|
+| 会话取消/返回回主页面 | 已解决 | `returnTo` + `replace` 回来源 |
+| 移动端新建/上传重复 | 已解决 | 顶部主操作移动端隐藏，底部保留 |
+| 预览后上一级失效和返回循环 | 已解决 | `rootPath` 分离 + `/browse/file` replace + `/browse` 显式返回 |
+| 移动/复制缺少目录选择 | 已解决 | 新增浏览式目录选择器 |
+| 复制路径不可用 | 已解决 | 使用 `safeCopyToClipboard` fallback |
+| 路径栏剪贴板按钮不清晰 | 已解决 | 按钮显示“复制路径” |
+
+### 是否引入新空壳入口
+
+没有。新增目录选择器直接复用真实 list directory 能力；新建会话返回只改变导航行为；复制路径直接复用已测试 fallback。
+
+### 移动端和可访问性
+
+- 移动端主操作入口去重，减少同屏认知负担。
+- 目录选择器按钮保持 34px 以上，主弹窗按钮仍由 Dialog footer 提供 44px 移动端目标。
+- 路径栏复制按钮有可见文本、`aria-label` 和 `title`。
+- focus-visible 样式覆盖新增目录行。
+
+### 质量门禁
+
+```bash
+bun run typecheck
+# PASS
+
+cd web && bun run test src/lib/return-navigation.test.ts src/lib/clipboard.test.ts src/lib/file-manager-api.test.ts src/lib/files-i18n.test.ts
+# PASS: 13 tests
+
+bun run test:web
+# PASS: 80 files, 675 tests
+
+git diff --check
+# PASS
+
+bun run build:web
+# PASS，保留既有 Browserslist / KaTeX 字体 / 大 chunk 警告
+
+scripts/brand-check.sh
+# PASS
+```
+
+### 剩余风险
+
+1. 本轮未做真实 iOS PWA 手动操作验证，仍建议在发布前手测：会话返回、文件预览返回、移动复制目录选择、复制路径 fallback。
+2. TransferDirectoryPicker 当前基于当前目录即时列表，没有虚拟滚动；超大目录下后续可加搜索或分页。
+3. 目录上传、目录 zip 下载仍是未来增强，不在本轮交互回归范围。

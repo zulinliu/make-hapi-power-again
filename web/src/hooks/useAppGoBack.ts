@@ -1,5 +1,6 @@
 import { useCallback } from 'react'
 import { useLocation, useNavigate, useRouter } from '@tanstack/react-router'
+import { parseSafeReturnTo } from '@/lib/return-navigation'
 
 export function useAppGoBack(): () => void {
     const navigate = useNavigate()
@@ -10,6 +11,28 @@ export function useAppGoBack(): () => void {
     return useCallback(() => {
         // Use explicit path navigation for consistent behavior across all environments
         if (pathname === '/sessions/new') {
+            const returnTo = (search && typeof search === 'object' && 'returnTo' in search)
+                ? (search as { returnTo?: unknown }).returnTo
+                : undefined
+            const target = parseSafeReturnTo(returnTo)
+            if (target?.type === 'browse') {
+                navigate({ to: '/browse', search: target.search, replace: true })
+                return
+            }
+            if (target?.type === 'sessionFiles') {
+                navigate({
+                    to: '/sessions/$sessionId/files',
+                    params: { sessionId: target.sessionId },
+                    search: target.search,
+                    replace: true,
+                })
+                return
+            }
+            navigate({ to: '/sessions', replace: true })
+            return
+        }
+
+        if (pathname === '/browse') {
             navigate({ to: '/sessions' })
             return
         }

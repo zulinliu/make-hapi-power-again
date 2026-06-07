@@ -240,7 +240,8 @@ export default function BrowseFilePage() {
             search: {
                 ...(machineId ? { machineId } : {}),
                 ...(parentPath ? { path: encodeBase64(parentPath) } : {}),
-            }
+            },
+            replace: true,
         })
         if (isDirty) setPendingNavigation(() => go)
         else go()

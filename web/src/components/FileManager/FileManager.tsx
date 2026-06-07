@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useTranslation } from '@/lib/use-translation'
+import { safeCopyToClipboard } from '@/lib/clipboard'
 import { encodeBase64 } from '@/lib/utils'
 import { BreadcrumbNav, buildBreadcrumbs } from './BreadcrumbNav'
 import DirectoryView from './DirectoryView'
@@ -37,6 +38,7 @@ export interface FileManagerProps {
   machineId?: string | null
   sessionId?: string | null
   initialPath?: string
+  rootPath?: string
 }
 
 const DEFAULT_ROOT = '/home/user/project'
@@ -99,6 +101,17 @@ function basename(path: string): string {
   return path.split('/').filter(Boolean).pop() ?? path
 }
 
+function buildReturnTo(machineId: string | null | undefined, path: string, sessionId?: string | null): string {
+  if (sessionId) {
+    return `/sessions/${encodeURIComponent(sessionId)}/files?tab=directories`
+  }
+  const params = new URLSearchParams()
+  if (machineId) params.set('machineId', machineId)
+  if (path) params.set('path', encodeBase64(path))
+  const query = params.toString()
+  return query ? `/browse?${query}` : '/browse'
+}
+
 function isValidDestinationDir(path: string): boolean {
   const value = path.trim()
   if (!value) return false
@@ -118,11 +131,7 @@ function getParentPath(path: string, rootPath: string): string | null {
 
 async function copyToClipboard(text: string, t: Translate) {
   try {
-    if (!navigator.clipboard?.writeText) {
-      showToast(t('fm.toast.clipboardUnavailable'), 'error')
-      return
-    }
-    await navigator.clipboard.writeText(text)
+    await safeCopyToClipboard(text)
     showToast(t('fm.toast.pathCopied'))
   } catch {
     showToast(t('fm.toast.copyPathFailed'), 'error')
@@ -175,12 +184,213 @@ function downloadBase64File(content: string, fileName: string): void {
   setTimeout(() => URL.revokeObjectURL(url), 5000)
 }
 
-export function FileManager({ api, machineId, sessionId, initialPath }: FileManagerProps = {}) {
+interface TransferDirectoryPickerProps {
+  api?: ApiClient | null
+  machineId?: string | null
+  useRealApi: boolean
+  rootPath: string
+  currentPath: string
+  showHidden: boolean
+  selectedPath: string
+  onSelect: (path: string) => void
+  t: Translate
+}
+
+function TransferDirectoryPicker({
+  api,
+  machineId,
+  useRealApi,
+  rootPath,
+  currentPath,
+  showHidden,
+  selectedPath,
+  onSelect,
+  t,
+}: TransferDirectoryPickerProps) {
+  const [browsePath, setBrowsePath] = useState(() => normalizePath(selectedPath || currentPath || rootPath))
+  const [directories, setDirectories] = useState<FileEntry[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const normalizedRoot = useMemo(() => normalizePath(rootPath), [rootPath])
+  const parent = useMemo(() => getParentPath(browsePath, normalizedRoot), [browsePath, normalizedRoot])
+
+  const loadPickerDirectory = useCallback(async (path: string) => {
+    const targetPath = normalizePath(path)
+    setIsLoading(true)
+    setError(null)
+    try {
+      const result = useRealApi && api && machineId
+        ? await apiListDirectory(api, machineId, targetPath, showHidden)
+        : await mockListDirectory(targetPath, showHidden)
+      setBrowsePath(targetPath)
+      setDirectories(sortEntries(
+        result.entries.filter((entry) => entry.type === 'directory'),
+        DEFAULT_SORT,
+      ))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('fm.dialog.transfer.loadError'))
+      setDirectories([])
+    } finally {
+      setIsLoading(false)
+    }
+  }, [api, machineId, showHidden, t, useRealApi])
+
+  useEffect(() => {
+    void loadPickerDirectory(browsePath)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const selectedNormalized = normalizePath(selectedPath || currentPath)
+
+  return (
+    <div
+      className="fm-transfer-picker"
+      aria-label={t('fm.dialog.transfer.pickerLabel')}
+      style={{
+        border: '1px solid var(--hp-border)',
+        borderRadius: 'var(--hp-radius-md)',
+        background: 'var(--hp-surface-0)',
+        overflow: 'hidden',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
+          padding: 8,
+          borderBottom: '1px solid var(--hp-divider)',
+          background: 'var(--hp-surface-1)',
+        }}
+      >
+        <button
+          type="button"
+          className="fm-secondary-button"
+          onClick={() => { if (parent) void loadPickerDirectory(parent) }}
+          disabled={!parent || isLoading}
+          style={{
+            minHeight: 34,
+            padding: '0 10px',
+            opacity: parent ? 1 : 0.55,
+            cursor: parent ? 'pointer' : 'not-allowed',
+          }}
+        >
+          {t('fm.dialog.transfer.upFolder')}
+        </button>
+        <button
+          type="button"
+          className="fm-secondary-button"
+          onClick={() => { onSelect(normalizedRoot); void loadPickerDirectory(normalizedRoot) }}
+          disabled={isLoading}
+          style={{ minHeight: 34, padding: '0 10px' }}
+        >
+          {t('fm.dialog.transfer.rootFolder')}
+        </button>
+        <button
+          type="button"
+          className="fm-primary-button"
+          onClick={() => onSelect(browsePath)}
+          disabled={isLoading}
+          style={{ minHeight: 34, padding: '0 10px', marginLeft: 'auto' }}
+        >
+          {t('fm.dialog.transfer.useThisFolder')}
+        </button>
+      </div>
+
+      <div style={{ padding: '8px 10px', borderBottom: '1px solid var(--hp-divider)' }}>
+        <div
+          title={browsePath}
+          style={{
+            fontSize: 12,
+            fontFamily: 'var(--hp-font-mono, ui-monospace, monospace)',
+            color: 'var(--hp-text-secondary)',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {browsePath}
+        </div>
+        <div
+          title={selectedNormalized}
+          style={{
+            marginTop: 4,
+            fontSize: 11,
+            color: 'var(--hp-text-tertiary)',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {t('fm.dialog.transfer.selected', { path: selectedNormalized })}
+        </div>
+      </div>
+
+      <div style={{ maxHeight: 220, overflowY: 'auto' }}>
+        {isLoading ? (
+          <div style={{ padding: 12, fontSize: 12, color: 'var(--hp-text-tertiary)' }}>
+            {t('fm.dialog.transfer.loading')}
+          </div>
+        ) : error ? (
+          <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ fontSize: 12, color: 'var(--hp-danger)', overflowWrap: 'anywhere' }}>{error}</div>
+            <button
+              type="button"
+              className="fm-secondary-button"
+              onClick={() => void loadPickerDirectory(browsePath)}
+              style={{ alignSelf: 'flex-start' }}
+            >
+              {t('fm.error.retry')}
+            </button>
+          </div>
+        ) : directories.length === 0 ? (
+          <div style={{ padding: 12, fontSize: 12, color: 'var(--hp-text-tertiary)' }}>
+            {t('fm.dialog.transfer.empty')}
+          </div>
+        ) : (
+          directories.map((directory) => {
+            const isSelected = normalizePath(directory.path) === selectedNormalized
+            return (
+              <button
+                key={directory.path}
+                type="button"
+                onClick={() => { onSelect(directory.path); void loadPickerDirectory(directory.path) }}
+                aria-label={t('fm.dialog.transfer.openFolder', { name: directory.name })}
+                className="fm-transfer-picker-row"
+                style={{
+                  minHeight: 42,
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '0 10px',
+                  border: 'none',
+                  borderBottom: '1px solid var(--hp-divider)',
+                  background: isSelected ? 'var(--hp-primary-subtle)' : 'transparent',
+                  color: isSelected ? 'var(--hp-primary)' : 'var(--hp-text-primary)',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                }}
+              >
+                <span aria-hidden="true" style={{ fontSize: 15 }}>▸</span>
+                <span style={{ minWidth: 0, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: 13 }}>
+                  {directory.name}
+                </span>
+              </button>
+            )
+          })
+        )}
+      </div>
+    </div>
+  )
+}
+
+export function FileManager({ api, machineId, sessionId, initialPath, rootPath: rootPathProp }: FileManagerProps = {}) {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const useRealApi = isApiReady(api ?? null, machineId ?? null)
   const mode: FileManagerMode = useRealApi ? (sessionId ? 'session' : 'machine') : 'mock'
-  const [currentPath, setCurrentPath] = useState<string>(initialPath ?? DEFAULT_ROOT)
+  const initialDirectoryPath = initialPath ?? DEFAULT_ROOT
+  const [currentPath, setCurrentPath] = useState<string>(initialDirectoryPath)
   const [entries, setEntries] = useState<FileEntry[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -209,7 +419,7 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
     return sortedEntries.filter((entry) => entry.name.toLowerCase().includes(normalizedSearch))
   }, [normalizedSearch, sortedEntries])
   const searchFilterActive = normalizedSearch.length > 0
-  const rootPath = useMemo(() => normalizePath(initialPath ?? DEFAULT_ROOT), [initialPath])
+  const rootPath = useMemo(() => normalizePath(rootPathProp ?? initialDirectoryPath), [rootPathProp, initialDirectoryPath])
   const parentPath = useMemo(() => getParentPath(currentPath, rootPath), [currentPath, rootPath])
   const mountedRef = useRef(false)
   const ctxMenu = useContextMenu()
@@ -240,10 +450,10 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
     loadDirectory(currentPath, showHidden)
   }, [loadDirectory, currentPath, showHidden])
 
-  // Load initial directory once on mount
+  // Load initial directory on mount and when route-level directory search changes.
   useEffect(() => {
-    loadDirectory(initialPath ?? DEFAULT_ROOT, false)
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    loadDirectory(initialDirectoryPath, showHidden)
+  }, [initialDirectoryPath]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!mountedRef.current) { mountedRef.current = true; return }
@@ -765,7 +975,7 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
           type="button"
           onClick={() => handleCreate('file')}
           aria-label={t('fm.toolbar.new')}
-          className="fm-toolbar-primary"
+          className="fm-toolbar-primary fm-desktop-action"
           style={{
             minHeight: 40,
             display: 'inline-flex',
@@ -789,7 +999,7 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
           type="button"
           onClick={handleUploadClick}
           aria-label={t('fm.toolbar.upload')}
-          className="fm-toolbar-button"
+          className="fm-toolbar-button fm-desktop-action"
           style={{
             minHeight: 40,
             display: 'inline-flex',
@@ -996,13 +1206,14 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
           onCopy={() => handleTransfer('copy', [...selectedPaths])}
           onDownload={() => { void handleDownload([...selectedPaths]) }}
           onStartSession={() => {
+            const returnTo = buildReturnTo(machineId, currentPath, sessionId)
             if (machineId && selectedPaths.size === 1) {
               const path = [...selectedPaths][0]
               const entry = entries.find(e => e.path === path)
               const dir = entry?.type === 'directory' ? path : currentPath
-              navigate({ to: '/sessions/new', search: { directory: dir, machineId } })
+              navigate({ to: '/sessions/new', search: { directory: dir, machineId, returnTo } })
             } else {
-              navigate({ to: '/sessions/new', search: { directory: currentPath, ...(machineId ? { machineId } : {}) } })
+              navigate({ to: '/sessions/new', search: { directory: currentPath, ...(machineId ? { machineId } : {}), returnTo } })
             }
           }}
         />
@@ -1013,7 +1224,14 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
         <ToolbarButton label={t('fm.toolbar.newShort')} icon="+" onClick={() => handleCreate('file')} />
         <ToolbarButton label={t('fm.toolbar.uploadShort')} icon="⇧" onClick={handleUploadClick} />
         <ToolbarButton label={t('fm.toolbar.sessionShort')} icon="▶" onClick={() => {
-          navigate({ to: '/sessions/new', search: { directory: currentPath, ...(machineId ? { machineId } : {}) } })
+          navigate({
+            to: '/sessions/new',
+            search: {
+              directory: currentPath,
+              ...(machineId ? { machineId } : {}),
+              returnTo: buildReturnTo(machineId, currentPath, sessionId),
+            }
+          })
         }} />
       </div>
 
@@ -1076,7 +1294,23 @@ export function FileManager({ api, machineId, sessionId, initialPath }: FileMana
             <ConfirmMessage message={dialog.paths.length === 1
               ? t('fm.dialog.transfer.source', { name: basename(dialog.paths[0]) })
               : t('fm.dialog.transfer.sourceMany', { count: dialog.paths.length })} />
-            <InputField value={inputValue} onChange={setInputValue} placeholder={currentPath} autoFocus onKeyDown={(e) => { if (e.key === 'Enter') handleDialogSubmit() }} />
+            <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <span style={{ fontSize: 12, fontWeight: 650, color: 'var(--hp-text-secondary)' }}>
+                {t('fm.dialog.transfer.destinationLabel')}
+              </span>
+              <InputField value={inputValue} onChange={setInputValue} placeholder={currentPath} onKeyDown={(e) => { if (e.key === 'Enter') handleDialogSubmit() }} />
+            </label>
+            <TransferDirectoryPicker
+              api={api}
+              machineId={machineId}
+              useRealApi={useRealApi}
+              rootPath={rootPath}
+              currentPath={currentPath}
+              showHidden={showHidden}
+              selectedPath={inputValue}
+              onSelect={setInputValue}
+              t={t}
+            />
             <div style={{ fontSize: 12, color: 'var(--hp-text-tertiary)', lineHeight: 1.5 }}>
               {t('fm.dialog.transfer.hint')}
             </div>

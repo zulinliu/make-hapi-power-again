@@ -35,6 +35,7 @@ import { queryKeys } from '@/lib/query-keys'
 import { useToast } from '@/lib/toast-context'
 import { useTranslation } from '@/lib/use-translation'
 import { decodeBase64 } from '@/lib/utils'
+import { parseSafeReturnTo } from '@/lib/return-navigation'
 import { fetchLatestMessages, seedMessageWindowFromSession } from '@/lib/message-window-store'
 import { clearDraftsAfterSend } from '@/lib/clearDraftsAfterSend'
 import { markSessionSeen } from '@/lib/sessionLastSeen'
@@ -514,11 +515,29 @@ function NewSessionPage() {
     const queryClient = useQueryClient()
     const { machines, isLoading: machinesLoading, error: machinesError } = useMachines(api, true)
     const { t } = useTranslation()
-    const { directory: initialDirectory, machineId: initialMachineId } = newSessionRoute.useSearch()
+    const { directory: initialDirectory, machineId: initialMachineId, returnTo } = newSessionRoute.useSearch()
+
+    const navigateToReturnTarget = useCallback(() => {
+        const target = parseSafeReturnTo(returnTo)
+        if (target?.type === 'browse') {
+            navigate({ to: '/browse', search: target.search, replace: true })
+            return
+        }
+        if (target?.type === 'sessionFiles') {
+            navigate({
+                to: '/sessions/$sessionId/files',
+                params: { sessionId: target.sessionId },
+                search: target.search,
+                replace: true,
+            })
+            return
+        }
+        navigate({ to: '/sessions', replace: true })
+    }, [navigate, returnTo])
 
     const handleCancel = useCallback(() => {
-        navigate({ to: '/sessions' })
-    }, [navigate])
+        navigateToReturnTarget()
+    }, [navigateToReturnTarget])
 
     const handleSuccess = useCallback((sessionId: string) => {
         void queryClient.invalidateQueries({ queryKey: queryKeys.sessions })
@@ -620,7 +639,7 @@ function BrowsePage() {
 
             <div className="flex-1 min-h-0">
                 {initialPath ? (
-                    <FileManager api={api} machineId={machineId} initialPath={initialPath} />
+                    <FileManager api={api} machineId={machineId} initialPath={initialPath} rootPath={workspaceRoot} />
                 ) : (
                     <div className="flex items-center justify-center h-full">
                         <div className="animate-pulse text-(--hp-text-tertiary)">{t('session.loading')}</div>
@@ -720,6 +739,7 @@ const sessionFileRoute = createRoute({
 type NewSessionSearch = {
     directory?: string
     machineId?: string
+    returnTo?: string
 }
 
 const newSessionRoute = createRoute({
@@ -732,6 +752,9 @@ const newSessionRoute = createRoute({
         }
         if (typeof search.machineId === 'string' && search.machineId) {
             result.machineId = search.machineId
+        }
+        if (typeof search.returnTo === 'string' && search.returnTo) {
+            result.returnTo = search.returnTo
         }
         return result
     },
