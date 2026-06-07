@@ -62,7 +62,7 @@ export function GitPortalEmptyState({ variant, error, onRetry }: GitPortalEmptyS
   return (
     <div className="gp-empty-state flex flex-col items-center justify-center py-8 px-4 text-center">
       <svg
-        className="w-10 h-10 text-[var(--hp-text-muted)] mb-3 opacity-40"
+        className="w-10 h-10 text-[var(--hp-text-tertiary)] mb-3 opacity-40"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
@@ -83,11 +83,11 @@ export function GitPortalEmptyState({ variant, error, onRetry }: GitPortalEmptyS
       </svg>
       <p className={cn(
         'text-sm font-medium mb-1',
-        variant === 'firstUse' ? 'text-[var(--hp-primary)]' : 'text-[var(--hp-text-muted)]'
+        variant === 'firstUse' ? 'text-[var(--hp-primary)]' : 'text-[var(--hp-text-tertiary)]'
       )}>
         {content.title}
       </p>
-      <p className="text-xs text-[var(--hp-text-muted)] max-w-[260px]">
+      <p className="text-xs text-[var(--hp-text-tertiary)] max-w-[260px]">
         {content.hint}
       </p>
     </div>

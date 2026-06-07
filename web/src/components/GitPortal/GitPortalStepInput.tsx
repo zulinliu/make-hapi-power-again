@@ -67,7 +67,7 @@ export function GitPortalStepInput({
           <input
             type="text"
             className={cn(
-              'gp-url-input w-full px-3 py-2.5 pr-9 text-sm rounded-lg border bg-[var(--hp-surface)] text-[var(--hp-text)] placeholder:text-[var(--hp-text-muted)] focus:outline-none focus:ring-2 transition-colors',
+              'gp-url-input w-full px-3 py-2.5 pr-9 text-sm rounded-lg border bg-[var(--hp-surface-0)] text-[var(--hp-text-primary)] placeholder:text-[var(--hp-text-tertiary)] focus:outline-none focus:ring-2 transition-colors',
               isEmpty
                 ? 'border-[var(--hp-border)] focus:ring-[var(--hp-primary)]'
                 : isValid
@@ -103,12 +103,12 @@ export function GitPortalStepInput({
         </div>
 
         {isValid && state.parsedRepo && (
-          <p className="mt-1.5 text-xs text-[var(--hp-text-muted)] flex items-center gap-1.5">
+          <p className="mt-1.5 text-xs text-[var(--hp-text-tertiary)] flex items-center gap-1.5">
             <PlatformLabel platform={state.parsedRepo.platform} />
             <span className="opacity-50">/</span>
-            <span className="font-medium text-[var(--hp-text)]">{state.parsedRepo.owner}</span>
+            <span className="font-medium text-[var(--hp-text-primary)]">{state.parsedRepo.owner}</span>
             <span className="opacity-50">/</span>
-            <span className="font-medium text-[var(--hp-text)]">{state.parsedRepo.repoName}</span>
+            <span className="font-medium text-[var(--hp-text-primary)]">{state.parsedRepo.repoName}</span>
           </p>
         )}
       </div>
@@ -121,7 +121,7 @@ export function GitPortalStepInput({
       <div>
         <button
           type="button"
-          className="flex items-center gap-1.5 text-xs text-[var(--hp-text-muted)] hover:text-[var(--hp-text)] transition-colors"
+          className="flex items-center gap-1.5 text-xs text-[var(--hp-text-tertiary)] hover:text-[var(--hp-text-primary)] transition-colors"
           onClick={() => setShowAdvanced(v => !v)}
         >
           <svg
@@ -141,40 +141,40 @@ export function GitPortalStepInput({
         {showAdvanced && (
           <div className="gp-advanced-options mt-3 space-y-2.5 pl-1">
             <div>
-              <label className="block text-xs text-[var(--hp-text-muted)] mb-1" htmlFor="gp-target-dir">
+              <label className="block text-xs text-[var(--hp-text-tertiary)] mb-1" htmlFor="gp-target-dir">
                 {t('gitPortal.input.targetDir')}
               </label>
               <input
                 id="gp-target-dir"
                 type="text"
-                className="gp-input w-full px-3 py-1.5 text-sm rounded-md border border-[var(--hp-border)] bg-[var(--hp-surface)] text-[var(--hp-text)] placeholder:text-[var(--hp-text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--hp-primary)]"
+                className="gp-input w-full px-3 py-1.5 text-sm rounded-md border border-[var(--hp-border)] bg-[var(--hp-surface-0)] text-[var(--hp-text-primary)] placeholder:text-[var(--hp-text-tertiary)] focus:outline-none focus:ring-1 focus:ring-[var(--hp-primary)]"
                 value={state.config.targetDir}
                 onChange={e => setConfig({ targetDir: e.target.value })}
                 placeholder={t('gitPortal.input.targetDirPlaceholder')}
               />
             </div>
             <div>
-              <label className="block text-xs text-[var(--hp-text-muted)] mb-1" htmlFor="gp-branch">
+              <label className="block text-xs text-[var(--hp-text-tertiary)] mb-1" htmlFor="gp-branch">
                 {t('gitPortal.input.branch')}
               </label>
               <input
                 id="gp-branch"
                 type="text"
-                className="gp-input w-full px-3 py-1.5 text-sm rounded-md border border-[var(--hp-border)] bg-[var(--hp-surface)] text-[var(--hp-text)] placeholder:text-[var(--hp-text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--hp-primary)]"
+                className="gp-input w-full px-3 py-1.5 text-sm rounded-md border border-[var(--hp-border)] bg-[var(--hp-surface-0)] text-[var(--hp-text-primary)] placeholder:text-[var(--hp-text-tertiary)] focus:outline-none focus:ring-1 focus:ring-[var(--hp-primary)]"
                 value={state.config.branch}
                 onChange={e => setConfig({ branch: e.target.value })}
                 placeholder={t('gitPortal.input.branchPlaceholder')}
               />
             </div>
             <div>
-              <label className="block text-xs text-[var(--hp-text-muted)] mb-1" htmlFor="gp-depth">
+              <label className="block text-xs text-[var(--hp-text-tertiary)] mb-1" htmlFor="gp-depth">
                 {t('gitPortal.input.depth')}
               </label>
               <input
                 id="gp-depth"
                 type="number"
                 min={1}
-                className="gp-input w-full px-3 py-1.5 text-sm rounded-md border border-[var(--hp-border)] bg-[var(--hp-surface)] text-[var(--hp-text)] placeholder:text-[var(--hp-text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--hp-primary)]"
+                className="gp-input w-full px-3 py-1.5 text-sm rounded-md border border-[var(--hp-border)] bg-[var(--hp-surface-0)] text-[var(--hp-text-primary)] placeholder:text-[var(--hp-text-tertiary)] focus:outline-none focus:ring-1 focus:ring-[var(--hp-primary)]"
                 value={state.config.depth ?? ''}
                 onChange={e => setConfig({ depth: e.target.value ? Number(e.target.value) : null })}
                 placeholder={t('gitPortal.input.depthPlaceholder')}
@@ -197,7 +197,7 @@ export function GitPortalStepInput({
           'gp-start-btn w-full py-2.5 rounded-lg text-sm font-medium transition-colors',
           canStart
             ? 'bg-[var(--hp-primary)] text-[var(--hp-primary-text)] hover:bg-[var(--hp-primary-hover)]'
-            : 'bg-[var(--hp-surface-2)] text-[var(--hp-text-muted)] cursor-not-allowed'
+            : 'bg-[var(--hp-surface-2)] text-[var(--hp-text-tertiary)] cursor-not-allowed'
         )}
         disabled={!canStart}
         onClick={onStart}
