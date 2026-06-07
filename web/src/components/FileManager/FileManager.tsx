@@ -32,6 +32,7 @@ import {
 import type { ApiClient } from '@/api/client'
 import type { FileSearchItem } from '@/types/api'
 import type { FileEntry, FileManagerMode, SortOption, SortField, BreadcrumbSegment } from './types'
+import { GitPortal } from '../GitPortal/GitPortal'
 
 export interface FileManagerProps {
   api?: ApiClient | null
@@ -430,6 +431,7 @@ export function FileManager({ api, machineId, sessionId, initialPath, rootPath: 
   const [searchLoading, setSearchLoading] = useState(false)
   const [searchError, setSearchError] = useState<string | null>(null)
   const [uploadState, setUploadState] = useState<UploadState>({ status: 'idle' })
+  const [gitPortalOpen, setGitPortalOpen] = useState(false)
   const [lastUploadFiles, setLastUploadFiles] = useState<File[]>([])
   const uploadInputRef = useRef<HTMLInputElement>(null)
   const sortedEntries = useMemo(() => sortEntries(entries, sort), [entries, sort])
@@ -1073,6 +1075,32 @@ export function FileManager({ api, machineId, sessionId, initialPath, rootPath: 
           <span className="hidden sm:inline">{t('fm.toolbar.upload')}</span>
         </button>
 
+        <button
+          type="button"
+          onClick={() => setGitPortalOpen(true)}
+          aria-label={t('gitPortal.toolbar.button')}
+          className="fm-toolbar-button fm-desktop-action"
+          style={{
+            minHeight: 44,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '0 var(--hp-space-3)',
+            borderRadius: 'var(--hp-radius-md)',
+            fontSize: 12,
+            fontWeight: 650,
+            border: '1px solid var(--hp-border)',
+            cursor: 'pointer',
+            color: 'var(--hp-text-secondary)',
+            background: 'var(--hp-surface-1)',
+          }}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <rect x="6" y="6" width="12" height="12" rx="1" transform="rotate(45 12 12)" />
+          </svg>
+          <span className="hidden sm:inline">{t('gitPortal.toolbar.button')}</span>
+        </button>
+
         <div className="min-w-0 flex-1" />
         <span
           title={itemCountLabel}
@@ -1282,6 +1310,7 @@ export function FileManager({ api, machineId, sessionId, initialPath, rootPath: 
       <div className="fm-mobile-toolbar flex items-center justify-around border-t border-(--hp-border) md:hidden" style={{ height: 56, background: 'var(--hp-surface-0)', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
         <ToolbarButton label={t('fm.toolbar.newShort')} icon="new" onClick={() => handleCreate('file')} />
         <ToolbarButton label={t('fm.toolbar.uploadShort')} icon="upload" onClick={handleUploadClick} />
+        <ToolbarButton label={t('gitPortal.mobileBtn')} icon="session" onClick={() => setGitPortalOpen(true)} />
         <ToolbarButton label={t('fm.toolbar.sessionShort')} icon="session" onClick={() => {
           navigate({
             to: '/sessions/new',
@@ -1531,6 +1560,19 @@ export function FileManager({ api, machineId, sessionId, initialPath, rootPath: 
       )}
 
       <ToastContainer />
+
+      <GitPortal
+        isOpen={gitPortalOpen}
+        onClose={() => setGitPortalOpen(false)}
+        api={api ?? null}
+        machineId={mode === 'machine' ? (machineId ?? null) : null}
+        sessionId={mode === 'session' ? (sessionId ?? null) : null}
+        currentPath={currentPath ?? ''}
+        onCloneComplete={(clonedPath: string) => {
+          setGitPortalOpen(false)
+          loadDirectory(currentPath ?? '', false)
+        }}
+      />
     </div>
   )
 }

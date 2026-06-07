@@ -883,4 +883,122 @@ export default {
   'fm.date.daysAgo': '{count}d ago',
   'fm.directoryContents': 'Directory contents',
 
+  // ── Git Portal ──────────────────────────────────────────
+  'gitPortal.name': 'Git Portal',
+  'gitPortal.title': 'Git Portal',
+  'gitPortal.slogan': 'Portal to your code universe',
+  'gitPortal.description': 'Clone any Git repository and start coding with AI in seconds',
+  'gitPortal.close': 'Close',
+  'gitPortal.toolbar.button': 'Git Portal',
+  'gitPortal.mobileBtn': 'Clone',
+  'gitPortal.sessionCard.title': 'Import from Git',
+  'gitPortal.sessionCard.desc': 'Clone a remote repository and start a new session',
+
+  // URL input
+  'gitPortal.url.placeholder': 'Paste Git repository URL',
+  'gitPortal.url.invalid': 'Please enter a valid Git URL',
+  'gitPortal.url.supported': 'Supports HTTPS, SSH, and git@ formats',
+  'gitPortal.url.detected': 'Detected {platform} repository {owner}/{repo}',
+
+  // History
+  'gitPortal.history.title': 'Recent portals',
+  'gitPortal.history.empty': 'No recent clones',
+  'gitPortal.history.more': 'Show more',
+  'gitPortal.history.clear': 'Clear history',
+  'gitPortal.favorites.title': 'Favorites',
+  'gitPortal.favorites.empty': 'No favorite repositories yet',
+
+  // Config
+  'gitPortal.advancedOptions': 'Advanced options',
+  'gitPortal.start': 'Start portal',
+  'gitPortal.config.title': 'Clone settings',
+  'gitPortal.config.targetProject': 'Target project',
+  'gitPortal.config.cloneTo': 'Clone to directory',
+  'gitPortal.config.changeDir': 'Change directory',
+  'gitPortal.config.branch': 'Branch',
+  'gitPortal.config.branch.default': 'Default branch',
+  'gitPortal.config.depth': 'Clone depth',
+  'gitPortal.config.depth.full': 'Full clone',
+  'gitPortal.config.depth.shallow': 'Shallow (latest commit only)',
+  'gitPortal.config.depth.custom': 'Custom depth',
+
+  // Auth
+  'gitPortal.auth.title': 'Authentication',
+  'gitPortal.auth.privateRepo': '{platform} private repository',
+  'gitPortal.auth.required': 'This repository requires authentication',
+  'gitPortal.auth.username': 'Username',
+  'gitPortal.auth.usernamePlaceholder': 'Enter username',
+  'gitPortal.auth.password': 'Password',
+  'gitPortal.auth.passwordPlaceholder': 'Enter password',
+  'gitPortal.auth.token': 'Token',
+  'gitPortal.auth.tokenPlaceholder': 'Enter access token',
+  'gitPortal.auth.usePassword': 'Use username & password',
+  'gitPortal.auth.useToken': 'Use Token',
+  'gitPortal.auth.hint.github': 'GitHub no longer supports password auth. Recommend using a Personal Access Token',
+  'gitPortal.auth.hint.gitlab': 'Enter your GitLab username and password',
+  'gitPortal.auth.hint.bitbucket': 'Enter your Bitbucket username and App Password',
+  'gitPortal.auth.hint.generic': 'Enter repository username and password',
+  'gitPortal.auth.howToToken': 'How to get a {platform} Token',
+  'gitPortal.auth.sshDetected': 'Using configured SSH key',
+  'gitPortal.auth.showPassword': 'Show password',
+  'gitPortal.auth.hidePassword': 'Hide password',
+
+  // Progress
+  'gitPortal.progress.connecting': 'Connecting to server...',
+  'gitPortal.progress.transferring': 'Transferring data... {received}',
+  'gitPortal.progress.transferringWithTotal': 'Transferring data... {received} / {total}',
+  'gitPortal.progress.unpacking': 'Unpacking project files...',
+  'gitPortal.progress.filesExtracted': '{count} files extracted',
+  'gitPortal.progress.cancel': 'Cancel portal',
+  'gitPortal.progress.cancelling': 'Cancelling...',
+
+  // Result
+  'gitPortal.result.success': 'Portal complete!',
+  'gitPortal.result.repoInfo': '{repo} / {branch} / {size}',
+  'gitPortal.result.fileCount': '{count} files',
+  'gitPortal.result.openDir': 'Open directory',
+  'gitPortal.result.startSession': 'Start AI session',
+  'gitPortal.result.favorite': 'Star this repo',
+  'gitPortal.result.unfavorite': 'Remove from favorites',
+  'gitPortal.result.favorited': 'Added to favorites',
+
+  // Empty states
+  'gitPortal.empty.noHistory.title': 'No portal history yet',
+  'gitPortal.empty.noHistory.hint': 'Paste a Git repository URL to start your first portal',
+  'gitPortal.empty.noFavorites.title': 'No favorite repositories',
+  'gitPortal.empty.noFavorites.hint': 'Star a repository after cloning to add it here',
+  'gitPortal.empty.firstUse.title': 'Quick start',
+  'gitPortal.empty.firstUse.hint': 'Paste a GitHub repository URL to try it out',
+
+  // Confirmations
+  'gitPortal.confirm.cancelClone': 'Cancel portal? Transferred data will be lost.',
+  'gitPortal.confirm.closeDuringClone': 'Portal in progress. Close anyway?',
+
+  // Toasts
+  'gitPortal.toast.cloneStarted': 'Portal started',
+  'gitPortal.toast.dirRefreshed': 'Directory refreshed',
+  'gitPortal.toast.favorited': 'Added to favorites',
+  'gitPortal.toast.unfavorited': 'Removed from favorites',
+  'gitPortal.toast.historyCleared': 'Clone history cleared',
+
+  // Errors
+  'gitPortal.error.authFailed': 'Authentication failed. Please check your credentials',
+  'gitPortal.error.tokenExpired': 'Token may have expired',
+  'gitPortal.error.networkError': 'Cannot connect to server',
+  'gitPortal.error.dirExists': 'Directory already exists. Choose a different path',
+  'gitPortal.error.diskFull': 'Not enough disk space. Estimated size: {size}',
+  'gitPortal.error.sshKeyMissing': 'No matching SSH key found on the server',
+  'gitPortal.error.retry': 'Retry',
+  'gitPortal.error.switchToToken': 'Switch to Token authentication',
+
+  // Loading
+  'gitPortal.loading.history': 'Loading clone history...',
+  'gitPortal.loading.branches': 'Loading branches...',
+  'gitPortal.loading.validating': 'Validating URL...',
+
+  // A11y
+  'gitPortal.a11y.historyList': 'Recent clone history',
+  'gitPortal.a11y.progressAnimation': 'Clone progress animation',
+  'gitPortal.a11y.urlInput': 'Enter a Git repository URL to clone',
+
 } as const
