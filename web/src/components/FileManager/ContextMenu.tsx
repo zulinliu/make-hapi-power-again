@@ -60,7 +60,7 @@ function MenuIcon({ icon, danger }: { icon: ContextMenuItem['icon']; danger?: bo
         {icon === 'folder' && <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />}
         {icon === 'rename' && <><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></>}
         {icon === 'copyPath' && <><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></>}
-        {icon === 'move' && <><path d="M7 17 17 7" /><path d="M7 7h10v10" /></>}
+        {icon === 'move' && <><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><path d="M12 10v6" /><path d="m9 13 3-3 3 3" /></>}
         {icon === 'copy' && <><path d="M8 7h9a2 2 0 0 1 2 2v9" /><rect x="5" y="4" width="11" height="11" rx="2" /></>}
         {icon === 'download' && <><path d="M12 3v12" /><path d="m7 10 5 5 5-5" /><path d="M5 21h14" /></>}
         {icon === 'delete' && <><path d="M3 6h18" /><path d="M8 6V4h8v2" /><path d="M19 6l-1 14H6L5 6" /><path d="M10 11v5" /><path d="M14 11v5" /></>}
