@@ -904,6 +904,7 @@ export default {
   'gitPortal.history.title': 'Recent portals',
   'gitPortal.history.empty': 'No recent clones',
   'gitPortal.history.more': 'Show more',
+  'gitPortal.history.less': 'Show less',
   'gitPortal.history.clear': 'Clear history',
   'gitPortal.favorites.title': 'Favorites',
   'gitPortal.favorites.empty': 'No favorite repositories yet',
@@ -911,6 +912,17 @@ export default {
   // Config
   'gitPortal.advancedOptions': 'Advanced options',
   'gitPortal.start': 'Start portal',
+
+  // Input step keys (used by GitPortalStepInput)
+  'gitPortal.input.urlPlaceholder': 'Paste Git repository URL',
+  'gitPortal.input.advanced': 'Advanced options',
+  'gitPortal.input.targetDir': 'Clone to directory',
+  'gitPortal.input.targetDirPlaceholder': 'Default: current directory',
+  'gitPortal.input.branch': 'Branch',
+  'gitPortal.input.branchPlaceholder': 'Default branch',
+  'gitPortal.input.depth': 'Clone depth',
+  'gitPortal.input.depthPlaceholder': 'Full clone',
+  'gitPortal.input.start': 'Start portal',
   'gitPortal.config.title': 'Clone settings',
   'gitPortal.config.targetProject': 'Target project',
   'gitPortal.config.cloneTo': 'Clone to directory',
@@ -971,6 +983,7 @@ export default {
   'gitPortal.empty.firstUse.hint': 'Paste a GitHub repository URL to try it out',
 
   // Confirmations
+  'gitPortal.confirm.cancel': 'Cancel portal? Transferred data will be lost.',
   'gitPortal.confirm.cancelClone': 'Cancel portal? Transferred data will be lost.',
   'gitPortal.confirm.closeDuringClone': 'Portal in progress. Close anyway?',
 

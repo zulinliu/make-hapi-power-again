@@ -1,4 +1,5 @@
 import { useTranslation } from '@/lib/use-translation'
+import { cn } from '@/lib/utils'
 
 interface GitPortalAnimationProps {
   phase: 'connecting' | 'transferring' | 'unpacking' | 'done' | 'error'
@@ -93,8 +94,4 @@ export function GitPortalAnimation({ phase, progress, isLowEnd }: GitPortalAnima
       </span>
     </div>
   )
-}
-
-function cn(...classes: (string | boolean | undefined)[]) {
-  return classes.filter(Boolean).join(' ')
 }

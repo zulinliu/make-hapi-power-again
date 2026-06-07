@@ -906,6 +906,7 @@ export default {
   'gitPortal.history.title': '最近传送',
   'gitPortal.history.empty': '暂无克隆记录',
   'gitPortal.history.more': '查看更多',
+  'gitPortal.history.less': '收起',
   'gitPortal.history.clear': '清除历史',
   'gitPortal.favorites.title': '收藏',
   'gitPortal.favorites.empty': '还没有收藏的仓库',
@@ -913,6 +914,17 @@ export default {
   // 配置
   'gitPortal.advancedOptions': '高级选项',
   'gitPortal.start': '开始传送',
+
+  // 输入步骤键 (GitPortalStepInput 使用)
+  'gitPortal.input.urlPlaceholder': '粘贴 Git 仓库地址',
+  'gitPortal.input.advanced': '高级选项',
+  'gitPortal.input.targetDir': '克隆到目录',
+  'gitPortal.input.targetDirPlaceholder': '默认：当前目录',
+  'gitPortal.input.branch': '分支',
+  'gitPortal.input.branchPlaceholder': '默认分支',
+  'gitPortal.input.depth': '克隆深度',
+  'gitPortal.input.depthPlaceholder': '完整克隆',
+  'gitPortal.input.start': '开始传送',
   'gitPortal.config.title': '克隆设置',
   'gitPortal.config.targetProject': '目标项目',
   'gitPortal.config.cloneTo': '克隆到目录',
@@ -973,6 +985,7 @@ export default {
   'gitPortal.empty.firstUse.hint': '粘贴一个 GitHub 仓库地址试试',
 
   // 确认
+  'gitPortal.confirm.cancel': '确定取消传送？已传输的数据将丢失。',
   'gitPortal.confirm.cancelClone': '确定取消传送？已传输的数据将丢失。',
   'gitPortal.confirm.closeDuringClone': '传送尚未完成，确定关闭吗？',
 
