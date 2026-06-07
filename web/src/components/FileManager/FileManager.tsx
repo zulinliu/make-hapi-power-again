@@ -423,7 +423,6 @@ export function FileManager({ api, machineId, sessionId, initialPath, rootPath: 
   const [highlightPath, setHighlightPath] = useState<string | null>(null)
   const [selectedPaths, setSelectedPaths] = useState<Set<string>>(new Set())
   const [isEditMode, setIsEditMode] = useState(false)
-  const [moreMenuVisible, setMoreMenuVisible] = useState(false)
   const [navKey, setNavKey] = useState(0)
   const [searchQuery, setSearchQuery] = useState('')
   const [searchMode, setSearchMode] = useState<SearchMode>('name')
@@ -840,8 +839,6 @@ export function FileManager({ api, machineId, sessionId, initialPath, rootPath: 
 
   const handleBatchDelete = useCallback(() => {
     if (selectedPaths.size === 0) return
-    setIsEditMode(false)
-    setMoreMenuVisible(false)
     setDialog({ type: 'batchDelete', paths: [...selectedPaths] })
   }, [selectedPaths])
 
@@ -854,7 +851,6 @@ export function FileManager({ api, machineId, sessionId, initialPath, rootPath: 
   const handleExitEditMode = useCallback(() => {
     setIsEditMode(false)
     setSelectedPaths(new Set())
-    setMoreMenuVisible(false)
   }, [])
 
   const handleToggleSelectAllEdit = useCallback(() => {
@@ -868,14 +864,6 @@ export function FileManager({ api, machineId, sessionId, initialPath, rootPath: 
     const paths = [...selectedPaths].join('\n')
     void copyToClipboard(paths, t)
   }, [selectedPaths, t])
-
-  // Close more menu on outside click
-  useEffect(() => {
-    if (!moreMenuVisible) return
-    const handleClick = () => setMoreMenuVisible(false)
-    document.addEventListener('mousedown', handleClick)
-    return () => document.removeEventListener('mousedown', handleClick)
-  }, [moreMenuVisible])
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -1406,102 +1394,28 @@ export function FileManager({ api, machineId, sessionId, initialPath, rootPath: 
         >
           {t('fm.batch.copy')}
         </button>
-        <div style={{ position: 'relative' }}>
-          <button
-            type="button"
-            disabled={selectedPaths.size === 0}
-            onClick={(e) => {
-              e.stopPropagation()
-              setMoreMenuVisible((v) => !v)
-            }}
-            style={{
-              minHeight: 44,
-              minWidth: 44,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '0 8px',
-              border: '1px solid var(--hp-border)',
-              borderRadius: 'var(--hp-radius-md)',
-              background: 'transparent',
-              color: selectedPaths.size === 0 ? 'var(--hp-text-tertiary)' : 'var(--hp-text-secondary)',
-              fontSize: 13,
-              fontWeight: 500,
-              cursor: selectedPaths.size === 0 ? 'not-allowed' : 'pointer',
-              opacity: selectedPaths.size === 0 ? 0.5 : 1,
-            }}
-          >
-            {t('fm.edit.more')}
-          </button>
-          {moreMenuVisible && selectedPaths.size > 0 && (
-            <div
-              role="menu"
-              className="fm-edit-more-menu"
-              onClick={(e) => e.stopPropagation()}
-              style={{
-                position: 'absolute',
-                bottom: '100%',
-                right: 0,
-                marginBottom: 4,
-                minWidth: 160,
-                background: 'var(--hp-surface-0)',
-                border: '1px solid var(--hp-border)',
-                borderRadius: 'var(--hp-radius-md)',
-                boxShadow: 'var(--hp-shadow-lg)',
-                padding: '4px 0',
-                zIndex: 60,
-                animation: 'fm-menu-in var(--hp-duration-fast) var(--hp-ease-overlay)',
-              }}
-            >
-              <button
-                type="button"
-                role="menuitem"
-                onClick={() => { setMoreMenuVisible(false); handleBatchDelete() }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  width: '100%',
-                  height: 44,
-                  padding: '0 14px',
-                  border: 'none',
-                  background: 'none',
-                  cursor: 'pointer',
-                  color: 'var(--hp-danger)',
-                  fontSize: 13,
-                  fontWeight: 500,
-                  textAlign: 'left',
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hp-danger-subtle)' }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = 'none' }}
-              >
-                {t('fm.edit.deleteSelected')}
-              </button>
-              <button
-                type="button"
-                role="menuitem"
-                onClick={() => setMoreMenuVisible(false)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  width: '100%',
-                  height: 44,
-                  padding: '0 14px',
-                  border: 'none',
-                  background: 'none',
-                  cursor: 'pointer',
-                  color: 'var(--hp-text-secondary)',
-                  fontSize: 13,
-                  fontWeight: 500,
-                  textAlign: 'left',
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hp-surface-1)' }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = 'none' }}
-              >
-                {t('fm.edit.cancel')}
-              </button>
-            </div>
-          )}
-        </div>
+        <button
+          type="button"
+          disabled={selectedPaths.size === 0}
+          onClick={handleBatchDelete}
+          style={{
+            minHeight: 44,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '0 10px',
+            border: '1px solid var(--hp-border)',
+            borderRadius: 'var(--hp-radius-md)',
+            background: 'transparent',
+            color: selectedPaths.size === 0 ? 'var(--hp-text-tertiary)' : 'var(--hp-danger)',
+            fontSize: 13,
+            fontWeight: 500,
+            cursor: selectedPaths.size === 0 ? 'not-allowed' : 'pointer',
+            opacity: selectedPaths.size === 0 ? 0.5 : 1,
+          }}
+        >
+          {t('fm.edit.deleteSelected')}
+        </button>
         <div style={{ flex: 1 }} />
         <button
           type="button"
