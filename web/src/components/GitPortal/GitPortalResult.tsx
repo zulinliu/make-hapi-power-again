@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import { useTranslation } from '@/lib/use-translation'
+import { cn } from '@/lib/utils'
 import { toggleFavorite, getHistory } from '../../lib/git-portal-storage'
 import { GitPortalAnimation } from './GitPortalAnimation'
 
@@ -98,8 +99,4 @@ export function GitPortalResult({ clonedPath, repoInfo, onClose, onOpenDir, onSt
       </div>
     </div>
   )
-}
-
-function cn(...classes: (string | boolean | undefined)[]) {
-  return classes.filter(Boolean).join(' ')
 }

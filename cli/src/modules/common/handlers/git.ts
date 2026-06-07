@@ -1,7 +1,7 @@
 import { execFile, spawn, type ExecFileOptions } from 'child_process'
 import { promisify } from 'util'
 import { randomUUID } from 'crypto'
-import { writeFileSync, unlinkSync, chmodSync } from 'fs'
+import { writeFileSync, unlinkSync } from 'fs'
 import { join } from 'path'
 import type { CommandResponse } from '@hapipower/protocol/apiTypes'
 import { RPC_METHODS } from '@hapipower/protocol/rpcMethods'
@@ -160,7 +160,7 @@ function validateCloneUrl(url: string): string | null {
         try {
             const parsed = new URL(url)
             const hostname = parsed.hostname
-            // Block private/loopback/link-local addresses
+            // Block private/loopback/link-local addresses (IPv4)
             if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '0.0.0.0') {
                 return 'Cannot clone from localhost'
             }
@@ -172,6 +172,25 @@ function validateCloneUrl(url: string): string | null {
             }
             if (/^0\./.test(hostname)) {
                 return 'Invalid hostname'
+            }
+            // Block IPv6 loopback/private/link-local
+            if (hostname === '::1' || hostname === '[::1]') {
+                return 'Cannot clone from localhost'
+            }
+            if (/^fd[0-9a-f]{2}/i.test(hostname) || /^fe80/i.test(hostname)) {
+                return 'Cannot clone from private/link-local addresses'
+            }
+            // Block IPv6-mapped private IPv4 (e.g., ::ffff:127.0.0.1)
+            const mappedMatch = hostname.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/i)
+            if (mappedMatch) {
+                const ip = mappedMatch[1]
+                if (ip === '127.0.0.1' || ip === '0.0.0.0' || ip.startsWith('10.') || /^172\.(1[6-9]|2\d|3[01])\./.test(ip) || ip.startsWith('192.168.') || ip.startsWith('169.254.') || ip.startsWith('0.')) {
+                    return 'Cannot clone from private/local addresses'
+                }
+            }
+            // Block decimal/octal encoded IPs
+            if (/^\d{8,}$/.test(hostname)) {
+                return 'Cannot clone from local addresses'
             }
         } catch {
             return 'Invalid URL format'
@@ -216,6 +235,7 @@ function parseClonePhase(line: string): { phase: CloneProgressPayload['phase']; 
 function runGitCloneStreaming(
     url: string,
     targetDir: string,
+    cwd: string,
     branch: string | undefined,
     depth: number | undefined,
     cloneId: string,
@@ -233,14 +253,15 @@ function runGitCloneStreaming(
 
         if (auth && auth.type !== 'ssh' && auth.password) {
             askpassScript = join('/tmp', `gp-askpass-${cloneId}.sh`)
-            writeFileSync(askpassScript, `#!/bin/sh\necho "${auth.password.replace(/"/g, '\\"')}"\n`, { mode: 0o600 })
-            chmodSync(askpassScript, 0o600)
+            // Use env var to pass password — avoids shell injection from password containing $, `, etc.
+            env.GP_CLONE_PASSWORD = auth.password
+            writeFileSync(askpassScript, '#!/bin/sh\nprintf \'%s\' "$GP_CLONE_PASSWORD"\n', { mode: 0o600 })
             env.GIT_ASKPASS = askpassScript
             env.GIT_TERMINAL_PROMPT = '0'
         }
 
         const child = spawn('git', args, {
-            cwd: targetDir,
+            cwd,
             timeout: 600_000,
             env
         })
@@ -524,9 +545,15 @@ export function registerGitHandlers(rpcHandlerManager: RpcHandlerManager, workin
             ? require('path').resolve(resolved.cwd, data.targetDir)
             : resolved.cwd
 
+        if (data.targetDir) {
+            const targetValidation = validatePath(targetDir, workingDirectory)
+            if (!targetValidation.valid) return rpcError(targetValidation.error ?? 'Invalid target directory')
+        }
+
         return await runGitCloneStreaming(
             data.url,
             targetDir,
+            resolved.cwd,
             data.branch,
             data.depth,
             data.cloneId ?? randomUUID(),
@@ -548,9 +575,15 @@ export function registerGitHandlers(rpcHandlerManager: RpcHandlerManager, workin
             ? require('path').resolve(resolved.cwd, data.targetDir)
             : resolved.cwd
 
+        if (data.targetDir) {
+            const targetValidation = validatePath(targetDir, workingDirectory)
+            if (!targetValidation.valid) return rpcError(targetValidation.error ?? 'Invalid target directory')
+        }
+
         return await runGitCloneStreaming(
             data.url,
             targetDir,
+            resolved.cwd,
             data.branch,
             data.depth,
             data.cloneId ?? randomUUID(),
