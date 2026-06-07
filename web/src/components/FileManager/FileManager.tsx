@@ -85,7 +85,7 @@ function isValidFileName(name: string): boolean {
   if (name.length > 255) return false
   if (name.includes('/') || name.includes('\\')) return false
   if (/[\x00-\x1f]/.test(name)) return false
-  if (name.includes(':') && !/^[a-zA-Z]:/.test(name)) return false
+  if (name.includes(':')) return false
   return true
 }
 
@@ -114,10 +114,24 @@ function buildReturnTo(machineId: string | null | undefined, path: string, sessi
   return query ? `/browse?${query}` : '/browse'
 }
 
-function isValidDestinationDir(path: string): boolean {
+function isValidDestinationDir(path: string, rootPath: string): boolean {
   const value = path.trim()
   if (!value) return false
   if (value.includes('\0')) return false
+  if (!value.startsWith('/')) return false
+  const parts = value.split('/').filter(Boolean)
+  const resolved: string[] = []
+  for (const part of parts) {
+    if (part === '..') {
+      if (resolved.length === 0) return false
+      resolved.pop()
+    } else if (part !== '.') {
+      resolved.push(part)
+    }
+  }
+  const normalized = '/' + resolved.join('/')
+  const root = normalizePath(rootPath)
+  if (root !== '/' && !normalized.startsWith(root)) return false
   return true
 }
 
@@ -142,13 +156,14 @@ async function copyToClipboard(text: string, t: Translate) {
 
 function arrayBufferToBase64(buffer: ArrayBuffer): string {
   const bytes = new Uint8Array(buffer)
-  const chunkSize = 0x8000
-  let binary = ''
+  const chunkSize = 8192
+  const chunks: string[] = []
   for (let i = 0; i < bytes.length; i += chunkSize) {
-    const chunk = bytes.subarray(i, i + chunkSize)
-    binary += String.fromCharCode(...chunk)
+    const end = Math.min(i + chunkSize, bytes.length)
+    const chunk = bytes.subarray(i, end)
+    chunks.push(String.fromCharCode(...chunk))
   }
-  return btoa(binary)
+  return btoa(chunks.join(''))
 }
 
 function readBrowserFileAsBase64(file: File, onProgress: (progress: number) => void): Promise<string> {
@@ -696,7 +711,7 @@ export function FileManager({ api, machineId, sessionId, initialPath, rootPath: 
     if (dialog.type === 'transfer') {
       const destinationDir = inputValue.trim()
       if (!destinationDir) { showToast(t('fm.toast.destinationRequired'), 'error'); return }
-      if (!isValidDestinationDir(destinationDir)) { showToast(t('fm.toast.invalidDestination'), 'error'); return }
+      if (!isValidDestinationDir(destinationDir, rootPath)) { showToast(t('fm.toast.invalidDestination'), 'error'); return }
     }
 
     setDialogLoading(true)

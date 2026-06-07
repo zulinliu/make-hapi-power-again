@@ -239,14 +239,18 @@ export function createMachinesRoutes(getSyncEngine: () => SyncEngine | null, sto
             return c.json({ error: 'Invalid query', details: parsed.error.flatten() }, 400)
         }
 
-        const result = await searchMachineFiles(engine, machineId, {
-            path: parsed.data.path,
-            query: parsed.data.query ?? '',
-            mode: parsed.data.mode,
-            limit: parsed.data.limit,
-            showHidden: parsed.data.showHidden === 'true'
-        })
-        return c.json(result)
+        try {
+            const result = await searchMachineFiles(engine, machineId, {
+                path: parsed.data.path,
+                query: parsed.data.query ?? '',
+                mode: parsed.data.mode,
+                limit: parsed.data.limit,
+                showHidden: parsed.data.showHidden === 'true'
+            })
+            return c.json(result)
+        } catch (error) {
+            return c.json({ error: 'File operation failed' }, 500)
+        }
     })
 
     app.get('/machines/:id/file', async (c) => {
@@ -262,7 +266,11 @@ export function createMachinesRoutes(getSyncEngine: () => SyncEngine | null, sto
             return c.json({ error: 'Invalid query' }, 400)
         }
 
-        return c.json(await engine.readMachineFile(machineId, parsed.data.path))
+        try {
+            return c.json(await engine.readMachineFile(machineId, parsed.data.path))
+        } catch (error) {
+            return c.json({ error: 'File operation failed' }, 500)
+        }
     })
 
     app.put('/machines/:id/file', async (c) => {
@@ -278,7 +286,11 @@ export function createMachinesRoutes(getSyncEngine: () => SyncEngine | null, sto
             return c.json({ error: 'Invalid request', details: parsed.error.flatten() }, 400)
         }
 
-        return c.json(await engine.writeMachineFile(machineId, parsed.data))
+        try {
+            return c.json(await engine.writeMachineFile(machineId, parsed.data))
+        } catch (error) {
+            return c.json({ error: 'File operation failed' }, 500)
+        }
     })
 
     app.delete('/machines/:id/file', async (c) => {
@@ -294,7 +306,11 @@ export function createMachinesRoutes(getSyncEngine: () => SyncEngine | null, sto
             return c.json({ error: 'Invalid request', details: parsed.error.flatten() }, 400)
         }
 
-        return c.json(await engine.deleteMachineFile(machineId, parsed.data.path, parsed.data.recursive))
+        try {
+            return c.json(await engine.deleteMachineFile(machineId, parsed.data.path, parsed.data.recursive))
+        } catch (error) {
+            return c.json({ error: 'File operation failed' }, 500)
+        }
     })
 
     app.post('/machines/:id/rename', async (c) => {
@@ -310,7 +326,11 @@ export function createMachinesRoutes(getSyncEngine: () => SyncEngine | null, sto
             return c.json({ error: 'Invalid request', details: parsed.error.flatten() }, 400)
         }
 
-        return c.json(await engine.renameMachineFile(machineId, parsed.data.oldPath, parsed.data.newPath))
+        try {
+            return c.json(await engine.renameMachineFile(machineId, parsed.data.oldPath, parsed.data.newPath))
+        } catch (error) {
+            return c.json({ error: 'File operation failed' }, 500)
+        }
     })
 
     app.post('/machines/:id/copy', async (c) => {
@@ -326,7 +346,11 @@ export function createMachinesRoutes(getSyncEngine: () => SyncEngine | null, sto
             return c.json({ error: 'Invalid request', details: parsed.error.flatten() }, 400)
         }
 
-        return c.json(await engine.copyMachineFile(machineId, parsed.data.sourcePath, parsed.data.destinationPath))
+        try {
+            return c.json(await engine.copyMachineFile(machineId, parsed.data.sourcePath, parsed.data.destinationPath))
+        } catch (error) {
+            return c.json({ error: 'File operation failed' }, 500)
+        }
     })
 
     app.post('/machines/:id/move', async (c) => {
@@ -342,7 +366,11 @@ export function createMachinesRoutes(getSyncEngine: () => SyncEngine | null, sto
             return c.json({ error: 'Invalid request', details: parsed.error.flatten() }, 400)
         }
 
-        return c.json(await engine.moveMachineFile(machineId, parsed.data.sourcePath, parsed.data.destinationPath))
+        try {
+            return c.json(await engine.moveMachineFile(machineId, parsed.data.sourcePath, parsed.data.destinationPath))
+        } catch (error) {
+            return c.json({ error: 'File operation failed' }, 500)
+        }
     })
 
     app.post('/machines/:id/mkdir', async (c) => {
@@ -358,7 +386,11 @@ export function createMachinesRoutes(getSyncEngine: () => SyncEngine | null, sto
             return c.json({ error: 'Invalid request', details: parsed.error.flatten() }, 400)
         }
 
-        return c.json(await engine.createMachineDirectory(machineId, parsed.data.path, parsed.data.recursive))
+        try {
+            return c.json(await engine.createMachineDirectory(machineId, parsed.data.path, parsed.data.recursive))
+        } catch (error) {
+            return c.json({ error: 'File operation failed' }, 500)
+        }
     })
 
     app.post('/machines/:id/paths/exists', async (c) => {

@@ -150,9 +150,11 @@ export class ApiMachineClient {
             await Promise.all(uniquePaths.map(async (path) => {
                 const trimmed = path.trim()
                 if (!trimmed) return
+                const resolved = await this.resolveWorkspaceFilePath(trimmed)
+                if (!resolved.success) return
                 try {
-                    const stats = await stat(trimmed)
-                    exists[trimmed] = stats.isDirectory()
+                    await stat(resolved.path)
+                    exists[trimmed] = true
                 } catch {
                     exists[trimmed] = false
                 }
@@ -300,6 +302,10 @@ export class ApiMachineClient {
 
             try {
                 const fileStat = await stat(resolved.path)
+                const MAX_READ_FILE_BYTES = 10 * 1024 * 1024  // 10MB
+                if (fileStat.size > MAX_READ_FILE_BYTES) {
+                    return { success: false, error: `File is too large to read (${Math.round(fileStat.size / 1024 / 1024)}MB). Maximum is 10MB.` }
+                }
                 if (fileStat.isDirectory()) {
                     return { success: false, error: 'Path is a directory' }
                 }
@@ -342,6 +348,10 @@ export class ApiMachineClient {
                 }
 
                 const buffer = Buffer.from(typeof params.content === 'string' ? params.content : '', 'base64')
+                const MAX_WRITE_FILE_BYTES = 10 * 1024 * 1024  // 10MB
+                if (buffer.length > MAX_WRITE_FILE_BYTES) {
+                    return { success: false, error: `File content exceeds maximum size of 10MB` }
+                }
                 await writeFile(resolved.path, buffer)
                 const hash = createHash('sha256').update(buffer).digest('hex')
                 return { success: true, hash }
