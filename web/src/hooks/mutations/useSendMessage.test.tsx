@@ -225,13 +225,115 @@ describe('useSendMessage', () => {
             expect(sendMock).toHaveBeenCalled()
         })
 
-        // api.sendMessage(sessionId, text, localId, attachments, scheduledAt)
+        // api.sendMessage(sessionId, text, localId, attachments, scheduledAt, deliveryMode)
         expect(sendMock).toHaveBeenCalledWith(
             'session-A',
             'hi later',
             'local-retry-1',
             undefined,
             scheduledAt,
+            undefined,
         )
+    })
+
+    it('preserves guide delivery mode when retrying a failed guide message', async () => {
+        const sendMock = vi.fn(async () => {})
+        const api = createMockApi(sendMock)
+
+        const { getMessageWindowState, updateMessageStatus } = await import('@/lib/message-window-store')
+        vi.mocked(getMessageWindowState).mockReturnValueOnce({
+            messages: [],
+            pending: [{
+                id: 'local-guide-retry',
+                seq: null,
+                localId: 'local-guide-retry',
+                content: {
+                    role: 'user',
+                    content: { type: 'text', text: 'steer again' },
+                    meta: {
+                        deliveryMode: 'guide',
+                        guide: {
+                            requestedAt: 1_000,
+                            status: 'failed'
+                        }
+                    }
+                },
+                createdAt: 1_000,
+                invokedAt: null,
+                scheduledAt: null,
+                status: 'failed',
+                originalText: 'steer again',
+            } as never],
+        } as never)
+
+        const { result } = renderHook(
+            () => useSendMessage(api, 'session-A', { isSessionThinking: true }),
+            { wrapper: createWrapper() },
+        )
+
+        act(() => {
+            result.current.retryMessage('local-guide-retry')
+        })
+
+        await waitFor(() => {
+            expect(sendMock).toHaveBeenCalled()
+        })
+
+        expect(updateMessageStatus).toHaveBeenCalledWith('session-A', 'local-guide-retry', 'guiding')
+        expect(sendMock).toHaveBeenCalledWith(
+            'session-A',
+            'steer again',
+            'local-guide-retry',
+            undefined,
+            null,
+            'guide',
+        )
+    })
+
+    it('passes guide delivery mode and creates a guiding optimistic message', async () => {
+        const sendMock = vi.fn(async () => {})
+        const api = createMockApi(sendMock)
+        const { appendOptimisticMessage, updateMessageStatus } = await import('@/lib/message-window-store')
+
+        const { result } = renderHook(
+            () => useSendMessage(api, 'session-A', { isSessionThinking: true }),
+            { wrapper: createWrapper() },
+        )
+
+        act(() => {
+            result.current.sendMessage('steer now', undefined, null, 'guide')
+        })
+
+        await waitFor(() => {
+            expect(sendMock).toHaveBeenCalled()
+        })
+
+        expect(sendMock).toHaveBeenCalledWith(
+            'session-A',
+            'steer now',
+            'local-id-1',
+            undefined,
+            null,
+            'guide',
+        )
+        expect(appendOptimisticMessage).toHaveBeenCalledWith(
+            'session-A',
+            expect.objectContaining({
+                id: 'local-id-1',
+                localId: 'local-id-1',
+                status: 'guiding',
+                content: expect.objectContaining({
+                    meta: expect.objectContaining({
+                        deliveryMode: 'guide',
+                        guide: expect.objectContaining({
+                            status: 'requested'
+                        })
+                    })
+                })
+            })
+        )
+        await waitFor(() => {
+            expect(updateMessageStatus).toHaveBeenCalledWith('session-A', 'local-id-1', 'guiding')
+        })
     })
 })

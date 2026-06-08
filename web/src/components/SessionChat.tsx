@@ -10,6 +10,7 @@ import type {
     Session,
     SlashCommand
 } from '@/types/api'
+import type { MessageDeliveryMode } from '@/types/api'
 import type { ChatBlock, NormalizedMessage } from '@/chat/types'
 import type { Suggestion } from '@/hooks/useActiveSuggestions'
 import { normalizeDecryptedMessage } from '@/chat/normalize'
@@ -115,7 +116,7 @@ export function SessionChat(props: {
     // pre-mutation guards (no-api / no-session / pending) rejected the call OR async
     // inactive-session resume failed. Composer state that should only be cleared on
     // actual send (pendingSchedule) must await this — see handleSend below.
-    onSend: (text: string, attachments?: AttachmentMetadata[], scheduledAt?: number | null) => Promise<boolean>
+    onSend: (text: string, attachments?: AttachmentMetadata[], scheduledAt?: number | null, deliveryMode?: MessageDeliveryMode) => Promise<boolean>
     onFlushPending: () => void
     onAtBottomChange: (atBottom: boolean) => void
     onRetryMessage?: (localId: string) => void
@@ -417,6 +418,7 @@ export function SessionChat(props: {
     // absolute epoch-ms using Date.now() at that moment (send-time base for presets).
     const [pendingSchedule, setPendingSchedule] = useState<PendingSchedule | null>(null)
     const pendingScheduleRef = useRef<PendingSchedule | null>(null)
+    const deliveryModeRef = useRef<MessageDeliveryMode>('queue')
     // Keep render ref in sync so onNew can snapshot at send time
     pendingScheduleRef.current = pendingSchedule
 
@@ -438,8 +440,13 @@ export function SessionChat(props: {
         return () => clearTimeout(timer)
     }, [pendingSchedule])
 
-    const handleSend = useCallback(async (text: string, attachments?: AttachmentMetadata[], scheduledAt?: number | null) => {
-        const accepted = await props.onSend(text, attachments, scheduledAt)
+    const handleSend = useCallback(async (
+        text: string,
+        attachments?: AttachmentMetadata[],
+        scheduledAt?: number | null,
+        deliveryMode?: MessageDeliveryMode
+    ) => {
+        const accepted = await props.onSend(text, attachments, scheduledAt, deliveryMode)
         if (!accepted) return
         // Clear pendingSchedule only after the mutation is actually accepted —
         // covers both pre-mutation guards AND async inactive-session resume
@@ -465,7 +472,8 @@ export function SessionChat(props: {
         onAbort: handleAbort,
         attachmentAdapter,
         allowSendWhenInactive: true,
-        pendingScheduleRef
+        pendingScheduleRef,
+        deliveryModeRef
     })
 
     return (
@@ -549,6 +557,7 @@ export function SessionChat(props: {
                         pendingSchedule={pendingSchedule}
                         onSchedule={setPendingSchedule}
                         onClearSchedule={() => setPendingSchedule(null)}
+                        deliveryModeRef={deliveryModeRef}
                         permissionMode={props.session.permissionMode}
                         collaborationMode={codexCollaborationModeSupported ? props.session.collaborationMode : undefined}
                         threadGoal={reduced.latestGoal}

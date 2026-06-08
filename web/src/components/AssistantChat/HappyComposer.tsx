@@ -5,14 +5,16 @@ import {
     type ClipboardEvent as ReactClipboardEvent,
     type FormEvent as ReactFormEvent,
     type KeyboardEvent as ReactKeyboardEvent,
+    type MutableRefObject,
     type SyntheticEvent as ReactSyntheticEvent,
     useCallback,
     useEffect,
+    useId,
     useMemo,
     useRef,
     useState
 } from 'react'
-import type { AgentState, CodexCollaborationMode, PermissionMode, ThreadGoal } from '@/types/api'
+import type { AgentState, CodexCollaborationMode, MessageDeliveryMode, PermissionMode, ThreadGoal } from '@/types/api'
 import type { Suggestion } from '@/hooks/useActiveSuggestions'
 import { useActiveWord } from '@/hooks/useActiveWord'
 import { useActiveSuggestions } from '@/hooks/useActiveSuggestions'
@@ -40,6 +42,7 @@ export interface TextInputState {
 }
 
 const defaultSuggestionHandler = async (): Promise<Suggestion[]> => []
+const DELIVERY_MODE_OPTIONS = ['queue', 'guide'] as const
 
 export function HappyComposer(props: {
     sessionId?: string
@@ -75,8 +78,10 @@ export function HappyComposer(props: {
     pendingSchedule?: PendingSchedule | null
     onSchedule?: (pending: PendingSchedule) => void
     onClearSchedule?: () => void
+    deliveryModeRef?: MutableRefObject<MessageDeliveryMode>
 }) {
     const { t } = useTranslation()
+    const guideDescriptionId = useId()
     const {
         sessionId,
         disabled = false,
@@ -109,7 +114,8 @@ export function HappyComposer(props: {
         autocompleteSuggestions = defaultSuggestionHandler,
         pendingSchedule: pendingScheduleProp,
         onSchedule: onScheduleProp,
-        onClearSchedule: onClearScheduleProp
+        onClearSchedule: onClearScheduleProp,
+        deliveryModeRef
     } = props
 
     // Use ?? so missing values fall back to default (destructuring defaults only handle undefined)
@@ -152,11 +158,19 @@ export function HappyComposer(props: {
     const [showContinueHint, setShowContinueHint] = useState(false)
     // pendingSchedule is controlled externally when onSchedule prop is provided; otherwise local state
     const [pendingScheduleLocal, setPendingScheduleLocal] = useState<PendingSchedule | null>(null)
+    const [deliveryMode, setDeliveryMode] = useState<MessageDeliveryMode>('queue')
     const isControlled = onScheduleProp !== undefined
     const pendingSchedule = isControlled ? (pendingScheduleProp ?? null) : pendingScheduleLocal
     const setPendingSchedule = isControlled ? onScheduleProp : setPendingScheduleLocal
+    const hasPendingPermission = Boolean(agentState?.requests && Object.keys(agentState.requests).length > 0)
+    const guideModeAvailable = thinking && !hasPendingPermission && !hasAttachments && pendingSchedule === null
+    const activeDeliveryMode: MessageDeliveryMode = guideModeAvailable ? deliveryMode : 'queue'
 
     const textareaRef = useRef<HTMLTextAreaElement>(null)
+    const deliveryModeButtonRefs = useRef<Record<MessageDeliveryMode, HTMLButtonElement | null>>({
+        queue: null,
+        guide: null
+    })
     const prevControlledByUser = useRef(controlledByUser)
 
     useComposerDraft(sessionId, composerText, (text) => api.composer().setText(text))
@@ -170,6 +184,43 @@ export function HappyComposer(props: {
             return { text: composerText, selection: { start: newPos, end: newPos } }
         })
     }, [composerText])
+
+    useEffect(() => {
+        if (!guideModeAvailable && deliveryMode !== 'queue') {
+            setDeliveryMode('queue')
+        }
+    }, [guideModeAvailable, deliveryMode])
+
+    useEffect(() => {
+        if (deliveryModeRef) {
+            deliveryModeRef.current = activeDeliveryMode
+        }
+    }, [deliveryModeRef, activeDeliveryMode])
+
+    const handleDeliveryModeKeyDown = useCallback((event: ReactKeyboardEvent<HTMLButtonElement>, mode: MessageDeliveryMode) => {
+        const currentIndex = DELIVERY_MODE_OPTIONS.indexOf(mode)
+        if (currentIndex === -1) return
+
+        let nextMode: MessageDeliveryMode | null = null
+        if (event.key === 'ArrowLeft') {
+            nextMode = DELIVERY_MODE_OPTIONS[(currentIndex + DELIVERY_MODE_OPTIONS.length - 1) % DELIVERY_MODE_OPTIONS.length]
+        } else if (event.key === 'ArrowRight') {
+            nextMode = DELIVERY_MODE_OPTIONS[(currentIndex + 1) % DELIVERY_MODE_OPTIONS.length]
+        } else if (event.key === 'Home') {
+            nextMode = 'queue'
+        } else if (event.key === 'End') {
+            nextMode = 'guide'
+        } else if (event.key === ' ' || event.key === 'Enter') {
+            nextMode = mode
+        }
+
+        if (!nextMode) return
+        event.preventDefault()
+        setDeliveryMode(nextMode)
+        requestAnimationFrame(() => {
+            deliveryModeButtonRefs.current[nextMode]?.focus()
+        })
+    }, [])
 
     // Track one-time "continue" hint after switching from local to remote.
     useEffect(() => {
@@ -800,6 +851,54 @@ export function HappyComposer(props: {
                         agentFlavor={agentFlavor}
                     />
 
+                    {guideModeAvailable ? (
+                        <div
+                            role="radiogroup"
+                            aria-label={`${t('composer.deliveryMode.label')}: ${
+                                activeDeliveryMode === 'guide'
+                                    ? t('composer.deliveryMode.guideNow')
+                                    : t('composer.deliveryMode.queue')
+                            }`}
+                            aria-describedby={activeDeliveryMode === 'guide' ? guideDescriptionId : undefined}
+                            className="mb-1 flex flex-wrap items-center justify-end gap-x-2 gap-y-1"
+                        >
+                            {activeDeliveryMode === 'guide' ? (
+                                <span id={guideDescriptionId} className="min-w-0 text-right text-[11px] leading-4 text-[var(--app-hint)]">
+                                    {t('composer.deliveryMode.guideDescription')}
+                                </span>
+                            ) : null}
+                            <div className="inline-flex rounded-(--hp-radius-sm) border border-(--hp-border) bg-(--hp-surface-1) p-0.5 text-xs">
+                                {DELIVERY_MODE_OPTIONS.map((mode) => {
+                                    const selected = activeDeliveryMode === mode
+                                    return (
+                                        <button
+                                            key={mode}
+                                            ref={(node) => {
+                                                deliveryModeButtonRefs.current[mode] = node
+                                            }}
+                                            type="button"
+                                            role="radio"
+                                            aria-checked={selected}
+                                            tabIndex={selected ? 0 : -1}
+                                            onClick={() => setDeliveryMode(mode)}
+                                            onKeyDown={(event) => handleDeliveryModeKeyDown(event, mode)}
+                                            onMouseDown={(e) => e.preventDefault()}
+                                            className={`min-h-7 rounded-[calc(var(--hp-radius-sm)-2px)] px-2.5 font-medium transition-colors ${
+                                                selected
+                                                    ? 'bg-(--hp-primary) text-(--hp-text-inverse)'
+                                                    : 'text-(--hp-text-tertiary) hover:bg-(--hp-surface-2) hover:text-(--hp-text-primary)'
+                                            }`}
+                                        >
+                                            {mode === 'guide'
+                                                ? t('composer.deliveryMode.guideNow')
+                                                : t('composer.deliveryMode.queue')}
+                                        </button>
+                                    )
+                                })}
+                            </div>
+                        </div>
+                    ) : null}
+
                     <div className="overflow-hidden rounded-(--hp-radius-md) border border-(--hp-border) bg-(--hp-surface-1) focus-within:ring-2 focus-within:ring-(--hp-primary) transition-shadow">
                         {attachments.length > 0 ? (
                             <div className="flex flex-wrap gap-2 px-4 pt-3">
@@ -846,6 +945,7 @@ export function HappyComposer(props: {
                             onSchedule={setPendingSchedule}
                             onClearSchedule={isControlled ? onClearScheduleProp : () => setPendingScheduleLocal(null)}
                             hasAttachments={hasAttachments}
+                            deliveryMode={activeDeliveryMode}
                         />
                     </div>
                 </ComposerPrimitive.Root>

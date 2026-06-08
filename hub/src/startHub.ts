@@ -190,6 +190,10 @@ export async function startHub(options: StartHubOptions = {}): Promise<HubInstan
         onBackgroundTaskDelta: (sessionId, delta) => syncEngine?.handleBackgroundTaskDelta(sessionId, delta),
         onSessionActivity: (sessionId, updatedAt) => syncEngine?.recordSessionActivity(sessionId, updatedAt),
         onSweepImmediateQueued: (sessionId, now) => syncEngine?.sweepImmediateQueuedOnSessionEnd(sessionId, now),
+        onMessagesConsumed: (sessionId, localIds, invokedAt) => syncEngine?.emitGuideConsumedFromLocalIds(sessionId, localIds, invokedAt),
+        onConnectedSessionCapabilities: (sessionId, socketId, metadata) => syncEngine?.recordConnectedSessionCapabilities(sessionId, socketId, metadata),
+        onSessionSocketClosed: (sessionId, socketId) => syncEngine?.forgetConnectedSessionCapabilities(sessionId, socketId),
+        onCliSocketDisconnect: (socketId) => syncEngine?.forgetSocketGuideCapabilities(socketId),
         getSyncEngine: () => syncEngine
     })
 

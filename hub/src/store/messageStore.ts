@@ -1,7 +1,7 @@
 import type { Database } from 'bun:sqlite'
 
 import type { StoredMessage } from './types'
-import { addMessage, cancelQueuedMessage, deleteQueuedMessageById, lookupQueuedMessage, getMessages, getFirstMessages, getDeliverableMessagesAfter, getMessagesByPosition, getUninvokedLocalMessages, getMatureScheduledMessages, getImmediateQueuedLocalMessages, countFutureScheduledBySessionIds, countFutureScheduledLocalMessages, markMessagesInvoked, mergeSessionMessages, type CancelQueuedMessageResult, type LookupQueuedMessageResult } from './messages'
+import { addMessage, cancelQueuedMessage, deleteQueuedMessageById, lookupQueuedMessage, getMessages, getFirstMessages, getDeliverableMessagesAfter, getMessagesByPosition, getUninvokedLocalMessages, getMatureScheduledMessages, getImmediateQueuedLocalMessages, getMessagesByLocalIds, updateGuideStatusByLocalIds, countFutureScheduledBySessionIds, countFutureScheduledLocalMessages, markMessagesInvoked, mergeSessionMessages, type CancelQueuedMessageResult, type LookupQueuedMessageResult } from './messages'
 
 export class MessageStore {
     private readonly db: Database
@@ -56,6 +56,22 @@ export class MessageStore {
 
     lookupQueuedMessage(sessionId: string, messageId: string): LookupQueuedMessageResult {
         return lookupQueuedMessage(this.db, sessionId, messageId)
+    }
+
+    getMessagesByLocalIds(sessionId: string, localIds: string[]): StoredMessage[] {
+        return getMessagesByLocalIds(this.db, sessionId, localIds)
+    }
+
+    updateGuideStatusByLocalIds(
+        sessionId: string,
+        localIds: string[],
+        update: {
+            status: 'requested' | 'fallback-queued' | 'consumed' | 'failed'
+            fallbackReason?: string
+        },
+        options?: { onlyUninvoked?: boolean }
+    ): StoredMessage[] {
+        return updateGuideStatusByLocalIds(this.db, sessionId, localIds, update, options)
     }
 
     deleteQueuedMessageById(sessionId: string, messageId: string): void {

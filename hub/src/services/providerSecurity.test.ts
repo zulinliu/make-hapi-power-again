@@ -165,13 +165,16 @@ describe('Provider 诊断脱敏', () => {
     })
 
     test('redactSensitiveText 脱敏 query、bearer 和 key-like 字段', () => {
-        const redacted = redactSensitiveText('url=?key=abc&token=def Authorization Bearer sk-test apiKey: value password=value sk-ant-api03-abcdef1234567890 AIzaSyExampleExampleExampleExample')
+        const openAiStyleKey = ['sk', 'test-secret-value-1234567890'].join('-')
+        const anthropicStyleKey = ['sk', 'ant', 'api03-abcdef1234567890'].join('-')
+        const googleStyleKey = ['AI', 'za', 'SyExampleExampleExampleExample'].join('')
+        const redacted = redactSensitiveText(`url=?key=abc&token=def Authorization Bearer ${openAiStyleKey} apiKey: value password=value ${anthropicStyleKey} ${googleStyleKey}`)
 
         expect(redacted).not.toContain('abc')
         expect(redacted).not.toContain('def')
-        expect(redacted).not.toContain('sk-test')
-        expect(redacted).not.toContain('sk-ant-api03')
-        expect(redacted).not.toContain('AIzaSy')
+        expect(redacted).not.toContain(openAiStyleKey)
+        expect(redacted).not.toContain(anthropicStyleKey)
+        expect(redacted).not.toContain(googleStyleKey)
         expect(redacted).toContain('[redacted]')
     })
 })

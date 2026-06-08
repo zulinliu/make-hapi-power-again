@@ -39,6 +39,12 @@ export type SessionBootstrapResult = {
     workingDirectory: string
 }
 
+function buildSessionCapabilities(): Metadata['capabilities'] {
+    return {
+        terminal: true
+    }
+}
+
 export function buildMachineMetadata(options?: { workspaceRoots?: string[] }): MachineMetadata {
     return {
         host: getEnv('HAPI_POWER_HOSTNAME') || os.hostname(),
@@ -79,9 +85,7 @@ export function buildSessionMetadata(options: {
         lifecycleState: 'running',
         lifecycleStateSince: now,
         flavor: options.flavor,
-        capabilities: {
-            terminal: true
-        },
+        capabilities: buildSessionCapabilities(),
         worktree: worktreeInfo ?? undefined,
         ...options.metadataOverrides
     }

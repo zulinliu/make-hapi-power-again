@@ -6,6 +6,7 @@ interface QueueItem<T> {
     modeHash: string;
     localId?: string;
     isolate?: boolean; // If true, this message must be processed alone
+    guide?: boolean;
 }
 
 /**
@@ -17,6 +18,7 @@ export class MessageQueue2<T> {
     private waiter: ((hasMessages: boolean) => void) | null = null;
     private closed = false;
     private onMessageHandler: ((message: string, mode: T) => void) | null = null;
+    private onGuideMessageHandler: ((message: string, mode: T) => void) | null = null;
     onBatchConsumed: ((localIds: string[]) => void) | null = null;
     modeHasher: (mode: T) => string;
 
@@ -34,6 +36,10 @@ export class MessageQueue2<T> {
      */
     setOnMessage(handler: ((message: string, mode: T) => void) | null): void {
         this.onMessageHandler = handler;
+    }
+
+    setOnGuideMessage(handler: ((message: string, mode: T) => void) | null): void {
+        this.onGuideMessageHandler = handler;
     }
 
     /**
@@ -148,6 +154,39 @@ export class MessageQueue2<T> {
     }
 
     /**
+     * Push an isolated message to the front without clearing pending messages.
+     * Used for administrative commands that must run next while preserving guide
+     * and normal queued messages that already exist in Hub.
+     */
+    pushIsolatePreservingQueue(message: string, mode: T, localId?: string): void {
+        if (this.closed) {
+            throw new Error('Cannot push isolated message to closed queue');
+        }
+
+        const modeHash = this.modeHasher(mode);
+        logger.debug(`[MessageQueue2] pushIsolatePreservingQueue() called with mode hash: ${modeHash}`);
+
+        this.queue.unshift({
+            message,
+            mode,
+            modeHash,
+            localId,
+            isolate: true
+        });
+
+        this.onMessageHandler?.(message, mode);
+
+        if (this.waiter) {
+            logger.debug(`[MessageQueue2] Notifying waiter for preserved isolated message`);
+            const waiter = this.waiter;
+            this.waiter = null;
+            waiter(true);
+        }
+
+        logger.debug(`[MessageQueue2] pushIsolatePreservingQueue() completed. Queue size: ${this.queue.length}`);
+    }
+
+    /**
      * Push a message to the beginning of the queue with a mode.
      */
     unshift(message: string, mode: T, localId?: string): void {
@@ -180,6 +219,40 @@ export class MessageQueue2<T> {
         }
 
         logger.debug(`[MessageQueue2] unshift() completed. Queue size: ${this.queue.length}`);
+    }
+
+    /**
+     * Insert a guide message at the front without clearing pending messages.
+     * Guide messages must be consumed alone so they never merge with normal queued batches.
+     */
+    pushGuide(message: string, mode: T, localId?: string): void {
+        if (this.closed) {
+            throw new Error('Cannot push guide to closed queue');
+        }
+
+        const modeHash = this.modeHasher(mode);
+        logger.debug(`[MessageQueue2] pushGuide() called with mode hash: ${modeHash}`);
+
+        this.queue.unshift({
+            message,
+            mode,
+            modeHash,
+            localId,
+            isolate: true,
+            guide: true
+        });
+
+        this.onMessageHandler?.(message, mode);
+        this.onGuideMessageHandler?.(message, mode);
+
+        if (this.waiter) {
+            logger.debug(`[MessageQueue2] Notifying waiter for guide message`);
+            const waiter = this.waiter;
+            this.waiter = null;
+            waiter(true);
+        }
+
+        logger.debug(`[MessageQueue2] pushGuide() completed. Queue size: ${this.queue.length}`);
     }
 
     /**
@@ -235,6 +308,51 @@ export class MessageQueue2<T> {
      */
     size(): number {
         return this.queue.length;
+    }
+
+    hasPendingGuide(): boolean {
+        return this.queue.some((item) => item.guide === true);
+    }
+
+    hasPendingIsolated(): boolean {
+        return this.queue.some((item) => item.isolate === true);
+    }
+
+    hasNextIsolated(): boolean {
+        return this.queue[0]?.isolate === true;
+    }
+
+    hasNextMessageMatching(predicate: (message: string) => boolean): boolean {
+        const nextItem = this.queue[0];
+        return nextItem ? predicate(nextItem.message) : false;
+    }
+
+    downgradePendingGuides(): string[] {
+        const normalItems: QueueItem<T>[] = [];
+        const downgradedItems: QueueItem<T>[] = [];
+        const localIds: string[] = [];
+
+        for (const item of this.queue) {
+            if (item.guide === true) {
+                if (item.localId) {
+                    localIds.push(item.localId);
+                }
+                downgradedItems.push({
+                    ...item,
+                    isolate: false,
+                    guide: false
+                });
+            } else {
+                normalItems.push(item);
+            }
+        }
+
+        if (downgradedItems.length === 0) {
+            return [];
+        }
+
+        this.queue = [...normalItems, ...downgradedItems];
+        return localIds;
     }
 
     /**

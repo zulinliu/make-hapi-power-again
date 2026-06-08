@@ -469,9 +469,18 @@ describe('AppServerEventConverter', () => {
             tokenUsage: {
                 thread_id: 'child-thread',
                 turn_id: 'child-turn',
+                prompt: 'do not persist this prompt',
+                headers: { authorization: 'Bearer secret' },
+                path: '/home/tester/project',
                 last_token_usage: {
                     input_tokens: 10,
-                    output_tokens: 2
+                    output_tokens: 2,
+                    prompt: 'nested secret'
+                },
+                total: {
+                    inputTokens: 20,
+                    outputTokens: 4,
+                    apiKey: 'sk-test'
                 }
             }
         });
@@ -485,6 +494,10 @@ describe('AppServerEventConverter', () => {
                 last_token_usage: {
                     input_tokens: 10,
                     output_tokens: 2
+                },
+                total: {
+                    inputTokens: 20,
+                    outputTokens: 4
                 }
             }
         }]);

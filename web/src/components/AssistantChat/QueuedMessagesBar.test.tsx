@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { DecryptedMessage } from '@/types/api'
-import { computeCanCancel, computeEditPendingSchedule, formatScheduledTime, sortQueuedMessages } from './QueuedMessagesBar'
+import { computeCanCancel, computeEditPendingSchedule, formatScheduledTime, getQueuedMessageStatusLabelKey, sortQueuedMessages } from './QueuedMessagesBar'
 
 /**
  * Unit tests for computeCanCancel — the race guard that prevents sending
@@ -126,6 +126,61 @@ describe('sortQueuedMessages', () => {
         const sched2 = make('sched-far', 600, 10_000)
         const result = sortQueuedMessages([sched2, im2, sched1, im1])
         expect(result.map((m) => m.id)).toEqual(['im1', 'im2', 'sched-near', 'sched-far'])
+    })
+
+    it('places guide messages before ordinary immediate queue messages', () => {
+        const normal = make('normal', 1000)
+        const guide = {
+            ...make('guide', 2000),
+            content: {
+                role: 'user',
+                content: { type: 'text', text: 'guide' },
+                meta: {
+                    deliveryMode: 'guide',
+                    guide: { status: 'requested' },
+                },
+            },
+        } as unknown as DecryptedMessage
+
+        const result = sortQueuedMessages([normal, guide])
+
+        expect(result.map((m) => m.id)).toEqual(['guide', 'normal'])
+    })
+})
+
+describe('getQueuedMessageStatusLabelKey', () => {
+    const makeGuide = (status: string): DecryptedMessage => ({
+        id: `guide-${status}`,
+        localId: `guide-${status}`,
+        createdAt: 1000,
+        seq: 1,
+        invokedAt: null,
+        content: {
+            role: 'user',
+            content: { type: 'text', text: 'guide' },
+            meta: {
+                deliveryMode: 'guide',
+                guide: { status },
+            },
+        },
+    } as unknown as DecryptedMessage)
+
+    it('maps guide statuses to i18n label keys', () => {
+        expect(getQueuedMessageStatusLabelKey(makeGuide('requested'))).toBe('queuedMessages.guide.requested')
+        expect(getQueuedMessageStatusLabelKey(makeGuide('fallback-queued'))).toBe('queuedMessages.guide.fallbackQueued')
+        expect(getQueuedMessageStatusLabelKey(makeGuide('consumed'))).toBe('queuedMessages.guide.consumed')
+        expect(getQueuedMessageStatusLabelKey(makeGuide('failed'))).toBe('queuedMessages.guide.failed')
+    })
+
+    it('returns null for ordinary queue messages', () => {
+        expect(getQueuedMessageStatusLabelKey({
+            id: 'normal',
+            localId: 'normal',
+            createdAt: 1000,
+            seq: 1,
+            invokedAt: null,
+            content: { role: 'user', content: { type: 'text', text: 'normal' } },
+        } as unknown as DecryptedMessage)).toBeNull()
     })
 })
 

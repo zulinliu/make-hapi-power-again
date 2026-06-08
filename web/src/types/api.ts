@@ -1,12 +1,15 @@
 import type {
     DecryptedMessage as ProtocolDecryptedMessage,
     Machine,
+    MessageDeliveryMode,
     RunnerState,
     Session,
     SessionSummary,
     SyncEvent as ProtocolSyncEvent,
     WorktreeMetadata
 } from '@hapipower/protocol/types'
+
+export type { MessageDeliveryMode } from '@hapipower/protocol/types'
 
 export type {
     CodexModelsResponse,
@@ -73,7 +76,7 @@ export type SessionMetadataSummary = {
     worktree?: WorktreeMetadata
 }
 
-export type MessageStatus = 'queued' | 'sending' | 'sent' | 'failed'
+export type MessageStatus = 'queued' | 'guiding' | 'sending' | 'sent' | 'failed'
 
 export type DecryptedMessage = ProtocolDecryptedMessage & {
     status?: MessageStatus

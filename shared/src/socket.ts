@@ -84,6 +84,20 @@ export const UpdateNewMessageBodySchema = z.object({
 
 export type UpdateNewMessageBody = z.infer<typeof UpdateNewMessageBodySchema>
 
+export const UpdateGuideMessageBodySchema = z.object({
+    t: z.literal('guide-message'),
+    sid: z.string(),
+    message: z.object({
+        id: z.string(),
+        seq: z.number(),
+        createdAt: z.number(),
+        localId: z.string().nullable().optional(),
+        content: z.unknown()
+    })
+})
+
+export type UpdateGuideMessageBody = z.infer<typeof UpdateGuideMessageBodySchema>
+
 export const UpdateSessionBodySchema = z.object({
     t: z.literal('update-session'),
     sid: z.string(),
@@ -132,7 +146,7 @@ export type CancelQueuedMessageAck = z.infer<typeof CancelQueuedMessageAckSchema
 export const UpdateSchema = z.object({
     id: z.string(),
     seq: z.number(),
-    body: z.union([UpdateNewMessageBodySchema, UpdateSessionBodySchema, UpdateMachineBodySchema, UpdateCancelQueuedMessageBodySchema]),
+    body: z.union([UpdateNewMessageBodySchema, UpdateGuideMessageBodySchema, UpdateSessionBodySchema, UpdateMachineBodySchema, UpdateCancelQueuedMessageBodySchema]),
     createdAt: z.number()
 })
 
@@ -219,6 +233,7 @@ export interface ClientToServerEvents {
     }) => void
     'session-end': (data: { sid: string; time: number; reason?: SessionEndReason }) => void
     'messages-consumed': (data: { sid: string; localIds: string[] }) => void
+    'guide-fallback': (data: { sid: string; localIds: string[]; reason: 'interrupt-failed' }) => void
     'update-metadata': (data: { sid: string; expectedVersion: number; metadata: unknown }, cb: (answer: UpdateMetadataAck) => void) => void
     'update-state': (data: { sid: string; expectedVersion: number; agentState: unknown | null }, cb: (answer: UpdateStateAck) => void) => void
     'machine-alive': (data: { machineId: string; time: number }) => void

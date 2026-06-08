@@ -582,9 +582,12 @@ describe('normalizeDecryptedMessage', () => {
                         total: {
                             inputTokens: 82_503,
                             cachedInputTokens: 71_808,
-                            outputTokens: 166
+                            outputTokens: 166,
+                            prompt: 'do not persist this prompt'
                         },
-                        modelContextWindow: 258_400
+                        modelContextWindow: 258_400,
+                        headers: { authorization: 'Bearer secret' },
+                        path: '/home/tester/project'
                     }
                 }
             }
@@ -600,6 +603,20 @@ describe('normalizeDecryptedMessage', () => {
             usage: {
                 input_tokens: 82503,
                 output_tokens: 166
+            }
+        })
+        if (!normalized || normalized.role !== 'event') {
+            throw new Error('Expected token-count event')
+        }
+        expect(normalized.content).toEqual({
+            type: 'token-count',
+            info: {
+                total: {
+                    inputTokens: 82_503,
+                    cachedInputTokens: 71_808,
+                    outputTokens: 166
+                },
+                modelContextWindow: 258_400
             }
         })
     })

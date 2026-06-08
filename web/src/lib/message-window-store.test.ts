@@ -11,6 +11,7 @@ import {
     markMessagesConsumed,
     removeOptimisticMessage,
     setAtBottom,
+    updateGuideMessageState,
     VISIBLE_WINDOW_SIZE,
     updateMessageStatus,
 } from '@/lib/message-window-store'
@@ -448,6 +449,33 @@ describe('message-window-store status updates', () => {
 
         const message = getMessageWindowState(SESSION_ID).messages.find((entry) => entry.id === 'server-queued')
         expect(message?.status).toBe('sent')
+    })
+
+    it('updates guide message status and metadata by localId', () => {
+        appendOptimisticMessage(SESSION_ID, makeUserMessage({
+            id: 'local-guide',
+            localId: 'local-guide',
+            status: 'guiding',
+            text: 'steer now',
+        }))
+
+        updateGuideMessageState(SESSION_ID, { localId: 'local-guide' }, 'fallback-queued', 'unsupported-capability')
+
+        let message = getMessageWindowState(SESSION_ID).messages.find((entry) => entry.id === 'local-guide')
+        expect(message?.status).toBe('queued')
+        expect((message?.content as { meta?: { deliveryMode?: string; guide?: { status?: string; fallbackReason?: string } } }).meta).toEqual({
+            deliveryMode: 'guide',
+            guide: {
+                status: 'fallback-queued',
+                fallbackReason: 'unsupported-capability',
+            },
+        })
+
+        updateGuideMessageState(SESSION_ID, { localId: 'local-guide' }, 'consumed')
+
+        message = getMessageWindowState(SESSION_ID).messages.find((entry) => entry.id === 'local-guide')
+        expect(message?.status).toBe('sent')
+        expect((message?.content as { meta?: { guide?: { status?: string } } }).meta?.guide?.status).toBe('consumed')
     })
 })
 

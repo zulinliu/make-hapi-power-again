@@ -55,6 +55,82 @@ function asString(value: unknown): string | null {
     return typeof value === 'string' && value.length > 0 ? value : null;
 }
 
+function asNumber(value: unknown): number | null {
+    return typeof value === 'number' && Number.isFinite(value) ? value : null;
+}
+
+const TOKEN_USAGE_NUMBER_KEYS = new Set([
+    'input_tokens',
+    'inputTokens',
+    'output_tokens',
+    'outputTokens',
+    'total_tokens',
+    'totalTokens',
+    'context_tokens',
+    'contextTokens',
+    'context_window',
+    'contextWindow',
+    'model_context_window',
+    'modelContextWindow',
+    'cache_creation_input_tokens',
+    'cacheCreationInputTokens',
+    'cache_read_input_tokens',
+    'cacheReadInputTokens',
+    'cached_input_tokens',
+    'cachedInputTokens'
+]);
+
+const TOKEN_USAGE_OBJECT_KEYS = new Set([
+    'last',
+    'last_token_usage',
+    'lastTokenUsage',
+    'total',
+    'total_token_usage',
+    'totalTokenUsage'
+]);
+
+const TOKEN_USAGE_STRING_KEYS = new Set([
+    'thread_id',
+    'threadId',
+    'turn_id',
+    'turnId'
+]);
+
+function sanitizeTokenUsageInfo(value: unknown): Record<string, unknown> {
+    const record = asRecord(value);
+    if (!record || Array.isArray(value)) {
+        return {};
+    }
+
+    const sanitized: Record<string, unknown> = {};
+    for (const [key, nestedValue] of Object.entries(record)) {
+        if (TOKEN_USAGE_NUMBER_KEYS.has(key)) {
+            const numberValue = asNumber(nestedValue);
+            if (numberValue !== null) {
+                sanitized[key] = numberValue;
+            }
+            continue;
+        }
+
+        if (TOKEN_USAGE_STRING_KEYS.has(key)) {
+            const stringValue = asString(nestedValue);
+            if (stringValue) {
+                sanitized[key] = stringValue;
+            }
+            continue;
+        }
+
+        if (TOKEN_USAGE_OBJECT_KEYS.has(key)) {
+            const nested = sanitizeTokenUsageInfo(nestedValue);
+            if (Object.keys(nested).length > 0) {
+                sanitized[key] = nested;
+            }
+        }
+    }
+
+    return sanitized;
+}
+
 function parseArguments(value: unknown): unknown {
     if (typeof value !== 'string') {
         return value;
@@ -172,8 +248,8 @@ export function convertCodexEvent(rawEvent: unknown): CodexConversionResult | nu
         }
 
         if (eventType === 'token_count') {
-            const info = asRecord(payloadRecord.info);
-            if (!info) {
+            const info = sanitizeTokenUsageInfo(payloadRecord.info);
+            if (Object.keys(info).length === 0) {
                 return null;
             }
             return {

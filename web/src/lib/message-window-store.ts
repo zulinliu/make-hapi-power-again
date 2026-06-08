@@ -1,6 +1,8 @@
 import type { ApiClient } from '@/api/client'
 import type { DecryptedMessage, MessageStatus, MessagesResponse } from '@/types/api'
 import { normalizeDecryptedMessage } from '@/chat/normalize'
+import type { GuideMessageStatus } from '@/lib/message-delivery'
+import { withGuideMessageState } from '@/lib/message-delivery'
 import { isQueuedForInvocation, isUserMessage, mergeMessages } from '@/lib/messages'
 
 export type MessageWindowState = {
@@ -965,6 +967,50 @@ export function updateMessageStatus(sessionId: string, localId: string, status: 
                 }
                 changed = true
                 return { ...message, status }
+            })
+        }
+        const messages = updateList(prev.messages)
+        const pending = updateList(prev.pending)
+        if (!changed) {
+            return prev
+        }
+        return buildState(prev, { messages, pending })
+    })
+}
+
+function getMessageStatusForGuideState(status: GuideMessageStatus): MessageStatus {
+    if (status === 'requested') return 'guiding'
+    if (status === 'fallback-queued') return 'queued'
+    if (status === 'consumed') return 'sent'
+    return 'failed'
+}
+
+export function updateGuideMessageState(
+    sessionId: string,
+    selector: { localId?: string | null; messageId?: string },
+    status: GuideMessageStatus,
+    fallbackReason?: string
+): void {
+    if (!selector.localId && !selector.messageId) {
+        return
+    }
+    const nextStatus = getMessageStatusForGuideState(status)
+    updateState(sessionId, (prev) => {
+        let changed = false
+        const updateList = (list: DecryptedMessage[]) => {
+            return list.map((message) => {
+                const matchesLocalId = selector.localId ? message.localId === selector.localId : false
+                const matchesMessageId = selector.messageId ? message.id === selector.messageId : false
+                if (!matchesLocalId && !matchesMessageId) {
+                    return message
+                }
+                const withMeta = withGuideMessageState(message, status, fallbackReason)
+                if (withMeta.status === nextStatus) {
+                    changed = true
+                    return withMeta
+                }
+                changed = true
+                return { ...withMeta, status: nextStatus }
             })
         }
         const messages = updateList(prev.messages)

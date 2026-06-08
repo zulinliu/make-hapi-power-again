@@ -137,4 +137,8 @@ export class CodexSession extends AgentSessionBase<EnhancedMode> {
     sendSessionEvent = (event: Parameters<ApiSessionClient['sendSessionEvent']>[0]): void => {
         this.client.sendSessionEvent(event);
     };
+
+    emitGuideFallback = (localIds: string[], reason: 'interrupt-failed'): void => {
+        this.client.emitGuideFallback(localIds, reason);
+    };
 }

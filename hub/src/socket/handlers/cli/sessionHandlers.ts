@@ -56,6 +56,12 @@ const updateStateSchema = z.object({
     agentState: z.unknown().nullable()
 })
 
+const guideFallbackSchema = z.object({
+    sid: z.string(),
+    localIds: z.array(z.string()),
+    reason: z.literal('interrupt-failed')
+})
+
 export type SessionHandlersDeps = {
     store: Store
     resolveSessionAccess: ResolveSessionAccess
@@ -67,10 +73,26 @@ export type SessionHandlersDeps = {
     onSessionActivity?: (sessionId: string, updatedAt: number) => void
     /** Delegates session-end immediate-queue sweep to the MessageService layer. */
     onSweepImmediateQueued?: (sessionId: string, now: number) => void
+    onMessagesConsumed?: (sessionId: string, localIds: string[], invokedAt: number) => void
+    onConnectedSessionCapabilities?: (sessionId: string, socketId: string, metadata: unknown) => void
+    onSessionSocketClosed?: (sessionId: string, socketId: string) => void
 }
 
 export function registerSessionHandlers(socket: CliSocketWithData, deps: SessionHandlersDeps): void {
-    const { store, resolveSessionAccess, emitAccessError, onSessionAlive, onSessionEnd, onWebappEvent, onBackgroundTaskDelta, onSessionActivity, onSweepImmediateQueued } = deps
+    const {
+        store,
+        resolveSessionAccess,
+        emitAccessError,
+        onSessionAlive,
+        onSessionEnd,
+        onWebappEvent,
+        onBackgroundTaskDelta,
+        onSessionActivity,
+        onSweepImmediateQueued,
+        onMessagesConsumed,
+        onConnectedSessionCapabilities,
+        onSessionSocketClosed
+    } = deps
 
     socket.on('message', (data: unknown) => {
         const parsed = messageSchema.safeParse(data)
@@ -204,6 +226,7 @@ export function registerSessionHandlers(socket: CliSocketWithData, deps: Session
                 }
             }
             socket.to(`session:${sid}`).emit('update', update)
+            onConnectedSessionCapabilities?.(sid, socket.id, metadata)
             onWebappEvent?.({ type: 'session-updated', sessionId: sid })
         }
     }
@@ -291,8 +314,42 @@ export function registerSessionHandlers(socket: CliSocketWithData, deps: Session
             // live clients would hide the queued rows while a refresh / secondary
             // client would see them as queued again, diverging the state.
             onWebappEvent?.({ type: 'messages-consumed', sessionId: data.sid, localIds, invokedAt })
+            onMessagesConsumed?.(data.sid, localIds, invokedAt)
         } catch (err) {
             console.error('markMessagesInvoked failed', err)
+        }
+    })
+
+    socket.on('guide-fallback', (data: unknown) => {
+        const parsed = guideFallbackSchema.safeParse(data)
+        if (!parsed.success) {
+            return
+        }
+        const { sid, reason } = parsed.data
+        const localIds = Array.from(new Set(parsed.data.localIds.filter((id) => id.length > 0)))
+        if (localIds.length === 0) {
+            return
+        }
+        const sessionAccess = resolveSessionAccess(sid)
+        if (!sessionAccess.ok) {
+            emitAccessError('session', sid, sessionAccess.reason)
+            return
+        }
+
+        const updatedGuides = store.messages.updateGuideStatusByLocalIds(
+            sid,
+            localIds,
+            { status: 'fallback-queued', fallbackReason: reason },
+            { onlyUninvoked: true }
+        )
+        for (const msg of updatedGuides) {
+            onWebappEvent?.({
+                type: 'guide-fallback-queued',
+                sessionId: sid,
+                messageId: msg.id,
+                localId: msg.localId,
+                reason
+            })
         }
     })
 
@@ -324,6 +381,7 @@ export function registerSessionHandlers(socket: CliSocketWithData, deps: Session
             console.error('session-end sweep failed', err)
         }
 
+        onSessionSocketClosed?.(data.sid, socket.id)
         onSessionEnd?.(data)
     })
 }

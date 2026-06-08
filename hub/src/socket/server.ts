@@ -43,6 +43,10 @@ export type SocketServerDeps = {
     onBackgroundTaskDelta?: (sessionId: string, delta: { started: number; completed: number }) => void
     onSessionActivity?: (sessionId: string, updatedAt: number) => void
     onSweepImmediateQueued?: (sessionId: string, now: number) => void
+    onMessagesConsumed?: (sessionId: string, localIds: string[], invokedAt: number) => void
+    onConnectedSessionCapabilities?: (sessionId: string, socketId: string, metadata: unknown) => void
+    onSessionSocketClosed?: (sessionId: string, socketId: string) => void
+    onCliSocketDisconnect?: (socketId: string) => void
     getSyncEngine?: () => import('../sync/syncEngine').SyncEngine | null
 }
 
@@ -122,7 +126,11 @@ export function createSocketServer(deps: SocketServerDeps): {
         onWebappEvent: deps.onWebappEvent,
         onBackgroundTaskDelta: deps.onBackgroundTaskDelta,
         onSessionActivity: deps.onSessionActivity,
-        onSweepImmediateQueued: deps.onSweepImmediateQueued
+        onSweepImmediateQueued: deps.onSweepImmediateQueued,
+        onMessagesConsumed: deps.onMessagesConsumed,
+        onConnectedSessionCapabilities: deps.onConnectedSessionCapabilities,
+        onSessionSocketClosed: deps.onSessionSocketClosed,
+        onCliSocketDisconnect: deps.onCliSocketDisconnect
     }))
 
     terminalNs.use(async (socket, next) => {

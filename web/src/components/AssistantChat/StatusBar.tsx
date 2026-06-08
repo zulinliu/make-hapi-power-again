@@ -11,25 +11,6 @@ import type { ThreadGoal } from '@/types/api'
 import { getContextBudgetTokens } from '@/chat/modelConfig'
 import { useTranslation } from '@/lib/use-translation'
 
-// Vibing messages for thinking state
-const VIBING_MESSAGES = [
-    "Accomplishing", "Actioning", "Actualizing", "Baking", "Booping", "Brewing",
-    "Calculating", "Cerebrating", "Channelling", "Churning", "Clauding", "Coalescing",
-    "Cogitating", "Computing", "Combobulating", "Concocting", "Conjuring", "Considering",
-    "Contemplating", "Cooking", "Crafting", "Creating", "Crunching", "Deciphering",
-    "Deliberating", "Determining", "Discombobulating", "Divining", "Doing", "Effecting",
-    "Elucidating", "Enchanting", "Envisioning", "Finagling", "Flibbertigibbeting",
-    "Forging", "Forming", "Frolicking", "Generating", "Germinating", "Hatching",
-    "Herding", "Honking", "Ideating", "Imagining", "Incubating", "Inferring",
-    "Manifesting", "Marinating", "Meandering", "Moseying", "Mulling", "Mustering",
-    "Musing", "Noodling", "Percolating", "Perusing", "Philosophising", "Pontificating",
-    "Pondering", "Processing", "Puttering", "Puzzling", "Reticulating", "Ruminating",
-    "Scheming", "Schlepping", "Shimmying", "Simmering", "Smooshing", "Spelunking",
-    "Spinning", "Stewing", "Sussing", "Synthesizing", "Thinking", "Tinkering",
-    "Transmuting", "Unfurling", "Unravelling", "Vibing", "Wandering", "Whirring",
-    "Wibbling", "Wizarding", "Working", "Wrangling"
-]
-
 const PERMISSION_TONE_CLASSES: Record<PermissionModeTone, string> = {
     neutral: 'text-[var(--app-hint)]',
     info: 'text-(--hp-info)',
@@ -42,7 +23,7 @@ function getConnectionStatus(
     thinking: boolean,
     agentState: AgentState | null | undefined,
     backgroundTaskCount: number,
-    t: (key: string) => string
+    t: TranslationFn
 ): { text: string; color: string; dotColor: string; isPulsing: boolean } {
     const hasPermissions = agentState?.requests && Object.keys(agentState.requests).length > 0
 
@@ -65,9 +46,8 @@ function getConnectionStatus(
     }
 
     if (thinking) {
-        const vibingMessage = VIBING_MESSAGES[Math.floor(Math.random() * VIBING_MESSAGES.length)].toLowerCase() + '…'
         return {
-            text: vibingMessage,
+            text: t('status.thinking'),
             color: 'text-(--hp-info)',
             dotColor: 'bg-(--hp-info)',
             isPulsing: true
@@ -76,7 +56,7 @@ function getConnectionStatus(
 
     if (backgroundTaskCount > 0) {
         return {
-            text: `${backgroundTaskCount} background task${backgroundTaskCount > 1 ? 's' : ''} running`,
+            text: t('status.backgroundTasks', { count: backgroundTaskCount }),
             color: 'text-(--hp-info)',
             dotColor: 'bg-(--hp-info)',
             isPulsing: true
@@ -91,30 +71,101 @@ function getConnectionStatus(
     }
 }
 
-function getContextWarning(contextSize: number, maxContextSize: number, t: (key: string, params?: Record<string, string | number>) => string): { text: string; color: string } | null {
-    const percentageUsed = (contextSize / maxContextSize) * 100
-    const percentageRemaining = Math.max(0, 100 - percentageUsed)
-
-    const percent = Math.round(percentageRemaining)
-    if (percentageRemaining <= 5) {
-        return { text: t('misc.percentLeft', { percent }), color: 'text-(--hp-danger)' }
-    } else if (percentageRemaining <= 10) {
-        return { text: t('misc.percentLeft', { percent }), color: 'text-(--hp-warning)' }
-    } else {
-        return { text: t('misc.percentLeft', { percent }), color: 'text-[var(--app-hint)]' }
-    }
-}
-
 function formatTokenCount(value: number): string {
     if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`
     if (value >= 1_000) return `${Math.round(value / 1_000)}k`
     return String(value)
 }
 
-function formatCodexReasoningLabel(effort?: string | null): string {
+export type ContextPulseTone = 'success' | 'warning' | 'danger' | 'unknown'
+export type ContextPulseSource = 'reported' | 'fallback' | 'unknown'
+export type ContextPulseReason = 'ok' | 'missing-usage' | 'missing-window'
+
+type TranslationFn = (key: string, params?: Record<string, string | number>) => string
+
+export type ContextPulseView = {
+    label: string
+    tone: ContextPulseTone
+    percent: number | null
+    usedTokens: number | null
+    maxTokens: number | null
+    source: ContextPulseSource
+    reason: ContextPulseReason
+}
+
+export function getContextPulseView(props: {
+    contextSize?: number
+    contextWindow?: number | null
+    model?: string | null
+    agentFlavor?: string | null
+    t: TranslationFn
+}): ContextPulseView {
+    const reportedContextWindow = typeof props.contextWindow === 'number' && Number.isFinite(props.contextWindow) && props.contextWindow > 0
+        ? props.contextWindow
+        : null
+    const fallbackContextWindow = getContextBudgetTokens(props.model, props.agentFlavor)
+    const maxContextSize = reportedContextWindow ?? fallbackContextWindow
+    const source: ContextPulseSource = reportedContextWindow
+        ? 'reported'
+        : fallbackContextWindow
+            ? 'fallback'
+            : 'unknown'
+
+    if (
+        props.contextSize === undefined
+        || !Number.isFinite(props.contextSize)
+    ) {
+        return {
+            label: props.t('contextPulse.unavailable'),
+            tone: 'unknown',
+            percent: null,
+            usedTokens: null,
+            maxTokens: maxContextSize ?? null,
+            source,
+            reason: 'missing-usage'
+        }
+    }
+
+    if (!maxContextSize || maxContextSize <= 0) {
+        return {
+            label: props.t('contextPulse.unavailable'),
+            tone: 'unknown',
+            percent: null,
+            usedTokens: Math.max(0, Math.round(props.contextSize)),
+            maxTokens: null,
+            source,
+            reason: 'missing-window'
+        }
+    }
+
+    const percent = Math.max(0, Math.min(100, Math.round((props.contextSize / maxContextSize) * 100)))
+    const tone: ContextPulseTone = percent < 60
+        ? 'success'
+        : percent <= 80
+            ? 'warning'
+            : 'danger'
+    return {
+        label: props.t('contextPulse.label', { percent }),
+        tone,
+        percent,
+        usedTokens: Math.max(0, Math.round(props.contextSize)),
+        maxTokens: maxContextSize,
+        source,
+        reason: 'ok'
+    }
+}
+
+const CONTEXT_PULSE_TONE_CLASSES: Record<ContextPulseTone, string> = {
+    success: 'text-(--hp-success)',
+    warning: 'text-(--hp-warning)',
+    danger: 'text-(--hp-danger)',
+    unknown: 'text-[var(--app-hint)]'
+}
+
+function formatCodexReasoningLabel(effort: string | null | undefined, t: TranslationFn): string {
     const normalized = effort?.trim().toLowerCase()
-    if (!normalized || normalized === 'default') return 'reasoning default'
-    return `reasoning ${normalized}`
+    if (!normalized || normalized === 'default') return t('status.reasoning.default')
+    return t('status.reasoning.value', { effort: normalized })
 }
 
 function isCodexFastMode(model?: string | null, effort?: string | null): boolean {
@@ -148,33 +199,55 @@ export function StatusBar(props: {
         [props.active, props.thinking, props.agentState, props.backgroundTaskCount, t]
     )
 
-    const contextWarning = useMemo(
-        () => {
-            if (props.contextSize === undefined) return null
-            const maxContextSize = props.contextWindow ?? getContextBudgetTokens(props.model, props.agentFlavor)
-            if (!maxContextSize) return null
-            return getContextWarning(props.contextSize, maxContextSize, t)
-        },
+    const contextPulse = useMemo(
+        () => getContextPulseView({
+            contextSize: props.contextSize,
+            contextWindow: props.contextWindow,
+            model: props.model,
+            agentFlavor: props.agentFlavor,
+            t
+        }),
         [props.contextSize, props.contextWindow, props.model, props.agentFlavor, t]
     )
-    const contextUsageLabel = useMemo(() => {
-        if (props.contextSize === undefined) return null
-        const maxContextSize = props.contextWindow ?? getContextBudgetTokens(props.model, props.agentFlavor)
-        if (!maxContextSize) return `ctx ${formatTokenCount(props.contextSize)}`
-        const percentageUsed = Math.min(100, Math.round((props.contextSize / maxContextSize) * 100))
-        return `ctx ${formatTokenCount(props.contextSize)}/${formatTokenCount(maxContextSize)} (${percentageUsed}%)`
-    }, [props.contextSize, props.contextWindow, props.model, props.agentFlavor])
-    const compactContextUsageLabel = useMemo(() => {
-        if (props.contextSize === undefined) return null
-        const maxContextSize = props.contextWindow ?? getContextBudgetTokens(props.model, props.agentFlavor)
-        if (!maxContextSize) return `ctx ${formatTokenCount(props.contextSize)}`
-        const percentageLeft = Math.max(0, Math.round(100 - (props.contextSize / maxContextSize) * 100))
-        return `ctx ${formatTokenCount(maxContextSize).toUpperCase()}, ${percentageLeft}% left`
-    }, [props.contextSize, props.contextWindow, props.model, props.agentFlavor])
     const cacheHitLabel = useMemo(() => {
         if (!props.contextCacheRead || props.contextCacheRead <= 0) return null
-        return `cache ${formatTokenCount(props.contextCacheRead)}`
-    }, [props.contextCacheRead])
+        return t('contextPulse.cache', { tokens: formatTokenCount(props.contextCacheRead) })
+    }, [props.contextCacheRead, t])
+    const contextDetailRows = useMemo(() => {
+        const modelLabel = props.model?.trim()
+            || props.agentFlavor
+            || t('contextPulse.unknown')
+        return [
+            {
+                label: t('contextPulse.detail.used'),
+                value: contextPulse.usedTokens === null
+                    ? t('contextPulse.unknown')
+                    : formatTokenCount(contextPulse.usedTokens)
+            },
+            {
+                label: t('contextPulse.detail.max'),
+                value: contextPulse.maxTokens === null
+                    ? t('contextPulse.unknown')
+                    : formatTokenCount(contextPulse.maxTokens)
+            },
+            {
+                label: t('contextPulse.detail.source'),
+                value: t(`contextPulse.source.${contextPulse.source}`)
+            },
+            {
+                label: t('contextPulse.detail.model'),
+                value: modelLabel
+            },
+            {
+                label: t('contextPulse.detail.cache'),
+                value: cacheHitLabel ?? t('contextPulse.none')
+            },
+            {
+                label: t('contextPulse.detail.reason'),
+                value: t(`contextPulse.reason.${contextPulse.reason}`)
+            }
+        ]
+    }, [cacheHitLabel, contextPulse.maxTokens, contextPulse.reason, contextPulse.source, contextPulse.usedTokens, props.agentFlavor, props.model, t])
 
     const permissionMode = props.permissionMode
     const displayPermissionMode = permissionMode
@@ -193,38 +266,55 @@ export function StatusBar(props: {
         ? getCodexCollaborationModeLabel(displayCollaborationMode)
         : null
     const codexReasoningLabel = (props.agentFlavor === 'codex' || props.agentFlavor === 'opencode')
-        ? formatCodexReasoningLabel(props.modelReasoningEffort)
+        ? formatCodexReasoningLabel(props.modelReasoningEffort, t)
         : null
     const codexFastMode = props.agentFlavor === 'codex'
         ? isCodexFastMode(props.model, props.modelReasoningEffort)
         : false
     const goalLabel = props.agentFlavor === 'codex' && props.threadGoal
         ? props.threadGoal.status === 'active'
-            ? 'goal'
-            : `goal ${props.threadGoal.status === 'budgetLimited' ? 'limited' : props.threadGoal.status}`
+            ? t('status.goal.active')
+            : props.threadGoal.status === 'budgetLimited'
+                ? t('status.goal.budgetLimited')
+                : t('status.goal.status', { status: props.threadGoal.status })
         : null
 
     return (
-        <div className="flex min-w-0 items-center justify-between gap-2 px-2 pb-1">
-            <div className="flex min-w-0 items-baseline gap-2 sm:gap-3">
+        <div className="flex min-w-0 flex-wrap items-center justify-between gap-x-2 gap-y-1 px-2 pb-1">
+            <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1 sm:gap-x-3">
                 <div className="flex shrink-0 items-center gap-1.5">
                     <span
-                        className={`h-2 w-2 rounded-full ${connectionStatus.dotColor} ${connectionStatus.isPulsing ? 'animate-pulse' : ''}`}
+                        className={`h-2 w-2 rounded-full ${connectionStatus.dotColor} ${connectionStatus.isPulsing ? 'motion-safe:animate-pulse' : ''}`}
                     />
                     <span className={`whitespace-nowrap text-xs ${connectionStatus.color}`}>
                         {connectionStatus.text}
                     </span>
                 </div>
-                {contextUsageLabel ? (
-                    <span className={`min-w-0 whitespace-nowrap text-[11px] sm:text-[10px] ${contextWarning?.color ?? 'text-[var(--app-hint)]'}`}>
-                        <span className="sm:hidden">
-                            {compactContextUsageLabel}
-                        </span>
-                        <span className="hidden sm:inline">
-                            {contextUsageLabel}{contextWarning ? ` · ${contextWarning.text}` : ''}
-                        </span>
-                    </span>
-                ) : null}
+                <details className="group relative min-w-0">
+                    <summary
+                        aria-label={t('contextPulse.detailsLabel', { label: contextPulse.label })}
+                        className={`list-none rounded-(--hp-radius-sm) px-1 py-0.5 text-[11px] leading-4 sm:text-[10px] ${CONTEXT_PULSE_TONE_CLASSES[contextPulse.tone]} cursor-pointer transition-colors hover:bg-(--hp-surface-2) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--hp-primary) [&::-webkit-details-marker]:hidden`}
+                    >
+                        {contextPulse.label}
+                    </summary>
+                    <div className="fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+96px)] z-30 rounded-(--hp-radius-md) border border-(--hp-border) bg-(--hp-surface-0) p-2 shadow-lg sm:absolute sm:inset-x-auto sm:bottom-auto sm:left-0 sm:top-[calc(100%+4px)] sm:w-[260px]">
+                        <div className="mb-1 text-[11px] font-semibold text-(--hp-text-primary)">
+                            {t('contextPulse.detail.title')}
+                        </div>
+                        <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-[11px] leading-4">
+                            {contextDetailRows.map((row) => (
+                                <div key={row.label} className="contents">
+                                    <dt className="whitespace-nowrap text-[var(--app-hint)]">
+                                        {row.label}
+                                    </dt>
+                                    <dd className="min-w-0 break-words text-right text-(--hp-text-secondary)">
+                                        {row.value}
+                                    </dd>
+                                </div>
+                            ))}
+                        </dl>
+                    </div>
+                </details>
                 {cacheHitLabel ? (
                     <span className="hidden whitespace-nowrap text-[10px] text-[var(--app-hint)] sm:inline">
                         {cacheHitLabel}
@@ -232,29 +322,29 @@ export function StatusBar(props: {
                 ) : null}
             </div>
 
-            <div className="flex min-w-0 shrink-0 items-center gap-2">
+            <div className="flex min-w-0 flex-1 flex-wrap items-center justify-start gap-x-2 gap-y-1 sm:flex-initial sm:justify-end">
                 {codexReasoningLabel ? (
-                    <span className="whitespace-nowrap text-xs text-[var(--app-hint)]">
+                    <span className="min-w-0 max-w-full truncate text-xs text-[var(--app-hint)]">
                         {codexReasoningLabel}
                     </span>
                 ) : null}
                 {codexFastMode ? (
-                    <span className="whitespace-nowrap text-xs text-(--hp-success)">
-                        fast
+                    <span className="min-w-0 max-w-full truncate text-xs text-(--hp-success)">
+                        {t('status.fast')}
                     </span>
                 ) : null}
                 {goalLabel ? (
-                    <span className="whitespace-nowrap text-xs text-[var(--app-link)]">
+                    <span className="min-w-0 max-w-full truncate text-xs text-[var(--app-link)]">
                         {goalLabel}
                     </span>
                 ) : null}
                 {collaborationModeLabel ? (
-                    <span className="whitespace-nowrap text-xs text-(--hp-info)">
+                    <span className="min-w-0 max-w-full truncate text-xs text-(--hp-info)">
                         {collaborationModeLabel}
                     </span>
                 ) : null}
                 {displayPermissionMode ? (
-                    <span className={`whitespace-nowrap text-xs ${permissionModeColor}`}>
+                    <span className={`min-w-0 max-w-full truncate text-xs ${permissionModeColor}`}>
                         {permissionModeLabel}
                     </span>
                 ) : null}

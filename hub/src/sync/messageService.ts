@@ -1,4 +1,4 @@
-import type { AttachmentMetadata, DecryptedMessage } from '@hapipower/protocol/types'
+import type { AttachmentMetadata, DecryptedMessage, MessageDeliveryMode, Session } from '@hapipower/protocol/types'
 import { isRedundantGoalStatusEventContent } from '@hapipower/protocol/messages'
 import type { Server } from 'socket.io'
 import { randomUUID } from 'node:crypto'
@@ -27,6 +27,26 @@ function toVisibleDecryptedMessages(messages: StoredMessageForDelivery[]): Decry
     return messages.filter(isWebVisibleStoredMessage).map(toDecryptedMessage)
 }
 
+function hasGuideCapability(session: Session | undefined | null): boolean {
+    const guide = session?.metadata?.capabilities?.guideInterrupt
+    return guide?.supported === true
+        && guide.preservesQueue === true
+        && guide.isolatedDelivery === true
+}
+
+function hasPendingPermissionRequests(session: Session | undefined | null): boolean {
+    const requests = session?.agentState?.requests
+    return requests != null && Object.keys(requests).length > 0
+}
+
+type GuideFallbackReason = 'not-thinking' | 'unsupported-capability' | 'permission-pending'
+
+function getGuideFallbackReason(session: Session | undefined | null): GuideFallbackReason {
+    if (session?.thinking !== true) return 'not-thinking'
+    if (hasPendingPermissionRequests(session)) return 'permission-pending'
+    return 'unsupported-capability'
+}
+
 export class MessageService {
     /** One scheduled-matured SSE per localId per hub process (cleared on cancel/consume paths here). */
     private readonly scheduledMatureNotifiedLocalIds = new Set<string>()
@@ -35,7 +55,9 @@ export class MessageService {
         private readonly store: Store,
         private readonly io: Server,
         private readonly publisher: EventPublisher,
-        private readonly onSessionActivity?: (sessionId: string, updatedAt: number) => void
+        private readonly onSessionActivity?: (sessionId: string, updatedAt: number) => void,
+        private readonly getSession?: (sessionId: string) => Session | undefined,
+        private readonly hasConnectedGuideCapability?: (sessionId: string) => boolean
     ) {
     }
 
@@ -364,6 +386,7 @@ export class MessageService {
             attachments?: AttachmentMetadata[]
             sentFrom?: 'telegram-bot' | 'webapp'
             scheduledAt?: number | null
+            deliveryMode?: MessageDeliveryMode
         }
     ): Promise<void> {
         // Defence-in-depth invariant for non-REST callers (Telegram bot, MCP,
@@ -378,7 +401,28 @@ export class MessageService {
             throw new Error('sendMessage: scheduled messages with attachments are not supported')
         }
 
+        const deliveryMode = payload.deliveryMode ?? 'queue'
+        if (deliveryMode === 'guide' && payload.scheduledAt != null) {
+            throw new Error('sendMessage: guide messages cannot be scheduled')
+        }
+        if (deliveryMode === 'guide' && (payload.attachments?.length ?? 0) > 0) {
+            throw new Error('sendMessage: guide messages with attachments are not supported')
+        }
+        if (deliveryMode === 'guide' && !payload.localId) {
+            throw new Error('sendMessage: guide messages require localId')
+        }
+
         const sentFrom = payload.sentFrom ?? 'webapp'
+        const session = this.getSession?.(sessionId)
+        const canGuide = deliveryMode === 'guide'
+            && session?.thinking === true
+            && hasGuideCapability(session)
+            && this.hasConnectedGuideCapability?.(sessionId) === true
+            && !hasPendingPermissionRequests(session)
+        const guideFallbackReason = deliveryMode === 'guide' && !canGuide
+            ? getGuideFallbackReason(session)
+            : null
+        const requestedAt = Date.now()
 
         const content = {
             role: 'user',
@@ -388,8 +432,38 @@ export class MessageService {
                 attachments: payload.attachments
             },
             meta: {
-                sentFrom
+                sentFrom,
+                deliveryMode,
+                ...(deliveryMode === 'guide'
+                    ? {
+                        guide: {
+                            requestedAt,
+                            status: canGuide ? 'requested' : 'fallback-queued',
+                            ...(guideFallbackReason ? { fallbackReason: guideFallbackReason } : {})
+                        }
+                    }
+                    : {})
             }
+        }
+
+        const existing = payload.localId
+            ? this.store.messages.getMessagesByLocalIds(sessionId, [payload.localId])[0]
+            : undefined
+        if (existing) {
+            this.publisher.emit({
+                type: 'message-received',
+                sessionId,
+                message: {
+                    id: existing.id,
+                    seq: existing.seq,
+                    localId: existing.localId,
+                    content: existing.content,
+                    createdAt: existing.createdAt,
+                    invokedAt: existing.invokedAt,
+                    scheduledAt: existing.scheduledAt
+                }
+            })
+            return
         }
 
         const msg = this.store.messages.addMessage(
@@ -408,12 +482,13 @@ export class MessageService {
         // as future when it has already become past by the time we check.
         const isFutureScheduled = msg.scheduledAt !== null && msg.scheduledAt > Date.now()
         if (!isFutureScheduled) {
+            const updateType = canGuide ? 'guide-message' as const : 'new-message' as const
             const update = {
                 id: msg.id,
                 seq: msg.seq,
                 createdAt: msg.createdAt,
                 body: {
-                    t: 'new-message' as const,
+                    t: updateType,
                     sid: sessionId,
                     message: {
                         id: msg.id,
@@ -425,6 +500,22 @@ export class MessageService {
                 }
             }
             this.io.of('/cli').to(`session:${sessionId}`).emit('update', update)
+            if (deliveryMode === 'guide') {
+                this.publisher.emit(canGuide
+                    ? {
+                        type: 'guide-requested',
+                        sessionId,
+                        messageId: msg.id,
+                        localId: msg.localId
+                    }
+                    : {
+                        type: 'guide-fallback-queued',
+                        sessionId,
+                        messageId: msg.id,
+                        localId: msg.localId,
+                        reason: guideFallbackReason ?? 'unsupported-capability'
+                    })
+            }
         }
 
         // Always emit message-received to Web SSE so the floating bar renders.
@@ -440,6 +531,27 @@ export class MessageService {
                 invokedAt: msg.invokedAt,
                 scheduledAt: msg.scheduledAt
             }
+        })
+    }
+
+    emitGuideConsumedFromLocalIds(sessionId: string, localIds: string[], invokedAt: number): void {
+        if (localIds.length === 0) return
+
+        const updatedGuides = this.store.messages.updateGuideStatusByLocalIds(
+            sessionId,
+            localIds,
+            { status: 'consumed' }
+        )
+        const guideLocalIds = updatedGuides
+            .map((message) => message.localId)
+            .filter((localId): localId is string => typeof localId === 'string')
+
+        if (guideLocalIds.length === 0) return
+        this.publisher.emit({
+            type: 'guide-consumed',
+            sessionId,
+            localIds: guideLocalIds,
+            invokedAt
         })
     }
 

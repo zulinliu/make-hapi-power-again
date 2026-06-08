@@ -7,6 +7,7 @@ import {
     GitCloneCancelRequestSchema,
     GitCloneRequestSchema,
     MachineSchema,
+    MessageDeliveryModeSchema,
     PermissionModeSchema,
     SessionSchema
 } from './schemas'
@@ -167,7 +168,8 @@ export const SendMessageRequestSchema = z.object({
     text: z.string(),
     localId: z.string().min(1).optional(),
     attachments: z.array(AttachmentMetadataSchema).optional(),
-    scheduledAt: z.number().int().positive().nullable().optional()
+    scheduledAt: z.number().int().positive().nullable().optional(),
+    deliveryMode: MessageDeliveryModeSchema.optional().default('queue')
 }).refine(
     (data) => data.scheduledAt == null || typeof data.localId === 'string',
     { message: 'scheduledAt requires localId', path: ['localId'] }
@@ -177,6 +179,15 @@ export const SendMessageRequestSchema = z.object({
 ).refine(
     (data) => data.scheduledAt == null || !data.attachments?.length,
     { message: 'scheduled messages with attachments are not supported', path: ['attachments'] }
+).refine(
+    (data) => data.deliveryMode !== 'guide' || data.scheduledAt == null,
+    { message: 'guide messages cannot be scheduled', path: ['deliveryMode'] }
+).refine(
+    (data) => data.deliveryMode !== 'guide' || !data.attachments?.length,
+    { message: 'guide messages with attachments are not supported', path: ['deliveryMode'] }
+).refine(
+    (data) => data.deliveryMode !== 'guide' || typeof data.localId === 'string',
+    { message: 'guide messages require localId', path: ['localId'] }
 )
 
 export type SendMessageRequest = z.infer<typeof SendMessageRequestSchema>

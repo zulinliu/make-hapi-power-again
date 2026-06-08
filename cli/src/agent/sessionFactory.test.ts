@@ -190,4 +190,54 @@ describe('bootstrapExistingSession', () => {
 
         expect(metadata.capabilities?.terminal).toBe(true)
     })
+
+    it('does not advertise guide interrupt capability by flavor by default', () => {
+        const codexMetadata = buildSessionMetadata({
+            flavor: 'codex',
+            startedBy: 'terminal',
+            workingDirectory: '/tmp/project',
+            machineId: 'machine-1',
+            now: 123
+        })
+        const claudeMetadata = buildSessionMetadata({
+            flavor: 'claude',
+            startedBy: 'terminal',
+            workingDirectory: '/tmp/project',
+            machineId: 'machine-1',
+            now: 123
+        })
+
+        expect(codexMetadata.capabilities?.terminal).toBe(true)
+        expect(codexMetadata.capabilities?.guideInterrupt).toBeUndefined()
+        expect(claudeMetadata.capabilities?.terminal).toBe(true)
+        expect(claudeMetadata.capabilities?.guideInterrupt).toBeUndefined()
+    })
+
+    it('allows callers to explicitly advertise guide interrupt capability', () => {
+        const metadata = buildSessionMetadata({
+            flavor: 'codex',
+            startedBy: 'terminal',
+            workingDirectory: '/tmp/project',
+            machineId: 'machine-1',
+            now: 123,
+            metadataOverrides: {
+                capabilities: {
+                    terminal: true,
+                    guideInterrupt: {
+                        supported: true,
+                        preservesQueue: true,
+                        isolatedDelivery: true,
+                        version: 1
+                    }
+                }
+            }
+        })
+
+        expect(metadata.capabilities?.guideInterrupt).toEqual({
+            supported: true,
+            preservesQueue: true,
+            isolatedDelivery: true,
+            version: 1
+        })
+    })
 })

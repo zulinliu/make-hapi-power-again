@@ -51,6 +51,75 @@ function normalizeThreadGoal(value: unknown) {
     }
 }
 
+const TOKEN_USAGE_NUMBER_KEYS = new Set([
+    'input_tokens',
+    'inputTokens',
+    'output_tokens',
+    'outputTokens',
+    'total_tokens',
+    'totalTokens',
+    'context_tokens',
+    'contextTokens',
+    'context_window',
+    'contextWindow',
+    'model_context_window',
+    'modelContextWindow',
+    'cache_creation_input_tokens',
+    'cacheCreationInputTokens',
+    'cache_read_input_tokens',
+    'cacheReadInputTokens',
+    'cached_input_tokens',
+    'cachedInputTokens'
+])
+
+const TOKEN_USAGE_OBJECT_KEYS = new Set([
+    'last',
+    'last_token_usage',
+    'lastTokenUsage',
+    'total',
+    'total_token_usage',
+    'totalTokenUsage'
+])
+
+const TOKEN_USAGE_STRING_KEYS = new Set([
+    'thread_id',
+    'threadId',
+    'turn_id',
+    'turnId'
+])
+
+function sanitizeCodexTokenUsageInfo(value: unknown): Record<string, unknown> {
+    if (!isObject(value) || Array.isArray(value)) return {}
+
+    const sanitized: Record<string, unknown> = {}
+    for (const [key, nestedValue] of Object.entries(value)) {
+        if (TOKEN_USAGE_NUMBER_KEYS.has(key)) {
+            const numberValue = asNumber(nestedValue)
+            if (numberValue !== null) {
+                sanitized[key] = numberValue
+            }
+            continue
+        }
+
+        if (TOKEN_USAGE_STRING_KEYS.has(key)) {
+            const stringValue = asString(nestedValue)
+            if (stringValue) {
+                sanitized[key] = stringValue
+            }
+            continue
+        }
+
+        if (TOKEN_USAGE_OBJECT_KEYS.has(key)) {
+            const nested = sanitizeCodexTokenUsageInfo(nestedValue)
+            if (Object.keys(nested).length > 0) {
+                sanitized[key] = nested
+            }
+        }
+    }
+
+    return sanitized
+}
+
 function normalizeCodexTokenUsage(value: unknown, data?: Record<string, unknown>) {
     const info = isObject(value) ? value : null
     if (!info) return null
@@ -631,7 +700,8 @@ export function normalizeAgentRecord(
         }
 
         if (data.type === 'token_count') {
-            const usage = normalizeCodexTokenUsage(data.info, data)
+            const info = sanitizeCodexTokenUsageInfo(data.info)
+            const usage = normalizeCodexTokenUsage(info, data)
             return usage ? {
                 id: messageId,
                 localId,
@@ -639,7 +709,7 @@ export function normalizeAgentRecord(
                 role: 'event',
                 content: {
                     type: 'token-count',
-                    info: data.info
+                    info
                 },
                 isSidechain: false,
                 meta,

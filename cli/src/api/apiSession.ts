@@ -11,6 +11,7 @@ import type { RawJSONLines } from '@/claude/types'
 import { configuration } from '@/configuration'
 import { AGENT_MESSAGE_PAYLOAD_TYPE } from "@hapipower/protocol"
 import type { SessionEndReason } from '@hapipower/protocol'
+import type { MessageDeliveryMode } from '@hapipower/protocol/types'
 import type { ClientToServerEvents, ServerToClientEvents, Update } from '@hapipower/protocol'
 import {
     TerminalClosePayloadSchema,
@@ -160,8 +161,8 @@ export class ApiSessionClient extends EventEmitter {
     private agentState: AgentState | null
     private agentStateVersion: number
     private readonly socket: Socket<ServerToClientEvents, ClientToServerEvents>
-    private pendingMessages: { message: UserMessage; localId?: string }[] = []
-    private pendingMessageCallback: ((message: UserMessage, localId?: string) => void) | null = null
+    private pendingMessages: { message: UserMessage; localId?: string; deliveryMode: MessageDeliveryMode }[] = []
+    private pendingMessageCallback: ((message: UserMessage, localId?: string, deliveryMode?: MessageDeliveryMode) => void) | null = null
     private cancelQueuedMessageCallback: ((localId: string) => boolean) | null = null
     private readonly incomingFilter = new IncomingMessageFilter()
     private backfillInFlight: Promise<void> | null = null
@@ -287,8 +288,11 @@ export class ApiSessionClient extends EventEmitter {
             try {
                 if (!data.body) return
 
-                if (data.body.t === 'new-message') {
-                    this.handleIncomingMessage(data.body.message)
+                if (data.body.t === 'new-message' || data.body.t === 'guide-message') {
+                    this.handleIncomingMessage(
+                        data.body.message,
+                        data.body.t === 'guide-message' ? 'guide' : 'queue'
+                    )
                     return
                 }
 
@@ -336,11 +340,11 @@ export class ApiSessionClient extends EventEmitter {
         this.socket.connect()
     }
 
-    onUserMessage(callback: (data: UserMessage, localId?: string) => void): void {
+    onUserMessage(callback: (data: UserMessage, localId?: string, deliveryMode?: MessageDeliveryMode) => void): void {
         this.pendingMessageCallback = callback
         while (this.pendingMessages.length > 0) {
             const pending = this.pendingMessages.shift()!
-            callback(pending.message, pending.localId)
+            callback(pending.message, pending.localId, pending.deliveryMode)
         }
     }
 
@@ -348,22 +352,25 @@ export class ApiSessionClient extends EventEmitter {
         this.cancelQueuedMessageCallback = callback
     }
 
-    private enqueueUserMessage(message: UserMessage, localId?: string): void {
+    private enqueueUserMessage(message: UserMessage, localId: string | undefined, deliveryMode: MessageDeliveryMode): void {
         if (this.pendingMessageCallback) {
-            this.pendingMessageCallback(message, localId)
+            this.pendingMessageCallback(message, localId, deliveryMode)
         } else {
-            this.pendingMessages.push({ message, localId })
+            this.pendingMessages.push({ message, localId, deliveryMode })
         }
     }
 
-    private handleIncomingMessage(message: { id?: string; seq?: number; localId?: string | null; content: unknown }): void {
+    private handleIncomingMessage(
+        message: { id?: string; seq?: number; localId?: string | null; content: unknown },
+        deliveryMode: MessageDeliveryMode = 'queue'
+    ): void {
         if (!this.incomingFilter.accept({ id: message.id, seq: message.seq })) {
             return
         }
 
         const userResult = UserMessageSchema.safeParse(message.content)
         if (userResult.success) {
-            this.enqueueUserMessage(userResult.data, message.localId ?? undefined)
+            this.enqueueUserMessage(userResult.data, message.localId ?? undefined, deliveryMode)
             return
         }
 
@@ -589,6 +596,11 @@ export class ApiSessionClient extends EventEmitter {
     emitMessagesConsumed(localIds: string[]): void {
         if (localIds.length === 0) return
         this.socket.emit('messages-consumed', { sid: this.sessionId, localIds })
+    }
+
+    emitGuideFallback(localIds: string[], reason: 'interrupt-failed'): void {
+        if (localIds.length === 0) return
+        this.socket.emit('guide-fallback', { sid: this.sessionId, localIds, reason })
     }
 
     sendSessionDeath(reason?: SessionEndReason): void {

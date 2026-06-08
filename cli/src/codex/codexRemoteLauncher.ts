@@ -196,7 +196,7 @@ class CodexRemoteLauncher extends RemoteLauncherBase {
         return React.createElement(CodexDisplay, context);
     }
 
-    private async interruptActiveTurns(reason: string): Promise<void> {
+    private async interruptActiveTurns(reason: string): Promise<boolean> {
         const turnsToInterrupt = [
             ...(this.currentThreadId && this.currentTurnId
                 ? [{ threadId: this.currentThreadId, turnId: this.currentTurnId, role: 'parent' as const }]
@@ -209,7 +209,7 @@ class CodexRemoteLauncher extends RemoteLauncherBase {
         ];
 
         if (turnsToInterrupt.length === 0) {
-            return;
+            return true;
         }
 
         const results = await Promise.allSettled(
@@ -234,6 +234,8 @@ class CodexRemoteLauncher extends RemoteLauncherBase {
                 result.reason
             );
         });
+
+        return results.every((result) => result.status === 'fulfilled');
     }
 
     private async handleAbort(): Promise<void> {
@@ -1812,6 +1814,51 @@ class CodexRemoteLauncher extends RemoteLauncherBase {
             signal.addEventListener('abort', finish, { once: true });
         });
 
+        let guideInterruptInFlight = false;
+        const hasActiveInterruptTarget = (): boolean => (
+            Boolean(this.currentThreadId && this.currentTurnId)
+            || this.activeChildTurns.size > 0
+        );
+        const finishGuideInterruptWait = () => {
+            if (!guideInterruptInFlight) {
+                return;
+            }
+            guideInterruptInFlight = false;
+            wakeLoop();
+        };
+        session.queue.setOnGuideMessage(() => {
+            if (!turnInFlight && !recoveryInFlight) return;
+            if (guideInterruptInFlight) {
+                return;
+            }
+            if (!hasActiveInterruptTarget()) {
+                const localIds = session.queue.downgradePendingGuides();
+                session.emitGuideFallback(localIds, 'interrupt-failed');
+                wakeLoop();
+                return;
+            }
+            guideInterruptInFlight = true;
+            void (async () => {
+                try {
+                    const interrupted = await this.interruptActiveTurns('guide');
+                    if (!interrupted) {
+                        const localIds = session.queue.downgradePendingGuides();
+                        session.emitGuideFallback(localIds, 'interrupt-failed');
+                        finishGuideInterruptWait();
+                        return;
+                    }
+                    if (!turnInFlight && !recoveryInFlight) {
+                        finishGuideInterruptWait();
+                    }
+                } catch (error) {
+                    logger.debug('[Codex] Guide interrupt failed:', error);
+                    const localIds = session.queue.downgradePendingGuides();
+                    session.emitGuideFallback(localIds, 'interrupt-failed');
+                    finishGuideInterruptWait();
+                }
+            })();
+        });
+
         const clearCompactRecovery = (recovery: typeof compactRecovery) => {
             if (!recovery) {
                 return;
@@ -2168,6 +2215,7 @@ class CodexRemoteLauncher extends RemoteLauncherBase {
                 mcpTitleByCallId.clear();
                 pendingAgentToolInputByCallId.clear();
                 childAgentActivityInCurrentTurn = false;
+                finishGuideInterruptWait();
                 wakeLoop();
             }
 
@@ -2935,7 +2983,17 @@ class CodexRemoteLauncher extends RemoteLauncherBase {
 
         while (!this.shouldExit) {
             logActiveHandles('loop-top');
-            if (!pending && (turnInFlight || recoveryInFlight) && session.queue.size() === 0) {
+            const hasPendingGuide = session.queue.hasPendingGuide();
+            const hasPendingInterruptingMessage = hasPendingGuide
+                || session.queue.hasNextIsolated()
+                || session.queue.hasNextMessageMatching((nextMessage) => (
+                    parseGoalCommand(nextMessage) !== null
+                    || parseCodexSpecialCommand(nextMessage).type !== null
+                ));
+            const shouldWaitForActiveTurn = !pending
+                && (turnInFlight || recoveryInFlight)
+                && (!hasPendingInterruptingMessage || guideInterruptInFlight);
+            if (shouldWaitForActiveTurn) {
                 await waitForTurnOrRecovery(this.abortController.signal);
                 if (this.abortController.signal.aborted && !this.shouldExit) {
                     logger.debug('[codex]: Internal wait aborted while turn/recovery was active; continuing');
@@ -3161,6 +3219,7 @@ class CodexRemoteLauncher extends RemoteLauncherBase {
 
     protected async cleanup(): Promise<void> {
         logger.debug('[codex-remote]: cleanup start');
+        this.session.queue.setOnGuideMessage(null);
         this.appServerClient.setStderrHandler(null);
         try {
             await this.appServerClient.disconnect();

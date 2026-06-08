@@ -12,8 +12,20 @@ const MetadataSummarySchema = z.object({
 })
 
 const SessionCapabilitiesSchema = z.object({
-    terminal: z.boolean().optional()
+    terminal: z.boolean().optional(),
+    guideInterrupt: z.object({
+        supported: z.boolean(),
+        preservesQueue: z.boolean(),
+        isolatedDelivery: z.boolean(),
+        version: z.number().int().positive().optional()
+    }).optional()
 })
+
+export { SessionCapabilitiesSchema }
+export type SessionCapabilities = z.infer<typeof SessionCapabilitiesSchema>
+
+export const MessageDeliveryModeSchema = z.enum(['queue', 'guide'])
+export type MessageDeliveryMode = z.infer<typeof MessageDeliveryModeSchema>
 
 export const WorktreeMetadataSchema = z.object({
     basePath: z.string(),
@@ -472,6 +484,27 @@ export const SyncEventSchema = z.discriminatedUnion('type', [
         type: z.literal('messages-consumed'),
         localIds: z.array(z.string()),
         invokedAt: z.number()
+    }),
+    SessionChangedSchema.extend({
+        type: z.literal('guide-requested'),
+        localId: z.string().nullable().optional(),
+        messageId: z.string()
+    }),
+    SessionChangedSchema.extend({
+        type: z.literal('guide-fallback-queued'),
+        localId: z.string().nullable().optional(),
+        messageId: z.string(),
+        reason: z.enum(['not-thinking', 'unsupported-capability', 'permission-pending', 'interrupt-failed'])
+    }),
+    SessionChangedSchema.extend({
+        type: z.literal('guide-consumed'),
+        localIds: z.array(z.string()),
+        invokedAt: z.number()
+    }),
+    SessionChangedSchema.extend({
+        type: z.literal('guide-failed'),
+        localId: z.string().nullable().optional(),
+        reason: z.string()
     }),
     SessionChangedSchema.extend({
         type: z.literal('message-cancelled'),
