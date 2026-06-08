@@ -31,9 +31,14 @@ import type {
 import type { AgentFlavor } from '@hapipower/protocol'
 import type { CancelMessageResponse } from '@hapipower/protocol/schemas'
 import type {
+    CheckProviderResponse,
+    CreateProviderKeyRevealTokenResponse,
     DiscoverModelsResponse,
+    ProviderOverviewResponse,
+    ProviderProtocol,
     ProviderWithAssignments,
     ProvidersListResponse,
+    RevealProviderKeyResponse,
 } from '@hapipower/protocol'
 
 type ApiClientOptions = {
@@ -844,14 +849,18 @@ export class ApiClient {
         return await this.request<{ provider: ProviderWithAssignments }>(`/api/providers/${encodeURIComponent(id)}`)
     }
 
-    async createProvider(data: { name: string; baseUrl: string; apiKey: string; notes?: string }): Promise<{ provider: ProviderWithAssignments }> {
+    async getProviderOverview(): Promise<ProviderOverviewResponse> {
+        return await this.request<ProviderOverviewResponse>('/api/providers/overview')
+    }
+
+    async createProvider(data: { name: string; baseUrl: string; apiKey: string; protocol?: ProviderProtocol; defaultModel?: string | null; notes?: string }): Promise<{ provider: ProviderWithAssignments }> {
         return await this.request<{ provider: ProviderWithAssignments }>('/api/providers', {
             method: 'POST',
             body: JSON.stringify(data)
         })
     }
 
-    async updateProvider(id: string, data: { name?: string; baseUrl?: string; apiKey?: string; notes?: string }): Promise<{ provider: ProviderWithAssignments }> {
+    async updateProvider(id: string, data: { name?: string; baseUrl?: string; apiKey?: string; protocol?: ProviderProtocol; defaultModel?: string | null; notes?: string }): Promise<{ provider: ProviderWithAssignments }> {
         return await this.request<{ provider: ProviderWithAssignments }>(`/api/providers/${encodeURIComponent(id)}`, {
             method: 'PUT',
             body: JSON.stringify(data)
@@ -864,10 +873,10 @@ export class ApiClient {
         })
     }
 
-    async assignProvider(providerId: string, agentFlavor: string, isDefault: boolean): Promise<void> {
+    async assignProvider(providerId: string, agentFlavor: string, isDefault: boolean, model?: string | null): Promise<void> {
         await this.request(`/api/providers/${encodeURIComponent(providerId)}/assign`, {
             method: 'POST',
-            body: JSON.stringify({ agentFlavor, isDefault })
+            body: JSON.stringify({ agentFlavor, isDefault, model })
         })
     }
 
@@ -883,11 +892,37 @@ export class ApiClient {
         })
     }
 
+    async checkProvider(providerId: string): Promise<CheckProviderResponse> {
+        return await this.request<CheckProviderResponse>(`/api/providers/${encodeURIComponent(providerId)}/check`, {
+            method: 'POST',
+            body: JSON.stringify({ force: true })
+        })
+    }
+
+    async rotateProviderKey(providerId: string, apiKey: string): Promise<{ provider: ProviderWithAssignments }> {
+        return await this.request<{ provider: ProviderWithAssignments }>(`/api/providers/${encodeURIComponent(providerId)}/rotate-key`, {
+            method: 'POST',
+            body: JSON.stringify({ apiKey })
+        })
+    }
+
+    async revealProviderKey(providerId: string): Promise<RevealProviderKeyResponse> {
+        const grant = await this.request<CreateProviderKeyRevealTokenResponse>(`/api/providers/${encodeURIComponent(providerId)}/reveal-key-token`, {
+            method: 'POST',
+            body: JSON.stringify({ confirm: 'reveal-provider-key' })
+        })
+        return await this.request<RevealProviderKeyResponse>(`/api/providers/${encodeURIComponent(providerId)}/reveal-key`, {
+            method: 'POST',
+            body: JSON.stringify({ revealToken: grant.revealToken })
+        })
+    }
+
     async getFlavorModels(flavor: string): Promise<{ models: Array<{ id: string; name: string; providerId: string; providerName: string }> }> {
         return await this.request(`/api/providers/flavor/${encodeURIComponent(flavor)}/models`)
     }
 
     async getProviderApiKey(providerId: string): Promise<{ apiKey: string }> {
-        return await this.request<{ apiKey: string }>(`/api/providers/${encodeURIComponent(providerId)}/api-key`)
+        const response = await this.revealProviderKey(providerId)
+        return { apiKey: response.apiKey }
     }
 }

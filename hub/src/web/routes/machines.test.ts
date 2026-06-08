@@ -1,9 +1,14 @@
-import { describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
 import { Hono } from 'hono'
 import type { Machine, SyncEngine } from '../../sync/syncEngine'
 import type { Store } from '../../store'
+import type { StoredProvider } from '../../store/providerStore'
 import type { WebAppEnv } from '../middleware/auth'
+import { getDefaultProviderCapabilities } from '../../services/providerSecurity'
+import { encryptAES256GCM, getEncryptionKey } from '../../utils/crypto'
 import { createMachinesRoutes } from './machines'
+
+const TEST_ENCRYPTION_KEY = '3'.repeat(64)
 
 const mockStore = {
     providers: {
@@ -32,6 +37,34 @@ function createMachine(overrides?: Partial<Machine>): Machine {
     }
 }
 
+function createStoredProvider(overrides?: Partial<StoredProvider>): StoredProvider {
+    const now = 1
+    return {
+        id: '00000000-0000-4000-8000-000000000181',
+        namespace: 'default',
+        name: 'Example Gateway',
+        baseUrl: 'https://api.example.com/v1',
+        apiKeyEncrypted: encryptAES256GCM('provider-secret', getEncryptionKey()),
+        protocol: 'openai',
+        defaultModel: 'gpt-5.5',
+        health: {
+            status: 'online',
+            latencyMs: 120,
+            checkedAt: now,
+            errorCode: null,
+            errorMessage: null,
+            protocolDetected: 'openai',
+            capabilities: getDefaultProviderCapabilities(),
+        },
+        modelCache: [],
+        modelCacheUpdatedAt: null,
+        notes: '',
+        createdAt: now,
+        updatedAt: now,
+        ...overrides,
+    }
+}
+
 type MachineFileRouteCall =
     | { operation: 'read'; machineId: string; path: string }
     | { operation: 'write'; machineId: string; options: { path: string; content: string; expectedHash?: string; forceOverwrite?: boolean } }
@@ -42,6 +75,21 @@ type MachineFileRouteCall =
     | { operation: 'mkdir'; machineId: string; path: string; recursive?: boolean }
 
 describe('machines routes', () => {
+    let originalEncryptionKey: string | undefined
+
+    beforeEach(() => {
+        originalEncryptionKey = process.env.HAPI_POWER_PROVIDER_ENCRYPTION_KEY
+        process.env.HAPI_POWER_PROVIDER_ENCRYPTION_KEY = TEST_ENCRYPTION_KEY
+    })
+
+    afterEach(() => {
+        if (originalEncryptionKey === undefined) {
+            delete process.env.HAPI_POWER_PROVIDER_ENCRYPTION_KEY
+        } else {
+            process.env.HAPI_POWER_PROVIDER_ENCRYPTION_KEY = originalEncryptionKey
+        }
+    })
+
     it('returns Codex models for an online machine', async () => {
         const machine = createMachine()
         const engine = {
@@ -170,6 +218,189 @@ describe('machines routes', () => {
             ],
             currentModelId: 'composer-2.5'
         })
+    })
+
+    it('applies provider config after spawning a session with providerId', async () => {
+        const machine = createMachine()
+        const provider = createStoredProvider()
+        const applySessionConfigCalls: Array<[string, Record<string, unknown>]> = []
+        const engine = {
+            getMachine: () => machine,
+            getMachineByNamespace: () => machine,
+            spawnSession: async () => ({ type: 'success', sessionId: 'spawned-1' }),
+            applySessionConfig: async (sessionId: string, config: Record<string, unknown>) => {
+                applySessionConfigCalls.push([sessionId, config])
+            },
+        } as Partial<SyncEngine>
+        const store = {
+            providers: {
+                getById: (id: string, namespace: string) =>
+                    id === provider.id && namespace === provider.namespace ? provider : null,
+            },
+        } as unknown as Store
+
+        const app = new Hono<WebAppEnv>()
+        app.use('*', async (c, next) => {
+            c.set('namespace', 'default')
+            await next()
+        })
+        app.route('/api', createMachinesRoutes(() => engine as SyncEngine, store))
+
+        const response = await app.request('/api/machines/machine-1/spawn', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+                directory: '/home/tester/project',
+                agent: 'codex',
+                model: 'gpt-5.5',
+                providerId: provider.id,
+            })
+        })
+
+        const responseText = await response.text()
+        expect(response.status).toBe(200)
+        expect(JSON.parse(responseText)).toEqual({ type: 'success', sessionId: 'spawned-1' })
+        expect(responseText).not.toContain('provider-secret')
+        expect(applySessionConfigCalls).toEqual([
+            ['spawned-1', {
+                model: 'gpt-5.5',
+                providerBaseUrl: 'https://api.example.com/v1',
+                providerApiKey: 'provider-secret',
+            }]
+        ])
+    })
+
+    it('rejects spawn before creating a session when providerId is missing from the machine namespace', async () => {
+        const machine = createMachine()
+        const spawnSessionCalls: Array<{ directory: string; agent?: string; model?: string }> = []
+        const applySessionConfigCalls: Array<[string, Record<string, unknown>]> = []
+        const engine = {
+            getMachine: () => machine,
+            getMachineByNamespace: () => machine,
+            spawnSession: async (_machineId: string, directory: string, agent?: string, model?: string) => {
+                spawnSessionCalls.push({ directory, agent, model })
+                return { type: 'success', sessionId: 'spawned-2' }
+            },
+            applySessionConfig: async (sessionId: string, config: Record<string, unknown>) => {
+                applySessionConfigCalls.push([sessionId, config])
+            },
+        } as Partial<SyncEngine>
+        const store = {
+            providers: {
+                getById: () => null,
+            },
+        } as unknown as Store
+
+        const app = new Hono<WebAppEnv>()
+        app.use('*', async (c, next) => {
+            c.set('namespace', 'default')
+            await next()
+        })
+        app.route('/api', createMachinesRoutes(() => engine as SyncEngine, store))
+
+        const response = await app.request('/api/machines/machine-1/spawn', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+                directory: '/home/tester/project',
+                agent: 'codex',
+                model: 'gpt-5.5',
+                providerId: '00000000-0000-4000-8000-000000000182',
+            })
+        })
+
+        const responseText = await response.text()
+        expect(response.status).toBe(400)
+        expect(JSON.parse(responseText)).toEqual({ error: 'Provider not found' })
+        expect(responseText).not.toContain('provider-secret')
+        expect(spawnSessionCalls).toEqual([])
+        expect(applySessionConfigCalls).toEqual([])
+    })
+
+    it('returns 409 without leaking secrets when provider config cannot be applied after spawn', async () => {
+        const machine = createMachine()
+        const provider = createStoredProvider()
+        const engine = {
+            getMachine: () => machine,
+            getMachineByNamespace: () => machine,
+            spawnSession: async () => ({ type: 'success', sessionId: 'spawned-3' }),
+            applySessionConfig: async () => {
+                throw new Error('apply failed with provider-secret')
+            },
+        } as Partial<SyncEngine>
+        const store = {
+            providers: {
+                getById: (id: string, namespace: string) =>
+                    id === provider.id && namespace === provider.namespace ? provider : null,
+            },
+        } as unknown as Store
+
+        const app = new Hono<WebAppEnv>()
+        app.use('*', async (c, next) => {
+            c.set('namespace', 'default')
+            await next()
+        })
+        app.route('/api', createMachinesRoutes(() => engine as SyncEngine, store))
+
+        const response = await app.request('/api/machines/machine-1/spawn', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+                directory: '/home/tester/project',
+                agent: 'codex',
+                model: 'gpt-5.5',
+                providerId: provider.id,
+            })
+        })
+
+        const responseText = await response.text()
+        expect(response.status).toBe(409)
+        expect(JSON.parse(responseText)).toEqual({ error: 'Provider config could not be applied to spawned session' })
+        expect(responseText).not.toContain('provider-secret')
+    })
+
+    it('returns 409 without spawning when provider key cannot be decrypted', async () => {
+        const machine = createMachine()
+        const provider = createStoredProvider({ apiKeyEncrypted: 'not-encrypted' })
+        const spawnSessionCalls: string[] = []
+        const engine = {
+            getMachine: () => machine,
+            getMachineByNamespace: () => machine,
+            spawnSession: async () => {
+                spawnSessionCalls.push('spawn')
+                return { type: 'success', sessionId: 'spawned-4' }
+            },
+        } as Partial<SyncEngine>
+        const store = {
+            providers: {
+                getById: (id: string, namespace: string) =>
+                    id === provider.id && namespace === provider.namespace ? provider : null,
+            },
+        } as unknown as Store
+
+        const app = new Hono<WebAppEnv>()
+        app.use('*', async (c, next) => {
+            c.set('namespace', 'default')
+            await next()
+        })
+        app.route('/api', createMachinesRoutes(() => engine as SyncEngine, store))
+
+        const response = await app.request('/api/machines/machine-1/spawn', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+                directory: '/home/tester/project',
+                agent: 'codex',
+                model: 'gpt-5.5',
+                providerId: provider.id,
+            })
+        })
+
+        const responseText = await response.text()
+        expect(response.status).toBe(409)
+        expect(JSON.parse(responseText)).toEqual({ error: 'Provider key could not be decrypted' })
+        expect(responseText).not.toContain('not-encrypted')
+        expect(spawnSessionCalls).toEqual([])
     })
 
     it('forwards machine file routes to SyncEngine', async () => {

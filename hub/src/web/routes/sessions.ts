@@ -364,7 +364,7 @@ export function createSessionsRoutes(getSyncEngine: () => SyncEngine | null, sto
             const config: Record<string, unknown> = { model: parsed.data.model }
 
             if (parsed.data.providerId) {
-                const provider = store.providers.getById(parsed.data.providerId)
+                const provider = store.providers.getById(parsed.data.providerId, sessionResult.session.namespace)
                 if (!provider) {
                     return c.json({ error: 'Provider not found' }, 400)
                 }

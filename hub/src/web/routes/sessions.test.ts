@@ -1,9 +1,14 @@
-import { describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
 import { Hono } from 'hono'
+import type { StoredProvider } from '../../store/providerStore'
 import type { Session, SyncEngine } from '../../sync/syncEngine'
 import type { WebAppEnv } from '../middleware/auth'
 import { createSessionsRoutes } from './sessions'
 import type { Store } from '../../store'
+import { getDefaultProviderCapabilities } from '../../services/providerSecurity'
+import { encryptAES256GCM, getEncryptionKey } from '../../utils/crypto'
+
+const TEST_ENCRYPTION_KEY = '2'.repeat(64)
 
 function createSession(overrides?: Partial<Session>): Session {
     const baseMetadata = {
@@ -51,9 +56,38 @@ function createSession(overrides?: Partial<Session>): Session {
     }
 }
 
+function createStoredProvider(overrides?: Partial<StoredProvider>): StoredProvider {
+    const now = 1
+    return {
+        id: '00000000-0000-4000-8000-000000000180',
+        namespace: 'default',
+        name: 'Example Gateway',
+        baseUrl: 'https://api.example.com/v1',
+        apiKeyEncrypted: encryptAES256GCM('provider-secret', getEncryptionKey()),
+        protocol: 'openai',
+        defaultModel: 'gpt-5.5',
+        health: {
+            status: 'online',
+            latencyMs: 120,
+            checkedAt: now,
+            errorCode: null,
+            errorMessage: null,
+            protocolDetected: 'openai',
+            capabilities: getDefaultProviderCapabilities(),
+        },
+        modelCache: [],
+        modelCacheUpdatedAt: null,
+        notes: '',
+        createdAt: now,
+        updatedAt: now,
+        ...overrides,
+    }
+}
+
 function createApp(session: Session, opts?: {
     resumeSession?: (sessionId: string, namespace: string, resumeOpts?: { permissionMode?: string }) => Promise<{ type: string; sessionId?: string; message?: string; code?: string }>
     listSlashCommands?: SyncEngine['listSlashCommands']
+    providers?: { getById: (id: string, namespace: string) => StoredProvider | null }
 }) {
     const applySessionConfigCalls: Array<[string, Record<string, unknown>]> = []
     const applySessionConfig = async (sessionId: string, config: Record<string, unknown>) => {
@@ -100,12 +134,27 @@ function createApp(session: Session, opts?: {
         c.set('namespace', 'default')
         await next()
     })
-    app.route('/api', createSessionsRoutes(() => engine as SyncEngine, { providers: { getById: () => null } } as unknown as Store))
+    app.route('/api', createSessionsRoutes(() => engine as SyncEngine, { providers: opts?.providers ?? { getById: () => null } } as unknown as Store))
 
     return { app, applySessionConfigCalls }
 }
 
 describe('sessions routes', () => {
+    let originalEncryptionKey: string | undefined
+
+    beforeEach(() => {
+        originalEncryptionKey = process.env.HAPI_POWER_PROVIDER_ENCRYPTION_KEY
+        process.env.HAPI_POWER_PROVIDER_ENCRYPTION_KEY = TEST_ENCRYPTION_KEY
+    })
+
+    afterEach(() => {
+        if (originalEncryptionKey === undefined) {
+            delete process.env.HAPI_POWER_PROVIDER_ENCRYPTION_KEY
+        } else {
+            process.env.HAPI_POWER_PROVIDER_ENCRYPTION_KEY = originalEncryptionKey
+        }
+    })
+
     it('rejects collaboration mode changes for local Codex sessions', async () => {
         const session = createSession({
             agentState: {
@@ -269,6 +318,54 @@ describe('sessions routes', () => {
         expect(applySessionConfigCalls).toEqual([
             ['session-1', { model: 'gpt-5.5' }]
         ])
+    })
+
+    it('applies provider config when model changes include providerId', async () => {
+        const provider = createStoredProvider()
+        const { app, applySessionConfigCalls } = createApp(createSession(), {
+            providers: {
+                getById: (id, namespace) => id === provider.id && namespace === provider.namespace ? provider : null,
+            },
+        })
+
+        const response = await app.request('/api/sessions/session-1/model', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ model: 'gpt-5.5', providerId: provider.id })
+        })
+
+        const responseText = await response.text()
+        expect(response.status).toBe(200)
+        expect(JSON.parse(responseText)).toEqual({ ok: true })
+        expect(responseText).not.toContain('provider-secret')
+        expect(applySessionConfigCalls).toEqual([
+            ['session-1', {
+                model: 'gpt-5.5',
+                providerBaseUrl: 'https://api.example.com/v1',
+                providerApiKey: 'provider-secret',
+            }]
+        ])
+    })
+
+    it('rejects providerId outside the session namespace without leaking keys', async () => {
+        const provider = createStoredProvider({ namespace: 'other' })
+        const { app, applySessionConfigCalls } = createApp(createSession(), {
+            providers: {
+                getById: (id, namespace) => id === provider.id && namespace === provider.namespace ? provider : null,
+            },
+        })
+
+        const response = await app.request('/api/sessions/session-1/model', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ model: 'gpt-5.5', providerId: provider.id })
+        })
+
+        const responseText = await response.text()
+        expect(response.status).toBe(400)
+        expect(JSON.parse(responseText)).toEqual({ error: 'Provider not found' })
+        expect(responseText).not.toContain('provider-secret')
+        expect(applySessionConfigCalls).toEqual([])
     })
 
     it('rejects model changes for local Codex sessions', async () => {

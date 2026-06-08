@@ -23,6 +23,9 @@ export const queryKeys = {
     machineOpencodeModelsForCwd: (machineId: string, cwd: string) => ['machine-opencode-models', machineId, cwd] as const,
     skills: (sessionId: string) => ['skills', sessionId] as const,
     providers: ['providers'] as const,
+    providerOverview: ['providers', 'overview'] as const,
+    providerModelsRoot: ['provider-models'] as const,
     providerModels: (providerId: string) => ['provider-models', providerId] as const,
+    flavorModelsRoot: ['flavor-models'] as const,
     flavorModels: (flavor: string) => ['flavor-models', flavor] as const,
 }
