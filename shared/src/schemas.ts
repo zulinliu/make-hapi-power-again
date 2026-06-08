@@ -282,6 +282,134 @@ export const MachinePatchSchema = z.object({
 
 export type MachinePatch = z.infer<typeof MachinePatchSchema>
 
+export const CloneIdSchema = z.string().uuid()
+
+export const CloneProgressPhaseSchema = z.enum(['counting', 'compressing', 'writing', 'resolving', 'done', 'error'])
+export type CloneProgressPhase = z.infer<typeof CloneProgressPhaseSchema>
+
+const GitClonePasswordAuthSchema = z.object({
+    type: z.literal('password'),
+    username: z.string().trim().min(1).max(256).optional(),
+    password: z.string().min(1).max(4096)
+}).strict()
+
+const GitCloneTokenAuthSchema = z.object({
+    type: z.literal('token'),
+    username: z.string().trim().min(1).max(256).optional(),
+    password: z.string().min(1).max(4096)
+}).strict()
+
+const GitCloneSshAuthSchema = z.object({
+    type: z.literal('ssh')
+}).strict()
+
+export const GitCloneAuthSchema = z.discriminatedUnion('type', [
+    GitClonePasswordAuthSchema,
+    GitCloneTokenAuthSchema,
+    GitCloneSshAuthSchema
+])
+
+export type GitCloneAuth = z.infer<typeof GitCloneAuthSchema>
+
+const GitClonePathSchema = z.string()
+    .trim()
+    .min(1)
+    .max(4096)
+    .regex(/^[^\0]*$/, 'Path contains null bytes')
+
+export const GitCloneTargetNameSchema = z.string()
+    .trim()
+    .min(1)
+    .max(128)
+    .regex(/^[A-Za-z0-9._-]+$/, 'Target name may only contain letters, numbers, dot, underscore, and hyphen')
+    .refine((value) => value !== '.' && value !== '..', 'Target name must not be a relative path segment')
+    .refine((value) => !value.startsWith('-'), 'Target name must not start with a dash')
+
+function hasAllowedGitCloneUrlCredentials(url: string): boolean {
+    if (url.startsWith('git@')) return /^git@[^:\s]+:.+/.test(url)
+
+    try {
+        const parsed = new URL(url)
+        if (parsed.protocol === 'https:' || parsed.protocol === 'http:') {
+            return parsed.username === '' && parsed.password === ''
+        }
+        if (parsed.protocol === 'ssh:') {
+            return parsed.password === '' && (parsed.username === '' || parsed.username === 'git')
+        }
+        return false
+    } catch {
+        return false
+    }
+}
+
+function isGitCloneAuthCompatible(url: string, auth: GitCloneAuth | undefined): boolean {
+    if (!auth) return true
+    if (url.startsWith('https://') || url.startsWith('http://')) return auth.type === 'password' || auth.type === 'token'
+    if (url.startsWith('ssh://') || url.startsWith('git@')) return auth.type === 'ssh'
+    return false
+}
+
+/**
+ * Git Portal clone contract:
+ * - targetDir is the parent directory where the repository directory will be created.
+ * - targetName is the repository directory name. If omitted, the CLI derives it from the URL.
+ * - destinationPath is an explicit final destination path. It is mutually exclusive
+ *   with targetDir/targetName and is intended for future API clients.
+ */
+export const GitCloneRequestSchema = z.object({
+    url: z.string()
+        .trim()
+        .min(1)
+        .max(2048)
+        .regex(/^(https:\/\/|http:\/\/|ssh:\/\/|git@)/, 'Only http://, https://, ssh://, and git@ URLs are allowed')
+        .refine(hasAllowedGitCloneUrlCredentials, 'URL must not contain embedded credentials'),
+    targetDir: GitClonePathSchema.optional(),
+    targetName: GitCloneTargetNameSchema.optional(),
+    destinationPath: GitClonePathSchema.optional(),
+    branch: z.string()
+        .min(1)
+        .max(255)
+        .regex(/^[^\0]*$/, 'Branch contains null bytes')
+        .refine((value) => !value.startsWith('-'), 'Branch must not start with a dash')
+        .refine((value) => !/\s/.test(value), 'Branch must not contain whitespace')
+        .optional(),
+    depth: z.number().int().min(1).max(1_000_000).optional(),
+    cloneId: CloneIdSchema,
+    auth: GitCloneAuthSchema.optional()
+}).strict().refine(
+    (value) => !(value.destinationPath && (value.targetDir || value.targetName)),
+    { message: 'destinationPath is mutually exclusive with targetDir and targetName', path: ['destinationPath'] }
+).refine(
+    (value) => isGitCloneAuthCompatible(value.url, value.auth),
+    { message: 'Authentication type does not match clone URL protocol', path: ['auth'] }
+)
+
+export type GitCloneRequest = z.infer<typeof GitCloneRequestSchema>
+
+export const GitCloneCancelRequestSchema = z.object({
+    cloneId: CloneIdSchema
+}).strict()
+
+export type GitCloneCancelRequest = z.infer<typeof GitCloneCancelRequestSchema>
+
+export const CloneProgressDataSchema = z.object({
+    cloneId: CloneIdSchema,
+    sessionId: z.string().min(1).optional(),
+    machineId: z.string().min(1).optional(),
+    phase: CloneProgressPhaseSchema,
+    progress: z.number().min(0).max(100).optional(),
+    message: z.string().max(2000).optional(),
+    objectsReceived: z.number().int().min(0).optional(),
+    objectsTotal: z.number().int().min(0).optional(),
+    bytesReceived: z.number().int().min(0).optional(),
+    bytesTotal: z.number().int().min(0).optional()
+}).strict().refine(
+    (value) => Number(Boolean(value.sessionId)) + Number(Boolean(value.machineId)) === 1,
+    { message: 'Clone progress must include exactly one of sessionId or machineId' }
+)
+
+export type CloneProgressData = z.infer<typeof CloneProgressDataSchema>
+
 export const SessionUpdatedDataSchema = z.union([SessionSchema, SessionPatchSchema])
 export type SessionUpdatedData = z.infer<typeof SessionUpdatedDataSchema>
 
@@ -365,18 +493,9 @@ export const SyncEventSchema = z.discriminatedUnion('type', [
     }),
     SessionEventBaseSchema.extend({
         type: z.literal('clone-progress'),
-        data: z.object({
-            cloneId: z.string(),
-            sessionId: z.string().optional(),
-            machineId: z.string().optional(),
-            phase: z.string(),
-            progress: z.number().optional(),
-            message: z.string().optional(),
-            objectsReceived: z.number().optional(),
-            objectsTotal: z.number().optional(),
-            bytesReceived: z.number().optional(),
-            bytesTotal: z.number().optional()
-        })
+        sessionId: z.string().min(1).optional(),
+        machineId: z.string().min(1).optional(),
+        data: CloneProgressDataSchema
     })
 ])
 

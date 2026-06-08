@@ -886,12 +886,12 @@ export default {
   'fm.directoryContents': '目录内容',
 
   // ── Git Portal ──────────────────────────────────────────
-  'gitPortal.name': 'Git 传送门',
-  'gitPortal.title': 'Git 传送门',
-  'gitPortal.slogan': '通向你的代码宇宙',
+  'gitPortal.name': '克隆仓库',
+  'gitPortal.title': '克隆仓库',
+  'gitPortal.slogan': '将远程 Git 仓库克隆到当前工作区',
   'gitPortal.description': '克隆任意 Git 仓库，秒级开启 AI 编程之旅',
   'gitPortal.close': '关闭',
-  'gitPortal.toolbar.button': 'Git 传送门',
+  'gitPortal.toolbar.button': '克隆仓库',
   'gitPortal.mobileBtn': '克隆',
   'gitPortal.sessionCard.title': '从 Git 导入',
   'gitPortal.sessionCard.desc': '克隆远程仓库并开启新会话',
@@ -903,7 +903,7 @@ export default {
   'gitPortal.url.detected': '检测到 {platform} 仓库 {owner}/{repo}',
 
   // 历史
-  'gitPortal.history.title': '最近传送',
+  'gitPortal.history.title': '最近克隆',
   'gitPortal.history.empty': '暂无克隆记录',
   'gitPortal.history.more': '查看更多',
   'gitPortal.history.less': '收起',
@@ -920,18 +920,19 @@ export default {
 
   // 配置
   'gitPortal.advancedOptions': '高级选项',
-  'gitPortal.start': '开始传送',
+  'gitPortal.start': '克隆仓库',
 
   // 输入步骤键 (GitPortalStepInput 使用)
+  'gitPortal.input.urlLabel': '仓库地址',
   'gitPortal.input.urlPlaceholder': '粘贴 Git 仓库地址',
   'gitPortal.input.advanced': '高级选项',
-  'gitPortal.input.targetDir': '克隆到目录',
+  'gitPortal.input.targetDir': '父级目录',
   'gitPortal.input.targetDirPlaceholder': '默认：当前目录',
   'gitPortal.input.branch': '分支',
   'gitPortal.input.branchPlaceholder': '默认分支',
   'gitPortal.input.depth': '克隆深度',
   'gitPortal.input.depthPlaceholder': '完整克隆',
-  'gitPortal.input.start': '开始传送',
+  'gitPortal.input.start': '克隆仓库',
   'gitPortal.config.title': '克隆设置',
   'gitPortal.config.targetProject': '目标项目',
   'gitPortal.config.cloneTo': '克隆到目录',
@@ -970,34 +971,39 @@ export default {
   'gitPortal.progress.transferringWithTotal': '正在传输数据... {received} / {total}',
   'gitPortal.progress.unpacking': '正在解包项目文件...',
   'gitPortal.progress.filesExtracted': '已解包 {count} 个文件',
-  'gitPortal.progress.cancel': '取消传送',
+  'gitPortal.progress.cancel': '取消克隆',
   'gitPortal.progress.cancelling': '正在取消...',
+  'gitPortal.status.cancelled': '已取消克隆',
 
   // 结果
-  'gitPortal.result.success': '传送完成!',
+  'gitPortal.result.success': '克隆完成',
   'gitPortal.result.repoInfo': '{repo} / {branch} / {size}',
   'gitPortal.result.fileCount': '{count} 个文件',
   'gitPortal.result.openDir': '打开目录',
   'gitPortal.result.startSession': '开启 AI 会话',
+  'gitPortal.result.useDirectory': '使用此目录',
   'gitPortal.result.favorite': '收藏此仓库',
   'gitPortal.result.unfavorite': '取消收藏',
   'gitPortal.result.favorited': '已收藏',
 
   // 空状态
-  'gitPortal.empty.noHistory.title': '还没有传送记录',
-  'gitPortal.empty.noHistory.hint': '粘贴 Git 仓库地址开始第一次传送',
+  'gitPortal.empty.noHistory.title': '还没有克隆记录',
+  'gitPortal.empty.noHistory.hint': '粘贴 Git 仓库地址开始第一次克隆',
   'gitPortal.empty.noFavorites.title': '还没有收藏的仓库',
   'gitPortal.empty.noFavorites.hint': '克隆完成后可以收藏常用仓库',
   'gitPortal.empty.firstUse.title': '快速开始',
   'gitPortal.empty.firstUse.hint': '粘贴一个 GitHub 仓库地址试试',
 
   // 确认
-  'gitPortal.confirm.cancel': '确定取消传送？已传输的数据将丢失。',
-  'gitPortal.confirm.cancelClone': '确定取消传送？已传输的数据将丢失。',
-  'gitPortal.confirm.closeDuringClone': '传送尚未完成，确定关闭吗？',
+  'gitPortal.confirm.cancel': '已传输的数据将被丢弃，之后可以重新克隆。',
+  'gitPortal.confirm.cancelTitle': '取消本次克隆？',
+  'gitPortal.confirm.keepCloning': '继续克隆',
+  'gitPortal.confirm.cancelAction': '取消克隆',
+  'gitPortal.confirm.cancelClone': '确定取消克隆？已传输的数据将丢失。',
+  'gitPortal.confirm.closeDuringClone': '克隆尚未完成，确定关闭吗？',
 
   // Toast
-  'gitPortal.toast.cloneStarted': '传送已开始',
+  'gitPortal.toast.cloneStarted': '克隆已开始',
   'gitPortal.toast.dirRefreshed': '目录已刷新',
   'gitPortal.toast.favorited': '已添加到收藏',
   'gitPortal.toast.unfavorited': '已取消收藏',
@@ -1011,6 +1017,10 @@ export default {
   'gitPortal.error.diskFull': '磁盘空间不足。预估大小: {size}',
   'gitPortal.error.sshKeyMissing': '服务器未找到对应的 SSH 公钥',
   'gitPortal.error.retry': '重试',
+  'gitPortal.error.invalidUrl': '请输入有效的 Git 仓库地址',
+  'gitPortal.error.repoNameMissing': '无法识别仓库名称',
+  'gitPortal.error.noTarget': '当前没有可用于克隆的机器或会话',
+  'gitPortal.error.noApi': 'API 连接不可用',
   'gitPortal.error.switchToToken': '切换到 Token 认证',
 
   // 加载
@@ -1022,5 +1032,6 @@ export default {
   'gitPortal.a11y.historyList': '最近克隆历史',
   'gitPortal.a11y.progressAnimation': '克隆进度动画',
   'gitPortal.a11y.urlInput': '输入要克隆的 Git 仓库地址',
+  'gitPortal.a11y.cloneProgress': 'Git 克隆进度',
 
 } as const

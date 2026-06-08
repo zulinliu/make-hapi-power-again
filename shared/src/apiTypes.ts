@@ -3,6 +3,9 @@ import {
     AttachmentMetadataSchema,
     CodexCollaborationModeSchema,
     DecryptedMessageSchema,
+    GitCloneAuthSchema,
+    GitCloneCancelRequestSchema,
+    GitCloneRequestSchema,
     MachineSchema,
     PermissionModeSchema,
     SessionSchema
@@ -10,6 +13,9 @@ import {
 import { AgentFlavorSchema } from './modes'
 import type {
     DecryptedMessage,
+    GitCloneAuth,
+    GitCloneCancelRequest,
+    GitCloneRequest,
     Machine,
     Session
 } from './schemas'
@@ -202,6 +208,9 @@ export const MachinePathsExistsRequestSchema = z.object({
 
 export type MachinePathsExistsRequest = z.infer<typeof MachinePathsExistsRequestSchema>
 
+export { GitCloneAuthSchema, GitCloneCancelRequestSchema, GitCloneRequestSchema }
+export type { GitCloneAuth, GitCloneCancelRequest, GitCloneRequest }
+
 export const AuthRequestSchema = z.union([
     z.object({ initData: z.string() }),
     z.object({ accessToken: z.string() })
@@ -218,6 +227,15 @@ export type CommandResponse = {
 }
 
 export type GitCommandResponse = CommandResponse
+
+export type GitCloneResponse = CommandResponse & {
+    clonedPath?: string
+    repoInfo?: {
+        name: string
+        branch: string
+        sizeBytes: number
+    }
+}
 
 export type FileReadResponse = {
     success: boolean

@@ -8,11 +8,22 @@
  * Fallback chain:
  *   1. crypto.randomUUID()           — secure context (HTTPS / localhost)
  *   2. crypto.getRandomValues()      — available in non-secure contexts on modern browsers
- *   3. Date.now() + Math.random()    — last resort for very old environments
+ *   3. Math.random() UUID v4         — last resort for very old environments
  *
- * All paths return a UUID v4-format string or a similarly unique string,
- * maintaining compatibility with existing ID consumers (DB, SSE, RPC payloads).
+ * All paths return a UUID v4-format string, maintaining compatibility with
+ * strict ID consumers (DB, SSE, RPC payloads, cloneId validation).
  */
+function uuidV4FromBytes(source: Uint8Array): string {
+    const bytes = Array.from(source)
+    // Set version 4 bits
+    bytes[6] = ((bytes[6] ?? 0) & 0x0f) | 0x40
+    // Set variant bits
+    bytes[8] = ((bytes[8] ?? 0) & 0x3f) | 0x80
+
+    const hex = bytes.map((b) => b.toString(16).padStart(2, '0')).join('')
+    return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`
+}
+
 export function randomId(): string {
     const c = globalThis.crypto
 
@@ -23,14 +34,13 @@ export function randomId(): string {
     if (typeof c?.getRandomValues === 'function') {
         const bytes = new Uint8Array(16)
         c.getRandomValues(bytes)
-        // Set version 4 bits
-        bytes[6] = (bytes[6] & 0x0f) | 0x40
-        // Set variant bits
-        bytes[8] = (bytes[8] & 0x3f) | 0x80
-        const hex = Array.from(bytes).map((b) => b.toString(16).padStart(2, '0')).join('')
-        return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`
+        return uuidV4FromBytes(bytes)
     }
 
     // Fallback for environments without any crypto support
-    return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`
+    const bytes = new Uint8Array(16)
+    for (let i = 0; i < bytes.length; i += 1) {
+        bytes[i] = Math.floor(Math.random() * 256)
+    }
+    return uuidV4FromBytes(bytes)
 }

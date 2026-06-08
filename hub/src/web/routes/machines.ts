@@ -10,6 +10,7 @@ import type { Store } from '../../store'
 import type { WebAppEnv } from '../middleware/auth'
 import { requireMachine } from './guards'
 import { decryptAES256GCM, getEncryptionKey } from '../../utils/crypto'
+import { gitCloneGate, parseGitCloneCancelRequest, parseGitCloneRequest } from './gitCloneSafety'
 
 const machineFileQuerySchema = z.object({
     path: z.string().min(1)
@@ -67,7 +68,8 @@ async function runRpc<T>(fn: () => Promise<T>): Promise<T | { success: false; er
     try {
         return await fn()
     } catch (error) {
-        return { success: false, error: error instanceof Error ? error.message : String(error) }
+        console.error('[machines] RPC failed', error)
+        return { success: false, error: 'Machine operation failed' }
     }
 }
 
@@ -514,31 +516,50 @@ export function createMachinesRoutes(getSyncEngine: () => SyncEngine | null, sto
         const machine = requireMachine(c, engine, machineId)
         if (machine instanceof Response) return machine
 
-        const body = await c.req.json().catch(() => null)
-        const parsed = z.object({
-            url: z.string().min(1).regex(/^(https:\/\/|ssh:\/\/|git@)/, 'Only https://, ssh://, and git@ URLs are allowed'),
-            targetDir: z.string().optional(),
-            branch: z.string().optional(),
-            depth: z.number().int().min(1).optional(),
-            cloneId: z.string().optional(),
-            auth: z.object({
-                type: z.enum(['password', 'token', 'ssh']),
-                username: z.string().optional(),
-                password: z.string().optional()
-            }).optional()
-        }).safeParse(body)
+        const parsed = parseGitCloneRequest(await c.req.json().catch(() => null))
         if (!parsed.success) {
-            return c.json({ error: 'Invalid request', details: parsed.error.flatten() }, 400)
+            return c.json({ error: 'Invalid request', details: parsed.error }, 400)
+        }
+        if (!parsed.data.targetDir && !parsed.data.destinationPath) {
+            return c.json({ error: 'targetDir or destinationPath is required for machine git clone' }, 400)
         }
 
-        const result = await runRpc(() => engine.gitCloneMachine(machineId, {
-            url: parsed.data.url,
-            targetDir: parsed.data.targetDir,
-            branch: parsed.data.branch,
-            depth: parsed.data.depth,
-            cloneId: parsed.data.cloneId,
-            auth: parsed.data.auth
-        }))
+        const gate = gitCloneGate.start(`machine:${machineId}`, parsed.data.cloneId)
+        if (!gate.ok) {
+            return c.json({ success: false, error: gate.error }, gate.status)
+        }
+
+        try {
+            const result = await runRpc(() => engine.gitCloneMachine(machineId, {
+                url: parsed.data.url,
+                targetDir: parsed.data.targetDir,
+                targetName: parsed.data.targetName,
+                destinationPath: parsed.data.destinationPath,
+                branch: parsed.data.branch,
+                depth: parsed.data.depth,
+                cloneId: parsed.data.cloneId,
+                auth: parsed.data.auth
+            }))
+            return c.json(result)
+        } finally {
+            gate.release()
+        }
+    })
+
+    app.delete('/machines/:id/git-clone/:cloneId?', async (c) => {
+        const engine = getSyncEngine()
+        if (!engine) return c.json({ error: 'Not connected' }, 503)
+
+        const machineId = c.req.param('id')
+        const machine = requireMachine(c, engine, machineId)
+        if (machine instanceof Response) return machine
+
+        const parsed = parseGitCloneCancelRequest(c.req.param('cloneId'), await c.req.json().catch(() => null))
+        if (!parsed.success) {
+            return c.json({ error: 'Invalid request', details: parsed.error }, 400)
+        }
+
+        const result = await runRpc(() => engine.cancelGitCloneMachine(machineId, parsed.data))
         return c.json(result)
     })
 

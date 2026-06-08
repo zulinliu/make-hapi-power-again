@@ -884,12 +884,12 @@ export default {
   'fm.directoryContents': 'Directory contents',
 
   // ── Git Portal ──────────────────────────────────────────
-  'gitPortal.name': 'Git Portal',
-  'gitPortal.title': 'Git Portal',
-  'gitPortal.slogan': 'Portal to your code universe',
+  'gitPortal.name': 'Clone repository',
+  'gitPortal.title': 'Clone repository',
+  'gitPortal.slogan': 'Bring a remote Git repository into this workspace',
   'gitPortal.description': 'Clone any Git repository and start coding with AI in seconds',
   'gitPortal.close': 'Close',
-  'gitPortal.toolbar.button': 'Git Portal',
+  'gitPortal.toolbar.button': 'Clone repository',
   'gitPortal.mobileBtn': 'Clone',
   'gitPortal.sessionCard.title': 'Import from Git',
   'gitPortal.sessionCard.desc': 'Clone a remote repository and start a new session',
@@ -901,7 +901,7 @@ export default {
   'gitPortal.url.detected': 'Detected {platform} repository {owner}/{repo}',
 
   // History
-  'gitPortal.history.title': 'Recent portals',
+  'gitPortal.history.title': 'Recent clones',
   'gitPortal.history.empty': 'No recent clones',
   'gitPortal.history.more': 'Show more',
   'gitPortal.history.less': 'Show less',
@@ -918,18 +918,19 @@ export default {
 
   // Config
   'gitPortal.advancedOptions': 'Advanced options',
-  'gitPortal.start': 'Start portal',
+  'gitPortal.start': 'Clone repository',
 
   // Input step keys (used by GitPortalStepInput)
+  'gitPortal.input.urlLabel': 'Repository URL',
   'gitPortal.input.urlPlaceholder': 'Paste Git repository URL',
   'gitPortal.input.advanced': 'Advanced options',
-  'gitPortal.input.targetDir': 'Clone to directory',
+  'gitPortal.input.targetDir': 'Parent directory',
   'gitPortal.input.targetDirPlaceholder': 'Default: current directory',
   'gitPortal.input.branch': 'Branch',
   'gitPortal.input.branchPlaceholder': 'Default branch',
   'gitPortal.input.depth': 'Clone depth',
   'gitPortal.input.depthPlaceholder': 'Full clone',
-  'gitPortal.input.start': 'Start portal',
+  'gitPortal.input.start': 'Clone repository',
   'gitPortal.config.title': 'Clone settings',
   'gitPortal.config.targetProject': 'Target project',
   'gitPortal.config.cloneTo': 'Clone to directory',
@@ -968,34 +969,39 @@ export default {
   'gitPortal.progress.transferringWithTotal': 'Transferring data... {received} / {total}',
   'gitPortal.progress.unpacking': 'Unpacking project files...',
   'gitPortal.progress.filesExtracted': '{count} files extracted',
-  'gitPortal.progress.cancel': 'Cancel portal',
+  'gitPortal.progress.cancel': 'Cancel clone',
   'gitPortal.progress.cancelling': 'Cancelling...',
+  'gitPortal.status.cancelled': 'Clone cancelled',
 
   // Result
-  'gitPortal.result.success': 'Portal complete!',
+  'gitPortal.result.success': 'Clone complete',
   'gitPortal.result.repoInfo': '{repo} / {branch} / {size}',
   'gitPortal.result.fileCount': '{count} files',
   'gitPortal.result.openDir': 'Open directory',
   'gitPortal.result.startSession': 'Start AI session',
+  'gitPortal.result.useDirectory': 'Use this directory',
   'gitPortal.result.favorite': 'Star this repo',
   'gitPortal.result.unfavorite': 'Remove from favorites',
   'gitPortal.result.favorited': 'Added to favorites',
 
   // Empty states
-  'gitPortal.empty.noHistory.title': 'No portal history yet',
-  'gitPortal.empty.noHistory.hint': 'Paste a Git repository URL to start your first portal',
+  'gitPortal.empty.noHistory.title': 'No clone history yet',
+  'gitPortal.empty.noHistory.hint': 'Paste a Git repository URL to clone your first repo',
   'gitPortal.empty.noFavorites.title': 'No favorite repositories',
   'gitPortal.empty.noFavorites.hint': 'Star a repository after cloning to add it here',
   'gitPortal.empty.firstUse.title': 'Quick start',
   'gitPortal.empty.firstUse.hint': 'Paste a GitHub repository URL to try it out',
 
   // Confirmations
-  'gitPortal.confirm.cancel': 'Cancel portal? Transferred data will be lost.',
-  'gitPortal.confirm.cancelClone': 'Cancel portal? Transferred data will be lost.',
-  'gitPortal.confirm.closeDuringClone': 'Portal in progress. Close anyway?',
+  'gitPortal.confirm.cancel': 'Transferred data will be discarded. You can clone again later.',
+  'gitPortal.confirm.cancelTitle': 'Cancel this clone?',
+  'gitPortal.confirm.keepCloning': 'Keep cloning',
+  'gitPortal.confirm.cancelAction': 'Cancel clone',
+  'gitPortal.confirm.cancelClone': 'Cancel clone? Transferred data will be lost.',
+  'gitPortal.confirm.closeDuringClone': 'Clone in progress. Close anyway?',
 
   // Toasts
-  'gitPortal.toast.cloneStarted': 'Portal started',
+  'gitPortal.toast.cloneStarted': 'Clone started',
   'gitPortal.toast.dirRefreshed': 'Directory refreshed',
   'gitPortal.toast.favorited': 'Added to favorites',
   'gitPortal.toast.unfavorited': 'Removed from favorites',
@@ -1009,6 +1015,10 @@ export default {
   'gitPortal.error.diskFull': 'Not enough disk space. Estimated size: {size}',
   'gitPortal.error.sshKeyMissing': 'No matching SSH key found on the server',
   'gitPortal.error.retry': 'Retry',
+  'gitPortal.error.invalidUrl': 'Enter a valid Git repository URL',
+  'gitPortal.error.repoNameMissing': 'Could not determine the repository name',
+  'gitPortal.error.noTarget': 'No machine or session is available for cloning',
+  'gitPortal.error.noApi': 'No API connection available',
   'gitPortal.error.switchToToken': 'Switch to Token authentication',
 
   // Loading
@@ -1020,5 +1030,6 @@ export default {
   'gitPortal.a11y.historyList': 'Recent clone history',
   'gitPortal.a11y.progressAnimation': 'Clone progress animation',
   'gitPortal.a11y.urlInput': 'Enter a Git repository URL to clone',
+  'gitPortal.a11y.cloneProgress': 'Git clone progress',
 
 } as const

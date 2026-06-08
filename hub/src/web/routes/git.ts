@@ -3,6 +3,7 @@ import { z } from 'zod'
 import type { SyncEngine } from '../../sync/syncEngine'
 import type { WebAppEnv } from '../middleware/auth'
 import { requireSessionFromParam, requireSyncEngine } from './guards'
+import { gitCloneGate, parseGitCloneCancelRequest, parseGitCloneRequest } from './gitCloneSafety'
 
 const fileSearchSchema = z.object({
     query: z.string().optional(),
@@ -21,8 +22,44 @@ const generatedImageSchema = z.object({
     imageId: z.string().min(1)
 })
 
+const gitSafeNameSchema = z.string()
+    .min(1)
+    .max(255)
+    .regex(/^[A-Za-z0-9._/-]+$/, 'Invalid git name')
+    .refine((value) => !value.startsWith('-') && !value.includes('\0'), 'Invalid git name')
+
+const gitSafeRefSchema = z.string()
+    .min(1)
+    .max(255)
+    .regex(/^[A-Za-z0-9._/@{}~^:-]+$/, 'Invalid git ref')
+    .refine((value) => !value.startsWith('-') && !value.includes('\0') && !/\s/.test(value), 'Invalid git ref')
+
+function hasAllowedGitRemoteUrlCredentials(url: string): boolean {
+    if (url.startsWith('git@')) return /^git@[^:\s]+:.+/.test(url)
+
+    try {
+        const parsed = new URL(url)
+        if (parsed.protocol === 'https:') {
+            return parsed.username === '' && parsed.password === ''
+        }
+        if (parsed.protocol === 'ssh:') {
+            return parsed.password === '' && (parsed.username === '' || parsed.username === 'git')
+        }
+        return false
+    } catch {
+        return false
+    }
+}
+
+const gitRemoteUrlSchema = z.string()
+    .trim()
+    .min(1)
+    .max(2048)
+    .regex(/^(https:\/\/|ssh:\/\/|git@)/, 'Only https://, ssh://, and git@ URLs are allowed')
+    .refine(hasAllowedGitRemoteUrlCredentials, 'URL must not contain embedded credentials')
+
 const branchActionSchema = z.object({
-    name: z.string().min(1).regex(/^[\w.\-\/]+$/, 'Invalid branch name'),
+    name: gitSafeRefSchema,
     action: z.enum(['switch', 'delete', 'merge']).optional()
 })
 
@@ -31,27 +68,29 @@ const commitSchema = z.object({
     paths: z.array(z.string().refine(p => !p.startsWith('-'), 'Path must not start with -')).optional()
 })
 
-const cloneSchema = z.object({
-    url: z.string().min(1).regex(/^(https:\/\/|ssh:\/\/|git@)/, 'Only https://, ssh://, and git@ URLs are allowed'),
-    targetDir: z.string().optional(),
-    branch: z.string().optional(),
-    depth: z.number().int().min(1).optional(),
-    cloneId: z.string().optional(),
-    auth: z.object({
-        type: z.enum(['password', 'token', 'ssh']),
-        username: z.string().optional(),
-        password: z.string().optional()
-    }).optional()
-})
-
 const remoteAddSchema = z.object({
-    name: z.string().min(1).regex(/^[\w.\-\/]+$/, 'Invalid remote name'),
-    url: z.string().min(1)
+    name: gitSafeNameSchema,
+    url: gitRemoteUrlSchema
 })
 
 const remoteRemoveSchema = z.object({
-    name: z.string().min(1).regex(/^[\w.\-\/]+$/, 'Invalid remote name')
+    name: gitSafeNameSchema
 })
+
+const gitPushSchema = z.object({
+    remote: gitSafeNameSchema.optional(),
+    branch: gitSafeRefSchema.optional(),
+    force: z.boolean().optional()
+}).strict()
+
+const gitPullSchema = z.object({
+    remote: gitSafeNameSchema.optional(),
+    branch: gitSafeRefSchema.optional()
+}).strict()
+
+const gitFetchSchema = z.object({
+    remote: gitSafeNameSchema.optional()
+}).strict()
 
 const writeFileSchema = z.object({
     path: z.string().min(1).regex(/^[^\0]*$/, 'Path contains null bytes'),
@@ -69,8 +108,9 @@ function parseBooleanParam(value: string | undefined): boolean | undefined {
 async function runRpc<T>(fn: () => Promise<T>): Promise<T | { success: false; error: string }> {
     try {
         return await fn()
-    } catch (error) {
-        return { success: false, error: error instanceof Error ? error.message : String(error) }
+    } catch {
+        console.error('[git-routes] Git operation failed')
+        return { success: false, error: 'Git operation failed' }
     }
 }
 
@@ -271,18 +311,43 @@ export function createGitRoutes(getSyncEngine: () => SyncEngine | null): Hono<We
         const sessionPath = sessionResult.session.metadata?.path
         if (!sessionPath) return c.json({ success: false, error: 'Session path not available' })
 
-        const parsed = cloneSchema.safeParse(await c.req.json())
-        if (!parsed.success) return c.json({ error: 'Invalid request', details: parsed.error.flatten() }, 400)
+        const parsed = parseGitCloneRequest(await c.req.json().catch(() => null))
+        if (!parsed.success) return c.json({ error: 'Invalid request', details: parsed.error }, 400)
 
-        const result = await runRpc(() => engine.gitClone(sessionResult.sessionId, {
-            cwd: sessionPath,
-            url: parsed.data.url,
-            targetDir: parsed.data.targetDir,
-            branch: parsed.data.branch,
-            depth: parsed.data.depth,
-            cloneId: parsed.data.cloneId,
-            auth: parsed.data.auth
-        }))
+        const gate = gitCloneGate.start(`session:${sessionResult.sessionId}`, parsed.data.cloneId)
+        if (!gate.ok) {
+            return c.json({ success: false, error: gate.error }, gate.status)
+        }
+
+        try {
+            const result = await runRpc(() => engine.gitClone(sessionResult.sessionId, {
+                cwd: sessionPath,
+                url: parsed.data.url,
+                targetDir: parsed.data.targetDir,
+                targetName: parsed.data.targetName,
+                destinationPath: parsed.data.destinationPath,
+                branch: parsed.data.branch,
+                depth: parsed.data.depth,
+                cloneId: parsed.data.cloneId,
+                auth: parsed.data.auth
+            }))
+            return c.json(result)
+        } finally {
+            gate.release()
+        }
+    })
+
+    app.delete('/sessions/:id/git-clone/:cloneId?', async (c) => {
+        const engine = requireSyncEngine(c, getSyncEngine)
+        if (engine instanceof Response) return engine
+
+        const sessionResult = requireSessionFromParam(c, engine)
+        if (sessionResult instanceof Response) return sessionResult
+
+        const parsed = parseGitCloneCancelRequest(c.req.param('cloneId'), await c.req.json().catch(() => null))
+        if (!parsed.success) return c.json({ error: 'Invalid request', details: parsed.error }, 400)
+
+        const result = await runRpc(() => engine.cancelGitClone(sessionResult.sessionId, parsed.data))
         return c.json(result)
     })
 
@@ -355,12 +420,14 @@ export function createGitRoutes(getSyncEngine: () => SyncEngine | null): Hono<We
         const sessionPath = sessionResult.session.metadata?.path
         if (!sessionPath) return c.json({ success: false, error: 'Session path not available' })
 
-        const body = await c.req.json()
+        const parsed = gitPushSchema.safeParse(await c.req.json())
+        if (!parsed.success) return c.json({ error: 'Invalid request', details: parsed.error.flatten() }, 400)
+
         const result = await runRpc(() => engine.gitPush(sessionResult.sessionId, {
             cwd: sessionPath,
-            remote: body.remote,
-            branch: body.branch,
-            force: body.force === true
+            remote: parsed.data.remote,
+            branch: parsed.data.branch,
+            force: parsed.data.force === true
         }))
         return c.json(result)
     })
@@ -376,11 +443,13 @@ export function createGitRoutes(getSyncEngine: () => SyncEngine | null): Hono<We
         const sessionPath = sessionResult.session.metadata?.path
         if (!sessionPath) return c.json({ success: false, error: 'Session path not available' })
 
-        const body = await c.req.json()
+        const parsed = gitPullSchema.safeParse(await c.req.json())
+        if (!parsed.success) return c.json({ error: 'Invalid request', details: parsed.error.flatten() }, 400)
+
         const result = await runRpc(() => engine.gitPull(sessionResult.sessionId, {
             cwd: sessionPath,
-            remote: body.remote,
-            branch: body.branch
+            remote: parsed.data.remote,
+            branch: parsed.data.branch
         }))
         return c.json(result)
     })
@@ -396,10 +465,12 @@ export function createGitRoutes(getSyncEngine: () => SyncEngine | null): Hono<We
         const sessionPath = sessionResult.session.metadata?.path
         if (!sessionPath) return c.json({ success: false, error: 'Session path not available' })
 
-        const body = await c.req.json()
+        const parsed = gitFetchSchema.safeParse(await c.req.json())
+        if (!parsed.success) return c.json({ error: 'Invalid request', details: parsed.error.flatten() }, 400)
+
         const result = await runRpc(() => engine.gitFetch(sessionResult.sessionId, {
             cwd: sessionPath,
-            remote: body.remote
+            remote: parsed.data.remote
         }))
         return c.json(result)
     })

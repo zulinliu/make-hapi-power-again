@@ -62,7 +62,7 @@ export default {
             },
             transitionTimingFunction: {
                 'hp-default': 'var(--hp-ease-default)',
-                'hp-spring': 'var(--hp-ease-spring)',
+                'hp-emphasized': 'var(--hp-ease-emphasized)',
             },
         }
     },

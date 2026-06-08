@@ -1,7 +1,8 @@
 import { z } from 'zod'
 import type { CodexCollaborationMode, PermissionMode } from './modes'
-import type { SessionEndReason } from './schemas'
-export { SessionEndReasonSchema, type SessionEndReason } from './schemas'
+import type { CloneProgressData, SessionEndReason } from './schemas'
+import { CloneProgressDataSchema } from './schemas'
+export { CloneProgressPhaseSchema, SessionEndReasonSchema, type CloneProgressPhase, type SessionEndReason } from './schemas'
 
 export type SocketErrorReason = 'namespace-missing' | 'access-denied' | 'not-found'
 
@@ -189,20 +190,8 @@ export type MachineUpdateStateAck = {
     runnerState: unknown | null
 }
 
-export type CloneProgressPhase = 'counting' | 'compressing' | 'writing' | 'resolving' | 'done' | 'error'
-
-export interface CloneProgressPayload {
-    cloneId: string
-    sessionId: string
-    machineId?: string
-    phase: CloneProgressPhase
-    progress?: number
-    message?: string
-    objectsReceived?: number
-    objectsTotal?: number
-    bytesReceived?: number
-    bytesTotal?: number
-}
+export const CloneProgressPayloadSchema = CloneProgressDataSchema
+export type CloneProgressPayload = CloneProgressData
 
 export interface ServerToClientEvents {
     update: (data: Update, ack?: (response: CancelQueuedMessageAck) => void) => void

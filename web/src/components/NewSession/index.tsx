@@ -33,6 +33,7 @@ import {
 import { SessionTypeSelector } from './SessionTypeSelector'
 import { YoloToggle } from './YoloToggle'
 import { formatRunnerSpawnError } from '../../utils/formatRunnerSpawnError'
+import { GitPortal } from '../GitPortal/GitPortal'
 
 export function NewSession(props: {
     api: ApiClient
@@ -64,6 +65,7 @@ export function NewSession(props: {
     const [sessionType, setSessionType] = useState<SessionType>('simple')
     const [worktreeName, setWorktreeName] = useState('')
     const [directoryCreationConfirmed, setDirectoryCreationConfirmed] = useState(false)
+    const [gitPortalOpen, setGitPortalOpen] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const worktreeInputRef = useRef<HTMLInputElement>(null)
 
@@ -339,6 +341,13 @@ export function NewSession(props: {
         return () => chooseFolderCallback({ machineId, directory: trimmedDirectory })
     }, [chooseFolderCallback, workspaceRootsAvailable, machineId, trimmedDirectory])
 
+    const gitPortalCurrentPath = trimmedDirectory || selectedMachine?.metadata?.workspaceRoots?.[0] || ''
+    const handleGitPortalPathReady = useCallback((clonedPath: string) => {
+        setDirectory(clonedPath)
+        setDirectoryCreationConfirmed(false)
+        setGitPortalOpen(false)
+    }, [])
+
     async function handleCreate() {
         if (!machineId || !trimmedDirectory) return
 
@@ -415,6 +424,27 @@ export function NewSession(props: {
                 isDisabled={isFormDisabled}
                 onChange={handleMachineChange}
             />
+            <div className="px-3 py-3">
+                <button
+                    type="button"
+                    className="flex min-h-11 w-full items-center gap-3 rounded-(--hp-radius-md) border border-(--hp-border) bg-(--hp-surface-1) px-3 py-2 text-left text-(--hp-text-primary) transition-colors hover:border-(--hp-primary) hover:bg-(--hp-surface-2) disabled:cursor-not-allowed disabled:opacity-50"
+                    disabled={!machineId || isFormDisabled}
+                    onClick={() => setGitPortalOpen(true)}
+                >
+                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-(--hp-radius-md) bg-(--hp-primary-subtle) text-(--hp-primary)" aria-hidden="true">
+                        <svg xmlns="http://www.w3.org/2000/svg" width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="6" cy="6" r="2.5" />
+                            <circle cx="18" cy="18" r="2.5" />
+                            <path d="M8 8 16 16" />
+                            <path d="M6 8.5V14a4 4 0 0 0 4 4h5.5" />
+                        </svg>
+                    </span>
+                    <span className="min-w-0 flex-1">
+                        <span className="block text-sm font-semibold">{t('gitPortal.sessionCard.title')}</span>
+                        <span className="block text-xs text-(--hp-text-tertiary)">{t('gitPortal.sessionCard.desc')}</span>
+                    </span>
+                </button>
+            </div>
             {runnerSpawnError ? (
                 <div className="px-3 py-2 text-xs text-(--hp-danger)">
                     Runner last spawn error: {runnerSpawnError}
@@ -523,6 +553,16 @@ export function NewSession(props: {
                 createLabel={createLabel}
                 onCancel={props.onCancel}
                 onCreate={handleCreate}
+            />
+            <GitPortal
+                isOpen={gitPortalOpen}
+                onClose={() => setGitPortalOpen(false)}
+                api={props.api}
+                machineId={machineId}
+                currentPath={gitPortalCurrentPath}
+                onOpenDirectory={handleGitPortalPathReady}
+                onStartSession={handleGitPortalPathReady}
+                startSessionLabel={t('gitPortal.result.useDirectory')}
             />
         </div>
     )

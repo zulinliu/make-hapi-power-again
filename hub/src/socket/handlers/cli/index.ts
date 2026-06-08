@@ -5,11 +5,12 @@ import type { SyncEvent } from '../../../sync/syncEngine'
 import type { TerminalRegistry } from '../../terminalRegistry'
 import type { CliSocketWithData, SocketServer } from '../../socketTypes'
 import type { AccessErrorReason, AccessResult } from './types'
-import type { CloneProgressPayload } from '@hapipower/protocol/socket'
+import { CloneProgressPayloadSchema, type CloneProgressPayload } from '@hapipower/protocol/socket'
 import { registerMachineHandlers } from './machineHandlers'
 import { registerRpcHandlers } from './rpcHandlers'
 import { registerSessionHandlers } from './sessionHandlers'
 import { cleanupTerminalHandlers, registerTerminalHandlers } from './terminalHandlers'
+import type { RpcRegistrationScope } from '../../rpcRegistry'
 
 type SessionAlivePayload = {
     sid: string
@@ -81,14 +82,17 @@ export function registerCliHandlers(socket: CliSocketWithData, deps: CliHandlers
     }
 
     const auth = socket.handshake.auth as Record<string, unknown> | undefined
+    const allowedRpcScopes: RpcRegistrationScope[] = []
     const sessionId = typeof auth?.sessionId === 'string' ? auth.sessionId : null
     if (sessionId && resolveSessionAccess(sessionId).ok) {
         socket.join(`session:${sessionId}`)
+        allowedRpcScopes.push({ kind: 'session', id: sessionId })
     }
 
     const machineId = typeof auth?.machineId === 'string' ? auth.machineId : null
     if (machineId && resolveMachineAccess(machineId).ok) {
         socket.join(`machine:${machineId}`)
+        allowedRpcScopes.push({ kind: 'machine', id: machineId })
     }
 
     const emitAccessError = (scope: 'session' | 'machine', id: string, reason: AccessErrorReason) => {
@@ -100,7 +104,7 @@ export function registerCliHandlers(socket: CliSocketWithData, deps: CliHandlers
         socket.emit('error', { message, code: reason, scope, id })
     }
 
-    registerRpcHandlers(socket, rpcRegistry)
+    registerRpcHandlers(socket, rpcRegistry, { allowedScopes: allowedRpcScopes })
     registerSessionHandlers(socket, {
         store,
         resolveSessionAccess,
@@ -131,20 +135,35 @@ export function registerCliHandlers(socket: CliSocketWithData, deps: CliHandlers
     })
 
     socket.on('clone:progress', (data: CloneProgressPayload) => {
+        const parsed = CloneProgressPayloadSchema.safeParse(data)
+        if (!parsed.success) {
+            return
+        }
+
+        const payload = parsed.data
+        const sessionAllowed = !payload.sessionId || (sessionId === payload.sessionId && resolveSessionAccess(payload.sessionId).ok)
+        const machineAllowed = !payload.machineId || (machineId === payload.machineId && resolveMachineAccess(payload.machineId).ok)
+        if (!sessionAllowed || !machineAllowed) {
+            socket.emit('error', { message: 'Clone progress scope rejected', code: 'access-denied' })
+            return
+        }
+
         onWebappEvent?.({
             type: 'clone-progress',
             namespace: namespace ?? undefined,
+            sessionId: payload.sessionId,
+            machineId: payload.machineId,
             data: {
-                cloneId: data.cloneId,
-                sessionId: data.sessionId || undefined,
-                machineId: data.machineId || undefined,
-                phase: data.phase,
-                progress: data.progress,
-                message: data.message,
-                objectsReceived: data.objectsReceived,
-                objectsTotal: data.objectsTotal,
-                bytesReceived: data.bytesReceived,
-                bytesTotal: data.bytesTotal
+                cloneId: payload.cloneId,
+                sessionId: payload.sessionId,
+                machineId: payload.machineId,
+                phase: payload.phase,
+                progress: payload.progress,
+                message: payload.message,
+                objectsReceived: payload.objectsReceived,
+                objectsTotal: payload.objectsTotal,
+                bytesReceived: payload.bytesReceived,
+                bytesTotal: payload.bytesTotal
             }
         })
     })

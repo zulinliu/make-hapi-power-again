@@ -12,7 +12,8 @@
   --hp-primary: oklch(68% 0.18 55);
   --hp-primary-hover: oklch(62% 0.20 50);
   --hp-primary-subtle: oklch(68% 0.06 55 / 0.10);
-  --hp-primary-text: oklch(100% 0 0);
+  --hp-primary-readable: oklch(55% 0.18 55);
+  --hp-primary-text: oklch(13% 0.02 55);
 
   /* === 强调色 === */
   --hp-accent: oklch(78% 0.14 85);
@@ -24,6 +25,10 @@
   --hp-warning-subtle: oklch(75% 0.08 80 / 0.10);
   --hp-danger: oklch(60% 0.20 22);
   --hp-danger-subtle: oklch(60% 0.10 22 / 0.10);
+  --hp-danger-readable: oklch(55% 0.20 22);
+  --hp-danger-action: oklch(50% 0.20 22);
+  --hp-danger-action-hover: oklch(45% 0.22 22);
+  --hp-danger-action-text: oklch(100% 0 0);
   --hp-info: oklch(65% 0.12 230);
   --hp-info-subtle: oklch(65% 0.06 230 / 0.10);
 
@@ -83,7 +88,7 @@
   --hp-ease-default: cubic-bezier(0.4, 0, 0.2, 1);
   --hp-ease-in: cubic-bezier(0.4, 0, 1, 1);
   --hp-ease-out: cubic-bezier(0, 0, 0.2, 1);
-  --hp-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --hp-ease-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
   --hp-ease-overlay: cubic-bezier(0.16, 1, 0.3, 1);
 
   /* === 布局 === */
@@ -99,9 +104,14 @@
   --hp-primary: oklch(72% 0.16 55);
   --hp-primary-hover: oklch(68% 0.18 50);
   --hp-primary-subtle: oklch(72% 0.06 55 / 0.14);
-  --hp-primary-text: oklch(100% 0 0);
+  --hp-primary-readable: oklch(78% 0.14 55);
+  --hp-primary-text: oklch(13% 0.02 55);
 
   --hp-accent: oklch(78% 0.14 85);
+  --hp-danger-readable: oklch(76% 0.14 22);
+  --hp-danger-action: oklch(50% 0.20 22);
+  --hp-danger-action-hover: oklch(45% 0.22 22);
+  --hp-danger-action-text: oklch(100% 0 0);
 
   --hp-canvas: oklch(13% 0.015 55);
   --hp-surface-0: oklch(15% 0.012 55);
@@ -111,7 +121,7 @@
 
   --hp-text-primary: oklch(95% 0.005 55);
   --hp-text-secondary: oklch(70% 0.008 55);
-  --hp-text-tertiary: oklch(52% 0.008 55);
+  --hp-text-tertiary: oklch(64% 0.008 55);
   --hp-text-disabled: oklch(40% 0.005 55);
 
   --hp-border: oklch(38% 0.008 55 / 0.35);

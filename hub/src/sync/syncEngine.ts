@@ -9,6 +9,7 @@
 
 import { isKnownFlavor, type LocalResumeTarget, type ResumableSession } from '@hapipower/protocol'
 import type { SlashCommandsResponse } from '@hapipower/protocol/apiTypes'
+import type { GitCloneCancelRequest, GitCloneRequest } from '@hapipower/protocol/schemas'
 import type { AgentFlavor, CodexCollaborationMode, DecryptedMessage, PermissionMode, Session, SyncEvent } from '@hapipower/protocol/types'
 import { unwrapRoleWrappedRecordEnvelope } from '@hapipower/protocol/messages'
 import type { Server } from 'socket.io'
@@ -159,10 +160,10 @@ export class SyncEngine {
         if (event.namespace) {
             return event.namespace
         }
-        if ('sessionId' in event) {
+        if ('sessionId' in event && event.sessionId) {
             return this.getSession(event.sessionId)?.namespace
         }
-        if ('machineId' in event) {
+        if ('machineId' in event && event.machineId) {
             return this.machineCache.getMachine(event.machineId)?.namespace
         }
         return undefined
@@ -946,12 +947,20 @@ export class SyncEngine {
         return await this.rpcGateway.createGitCommit(sessionId, options)
     }
 
-    async gitClone(sessionId: string, options: { cwd?: string; url: string; targetDir?: string; branch?: string; depth?: number; cloneId?: string; auth?: { type: 'password' | 'token' | 'ssh'; username?: string; password?: string } }): Promise<RpcCommandResponse> {
+    async gitClone(sessionId: string, options: GitCloneRequest & { cwd?: string }): Promise<RpcCommandResponse> {
         return await this.rpcGateway.gitClone(sessionId, options)
     }
 
-    async gitCloneMachine(machineId: string, options: { cwd?: string; url: string; targetDir?: string; branch?: string; depth?: number; cloneId?: string; auth?: { type: 'password' | 'token' | 'ssh'; username?: string; password?: string } }): Promise<RpcCommandResponse> {
+    async cancelGitClone(sessionId: string, options: GitCloneCancelRequest): Promise<RpcCommandResponse> {
+        return await this.rpcGateway.cancelGitClone(sessionId, options)
+    }
+
+    async gitCloneMachine(machineId: string, options: GitCloneRequest & { cwd?: string }): Promise<RpcCommandResponse> {
         return await this.rpcGateway.gitCloneMachine(machineId, options)
+    }
+
+    async cancelGitCloneMachine(machineId: string, options: GitCloneCancelRequest): Promise<RpcCommandResponse> {
+        return await this.rpcGateway.cancelGitCloneMachine(machineId, options)
     }
 
     async getGitRemoteList(sessionId: string, cwd?: string): Promise<RpcCommandResponse> {

@@ -14,6 +14,7 @@ import type {
 } from '@/types/api'
 import { queryKeys } from '@/lib/query-keys'
 import { clearMessageWindow, getMessageWindowState, ingestIncomingMessages, markMessagesConsumed, removeOptimisticMessage, updateMessageStatus } from '@/lib/message-window-store'
+import { emitCloneProgressEvent } from '@/lib/git-portal-events'
 
 type SSESubscription = {
     all?: boolean
@@ -522,6 +523,7 @@ export function useSSE(options: {
             }
 
             if (event.type === 'clone-progress') {
+                emitCloneProgressEvent(event)
                 onEventRef.current(event)
                 return
             }

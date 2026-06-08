@@ -6,10 +6,11 @@ import { GitPortalAnimation } from './GitPortalAnimation'
 
 interface GitPortalResultProps {
   clonedPath: string
-  repoInfo?: { name: string; branch: string; sizeBytes: number }
+  repoInfo?: { name: string; branch: string; sizeBytes: number; historyId?: string }
   onClose: () => void
   onOpenDir: (path: string) => void
   onStartSession: (path: string) => void
+  startSessionLabel?: string
   isMobile: boolean
 }
 
@@ -19,25 +20,25 @@ function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
-export function GitPortalResult({ clonedPath, repoInfo, onClose, onOpenDir, onStartSession, isMobile }: GitPortalResultProps) {
+export function GitPortalResult({ clonedPath, repoInfo, onOpenDir, onStartSession, startSessionLabel, isMobile }: GitPortalResultProps) {
   const { t } = useTranslation()
   const [isFavorite, setIsFavorite] = useState(() => {
     const history = getHistory()
-    const entry = history.find(e => e.url && e.repoName === repoInfo?.name)
+    const entry = history.find(e => e.id === repoInfo?.historyId)
     return entry?.isFavorite ?? false
   })
   const [starSpinning, setStarSpinning] = useState(false)
 
   const handleToggleFavorite = useCallback(() => {
     const history = getHistory()
-    const entry = history.find(e => e.repoName === repoInfo?.name)
+    const entry = history.find(e => e.id === repoInfo?.historyId)
     if (entry) {
       const nowFav = toggleFavorite(entry.id)
       setIsFavorite(nowFav)
       setStarSpinning(true)
       setTimeout(() => setStarSpinning(false), 300)
     }
-  }, [repoInfo])
+  }, [repoInfo?.historyId])
 
   return (
     <div className={`flex flex-col items-center gap-4 ${isMobile ? 'min-h-[60dvh] px-6' : 'min-h-[300px]'}`}>
@@ -47,7 +48,7 @@ export function GitPortalResult({ clonedPath, repoInfo, onClose, onOpenDir, onSt
         <button
           type="button"
           className={cn(
-            'absolute -top-1 -right-3 p-1 rounded-full transition-colors',
+            'absolute -top-4 -right-6 min-h-11 min-w-11 inline-flex items-center justify-center rounded-full transition-colors',
             isFavorite ? 'text-yellow-500' : 'text-[var(--hp-text-tertiary)] hover:text-yellow-500'
           )}
           onClick={handleToggleFavorite}
@@ -84,14 +85,14 @@ export function GitPortalResult({ clonedPath, repoInfo, onClose, onOpenDir, onSt
       <div className={cn('flex flex-col gap-2 w-full', isMobile ? 'max-w-sm' : 'max-w-xs')}>
         <button
           type="button"
-          className="w-full px-4 py-2.5 text-sm font-medium rounded-lg bg-[var(--hp-primary)] text-white hover:opacity-90 transition-opacity"
+          className="min-h-11 w-full px-4 py-2.5 text-sm font-medium rounded-lg bg-[var(--hp-primary)] text-[var(--hp-primary-text)] hover:bg-[var(--hp-primary-hover)] transition-colors"
           onClick={() => onStartSession(clonedPath)}
         >
-          {t('gitPortal.result.startSession')}
+          {startSessionLabel ?? t('gitPortal.result.startSession')}
         </button>
         <button
           type="button"
-          className="w-full px-4 py-2 text-sm rounded-lg border border-[var(--hp-border)] text-[var(--hp-text-tertiary)] hover:text-[var(--hp-text-primary)] hover:border-[var(--hp-text-tertiary)] transition-colors"
+          className="min-h-11 w-full px-4 py-2 text-sm rounded-lg border border-[var(--hp-border)] text-[var(--hp-text-tertiary)] hover:text-[var(--hp-text-primary)] hover:border-[var(--hp-text-tertiary)] transition-colors"
           onClick={() => onOpenDir(clonedPath)}
         >
           {t('gitPortal.result.openDir')}

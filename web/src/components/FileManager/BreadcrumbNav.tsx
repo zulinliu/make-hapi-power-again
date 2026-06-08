@@ -163,7 +163,7 @@ export function buildBreadcrumbs(path: string, rootLabel: string, rootDisplayLab
   const rootMatch = clean.match(rootPattern)
 
   if (!rootMatch || rootMatch.index === undefined) {
-    return [{ name: '~', path: clean || '/' }]
+    return [{ name: clean || '/', path: clean || '/' }]
   }
 
   const rootEnd = rootMatch.index + rootMatch[0].length

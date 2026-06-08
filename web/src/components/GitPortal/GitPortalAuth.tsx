@@ -2,10 +2,11 @@ import { useState } from 'react'
 import { useTranslation } from '@/lib/use-translation'
 import { cn } from '@/lib/utils'
 import type { GitPlatform } from '@/lib/git-portal-storage'
+import type { CloneAuth } from '@/lib/git-portal-api'
 
 interface GitPortalAuthProps {
-  auth: { type: 'password' | 'token' | 'ssh'; username?: string; password?: string } | null
-  onAuthChange: (auth: { type: 'password' | 'token'; username?: string; password?: string } | null) => void
+  auth: CloneAuth | null
+  onAuthChange: (auth: CloneAuth | null) => void
   platform: GitPlatform
   show: boolean
 }
@@ -17,49 +18,61 @@ const HINT_KEYS: Record<GitPlatform, string> = {
   other: 'gitPortal.auth.hint.generic',
 }
 
+const PLATFORM_LABELS: Record<GitPlatform, string> = {
+  github: 'GitHub',
+  gitlab: 'GitLab',
+  bitbucket: 'Bitbucket',
+  other: 'Git',
+}
+
 export function GitPortalAuth({ auth, onAuthChange, platform, show }: GitPortalAuthProps) {
   const { t } = useTranslation()
   const [showPassword, setShowPassword] = useState(false)
   const [mode, setMode] = useState<'password' | 'token'>(
     auth?.type === 'token' ? 'token' : 'password'
   )
+  const passwordAuth = auth?.type === 'password' ? auth : null
+  const tokenAuth = auth?.type === 'token' ? auth : null
 
   if (!show) return null
 
   const hintKey = HINT_KEYS[platform] ?? HINT_KEYS.other
+  const platformLabel = PLATFORM_LABELS[platform]
 
   return (
     <div className="gp-auth">
       <h4 className="text-sm font-medium text-[var(--hp-text-primary)] mb-2">
-        {t('gitPortal.auth.privateRepo')}
+        {t('gitPortal.auth.privateRepo', { platform: platformLabel })}
       </h4>
 
       <p className="text-xs text-[var(--hp-text-tertiary)] mb-3">
         {t(hintKey)}
       </p>
 
-      <div className="flex gap-2 mb-3">
+      <div className="flex gap-2 mb-3" role="group" aria-label={t('gitPortal.auth.title')}>
         <button
           type="button"
+          aria-pressed={mode === 'password'}
           className={cn(
-            'gp-auth-tab px-3 py-1 text-xs rounded-md border transition-colors',
+            'gp-auth-tab min-h-11 px-3 py-1 text-xs rounded-md border transition-colors',
             mode === 'password'
-              ? 'bg-[var(--hp-primary-subtle)] border-[var(--hp-primary)] text-[var(--hp-primary)]'
+              ? 'bg-[var(--hp-primary-subtle)] border-[var(--hp-primary)] text-[var(--hp-primary-readable,var(--hp-primary))]'
               : 'border-[var(--hp-border)] text-[var(--hp-text-tertiary)] hover:text-[var(--hp-text-primary)]'
           )}
           onClick={() => {
             setMode('password')
-            onAuthChange({ type: 'password', username: auth?.username ?? '', password: '' })
+            onAuthChange({ type: 'password', username: passwordAuth?.username ?? '', password: '' })
           }}
         >
           {t('gitPortal.auth.usePassword')}
         </button>
         <button
           type="button"
+          aria-pressed={mode === 'token'}
           className={cn(
-            'gp-auth-tab px-3 py-1 text-xs rounded-md border transition-colors',
+            'gp-auth-tab min-h-11 px-3 py-1 text-xs rounded-md border transition-colors',
             mode === 'token'
-              ? 'bg-[var(--hp-primary-subtle)] border-[var(--hp-primary)] text-[var(--hp-primary)]'
+              ? 'bg-[var(--hp-primary-subtle)] border-[var(--hp-primary)] text-[var(--hp-primary-readable,var(--hp-primary))]'
               : 'border-[var(--hp-border)] text-[var(--hp-text-tertiary)] hover:text-[var(--hp-text-primary)]'
           )}
           onClick={() => {
@@ -74,45 +87,46 @@ export function GitPortalAuth({ auth, onAuthChange, platform, show }: GitPortalA
       {mode === 'password' ? (
         <div className="space-y-2">
           <div>
-            <label className="block text-xs text-[var(--hp-text-tertiary)] mb-1">
+            <label className="block text-xs text-[var(--hp-text-tertiary)] mb-1" htmlFor="gp-auth-username">
               {t('gitPortal.auth.username')}
             </label>
             <input
+              id="gp-auth-username"
               type="text"
-              className="gp-input w-full px-3 py-1.5 text-sm rounded-md border border-[var(--hp-border)] bg-[var(--hp-surface-0)] text-[var(--hp-text-primary)] placeholder:text-[var(--hp-text-tertiary)] focus:outline-none focus:ring-1 focus:ring-[var(--hp-primary)]"
+              className="gp-input min-h-11 w-full px-3 py-2 text-sm rounded-md border border-[var(--hp-border)] bg-[var(--hp-surface-0)] text-[var(--hp-text-primary)] placeholder:text-[var(--hp-text-tertiary)] focus:outline-none focus:ring-1 focus:ring-[var(--hp-primary)]"
               placeholder={t('gitPortal.auth.usernamePlaceholder')}
-              value={auth?.username ?? ''}
-              onChange={e => onAuthChange({ type: 'password', username: e.target.value, password: auth?.password ?? '' })}
+              value={passwordAuth?.username ?? ''}
+              onChange={e => onAuthChange({ type: 'password', username: e.target.value, password: passwordAuth?.password ?? '' })}
               autoComplete="username"
             />
           </div>
           <div className="relative">
-            <label className="block text-xs text-[var(--hp-text-tertiary)] mb-1">
+            <label className="block text-xs text-[var(--hp-text-tertiary)] mb-1" htmlFor="gp-auth-password">
               {t('gitPortal.auth.password')}
             </label>
             <input
+              id="gp-auth-password"
               type={showPassword ? 'text' : 'password'}
-              className="gp-input w-full px-3 py-1.5 pr-9 text-sm rounded-md border border-[var(--hp-border)] bg-[var(--hp-surface-0)] text-[var(--hp-text-primary)] placeholder:text-[var(--hp-text-tertiary)] focus:outline-none focus:ring-1 focus:ring-[var(--hp-primary)]"
+              className="gp-input min-h-11 w-full px-3 py-2 pr-12 text-sm rounded-md border border-[var(--hp-border)] bg-[var(--hp-surface-0)] text-[var(--hp-text-primary)] placeholder:text-[var(--hp-text-tertiary)] focus:outline-none focus:ring-1 focus:ring-[var(--hp-primary)]"
               placeholder={t('gitPortal.auth.passwordPlaceholder')}
-              value={auth?.password ?? ''}
-              onChange={e => onAuthChange({ type: 'password', username: auth?.username ?? '', password: e.target.value })}
+              value={passwordAuth?.password ?? ''}
+              onChange={e => onAuthChange({ type: 'password', username: passwordAuth?.username ?? '', password: e.target.value })}
               autoComplete="current-password"
             />
             <button
               type="button"
-              className="absolute right-2 top-[26px] text-[var(--hp-text-tertiary)] hover:text-[var(--hp-text-primary)]"
+              className="absolute right-1 top-[22px] min-h-11 min-w-11 inline-flex items-center justify-center rounded-md text-[var(--hp-text-tertiary)] hover:text-[var(--hp-text-primary)]"
               onClick={() => setShowPassword(v => !v)}
-              tabIndex={-1}
               aria-label={showPassword ? t('gitPortal.auth.hidePassword') : t('gitPortal.auth.showPassword')}
             >
               {showPassword ? (
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
                   <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
                   <line x1="1" y1="1" x2="23" y2="23" />
                 </svg>
               ) : (
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                   <circle cx="12" cy="12" r="3" />
                 </svg>
@@ -122,14 +136,15 @@ export function GitPortalAuth({ auth, onAuthChange, platform, show }: GitPortalA
         </div>
       ) : (
         <div>
-          <label className="block text-xs text-[var(--hp-text-tertiary)] mb-1">
+          <label className="block text-xs text-[var(--hp-text-tertiary)] mb-1" htmlFor="gp-auth-token">
             {t('gitPortal.auth.token')}
           </label>
           <input
+            id="gp-auth-token"
             type="password"
-            className="gp-input w-full px-3 py-1.5 text-sm rounded-md border border-[var(--hp-border)] bg-[var(--hp-surface-0)] text-[var(--hp-text-primary)] placeholder:text-[var(--hp-text-tertiary)] focus:outline-none focus:ring-1 focus:ring-[var(--hp-primary)]"
+            className="gp-input min-h-11 w-full px-3 py-2 text-sm rounded-md border border-[var(--hp-border)] bg-[var(--hp-surface-0)] text-[var(--hp-text-primary)] placeholder:text-[var(--hp-text-tertiary)] focus:outline-none focus:ring-1 focus:ring-[var(--hp-primary)]"
             placeholder={t('gitPortal.auth.tokenPlaceholder')}
-            value={auth?.password ?? ''}
+            value={tokenAuth?.password ?? ''}
             onChange={e => onAuthChange({ type: 'token', password: e.target.value })}
             autoComplete="off"
           />

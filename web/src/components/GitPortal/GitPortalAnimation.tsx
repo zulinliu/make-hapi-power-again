@@ -26,43 +26,54 @@ export function GitPortalAnimation({ phase, progress, isLowEnd }: GitPortalAnima
         viewBox="0 0 100 100"
         aria-hidden="true"
       >
-        {/* Outer diamond (portal frame) */}
+        {/* Repository frame */}
         <rect
           className="gp-portal-ring"
-          x="15" y="15" width="70" height="70"
-          rx="4"
-          transform="rotate(45 50 50)"
+          x="18" y="18" width="64" height="64"
+          rx="14"
           fill="none"
           stroke={ringColor}
           strokeWidth="2.5"
           opacity="0.8"
         />
 
-        {/* Inner diamond (rotated 8 deg) */}
-        <rect
-          x="28" y="28" width="44" height="44"
-          rx="3"
-          transform="rotate(53 50 50)"
+        {/* Git branch graph */}
+        <path
+          d="M38 38v18a8 8 0 0 0 8 8h15"
           fill="none"
           stroke={innerColor}
-          strokeWidth="1.5"
-          opacity="0.6"
-        />
-
-        {/* Center branch line */}
-        <line
-          x1="50" y1="38" x2="50" y2="62"
-          stroke={innerColor}
-          strokeWidth="2"
+          strokeWidth="2.25"
           strokeLinecap="round"
-          opacity="0.7"
+          strokeLinejoin="round"
+          opacity="0.72"
+        />
+        <path
+          d="M38 50h24"
+          fill="none"
+          stroke={innerColor}
+          strokeWidth="2.25"
+          strokeLinecap="round"
+          opacity="0.72"
+        />
+        <circle cx="38" cy="36" r="5" fill="var(--hp-surface-0)" stroke={innerColor} strokeWidth="2.25" />
+        <circle cx="38" cy="64" r="5" fill="var(--hp-surface-0)" stroke={innerColor} strokeWidth="2.25" />
+        <circle cx="64" cy="50" r="5" fill="var(--hp-surface-0)" stroke={innerColor} strokeWidth="2.25" />
+
+        {/* Repository inner boundary */}
+        <rect
+          x="28" y="28" width="44" height="44"
+          rx="10"
+          fill="none"
+          stroke={innerColor}
+          strokeWidth="1"
+          opacity="0.22"
         />
 
         {/* Data flow lines (only during transfer) */}
         {(phase === 'connecting' || phase === 'transferring' || phase === 'unpacking') && (
           <>
-            <line className="gp-data-stream" x1="35" y1="50" x2="46" y2="50" stroke={innerColor} strokeWidth="1" opacity="0.5" />
-            <line className="gp-data-stream" x1="54" y1="50" x2="65" y2="50" stroke={innerColor} strokeWidth="1" opacity="0.5" />
+            <line className="gp-data-stream" x1="30" y1="50" x2="36" y2="50" stroke={innerColor} strokeWidth="1.25" opacity="0.5" />
+            <line className="gp-data-stream" x1="68" y1="50" x2="74" y2="50" stroke={innerColor} strokeWidth="1.25" opacity="0.5" />
           </>
         )}
 
@@ -89,8 +100,8 @@ export function GitPortalAnimation({ phase, progress, isLowEnd }: GitPortalAnima
       </svg>
 
       {/* Screen reader progress */}
-      <span className="sr-only" aria-live="polite">
-        {isDone ? t('gitPortal.result.success') : isError ? t('gitPortal.error.authFailed') : `${t('gitPortal.progress.transferring')} ${progress ?? 0}%`}
+      <span className="sr-only">
+        {isDone ? t('gitPortal.result.success') : isError ? t('gitPortal.error.authFailed') : `${progress ?? 0}%`}
       </span>
     </div>
   )
