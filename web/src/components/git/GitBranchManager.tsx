@@ -73,7 +73,7 @@ export function GitBranchManager({ sessionId }: { sessionId: string }) {
     setDeleteTarget(null)
     setDeleting(true)
     try {
-      const res = await api.deleteGitBranch(sessionId, name)
+      const res = await api.deleteGitBranch(sessionId, name, name)
       if (res.success) {
         loadBranches()
       } else {

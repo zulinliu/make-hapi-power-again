@@ -22,7 +22,12 @@ import type {
     CursorModelsResponse,
     DeleteUploadResponse,
     FileReadResponse,
+    GitAtlasDashboardResponse,
+    GitAtlasDiffResponse,
     GitCommandResponse,
+    GitCommitBasketResponse,
+    GitSyncRequest,
+    GitSyncResponse,
     ListDirectoryResponse,
     MachineListDirectoryResponse,
     MachinePathsExistsResponse,
@@ -236,6 +241,19 @@ export class ApiClient {
         return await this.request<GitCommandResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/git-status`)
     }
 
+    async getGitDashboard(sessionId: string): Promise<GitAtlasDashboardResponse> {
+        return await this.request<GitAtlasDashboardResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/git-dashboard`)
+    }
+
+    async getGitAtlasDiff(sessionId: string, path: string, staged?: boolean): Promise<GitAtlasDiffResponse> {
+        const params = new URLSearchParams()
+        params.set('path', path)
+        if (staged !== undefined) {
+            params.set('staged', staged ? 'true' : 'false')
+        }
+        return await this.request<GitAtlasDiffResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/git-diff?${params.toString()}`)
+    }
+
     async getGitDiffNumstat(sessionId: string, staged: boolean): Promise<GitCommandResponse> {
         const params = new URLSearchParams()
         params.set('staged', staged ? 'true' : 'false')
@@ -277,11 +295,11 @@ export class ApiClient {
         })
     }
 
-    async deleteGitBranch(sessionId: string, name: string): Promise<GitCommandResponse> {
+    async deleteGitBranch(sessionId: string, name: string, confirmation?: string): Promise<GitCommandResponse> {
         return await this.request<GitCommandResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/git-branches`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, action: 'delete' })
+            body: JSON.stringify({ name, action: 'delete', confirmation })
         })
     }
 
@@ -295,6 +313,14 @@ export class ApiClient {
 
     async createGitCommit(sessionId: string, message: string, paths?: string[]): Promise<GitCommandResponse> {
         return await this.request<GitCommandResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/git-commit`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message, paths })
+        })
+    }
+
+    async createGitCommitBasket(sessionId: string, message: string, paths: string[]): Promise<GitCommitBasketResponse> {
+        return await this.request<GitCommitBasketResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/git-commit-basket`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ message, paths })
@@ -341,13 +367,15 @@ export class ApiClient {
         })
     }
 
-    async removeGitRemote(sessionId: string, name: string): Promise<GitCommandResponse> {
+    async removeGitRemote(sessionId: string, name: string, confirmation?: string): Promise<GitCommandResponse> {
         return await this.request<GitCommandResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/git-remotes/${encodeURIComponent(name)}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ confirmation })
         })
     }
 
-    async gitPush(sessionId: string, options: { remote?: string; branch?: string; force?: boolean }): Promise<GitCommandResponse> {
+    async gitPush(sessionId: string, options: { remote?: string; branch?: string; force?: boolean; confirmation?: string }): Promise<GitCommandResponse> {
         return await this.request<GitCommandResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/git-push`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -365,6 +393,14 @@ export class ApiClient {
 
     async gitFetch(sessionId: string, options: { remote?: string }): Promise<GitCommandResponse> {
         return await this.request<GitCommandResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/git-fetch`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(options)
+        })
+    }
+
+    async gitSync(sessionId: string, options: GitSyncRequest): Promise<GitSyncResponse> {
+        return await this.request<GitSyncResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/git-sync`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(options)

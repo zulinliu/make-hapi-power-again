@@ -59,4 +59,58 @@ describe('ApiClient Git Portal requests', () => {
         expect(String(url)).toBe('https://hub.example/api/machines/machine%2Fid/git-clone/11111111-1111-4111-8111-111111111111')
         expect(init?.method).toBe('DELETE')
     })
+
+    it('posts Git Atlas commit basket requests with selected paths only', async () => {
+        const fetchMock = installFetchMock()
+        const api = new ApiClient('token-1', { baseUrl: 'https://hub.example' })
+
+        await api.createGitCommitBasket('session/id', '提交 Git 脉络', [
+            'web/src/routes/sessions/git.tsx',
+            'web/src/lib/git-atlas.ts',
+        ])
+
+        const [url, init] = fetchMock.mock.calls[0] as unknown as FetchCall
+        expect(String(url)).toBe('https://hub.example/api/sessions/session%2Fid/git-commit-basket')
+        expect(init?.method).toBe('POST')
+        expect(jsonBody(init)).toEqual({
+            message: '提交 Git 脉络',
+            paths: [
+                'web/src/routes/sessions/git.tsx',
+                'web/src/lib/git-atlas.ts',
+            ],
+        })
+    })
+
+    it('sends confirmation phrases for dangerous Git operations', async () => {
+        const fetchMock = installFetchMock()
+        const api = new ApiClient('token-1', { baseUrl: 'https://hub.example' })
+
+        await api.gitPush('session/id', {
+            remote: 'origin',
+            branch: 'feat/v0.18.0',
+            force: true,
+            confirmation: 'feat/v0.18.0',
+        })
+        await api.deleteGitBranch('session/id', 'old-branch', 'old-branch')
+        await api.removeGitRemote('session/id', 'backup', 'backup')
+
+        const [, pushInit] = fetchMock.mock.calls[0] as unknown as FetchCall
+        const [, branchInit] = fetchMock.mock.calls[1] as unknown as FetchCall
+        const [, remoteInit] = fetchMock.mock.calls[2] as unknown as FetchCall
+
+        expect(jsonBody(pushInit)).toEqual({
+            remote: 'origin',
+            branch: 'feat/v0.18.0',
+            force: true,
+            confirmation: 'feat/v0.18.0',
+        })
+        expect(jsonBody(branchInit)).toEqual({
+            name: 'old-branch',
+            action: 'delete',
+            confirmation: 'old-branch',
+        })
+        expect(jsonBody(remoteInit)).toEqual({
+            confirmation: 'backup',
+        })
+    })
 })

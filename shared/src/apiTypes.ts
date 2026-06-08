@@ -239,6 +239,127 @@ export type CommandResponse = {
 
 export type GitCommandResponse = CommandResponse
 
+export type GitAtlasChangeStatus =
+    | 'modified'
+    | 'added'
+    | 'deleted'
+    | 'renamed'
+    | 'untracked'
+    | 'conflicted'
+
+export type GitAtlasChangeStage = 'staged' | 'unstaged' | 'mixed' | 'untracked'
+
+export type GitAtlasChange = {
+    path: string
+    oldPath?: string
+    status: GitAtlasChangeStatus
+    stage: GitAtlasChangeStage
+    linesAdded: number
+    linesRemoved: number
+    binary: boolean
+    selectable: boolean
+}
+
+export type GitAtlasGroup = {
+    id: string
+    label: string
+    kind: 'conflicted' | 'staged' | 'unstaged' | 'untracked'
+    total: number
+    paths: string[]
+}
+
+export type GitAtlasRemote = {
+    name: string
+    url: string
+}
+
+export type GitAtlasCommitSummary = {
+    hash: string
+    message: string
+    refs?: string
+}
+
+export type GitAtlasRecommendation = {
+    kind: 'clone' | 'resolve-conflicts' | 'review' | 'commit' | 'pull' | 'push' | 'clean'
+    label: string
+    description: string
+}
+
+export type GitAtlasDashboardResponse = {
+    success: boolean
+    repo?: {
+        isRepo: boolean
+        root: string | null
+        branch: string | null
+        upstream: string | null
+        detached: boolean
+        ahead: number
+        behind: number
+        hasConflicts: boolean
+    }
+    summary?: {
+        totalChanges: number
+        staged: number
+        unstaged: number
+        untracked: number
+        conflicted: number
+        linesAdded: number
+        linesRemoved: number
+    }
+    recommendation?: GitAtlasRecommendation
+    changes?: GitAtlasChange[]
+    groups?: GitAtlasGroup[]
+    remotes?: GitAtlasRemote[]
+    recentCommits?: GitAtlasCommitSummary[]
+    sync?: {
+        remote: string | null
+        branch: string | null
+        ahead: number
+        behind: number
+        canPull: boolean
+        canPush: boolean
+        requiresRemote: boolean
+        inFlight: boolean
+    }
+    error?: string
+}
+
+export type GitAtlasDiffResponse = {
+    success: boolean
+    path?: string
+    staged?: boolean
+    diff?: string
+    binary?: boolean
+    tooLarge?: boolean
+    truncated?: boolean
+    error?: string
+}
+
+export type GitCommitBasketRequest = {
+    message: string
+    paths: string[]
+}
+
+export type GitCommitBasketResponse = CommandResponse & {
+    committedPaths?: string[]
+}
+
+export type GitSyncAction = 'fetch' | 'pull' | 'push'
+
+export type GitSyncRequest = {
+    action: GitSyncAction
+    remote?: string
+    branch?: string
+    force?: boolean
+    confirmation?: string
+}
+
+export type GitSyncResponse = CommandResponse & {
+    action?: GitSyncAction
+    remote?: string
+    branch?: string
+}
+
 export type GitCloneResponse = CommandResponse & {
     clonedPath?: string
     repoInfo?: {

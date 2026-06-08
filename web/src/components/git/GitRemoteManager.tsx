@@ -75,7 +75,7 @@ export function GitRemoteManager({ sessionId, onRemotesLoaded }: { sessionId: st
         setError('')
         setRemoving(true)
         try {
-            const result = await api.removeGitRemote(sessionId, name)
+            const result = await api.removeGitRemote(sessionId, name, name)
             if (result.success) {
                 fetchRemotes()
             } else {

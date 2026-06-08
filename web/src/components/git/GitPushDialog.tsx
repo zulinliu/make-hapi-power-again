@@ -34,7 +34,6 @@ export function GitPushDialog({
     const [remote, setRemote] = useState('origin')
     const [branch, setBranch] = useState('')
     const [forcePush, setForcePush] = useState(false)
-    const [upstream, setUpstream] = useState(true)
     const [confirmForce, setConfirmForce] = useState(false)
     const [phase, setPhase] = useState<PushPhase>('idle')
     const [error, setError] = useState('')
@@ -61,7 +60,7 @@ export function GitPushDialog({
             if (remote) args.remote = remote
             if (branch) args.branch = branch
             if (forcePush) args.force = true
-            if (upstream) args.setUpstream = true
+            if (forcePush) args.confirmation = branch
 
             const res = await api.gitPush(sessionId, args)
             if (res.success) {
@@ -85,7 +84,6 @@ export function GitPushDialog({
         setResult('')
         setForcePush(false)
         setConfirmForce(false)
-        setUpstream(true)
         onClose()
     }
 
@@ -138,16 +136,6 @@ export function GitPushDialog({
                     </div>
 
                     <div className="flex items-center gap-4">
-                        <label className="flex items-center gap-2 text-sm">
-                            <input
-                                type="checkbox"
-                                checked={upstream}
-                                onChange={(e) => setUpstream(e.target.checked)}
-                                disabled={phase === 'pushing'}
-                                className="rounded"
-                            />
-                            <span className="text-(--hp-text-secondary)">{t('git.push.setUpstream')}</span>
-                        </label>
                         <label className="flex items-center gap-2 text-sm">
                             <input
                                 type="checkbox"
