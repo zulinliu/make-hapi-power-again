@@ -1,16 +1,42 @@
-import { describe, expect, it, vi } from 'vitest'
-import { fireEvent, render, screen } from '@testing-library/react'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import type { ComponentProps } from 'react'
+import type { ApiClient } from '@/api/client'
 import { I18nProvider } from '@/lib/i18n-context'
 import {
     ConversationOutlinePanel,
     captureScrollAnchor,
     getScrollIntent,
     locateOutlineTargetMessage,
+    restoreFocusAfterPanelClose,
     restoreScrollAnchor,
     shouldCancelInitialScrollSettling,
 } from '@/components/AssistantChat/HappyThread'
 import type { ConversationOutlineItem } from '@/chat/outline'
+import type {
+    SessionLoomExportListResponse,
+    SessionLoomExportPreviewRequest,
+    SessionLoomExportPreviewResponse,
+    SessionLoomOutlineResponse,
+} from '@/types/api'
+
+const originalNavigatorShare = (navigator as Navigator & { share?: unknown }).share
+const originalNavigatorClipboard = navigator.clipboard
+
+function setNavigatorProperty(name: 'share' | 'clipboard', value: unknown): void {
+    Object.defineProperty(navigator, name, {
+        configurable: true,
+        value
+    })
+}
+
+afterEach(() => {
+    cleanup()
+    vi.restoreAllMocks()
+    vi.useRealTimers()
+    setNavigatorProperty('share', originalNavigatorShare)
+    setNavigatorProperty('clipboard', originalNavigatorClipboard)
+})
 
 const outlineItems: ConversationOutlineItem[] = [
     {
@@ -59,14 +85,121 @@ function renderPanel(props: Partial<ComponentProps<typeof ConversationOutlinePan
     )
 }
 
+function createSessionLoomApi(overrides: Partial<Pick<
+    ApiClient,
+    | 'getSessionLoomOutline'
+    | 'listSessionLoomExports'
+    | 'previewSessionLoomExport'
+    | 'createSessionLoomExport'
+    | 'downloadSessionLoomExport'
+    | 'deleteSessionLoomExport'
+>> = {}): ApiClient {
+    const outline: SessionLoomOutlineResponse = {
+        success: true,
+        sessionId: 'session-1',
+        title: 'project',
+        generatedAt: 3000,
+        items: [
+            {
+                id: 'session-loom:decision:m3',
+                targetMessageId: 'agent:m3',
+                kind: 'decision',
+                label: 'Decision: keep the server outline',
+                createdAt: 3000,
+                depth: 1
+            }
+        ],
+        stats: {
+            totalMessages: 3,
+            outlineItems: 1,
+            firstMessageAt: 1000,
+            lastMessageAt: 3000
+        }
+    }
+    const assets: SessionLoomExportListResponse = {
+        success: true,
+        assets: []
+    }
+    const preview: SessionLoomExportPreviewResponse = {
+        success: true,
+        sessionId: 'session-1',
+        generatedAt: 4000,
+        markdown: '# Session Loom',
+        title: 'project',
+        stats: {
+            messageCount: 2,
+            outlineCount: 1,
+            userMessages: 1,
+            assistantMessages: 1,
+            systemEvents: 0,
+            redactions: 1,
+            filteredToolDetails: 0
+        },
+        filters: {
+            redactSecrets: true,
+            includeSystemEvents: false,
+            includeToolDetails: false
+        },
+        warnings: []
+    }
+
+    return {
+        getSessionLoomOutline: vi.fn(async () => outline),
+        listSessionLoomExports: vi.fn(async () => assets),
+        previewSessionLoomExport: vi.fn(async () => preview),
+        createSessionLoomExport: vi.fn(async () => ({
+            success: true,
+            asset: {
+                exportId: 'export-1',
+                sessionId: 'session-1',
+                title: 'project',
+                fileName: 'project.md',
+                format: 'markdown',
+                template: 'raw',
+                createdAt: 4000,
+                expiresAt: 4000 + 7 * 24 * 60 * 60 * 1000,
+                sizeBytes: 14,
+                checksum: '0123456789abcdef',
+                stats: preview.stats
+            },
+            markdown: preview.markdown
+        })),
+        downloadSessionLoomExport: vi.fn(async () => preview.markdown),
+        deleteSessionLoomExport: vi.fn(async () => undefined),
+        ...overrides
+    } as unknown as ApiClient
+}
+
 describe('ConversationOutlinePanel', () => {
     it('renders outline items and selects an item', () => {
         const onSelect = vi.fn()
         renderPanel({ onSelect })
 
+        expect(screen.getByRole('complementary', { name: 'Session Loom' })).toBeInTheDocument()
         fireEvent.click(screen.getByText('Implement the panel'))
 
         expect(onSelect).toHaveBeenCalledWith(outlineItems[0])
+    })
+
+    it('renders Session Loom tabs', () => {
+        renderPanel()
+
+        expect(screen.getByRole('tab', { name: 'Outline' })).toBeInTheDocument()
+        expect(screen.getByRole('tab', { name: 'Export' })).toBeInTheDocument()
+        expect(screen.getByRole('tab', { name: 'Synthesis' })).toBeInTheDocument()
+        expect(screen.getByRole('tab', { name: 'Assets' })).toBeInTheDocument()
+    })
+
+    it('links Session Loom tabs to their active panel', () => {
+        renderPanel()
+
+        expect(screen.getByRole('tab', { name: 'Outline' })).toHaveAttribute('aria-controls', 'session-loom-panel-outline')
+        expect(screen.getByRole('tabpanel', { name: 'Outline' })).toHaveAttribute('id', 'session-loom-panel-outline')
+
+        fireEvent.click(screen.getByRole('tab', { name: 'Export' }))
+
+        expect(screen.getByRole('tab', { name: 'Export' })).toHaveAttribute('aria-controls', 'session-loom-panel-export')
+        expect(screen.getByRole('tabpanel', { name: 'Export' })).toHaveAttribute('id', 'session-loom-panel-export')
     })
 
     it('shows load earlier when older messages exist', () => {
@@ -81,7 +214,191 @@ describe('ConversationOutlinePanel', () => {
     it('renders an empty state', () => {
         renderPanel({ items: [] })
 
-        expect(screen.getByText('No outline items in loaded messages')).toBeInTheDocument()
+        expect(screen.getByText('No outline items in this session yet.')).toBeInTheDocument()
+    })
+
+    it('keeps outline item touch targets at least 44px tall', () => {
+        renderPanel()
+
+        expect(screen.getByText('Implement the panel').closest('button')).toHaveClass('min-h-11')
+    })
+
+    it('prefers the server outline when Session Loom API is available', async () => {
+        const onSelect = vi.fn()
+        const api = createSessionLoomApi()
+
+        renderPanel({
+            api,
+            sessionId: 'session-1',
+            onSelect
+        })
+
+        fireEvent.click(await screen.findByText('Decision: keep the server outline'))
+
+        expect(api.getSessionLoomOutline).toHaveBeenCalledWith('session-1')
+        expect(onSelect).toHaveBeenCalledWith({
+            id: 'session-loom:decision:m3',
+            targetMessageId: 'agent:m3',
+            kind: 'user',
+            label: 'Decision: keep the server outline',
+            createdAt: 3000
+        })
+    })
+
+    it('gives the export template selector an accessible name', () => {
+        renderPanel()
+
+        fireEvent.click(screen.getByRole('tab', { name: 'Export' }))
+
+        expect(screen.getByRole('combobox', { name: 'Export template' })).toBeInTheDocument()
+    })
+
+    it('requests export previews with redaction enabled by default', async () => {
+        const previewSessionLoomExport = vi.fn(async () => ({
+            success: true,
+            sessionId: 'session-1',
+            generatedAt: 4000,
+            markdown: '# Export',
+            title: 'project',
+            stats: {
+                messageCount: 2,
+                outlineCount: 1,
+                userMessages: 1,
+                assistantMessages: 1,
+                systemEvents: 0,
+                redactions: 1,
+                filteredToolDetails: 0
+            },
+            filters: {
+                redactSecrets: true,
+                includeSystemEvents: false,
+                includeToolDetails: false
+            },
+            warnings: []
+        } satisfies SessionLoomExportPreviewResponse))
+        const api = createSessionLoomApi({ previewSessionLoomExport })
+
+        renderPanel({
+            api,
+            sessionId: 'session-1'
+        })
+
+        fireEvent.click(screen.getByRole('tab', { name: 'Export' }))
+        fireEvent.click(screen.getByRole('button', { name: 'Preview export' }))
+
+        await waitFor(() => {
+            expect(previewSessionLoomExport).toHaveBeenCalledWith(
+                'session-1',
+                expect.objectContaining({
+                    language: 'en',
+                    format: 'markdown',
+                    template: 'raw',
+                    filters: {
+                        redactSecrets: true,
+                        includeSystemEvents: false,
+                        includeToolDetails: false
+                    }
+                } satisfies Partial<SessionLoomExportPreviewRequest>)
+            )
+        })
+        expect(await screen.findByText('Export preview is ready.')).toBeInTheDocument()
+    })
+
+    it('copies Markdown when Web Share rejects', async () => {
+        const share = vi.fn(async () => {
+            throw new Error('share unavailable')
+        })
+        const writeText = vi.fn(async () => undefined)
+        setNavigatorProperty('share', share)
+        setNavigatorProperty('clipboard', { writeText })
+        const api = createSessionLoomApi({
+            previewSessionLoomExport: vi.fn(async () => ({
+                success: true,
+                sessionId: 'session-1',
+                generatedAt: 4000,
+                markdown: '# Export fallback',
+                title: 'project',
+                stats: {
+                    messageCount: 2,
+                    outlineCount: 1,
+                    userMessages: 1,
+                    assistantMessages: 1,
+                    systemEvents: 0,
+                    redactions: 1,
+                    filteredToolDetails: 0
+                },
+                filters: {
+                    redactSecrets: true,
+                    includeSystemEvents: false,
+                    includeToolDetails: false
+                },
+                warnings: []
+            } satisfies SessionLoomExportPreviewResponse))
+        })
+
+        renderPanel({
+            api,
+            sessionId: 'session-1'
+        })
+
+        fireEvent.click(screen.getByRole('tab', { name: 'Export' }))
+        fireEvent.click(screen.getByRole('button', { name: 'Preview export' }))
+        fireEvent.click(await screen.findByRole('button', { name: 'Share' }))
+
+        await waitFor(() => {
+            expect(share).toHaveBeenCalledWith({ title: 'project', text: '# Export fallback' })
+            expect(writeText).toHaveBeenCalledWith('# Export fallback')
+        })
+        expect(await screen.findByText('Share was unavailable, so the Markdown was copied.')).toBeInTheDocument()
+    })
+
+    it('deletes exported assets from the asset list', async () => {
+        const deleteSessionLoomExport = vi.fn(async () => undefined)
+        const api = createSessionLoomApi({
+            listSessionLoomExports: vi.fn(async () => ({
+                success: true,
+                assets: [
+                    {
+                        exportId: 'export-1',
+                        sessionId: 'session-1',
+                        title: 'project',
+                        fileName: 'project.md',
+                        format: 'markdown',
+                        template: 'raw',
+                        createdAt: 4000,
+                        expiresAt: 4000 + 7 * 24 * 60 * 60 * 1000,
+                        sizeBytes: 14,
+                        checksum: '0123456789abcdef',
+                        stats: {
+                            messageCount: 2,
+                            outlineCount: 1,
+                            userMessages: 1,
+                            assistantMessages: 1,
+                            systemEvents: 0,
+                            redactions: 1,
+                            filteredToolDetails: 0
+                        }
+                    }
+                ]
+            } satisfies SessionLoomExportListResponse)),
+            deleteSessionLoomExport
+        })
+
+        renderPanel({
+            api,
+            sessionId: 'session-1'
+        })
+
+        fireEvent.click(screen.getByRole('tab', { name: 'Assets' }))
+        expect(await screen.findByText('project.md')).toBeInTheDocument()
+
+        fireEvent.click(screen.getByRole('button', { name: 'Delete asset' }))
+
+        await waitFor(() => {
+            expect(deleteSessionLoomExport).toHaveBeenCalledWith('session-1', 'export-1')
+            expect(screen.queryByText('project.md')).not.toBeInTheDocument()
+        })
+        expect(await screen.findByText('Export asset deleted.')).toBeInTheDocument()
     })
 })
 
@@ -182,6 +499,21 @@ describe('scroll anchor helpers', () => {
         expect(viewport.scrollTop).toBe(250)
 
         viewport.remove()
+    })
+
+    it('restores focus to the trigger after the panel closes', () => {
+        vi.useFakeTimers()
+        const trigger = document.createElement('button')
+        const other = document.createElement('button')
+        document.body.append(trigger, other)
+        other.focus()
+
+        restoreFocusAfterPanelClose(trigger)
+        vi.runAllTimers()
+
+        expect(document.activeElement).toBe(trigger)
+        trigger.remove()
+        other.remove()
     })
 })
 

@@ -21,6 +21,7 @@ import { createPushRoutes } from './routes/push'
 import { createPluginsRoutes } from './routes/plugins'
 import { createSkillManagementRoutes } from './routes/skillManagement'
 import { createProviderRoutes } from './routes/providers'
+import { createSessionLoomRoutes } from './routes/sessionLoom'
 import type { SSEManager } from '../sse/sseManager'
 import type { VisibilityTracker } from '../visibility/visibilityTracker'
 import type { Server as BunServer } from 'bun'
@@ -105,6 +106,7 @@ function createWebApp(options: {
     app.route('/api', createSkillManagementRoutes(options.getSyncEngine))
     app.route('/api', createPushRoutes(options.store, options.vapidPublicKey))
     app.route('/api', createProviderRoutes(options.store))
+    app.route('/api', createSessionLoomRoutes(options.getSyncEngine))
 
     // Skip static serving in relay mode, show helpful message on root
     if (options.relayMode) {

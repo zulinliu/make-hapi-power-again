@@ -9,6 +9,14 @@ import type {
     PushSubscriptionPayload,
     PushUnsubscribePayload,
     PushVapidPublicKeyResponse,
+    SessionLoomExportListResponse,
+    SessionLoomExportPreviewRequest,
+    SessionLoomExportPreviewResponse,
+    SessionLoomExportRequest,
+    SessionLoomExportResponse,
+    SessionLoomOutlineResponse,
+    SessionLoomSynthesisRequest,
+    SessionLoomSynthesisResponse,
     SlashCommandsResponse,
     SkillsResponse,
     SpawnResponse,
@@ -235,6 +243,96 @@ export class ApiClient {
         const qs = params.toString()
         const url = `/api/sessions/${encodeURIComponent(sessionId)}/messages${qs ? `?${qs}` : ''}`
         return await this.request<MessagesResponse>(url)
+    }
+
+    async getSessionLoomOutline(sessionId: string): Promise<SessionLoomOutlineResponse> {
+        return await this.request<SessionLoomOutlineResponse>(
+            `/api/sessions/${encodeURIComponent(sessionId)}/conversation-outline`
+        )
+    }
+
+    async previewSessionLoomExport(
+        sessionId: string,
+        payload: SessionLoomExportPreviewRequest
+    ): Promise<SessionLoomExportPreviewResponse> {
+        return await this.request<SessionLoomExportPreviewResponse>(
+            `/api/sessions/${encodeURIComponent(sessionId)}/exports/preview`,
+            {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            }
+        )
+    }
+
+    async createSessionLoomExport(
+        sessionId: string,
+        payload: SessionLoomExportRequest
+    ): Promise<SessionLoomExportResponse> {
+        return await this.request<SessionLoomExportResponse>(
+            `/api/sessions/${encodeURIComponent(sessionId)}/exports`,
+            {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            }
+        )
+    }
+
+    async listSessionLoomExports(sessionId: string): Promise<SessionLoomExportListResponse> {
+        return await this.request<SessionLoomExportListResponse>(
+            `/api/sessions/${encodeURIComponent(sessionId)}/exports`
+        )
+    }
+
+    async downloadSessionLoomExport(
+        sessionId: string,
+        exportId: string,
+        attempt: number = 0,
+        overrideToken?: string | null
+    ): Promise<string> {
+        const headers = new Headers()
+        const liveToken = this.getToken ? this.getToken() : null
+        const authToken = overrideToken !== undefined
+            ? (overrideToken ?? (liveToken ?? this.token))
+            : (liveToken ?? this.token)
+        if (authToken) {
+            headers.set('authorization', `Bearer ${authToken}`)
+        }
+
+        const response = await fetch(this.buildUrl(
+            `/api/sessions/${encodeURIComponent(sessionId)}/exports/${encodeURIComponent(exportId)}/download`
+        ), { headers })
+
+        if (response.status === 401 && attempt === 0 && this.onUnauthorized) {
+            const refreshed = await this.onUnauthorized()
+            if (refreshed) {
+                this.token = refreshed
+                return await this.downloadSessionLoomExport(sessionId, exportId, attempt + 1, refreshed)
+            }
+        }
+        if (!response.ok) {
+            throw new ApiError(`HTTP ${response.status}`, response.status, undefined, await response.text().catch(() => undefined))
+        }
+        return await response.text()
+    }
+
+    async deleteSessionLoomExport(sessionId: string, exportId: string): Promise<void> {
+        await this.request(
+            `/api/sessions/${encodeURIComponent(sessionId)}/exports/${encodeURIComponent(exportId)}`,
+            { method: 'DELETE' }
+        )
+    }
+
+    async createSessionLoomSynthesis(
+        sessionId: string,
+        payload: SessionLoomSynthesisRequest
+    ): Promise<SessionLoomSynthesisResponse> {
+        return await this.request<SessionLoomSynthesisResponse>(
+            `/api/sessions/${encodeURIComponent(sessionId)}/synthesis`,
+            {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            }
+        )
     }
 
     async getGitStatus(sessionId: string): Promise<GitCommandResponse> {
