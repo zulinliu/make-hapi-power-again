@@ -6,7 +6,6 @@ created: 2026-06-06
 skill: impeccable
 status: completed
 ---
-
 # UX Shape: v0.17.0 文件管理器
 
 ## 1. Feature Summary

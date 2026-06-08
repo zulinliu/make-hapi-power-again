@@ -5,7 +5,6 @@ version: v0.17.0
 created: 2026-06-06
 status: completed
 ---
-
 # PRD: v0.17.0 全功能文件管理器
 
 ## 1. 目标

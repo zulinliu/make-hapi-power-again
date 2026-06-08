@@ -1,0 +1,17 @@
+# CodeGraph persistent graph database is versioned for agent context.
+
+# Runtime database sidecars
+*.db-wal
+*.db-shm
+
+# Cache
+cache/
+
+# Logs
+*.log
+
+# Runtime process marker
+*.pid
+
+# Hook markers
+.dirty
