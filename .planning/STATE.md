@@ -589,7 +589,8 @@ Phase 19 (PWA 更新机制修复) 引入了三个叠加问题：
 - [x] 40: Git 脉络 / Git Atlas，结构化 Git dashboard、Diff preview、Commit Basket、Sync Center、selected paths、危险操作服务端确认与测试完成。
 - [x] 41: 会话织锦 / Session Loom，服务端全量 outline、export preview、Markdown 导出、redaction、本地提炼、资产下载/复制/share fallback 与 i18n 完成。
 - [x] 42: 品牌整合，README、README.zh-CN、PRODUCT、截图计划、规划状态和品牌自审文档同步完成。
-- [ ] 发布准备：尚未创建 v0.18.0 tag 或 GitHub Release；发布前仍需全量质量门禁、截图验收、release notes 和推送流程。
+- [x] 43: 发布准备审计，补齐 `CHANGELOG.md` v0.18.0 待发布说明，并通过全量 typecheck、test、build、Git 规范和敏感信息扫描。
+- [ ] 发布收尾：尚未创建 v0.18.0 tag 或 GitHub Release；发布前仍需补齐五张 signature moment 截图、iOS PWA 实机验收和推送流程。
 
 ---
 *状态更新: 2026-06-08 (v0.18.0 五大特色功能品牌化重塑设计完成，进入实施阶段)*
@@ -597,3 +598,5 @@ Phase 19 (PWA 更新机制修复) 引入了三个叠加问题：
 *状态更新: 2026-06-08 (v0.18.0 Phase 37.1 评审后协议/安全/UX/品牌门禁补充完成)*
 
 *状态更新: 2026-06-09 (v0.18.0 Phase 38~42 实施与品牌整合完成，待发布验收与发版)*
+
+*状态更新: 2026-06-09 (v0.18.0 Phase 43 发布准备审计完成，待截图、iOS PWA 实机验收与发版)*
