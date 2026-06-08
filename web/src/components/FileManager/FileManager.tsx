@@ -968,12 +968,14 @@ export function FileManager({ api, machineId, sessionId, initialPath, rootPath: 
           title={t('fm.toolbar.parent')}
           className="fm-toolbar-button"
           style={{
+            width: 44,
+            height: 44,
             minHeight: 44,
             minWidth: 44,
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '0 var(--hp-space-3)',
+            padding: 0,
             borderRadius: 'var(--hp-radius-md)',
             fontSize: 12,
             fontWeight: 650,
@@ -985,7 +987,7 @@ export function FileManager({ api, machineId, sessionId, initialPath, rootPath: 
             transition: 'background var(--hp-duration-fast) var(--hp-ease-out), border-color var(--hp-duration-fast) var(--hp-ease-out), color var(--hp-duration-fast) var(--hp-ease-out)',
           }}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ display: 'block' }}>
             <path d="m15 18-6-6 6-6" />
             <path d="M9 12h12" />
           </svg>
@@ -998,9 +1000,12 @@ export function FileManager({ api, machineId, sessionId, initialPath, rootPath: 
           title={showHidden ? t('fm.toolbar.hideHidden') : t('fm.toolbar.showHidden')}
           className="fm-toolbar-button"
           style={{
+            height: 44,
             minHeight: 44,
+            minWidth: 44,
             display: 'inline-flex',
             alignItems: 'center',
+            justifyContent: 'center',
             gap: 7,
             padding: '0 var(--hp-space-3)',
             borderRadius: 'var(--hp-radius-md)',
