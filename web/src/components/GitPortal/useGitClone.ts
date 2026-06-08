@@ -15,6 +15,7 @@ import { addHistory, getGitUrlScheme, parseRepoUrl, sanitizeGitUrl } from '../..
 import { subscribeCloneProgressEvents, type CloneProgressSyncEvent } from '../../lib/git-portal-events'
 import type { ApiClient } from '../../api/client'
 import { useTranslation } from '@/lib/use-translation'
+import { randomId } from '@/lib/randomId'
 
 export interface CloneState {
     phase: ClonePhase
@@ -232,7 +233,7 @@ export function useGitClone({ api, machineId, sessionId, currentPath, onCloneCom
             return
         }
 
-        const cloneId = crypto.randomUUID()
+        const cloneId = randomId()
         cloneIdRef.current = cloneId
         completedCloneIdRef.current = ''
         abortRef.current = false

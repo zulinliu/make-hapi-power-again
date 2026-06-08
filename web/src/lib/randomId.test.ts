@@ -49,14 +49,12 @@ describe('randomId', () => {
         for (const id of ids) expect(id).toMatch(UUID_V4)
     })
 
-    it('falls back to a Date/Math.random string when crypto is unavailable', () => {
+    it('falls back to a UUID v4-format string when crypto is unavailable', () => {
         vi.stubGlobal('crypto', undefined)
 
         const id = randomId()
 
         expect(typeof id).toBe('string')
-        expect(id.length).toBeGreaterThan(0)
-        // Not UUID v4 format; just needs to be non-empty and unique enough
-        expect(id).not.toMatch(UUID_V4)
+        expect(id).toMatch(UUID_V4)
     })
 })

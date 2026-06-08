@@ -1,3 +1,5 @@
+import { randomId } from './randomId'
+
 const STORAGE_KEY = 'git-portal'
 
 export type GitPlatform = 'github' | 'gitlab' | 'bitbucket' | 'other'
@@ -136,7 +138,7 @@ export function addHistory(entry: Omit<CloneHistoryEntry, 'id' | 'lastClonedAt' 
 
     const newEntry: CloneHistoryEntry = {
         ...entry,
-        id: crypto.randomUUID(),
+        id: randomId(),
         isFavorite: false,
         lastClonedAt: now,
         cloneCount: 1

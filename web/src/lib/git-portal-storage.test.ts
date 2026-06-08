@@ -63,6 +63,26 @@ describe('git-portal-storage', () => {
         expect(getHistory()).toHaveLength(1)
     })
 
+    it('adds clone history when randomUUID is unavailable on HTTP LAN origins', () => {
+        const getRandomValues = vi.fn((bytes: Uint8Array) => {
+            for (let i = 0; i < bytes.length; i += 1) bytes[i] = i
+            return bytes
+        })
+        vi.stubGlobal('crypto', { getRandomValues })
+
+        const added = addHistory({
+            url: 'https://github.com/zulinliu/zentao-workflow-skills',
+            platform: 'github',
+            repoName: 'zentao-workflow-skills',
+            owner: 'zulinliu',
+            targetDir: '/home/liuzl/agent/temp_test'
+        })
+
+        expect(getRandomValues).toHaveBeenCalledOnce()
+        expect(added.id).toMatch(/^[0-9a-f-]{36}$/i)
+        expect(getHistory()[0]?.repoName).toBe('zentao-workflow-skills')
+    })
+
     it('does not toggle favorites for malformed entries that happen to have an id', () => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify([
             { id: 'bad-entry', isFavorite: false },
