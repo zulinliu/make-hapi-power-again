@@ -183,6 +183,7 @@ export class ApiSessionClient extends EventEmitter {
 
         this.rpcHandlerManager = new RpcHandlerManager({
             scopePrefix: this.sessionId,
+            scopeKind: 'session',
             logger: (msg, data) => logger.debug(msg, data)
         })
 

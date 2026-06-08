@@ -188,6 +188,7 @@ export default function GitPage() {
         isOpen={cloneOpen}
         onClose={() => setCloneOpen(false)}
         sessionId={sessionId}
+        onCloneComplete={() => setActiveTab('status')}
       />
       <GitPushDialog
         isOpen={pushOpen}

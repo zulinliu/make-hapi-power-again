@@ -18,6 +18,7 @@ import { backoff } from '@/utils/time'
 import { getInvokedCwd } from '@/utils/invokedCwd'
 import { RpcHandlerManager } from './rpc/RpcHandlerManager'
 import { registerCommonHandlers } from '../modules/common/registerCommonHandlers'
+import { registerGitHandlers } from '../modules/common/handlers/git'
 import {
     listOpencodeModelsForCwd,
     type ListOpencodeModelsForCwdRequest,
@@ -88,6 +89,43 @@ type ResolvedWorkspacePath =
     | { success: true; path: string }
     | { success: false; error: string }
 
+const AGENT_FLAVORS = new Set<NonNullable<SpawnSessionOptions['agent']>>([
+    'claude',
+    'codex',
+    'gemini',
+    'opencode',
+    'cursor',
+    'kimi'
+])
+
+function asRecord(value: unknown): Record<string, unknown> {
+    return value !== null && typeof value === 'object' && !Array.isArray(value)
+        ? value as Record<string, unknown>
+        : {}
+}
+
+function optionalString(record: Record<string, unknown>, key: string): string | undefined {
+    const value = record[key]
+    return typeof value === 'string' ? value : undefined
+}
+
+function optionalBoolean(record: Record<string, unknown>, key: string): boolean | undefined {
+    const value = record[key]
+    return typeof value === 'boolean' ? value : undefined
+}
+
+function optionalAgent(record: Record<string, unknown>): SpawnSessionOptions['agent'] | undefined {
+    const value = record.agent
+    return typeof value === 'string' && AGENT_FLAVORS.has(value as NonNullable<SpawnSessionOptions['agent']>)
+        ? value as SpawnSessionOptions['agent']
+        : undefined
+}
+
+function optionalSessionType(record: Record<string, unknown>): SpawnSessionOptions['sessionType'] | undefined {
+    const value = record.sessionType
+    return value === 'simple' || value === 'worktree' ? value : undefined
+}
+
 function normalizeWorkspaceRoots(paths?: string[]): string[] | undefined {
     if (!paths?.length) {
         return undefined
@@ -137,10 +175,19 @@ export class ApiMachineClient {
 
         this.rpcHandlerManager = new RpcHandlerManager({
             scopePrefix: this.machine.id,
+            scopeKind: 'machine',
             logger: (msg, data) => logger.debug(msg, data)
         })
 
         registerCommonHandlers(this.rpcHandlerManager, getInvokedCwd())
+        registerGitHandlers(this.rpcHandlerManager, getInvokedCwd(), {
+            validateClonePath: async (path) => {
+                const resolvedPath = await this.resolveForWorkspaceCheck(path)
+                return this.isWithinWorkspaceRoots(resolvedPath)
+                    ? null
+                    : 'Path is outside workspace roots'
+            }
+        })
 
         this.rpcHandlerManager.registerHandler<PathExistsRequest, PathExistsResponse>(RPC_METHODS.PathExists, async (params) => {
             const rawPaths = Array.isArray(params?.paths) ? params.paths : []
@@ -253,7 +300,7 @@ export class ApiMachineClient {
     }
 
     private isWithinWorkspaceRoots(absolutePath: string): boolean {
-        if (!this.normalizedWorkspaceRoots?.length) return true
+        if (!this.normalizedWorkspaceRoots?.length) return false
         return this.normalizedWorkspaceRoots.some((workspaceRoot) => {
             const rel = relative(workspaceRoot, absolutePath)
             return rel === '' || (!rel.startsWith('..') && !isAbsolute(rel))
@@ -493,8 +540,9 @@ export class ApiMachineClient {
     }
 
     setRPCHandlers({ spawnSession, stopSession, requestShutdown }: MachineRpcHandlers): void {
-        this.rpcHandlerManager.registerHandler(RPC_METHODS.SpawnHappySession, async (params: any) => {
-            const { directory, sessionId, resumeSessionId, machineId, approvedNewDirectoryCreation, agent, model, effort, modelReasoningEffort, yolo, permissionMode, token, sessionType, worktreeName } = params || {}
+        this.rpcHandlerManager.registerHandler<unknown, SpawnSessionResult>(RPC_METHODS.SpawnHappySession, async (params) => {
+            const record = asRecord(params)
+            const directory = optionalString(record, 'directory')
 
             if (!directory) {
                 throw new Error('Directory is required')
@@ -507,19 +555,19 @@ export class ApiMachineClient {
 
             const result = await spawnSession({
                 directory,
-                sessionId,
-                resumeSessionId,
-                machineId,
-                approvedNewDirectoryCreation,
-                agent,
-                model,
-                effort,
-                modelReasoningEffort,
-                yolo,
-                permissionMode,
-                token,
-                sessionType,
-                worktreeName
+                sessionId: optionalString(record, 'sessionId'),
+                resumeSessionId: optionalString(record, 'resumeSessionId'),
+                machineId: optionalString(record, 'machineId'),
+                approvedNewDirectoryCreation: optionalBoolean(record, 'approvedNewDirectoryCreation'),
+                agent: optionalAgent(record),
+                model: optionalString(record, 'model'),
+                effort: optionalString(record, 'effort'),
+                modelReasoningEffort: optionalString(record, 'modelReasoningEffort'),
+                yolo: optionalBoolean(record, 'yolo'),
+                permissionMode: optionalString(record, 'permissionMode'),
+                token: optionalString(record, 'token'),
+                sessionType: optionalSessionType(record),
+                worktreeName: optionalString(record, 'worktreeName')
             })
 
             switch (result.type) {
@@ -532,8 +580,8 @@ export class ApiMachineClient {
             }
         })
 
-        this.rpcHandlerManager.registerHandler(RPC_METHODS.StopSession, (params: any) => {
-            const { sessionId } = params || {}
+        this.rpcHandlerManager.registerHandler<unknown, { message: string }>(RPC_METHODS.StopSession, (params) => {
+            const sessionId = optionalString(asRecord(params), 'sessionId')
             if (!sessionId) {
                 throw new Error('Session ID is required')
             }

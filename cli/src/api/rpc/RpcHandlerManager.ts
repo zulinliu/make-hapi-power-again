@@ -19,15 +19,17 @@ function safeJsonParse(value: string): unknown {
 export class RpcHandlerManager {
     private handlers: RpcHandlerMap = new Map()
     private readonly scopePrefix: string
-    private readonly logger: (message: string, data?: any) => void
+    private readonly scopeKind: 'session' | 'machine' | undefined
+    private readonly logger: (message: string, data?: unknown) => void
     private socket: Socket | null = null
 
     constructor(config: RpcHandlerConfig) {
         this.scopePrefix = config.scopePrefix
+        this.scopeKind = config.scopeKind
         this.logger = config.logger || ((msg, data) => defaultLogger.debug(msg, data))
     }
 
-    registerHandler<TRequest = any, TResponse = any>(
+    registerHandler<TRequest = unknown, TResponse = unknown>(
         method: string,
         handler: RpcHandler<TRequest, TResponse>
     ): void {
@@ -49,7 +51,7 @@ export class RpcHandlerManager {
             }
 
             const params = safeJsonParse(request.params)
-            const result = await handler(params as any)
+            const result = await handler(params as never)
             return JSON.stringify(result)
         } catch (error) {
             const details = error instanceof Error
@@ -77,6 +79,10 @@ export class RpcHandlerManager {
         return this.handlers.size
     }
 
+    getScopePrefix(): string {
+        return this.scopePrefix
+    }
+
     hasHandler(method: string): boolean {
         const prefixedMethod = this.getPrefixedMethod(method)
         return this.handlers.has(prefixedMethod)
@@ -89,7 +95,12 @@ export class RpcHandlerManager {
 
     emitCloneProgress(data: CloneProgressPayload): void {
         if (this.socket) {
-            this.socket.emit('clone:progress', data)
+            const scopedData = {
+                ...data,
+                ...(this.scopeKind === 'session' ? { sessionId: this.scopePrefix } : {}),
+                ...(this.scopeKind === 'machine' ? { machineId: this.scopePrefix } : {})
+            }
+            this.socket.emit('clone:progress', scopedData)
         }
     }
 

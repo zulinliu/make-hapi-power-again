@@ -14,7 +14,7 @@ import {
     getDetachedBranchLabel,
     getProjectRootLabel,
 } from '@/lib/files-i18n'
-import { encodeBase64 } from '@/lib/utils'
+import { decodeBase64, encodeBase64 } from '@/lib/utils'
 import { queryKeys } from '@/lib/query-keys'
 import { useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from '@/lib/use-translation'
@@ -230,6 +230,11 @@ export default function FilesPage() {
 
     const initialTab = search.tab === 'directories' ? 'directories' : 'changes'
     const [activeTab, setActiveTab] = useState<'changes' | 'directories'>(initialTab)
+    const initialDirectoryPath = useMemo(() => {
+        if (typeof search.path !== 'string' || !search.path) return session?.metadata?.path
+        const decoded = decodeBase64(search.path)
+        return decoded.ok ? decoded.text : search.path
+    }, [search.path, session?.metadata?.path])
 
     const {
         status: gitStatus,
@@ -378,11 +383,12 @@ export default function FilesPage() {
                 <div className="h-[calc(100dvh-190px)] min-h-[360px] md:min-h-[520px]">
                     {api && session?.metadata?.machineId && session?.metadata?.path ? (
                         <FileManager
-                            key={directoryRefreshKey}
+                            key={`${directoryRefreshKey}-${initialDirectoryPath ?? ''}`}
                             api={api}
                             machineId={session.metadata.machineId}
                             sessionId={sessionId}
-                            initialPath={session.metadata.path}
+                            initialPath={initialDirectoryPath}
+                            rootPath={session.metadata.path}
                         />
                     ) : (
                         <div className="p-6 text-sm text-(--hp-text-tertiary)">

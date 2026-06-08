@@ -43,7 +43,6 @@ export function GitPortalHistory({ onSelect, onToggleFavorite }: GitPortalHistor
     : favorites
 
   const handleToggleFavorite = useCallback((e: React.MouseEvent, entryId: string) => {
-    e.stopPropagation()
     toggleFavorite(entryId)
     onToggleFavorite(entryId)
     setRefreshKey(k => k + 1)
@@ -58,9 +57,9 @@ export function GitPortalHistory({ onSelect, onToggleFavorite }: GitPortalHistor
         <button
           type="button"
           className={cn(
-            'flex-1 pb-2 text-xs font-medium transition-colors border-b-2',
+            'flex-1 min-h-11 pb-2 text-xs font-medium transition-colors border-b-2',
             activeTab === 'recent'
-              ? 'text-[var(--hp-primary)] border-[var(--hp-primary)]'
+              ? 'text-[var(--hp-primary-readable,var(--hp-primary))] border-[var(--hp-primary)]'
               : 'text-[var(--hp-text-tertiary)] border-transparent hover:text-[var(--hp-text-primary)]'
           )}
           onClick={() => setActiveTab('recent')}
@@ -70,9 +69,9 @@ export function GitPortalHistory({ onSelect, onToggleFavorite }: GitPortalHistor
         <button
           type="button"
           className={cn(
-            'flex-1 pb-2 text-xs font-medium transition-colors border-b-2',
+            'flex-1 min-h-11 pb-2 text-xs font-medium transition-colors border-b-2',
             activeTab === 'favorites'
-              ? 'text-[var(--hp-primary)] border-[var(--hp-primary)]'
+              ? 'text-[var(--hp-primary-readable,var(--hp-primary))] border-[var(--hp-primary)]'
               : 'text-[var(--hp-text-tertiary)] border-transparent hover:text-[var(--hp-text-primary)]'
           )}
           onClick={() => setActiveTab('favorites')}
@@ -105,7 +104,7 @@ export function GitPortalHistory({ onSelect, onToggleFavorite }: GitPortalHistor
           {canExpand && (
             <button
               type="button"
-              className="w-full mt-2 py-1 text-xs text-[var(--hp-primary)] hover:text-[var(--hp-primary-hover)] transition-colors"
+              className="w-full min-h-11 mt-2 py-2 text-xs text-[var(--hp-primary-readable,var(--hp-primary))] hover:text-[var(--hp-primary-hover)] transition-colors"
               onClick={() => setExpanded(v => !v)}
             >
               {expanded ? t('gitPortal.history.less') : t('gitPortal.history.more')}
@@ -133,60 +132,64 @@ function HistoryCard({
 
   if (compact) {
     return (
-      <button
-        type="button"
-        className="gp-history-card flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-lg border border-[var(--hp-border)] bg-[var(--hp-surface-0)] hover:border-[var(--hp-primary)] transition-colors text-left min-w-[140px] max-w-[200px]"
-        onClick={() => onSelect(entry.url, entry.targetDir, entry.branch)}
-      >
-        <PlatformBadge platform={platform} />
-        <div className="flex-1 min-w-0">
-          <p className="text-xs font-medium text-[var(--hp-text-primary)] truncate">
-            {entry.repoName}
-          </p>
-          <p className="text-[10px] text-[var(--hp-text-tertiary)] truncate">
-            {entry.owner}
-          </p>
-        </div>
+      <div className="gp-history-card min-h-11 flex-shrink-0 flex items-center gap-1 rounded-lg border border-[var(--hp-border)] bg-[var(--hp-surface-0)] hover:border-[var(--hp-primary)] transition-colors min-w-[172px] max-w-[224px]">
+        <button
+          type="button"
+          className="min-h-11 flex-1 min-w-0 flex items-center gap-2 px-3 py-2 text-left rounded-lg"
+          onClick={() => onSelect(entry.url, entry.targetDir, entry.branch)}
+        >
+          <PlatformBadge platform={platform} />
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-medium text-[var(--hp-text-primary)] truncate">
+              {entry.repoName}
+            </p>
+            <p className="text-[10px] text-[var(--hp-text-tertiary)] truncate">
+              {entry.owner}
+            </p>
+          </div>
+        </button>
         <FavoriteStar
           isFavorite={entry.isFavorite}
           onClick={e => onToggleFavorite(e, entry.id)}
         />
-      </button>
+      </div>
     )
   }
 
   return (
-    <button
-      type="button"
-      className="gp-history-card w-full flex items-center gap-3 px-3 py-2.5 rounded-lg border border-[var(--hp-border)] bg-[var(--hp-surface-0)] hover:border-[var(--hp-primary)] transition-colors text-left"
-      onClick={() => onSelect(entry.url, entry.targetDir, entry.branch)}
-    >
-      <PlatformBadge platform={platform} />
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-[var(--hp-text-primary)] truncate">
-          {entry.owner}/{entry.repoName}
-        </p>
-        <div className="flex items-center gap-2 mt-0.5">
-          {entry.branch && (
+    <div className="gp-history-card min-h-11 w-full flex items-center gap-1 rounded-lg border border-[var(--hp-border)] bg-[var(--hp-surface-0)] hover:border-[var(--hp-primary)] transition-colors">
+      <button
+        type="button"
+        className="min-h-11 flex-1 min-w-0 flex items-center gap-3 px-3 py-2.5 text-left rounded-lg"
+        onClick={() => onSelect(entry.url, entry.targetDir, entry.branch)}
+      >
+        <PlatformBadge platform={platform} />
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-[var(--hp-text-primary)] truncate">
+            {entry.owner}/{entry.repoName}
+          </p>
+          <div className="flex items-center gap-2 mt-0.5">
+            {entry.branch && (
+              <span className="text-[10px] text-[var(--hp-text-tertiary)]">
+                {entry.branch}
+              </span>
+            )}
             <span className="text-[10px] text-[var(--hp-text-tertiary)]">
-              {entry.branch}
+              {formatRelativeTime(entry.lastClonedAt, t)}
             </span>
-          )}
-          <span className="text-[10px] text-[var(--hp-text-tertiary)]">
-            {formatRelativeTime(entry.lastClonedAt, t)}
-          </span>
-          {entry.cloneCount > 1 && (
-            <span className="text-[10px] text-[var(--hp-text-tertiary)]">
-              x{entry.cloneCount}
-            </span>
-          )}
+            {entry.cloneCount > 1 && (
+              <span className="text-[10px] text-[var(--hp-text-tertiary)]">
+                x{entry.cloneCount}
+              </span>
+            )}
+          </div>
         </div>
-      </div>
+      </button>
       <FavoriteStar
         isFavorite={entry.isFavorite}
         onClick={e => onToggleFavorite(e, entry.id)}
       />
-    </button>
+    </div>
   )
 }
 
@@ -208,14 +211,14 @@ function FavoriteStar({ isFavorite, onClick }: { isFavorite: boolean; onClick: (
     <button
       type="button"
       className={cn(
-        'flex-shrink-0 p-0.5 rounded transition-colors',
+        'flex-shrink-0 min-h-11 min-w-11 inline-flex items-center justify-center rounded transition-colors',
         isFavorite
           ? 'text-amber-500 hover:text-amber-600'
           : 'text-[var(--hp-text-tertiary)] hover:text-amber-500'
       )}
       onClick={onClick}
-      tabIndex={-1}
       aria-label={isFavorite ? t('gitPortal.result.unfavorite') : t('gitPortal.result.favorite')}
+      aria-pressed={isFavorite}
     >
       <svg className="w-4 h-4" viewBox="0 0 24 24" fill={isFavorite ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />

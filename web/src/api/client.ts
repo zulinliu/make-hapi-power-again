@@ -295,7 +295,7 @@ export class ApiClient {
         })
     }
 
-    async gitClone(sessionId: string, options: { url: string; targetDir?: string; branch?: string; depth?: number; cloneId?: string; auth?: { type: 'password' | 'token' | 'ssh'; username?: string; password?: string } }): Promise<GitCommandResponse> {
+    async gitClone(sessionId: string, options: { url: string; targetDir?: string; targetName?: string; destinationPath?: string; branch?: string; depth?: number; cloneId: string; auth?: { type: 'password' | 'token' | 'ssh'; username?: string; password?: string } }): Promise<GitCommandResponse> {
         return await this.request<GitCommandResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/git-clone`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -303,11 +303,23 @@ export class ApiClient {
         })
     }
 
-    async gitCloneMachine(machineId: string, options: { url: string; targetDir?: string; branch?: string; depth?: number; cloneId?: string; auth?: { type: 'password' | 'token' | 'ssh'; username?: string; password?: string } }): Promise<GitCommandResponse> {
+    async gitCloneMachine(machineId: string, options: { url: string; targetDir?: string; targetName?: string; destinationPath?: string; branch?: string; depth?: number; cloneId: string; auth?: { type: 'password' | 'token' | 'ssh'; username?: string; password?: string } }): Promise<GitCommandResponse> {
         return await this.request<GitCommandResponse>(`/api/machines/${encodeURIComponent(machineId)}/git-clone`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(options)
+        })
+    }
+
+    async cancelGitClone(sessionId: string, cloneId: string): Promise<GitCommandResponse> {
+        return await this.request<GitCommandResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/git-clone/${encodeURIComponent(cloneId)}`, {
+            method: 'DELETE'
+        })
+    }
+
+    async cancelGitCloneMachine(machineId: string, cloneId: string): Promise<GitCommandResponse> {
+        return await this.request<GitCommandResponse>(`/api/machines/${encodeURIComponent(machineId)}/git-clone/${encodeURIComponent(cloneId)}`, {
+            method: 'DELETE'
         })
     }
 

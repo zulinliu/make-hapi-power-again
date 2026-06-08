@@ -159,6 +159,14 @@ export class SSEManager {
             return connection.all || connection.sessionId === event.sessionId
         }
 
+        if (event.type === 'clone-progress') {
+            const sessionId = event.data.sessionId
+            const machineId = event.data.machineId
+            return connection.all
+                || (Boolean(sessionId) && connection.sessionId === sessionId)
+                || (Boolean(machineId) && connection.machineId === machineId)
+        }
+
         if (event.type === 'connection-changed') {
             return true
         }

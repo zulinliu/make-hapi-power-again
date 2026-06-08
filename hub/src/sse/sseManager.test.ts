@@ -118,4 +118,161 @@ describe('SSEManager namespace filtering', () => {
         expect(received).toHaveLength(1)
         expect(received[0]?.id).toBe('visible')
     })
+
+    it('routes clone progress only to matching session or all subscribers in the same namespace', () => {
+        const manager = new SSEManager(0, new VisibilityTracker())
+        const received: Record<string, SyncEvent[]> = {
+            session: [],
+            machine: [],
+            all: [],
+            otherNamespace: [],
+            otherScope: []
+        }
+
+        manager.subscribe({
+            id: 'session',
+            namespace: 'alpha',
+            sessionId: 'session-1',
+            send: (event) => {
+                received.session.push(event)
+            },
+            sendHeartbeat: () => {}
+        })
+        manager.subscribe({
+            id: 'machine',
+            namespace: 'alpha',
+            machineId: 'machine-1',
+            send: (event) => {
+                received.machine.push(event)
+            },
+            sendHeartbeat: () => {}
+        })
+        manager.subscribe({
+            id: 'all',
+            namespace: 'alpha',
+            all: true,
+            send: (event) => {
+                received.all.push(event)
+            },
+            sendHeartbeat: () => {}
+        })
+        manager.subscribe({
+            id: 'other-namespace',
+            namespace: 'beta',
+            all: true,
+            send: (event) => {
+                received.otherNamespace.push(event)
+            },
+            sendHeartbeat: () => {}
+        })
+        manager.subscribe({
+            id: 'other-scope',
+            namespace: 'alpha',
+            sessionId: 'session-2',
+            machineId: 'machine-2',
+            send: (event) => {
+                received.otherScope.push(event)
+            },
+            sendHeartbeat: () => {}
+        })
+
+        const cloneEvent: SyncEvent = {
+            type: 'clone-progress',
+            namespace: 'alpha',
+            sessionId: 'session-1',
+            data: {
+                cloneId: '11111111-1111-4111-8111-111111111111',
+                sessionId: 'session-1',
+                phase: 'writing',
+                progress: 50
+            }
+        }
+
+        manager.broadcast(cloneEvent)
+
+        expect(received.session).toHaveLength(1)
+        expect(received.machine).toHaveLength(0)
+        expect(received.all).toHaveLength(1)
+        expect(received.otherNamespace).toHaveLength(0)
+        expect(received.otherScope).toHaveLength(0)
+    })
+
+    it('routes machine clone progress using data-level scope fallback', () => {
+        const manager = new SSEManager(0, new VisibilityTracker())
+        const receivedSession: SyncEvent[] = []
+        const receivedMachine: SyncEvent[] = []
+
+        manager.subscribe({
+            id: 'session-fallback',
+            namespace: 'alpha',
+            sessionId: 'session-1',
+            send: (event) => {
+                receivedSession.push(event)
+            },
+            sendHeartbeat: () => {}
+        })
+        manager.subscribe({
+            id: 'machine-fallback',
+            namespace: 'alpha',
+            machineId: 'machine-1',
+            send: (event) => {
+                receivedMachine.push(event)
+            },
+            sendHeartbeat: () => {}
+        })
+
+        manager.broadcast({
+            type: 'clone-progress',
+            namespace: 'alpha',
+            data: {
+                cloneId: '11111111-1111-4111-8111-111111111111',
+                machineId: 'machine-1',
+                phase: 'done',
+                progress: 100
+            }
+        })
+
+        expect(receivedSession).toHaveLength(0)
+        expect(receivedMachine).toHaveLength(1)
+    })
+
+    it('uses clone progress data scope over inconsistent top-level scope fields', () => {
+        const manager = new SSEManager(0, new VisibilityTracker())
+        const receivedSession: SyncEvent[] = []
+        const receivedMachine: SyncEvent[] = []
+
+        manager.subscribe({
+            id: 'session-canonical',
+            namespace: 'alpha',
+            sessionId: 'session-1',
+            send: (event) => {
+                receivedSession.push(event)
+            },
+            sendHeartbeat: () => {}
+        })
+        manager.subscribe({
+            id: 'machine-stray',
+            namespace: 'alpha',
+            machineId: 'machine-1',
+            send: (event) => {
+                receivedMachine.push(event)
+            },
+            sendHeartbeat: () => {}
+        })
+
+        manager.broadcast({
+            type: 'clone-progress',
+            namespace: 'alpha',
+            machineId: 'machine-1',
+            data: {
+                cloneId: '11111111-1111-4111-8111-111111111111',
+                sessionId: 'session-1',
+                phase: 'writing',
+                progress: 50
+            }
+        })
+
+        expect(receivedSession).toHaveLength(1)
+        expect(receivedMachine).toHaveLength(0)
+    })
 })

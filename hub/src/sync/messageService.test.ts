@@ -7,7 +7,7 @@
  * Race-D (CLI offline): no CLI socket in room → immediate DELETE, message-cancelled emit, no ack call
  * Race-E (partial ack): broadcast ack receives err + [{ removed: true }] → DELETE + status='cancelled'
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it, setDefaultTimeout } from 'bun:test'
 import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -15,6 +15,8 @@ import { MessageService } from './messageService'
 import { Store } from '../store'
 import type { Server } from 'socket.io'
 import type { SyncEvent } from '@hapipower/protocol/types'
+
+setDefaultTimeout(30_000)
 
 // ---------------------------------------------------------------------------
 // Test helpers

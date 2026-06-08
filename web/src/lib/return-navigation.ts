@@ -1,7 +1,7 @@
 export type SafeReturnTarget =
     | { type: 'browse'; search: { machineId?: string; path?: string } }
     | { type: 'sessions' }
-    | { type: 'sessionFiles'; sessionId: string; search: { tab?: 'changes' | 'directories' } }
+    | { type: 'sessionFiles'; sessionId: string; search: { tab?: 'changes' | 'directories'; path?: string } }
 
 function isSafeLocalPath(value: string): boolean {
     return value.startsWith('/') && !value.startsWith('//') && !value.includes('\0')
@@ -35,6 +35,7 @@ export function parseSafeReturnTo(value: unknown): SafeReturnTarget | null {
     const sessionFilesMatch = url.pathname.match(/^\/sessions\/([^/]+)\/files$/)
     if (sessionFilesMatch) {
         const tabValue = url.searchParams.get('tab')
+        const path = url.searchParams.get('path') ?? undefined
         const tab = tabValue === 'directories'
             ? 'directories'
             : tabValue === 'changes'
@@ -43,7 +44,7 @@ export function parseSafeReturnTo(value: unknown): SafeReturnTarget | null {
         return {
             type: 'sessionFiles',
             sessionId: decodeURIComponent(sessionFilesMatch[1]),
-            search: tab ? { tab } : {},
+            search: { ...(tab ? { tab } : {}), ...(path ? { path } : {}) },
         }
     }
 

@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { mkdtempSync, rmSync, mkdirSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { RPC_METHODS } from '@hapipower/protocol/rpcMethods'
 
 const ioMock = vi.hoisted(() => vi.fn())
 const listOpencodeModelsForCwdMock = vi.hoisted(() => vi.fn())
@@ -46,6 +47,15 @@ async function callListOpencodeModels(client: ApiMachineClient, machineId: strin
         params: JSON.stringify({ cwd })
     })
     return JSON.parse(raw) as unknown
+}
+
+async function callMachineRpc<T>(client: ApiMachineClient, machineId: string, method: string, params: unknown): Promise<T> {
+    const manager = (client as unknown as { rpcHandlerManager: { handleRequest: (req: { method: string; params: string }) => Promise<string> } }).rpcHandlerManager
+    const raw = await manager.handleRequest({
+        method: `${machineId}:${method}`,
+        params: JSON.stringify(params)
+    })
+    return JSON.parse(raw) as T
 }
 
 describe('ApiMachineClient listOpencodeModelsForCwd handler', () => {
@@ -138,6 +148,29 @@ describe('ApiMachineClient listOpencodeModelsForCwd handler', () => {
             expect(listOpencodeModelsForCwdMock).toHaveBeenCalledWith(secondWorkspaceRoot)
         } finally {
             rmSync(secondWorkspaceRoot, { recursive: true, force: true })
+            client.shutdown()
+        }
+    })
+
+    it('rejects machine git clone when workspace roots are not configured', async () => {
+        const machine = makeMachine('machine-5')
+        const client = new ApiMachineClient('cli-token', machine, undefined)
+
+        try {
+            const result = await callMachineRpc<{ success: boolean; error?: string }>(
+                client,
+                machine.id,
+                RPC_METHODS.MachineGitClone,
+                {
+                    url: 'https://github.com/acme/repo.git',
+                    targetDir: workspaceRoot,
+                    cloneId: '11111111-1111-4111-8111-111111111111'
+                }
+            )
+
+            expect(result.success).toBe(false)
+            expect(result.error).toBe('Path is outside workspace roots')
+        } finally {
             client.shutdown()
         }
     })

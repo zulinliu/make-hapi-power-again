@@ -1,5 +1,6 @@
 import type { AgentFlavor, CodexCollaborationMode, PermissionMode } from '@hapipower/protocol/types'
 import { RPC_METHODS } from '@hapipower/protocol/rpcMethods'
+import type { GitCloneCancelRequest, GitCloneRequest } from '@hapipower/protocol/schemas'
 import type {
     CodexModelSummary,
     CodexModelsResponse,
@@ -254,12 +255,20 @@ export class RpcGateway {
         return await this.sessionRpc(sessionId, RPC_METHODS.GitCommit, options) as RpcCommandResponse
     }
 
-    async gitClone(sessionId: string, options: { cwd?: string; url: string; targetDir?: string; branch?: string; depth?: number; cloneId?: string; auth?: { type: 'password' | 'token' | 'ssh'; username?: string; password?: string } }): Promise<RpcCommandResponse> {
+    async gitClone(sessionId: string, options: GitCloneRequest & { cwd?: string }): Promise<RpcCommandResponse> {
         return await this.sessionRpc(sessionId, RPC_METHODS.GitClone, { ...options }, 600_000) as RpcCommandResponse
     }
 
-    async gitCloneMachine(machineId: string, options: { cwd?: string; url: string; targetDir?: string; branch?: string; depth?: number; cloneId?: string; auth?: { type: 'password' | 'token' | 'ssh'; username?: string; password?: string } }): Promise<RpcCommandResponse> {
+    async cancelGitClone(sessionId: string, options: GitCloneCancelRequest): Promise<RpcCommandResponse> {
+        return await this.sessionRpc(sessionId, RPC_METHODS.GitCloneCancel, options, 30_000) as RpcCommandResponse
+    }
+
+    async gitCloneMachine(machineId: string, options: GitCloneRequest & { cwd?: string }): Promise<RpcCommandResponse> {
         return await this.machineRpc(machineId, RPC_METHODS.MachineGitClone, { ...options }, 600_000) as RpcCommandResponse
+    }
+
+    async cancelGitCloneMachine(machineId: string, options: GitCloneCancelRequest): Promise<RpcCommandResponse> {
+        return await this.machineRpc(machineId, RPC_METHODS.MachineGitCloneCancel, options, 30_000) as RpcCommandResponse
     }
 
     async getGitRemoteList(sessionId: string, cwd?: string): Promise<RpcCommandResponse> {
@@ -422,7 +431,7 @@ export class RpcGateway {
         params: unknown,
         timeoutMs: number = DEFAULT_RPC_TIMEOUT_MS
     ): Promise<unknown> {
-        return await this.rpcCall(`${sessionId}:${method}`, params, timeoutMs)
+        return await this.rpcCall(`${sessionId}:${method}`, params, timeoutMs, { kind: 'session', id: sessionId })
     }
 
     private async machineRpc(
@@ -431,11 +440,16 @@ export class RpcGateway {
         params: unknown,
         timeoutMs: number = DEFAULT_RPC_TIMEOUT_MS
     ): Promise<unknown> {
-        return await this.rpcCall(`${machineId}:${method}`, params, timeoutMs)
+        return await this.rpcCall(`${machineId}:${method}`, params, timeoutMs, { kind: 'machine', id: machineId })
     }
 
-    private async rpcCall(method: string, params: unknown, timeoutMs: number = DEFAULT_RPC_TIMEOUT_MS): Promise<unknown> {
-        const socketId = this.rpcRegistry.getSocketIdForMethod(method)
+    private async rpcCall(
+        method: string,
+        params: unknown,
+        timeoutMs: number = DEFAULT_RPC_TIMEOUT_MS,
+        expectedScope?: { kind: 'session' | 'machine'; id: string }
+    ): Promise<unknown> {
+        const socketId = this.rpcRegistry.getSocketIdForMethod(method, expectedScope)
         if (!socketId) {
             throw new Error(`RPC handler not registered: ${method}`)
         }

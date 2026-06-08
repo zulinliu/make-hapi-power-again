@@ -681,7 +681,7 @@ const sessionDetailRoute = createRoute({
 const sessionFilesRoute = createRoute({
     getParentRoute: () => sessionDetailRoute,
     path: 'files',
-    validateSearch: (search: Record<string, unknown>): { tab?: 'changes' | 'directories' } => {
+    validateSearch: (search: Record<string, unknown>): { tab?: 'changes' | 'directories'; path?: string } => {
         const tabValue = typeof search.tab === 'string' ? search.tab : undefined
         const tab = tabValue === 'directories'
             ? 'directories'
@@ -689,7 +689,11 @@ const sessionFilesRoute = createRoute({
                 ? 'changes'
                 : undefined
 
-        return tab ? { tab } : {}
+        const path = typeof search.path === 'string' && search.path ? search.path : undefined
+        const result: { tab?: 'changes' | 'directories'; path?: string } = {}
+        if (tab) result.tab = tab
+        if (path) result.path = path
+        return result
     },
     component: FilesPage,
 })
