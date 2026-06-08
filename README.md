@@ -81,6 +81,30 @@ Hapi Power turns agent chats into a controllable engineering loop: connect trust
   <img src="docs/assets/screenshot-mobile-sessions.png" alt="Mobile: Sessions" height="360">
 </p>
 
+<table align="center">
+  <tr>
+    <td align="center"><b>Connect: Model Nexus</b></td>
+    <td align="center"><b>Drive: Guide Beam</b></td>
+  </tr>
+  <tr>
+    <td><img src="docs/assets/screenshot-model-nexus.png" alt="Model Nexus health, capability, and agent assignment matrix" width="360"></td>
+    <td><img src="docs/assets/screenshot-guide-beam.png" alt="Guide Beam mobile composer with queue and guide-now modes" width="240"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Observe: Context Pulse</b></td>
+    <td align="center"><b>Trace: Git Atlas</b></td>
+  </tr>
+  <tr>
+    <td><img src="docs/assets/screenshot-context-pulse.png" alt="Context Pulse showing Context 40% with usage diagnostics" width="360"></td>
+    <td><img src="docs/assets/screenshot-git-atlas.png" alt="Git Atlas branch hero, change map, diff preview, basket, and sync center" width="360"></td>
+  </tr>
+</table>
+
+<p align="center">
+  <b>Preserve: Session Loom</b><br>
+  <img src="docs/assets/screenshot-session-loom.png" alt="Session Loom mobile export preview with redaction status" height="360">
+</p>
+
 ---
 
 ## Features

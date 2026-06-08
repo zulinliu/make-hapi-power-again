@@ -883,7 +883,7 @@ export function HappyComposer(props: {
                                             onClick={() => setDeliveryMode(mode)}
                                             onKeyDown={(event) => handleDeliveryModeKeyDown(event, mode)}
                                             onMouseDown={(e) => e.preventDefault()}
-                                            className={`min-h-7 rounded-[calc(var(--hp-radius-sm)-2px)] px-2.5 font-medium transition-colors ${
+                                            className={`min-h-11 rounded-[calc(var(--hp-radius-sm)-2px)] px-3 text-sm font-medium transition-colors sm:min-h-7 sm:px-2.5 sm:text-xs ${
                                                 selected
                                                     ? 'bg-(--hp-primary) text-(--hp-text-inverse)'
                                                     : 'text-(--hp-text-tertiary) hover:bg-(--hp-surface-2) hover:text-(--hp-text-primary)'
