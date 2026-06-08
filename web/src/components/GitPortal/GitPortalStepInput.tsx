@@ -36,7 +36,7 @@ export function GitPortalStepInput({
   const parsed = trimmedUrl ? parseRepoUrl(trimmedUrl) : null
   const isValid = Boolean(parsed)
   const isEmpty = !trimmedUrl
-  const isHttps = trimmedUrl.startsWith('https://')
+  const usesHttpCredentials = trimmedUrl.startsWith('https://') || trimmedUrl.startsWith('http://')
   const platform: GitPlatform = trimmedUrl ? detectPlatform(trimmedUrl) : 'other'
   const canStart = isValid && trimmedUrl.length > 10
 
@@ -198,7 +198,7 @@ export function GitPortalStepInput({
         auth={state.auth}
         onAuthChange={setAuth}
         platform={platform}
-        show={isHttps}
+        show={usesHttpCredentials}
       />
 
       <button

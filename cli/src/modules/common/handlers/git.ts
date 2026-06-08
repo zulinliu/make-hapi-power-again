@@ -446,7 +446,17 @@ function isPrivateIPv6(ip: string): boolean {
 
 function isBlockedIpAddress(address: string): boolean {
     const version = isIP(address)
-    if (version === 4) return isPrivateIPv4(address)
+    if (version === 4) {
+        const parts = address.split('.').map((part) => Number.parseInt(part, 10))
+        if (parts.length !== 4 || parts.some((part) => !Number.isInteger(part) || part < 0 || part > 255)) {
+            return true
+        }
+        const [a, b] = parts
+        return a === 0
+            || a === 127
+            || (a === 169 && b === 254)
+            || a >= 224
+    }
     if (version === 6) return isPrivateIPv6(address)
     return true
 }
@@ -516,28 +526,30 @@ async function validateCloneUrl(url: string): Promise<ValidatedCloneUrl | { erro
     if (!url || typeof url !== 'string') return { error: 'Clone URL required' }
     if (url.startsWith('file://')) return { error: 'file:// protocol is not allowed' }
 
-    const isSupportedUrl = /^(https:\/\/|ssh:\/\/|git@)/.test(url)
-    if (!isSupportedUrl) return { error: 'Only https://, ssh://, and git@ URLs are allowed' }
+    const isSupportedUrl = /^(https:\/\/|http:\/\/|ssh:\/\/|git@)/.test(url)
+    if (!isSupportedUrl) return { error: 'Only http://, https://, ssh://, and git@ URLs are allowed' }
 
+    const isHttp = url.startsWith('http://')
     const isHttps = url.startsWith('https://')
+    const isHttpLike = isHttp || isHttps
     const isSsh = url.startsWith('ssh://') || url.startsWith('git@')
-    if (!isHttps && !isSsh) {
-        return { error: 'Only https://, ssh://, and git@ URLs are allowed' }
+    if (!isHttpLike && !isSsh) {
+        return { error: 'Only http://, https://, ssh://, and git@ URLs are allowed' }
     }
 
     let hostname: string | null = null
-    let httpsPort = '443'
-    if (isHttps) {
+    let httpPort = isHttps ? '443' : '80'
+    if (isHttpLike) {
         try {
             const parsed = new URL(url)
             if (parsed.username || parsed.password) {
                 return { error: 'URL must not contain embedded credentials' }
             }
-            if (parsed.protocol !== 'https:') {
-                return { error: 'Only https://, ssh://, and git@ URLs are allowed' }
+            if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+                return { error: 'Only http://, https://, ssh://, and git@ URLs are allowed' }
             }
             hostname = parsed.hostname
-            httpsPort = parsed.port || '443'
+            httpPort = parsed.port || (parsed.protocol === 'https:' ? '443' : '80')
         } catch {
             return { error: 'Invalid URL format' }
         }
@@ -573,15 +585,15 @@ async function validateCloneUrl(url: string): Promise<ValidatedCloneUrl | { erro
         return { error: 'Cannot clone from encoded IP addresses' }
     }
 
-    const gitConfigArgs = isHttps ? ['-c', 'http.followRedirects=false'] : []
-    const configuredHttpProxy = isHttps ? await readGitHttpProxyForUrl(url) : undefined
+    const gitConfigArgs = isHttpLike ? ['-c', 'http.followRedirects=false'] : []
+    const configuredHttpProxy = isHttpLike ? await readGitHttpProxyForUrl(url) : undefined
     if (configuredHttpProxy) {
         gitConfigArgs.push('-c', `http.proxy=${configuredHttpProxy}`)
     }
     const directIpVersion = isIP(normalizedHost)
     if (directIpVersion) {
         if (isBlockedIpAddress(normalizedHost)) {
-            return { error: 'Cannot clone from private or local network addresses' }
+            return { error: 'Cannot clone from local or unsafe network addresses' }
         }
         return {
             url,
@@ -596,11 +608,11 @@ async function validateCloneUrl(url: string): Promise<ValidatedCloneUrl | { erro
             return { error: 'Clone URL hostname could not be resolved' }
         }
         if (resolved.some((record) => isBlockedIpAddress(record.address))) {
-            return { error: 'Cannot clone from private or local network addresses' }
+            return { error: 'Cannot clone from local or unsafe network addresses' }
         }
-        if (isHttps) {
+        if (isHttpLike) {
             const addresses = Array.from(new Set(resolved.map((record) => record.address)))
-            gitConfigArgs.push('-c', `http.curloptResolve=${normalizedHost}:${httpsPort}:${addresses.map(formatCurlResolveAddress).join(',')}`)
+            gitConfigArgs.push('-c', `http.curloptResolve=${normalizedHost}:${httpPort}:${addresses.map(formatCurlResolveAddress).join(',')}`)
         }
         if (isSsh) {
             return {
@@ -618,6 +630,21 @@ async function validateCloneUrl(url: string): Promise<ValidatedCloneUrl | { erro
 
 function sanitizeGitUrl(url: string): string {
     return url.replace(/:\/\/[^@]+@/, '://***@')
+}
+
+async function sanitizeCloneOriginRemote(destinationPath: string, url: string): Promise<string | null> {
+    if (!existsSync(join(destinationPath, '.git'))) return null
+
+    try {
+        await execFileAsync('git', ['remote', 'set-url', 'origin', url], {
+            cwd: destinationPath,
+            timeout: 10_000,
+            env: createSafeGitEnv()
+        })
+        return null
+    } catch {
+        return 'Clone completed but failed to sanitize the origin remote URL'
+    }
 }
 
 const GIT_SAFE_NAME_RE = /^[A-Za-z0-9._/-]+$/
@@ -1173,13 +1200,28 @@ function runGitCloneStreaming(
             }
 
             if (code === 0) {
-                emitProgress({ ...scope, phase: 'done', progress: 100, message: 'Clone completed successfully' })
-                finish({
-                    success: true,
-                    stdout: sanitizeGitUrl(stdout),
-                    stderr: sanitizeGitUrl(stderr),
-                    exitCode: 0
-                })
+                void (async () => {
+                    const remoteError = await sanitizeCloneOriginRemote(destination.destinationPath, url)
+                    if (remoteError) {
+                        emitProgress({ ...scope, phase: 'error', message: remoteError })
+                        finish({
+                            success: false,
+                            error: remoteError,
+                            stdout: sanitizeGitUrl(stdout),
+                            stderr: sanitizeGitUrl(stderr),
+                            exitCode: 0
+                        })
+                        return
+                    }
+
+                    emitProgress({ ...scope, phase: 'done', progress: 100, message: 'Clone completed successfully' })
+                    finish({
+                        success: true,
+                        stdout: sanitizeGitUrl(stdout),
+                        stderr: sanitizeGitUrl(stderr),
+                        exitCode: 0
+                    })
+                })()
             } else {
                 const exitText = signal ? `signal ${signal}` : `exit code ${code}`
                 emitProgress({ ...scope, phase: 'error', message: `Clone failed with ${exitText}` })

@@ -25,6 +25,11 @@ function isActiveClonePhase(phase: string): boolean {
   return phase === 'connecting' || phase === 'transferring' || phase === 'unpacking'
 }
 
+function usesHttpCredentials(url: string): boolean {
+  const trimmed = url.trim()
+  return trimmed.startsWith('https://') || trimmed.startsWith('http://')
+}
+
 function getFocusableElements(root: HTMLElement): HTMLElement[] {
   const selectors = [
     'a[href]',
@@ -303,7 +308,7 @@ export function GitPortal({
           variant="cloneFailed"
           error={cloneState.error ?? undefined}
           onRetry={retryFromError}
-          onSwitchToToken={cloneState.url.trim().startsWith('https://') ? switchToTokenAuth : undefined}
+          onSwitchToToken={usesHttpCredentials(cloneState.url) ? switchToTokenAuth : undefined}
         />
       )}
     </div>

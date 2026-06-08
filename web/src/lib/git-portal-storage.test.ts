@@ -106,4 +106,12 @@ describe('git-portal-storage', () => {
             repoName: 'repo'
         })
     })
+
+    it('parses internal HTTP repository URLs with subgroup paths', () => {
+        expect(parseRepoUrl('http://git.tsintergy.com:8070/liuzulin/cq-dataworks/cq-dataworks-design-skill.git')).toEqual({
+            platform: 'other',
+            owner: 'liuzulin/cq-dataworks',
+            repoName: 'cq-dataworks-design-skill'
+        })
+    })
 })

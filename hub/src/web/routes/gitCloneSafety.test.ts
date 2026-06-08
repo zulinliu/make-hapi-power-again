@@ -19,6 +19,17 @@ describe('gitCloneSafety', () => {
         }
     })
 
+    it('accepts internal HTTP clone requests with explicit credentials', () => {
+        const parsed = parseGitCloneRequest({
+            url: 'http://git.tsintergy.com:8070/liuzulin/cq-dataworks/cq-dataworks-design-skill.git',
+            targetDir: '/workspace',
+            cloneId: VALID_UUID,
+            auth: { type: 'password', username: 'liuzl', password: 'secret-password' }
+        })
+
+        expect(parsed.success).toBe(true)
+    })
+
     it('rejects embedded credentials, missing cloneId, and unsafe clone IDs', () => {
         expect(parseGitCloneRequest({
             url: 'https://user:pass@github.com/zulinliu/make-hapi-power-again.git',

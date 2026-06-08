@@ -3,7 +3,7 @@ import { randomId } from './randomId'
 const STORAGE_KEY = 'git-portal'
 
 export type GitPlatform = 'github' | 'gitlab' | 'bitbucket' | 'other'
-export type GitUrlScheme = 'https' | 'ssh' | 'scp' | null
+export type GitUrlScheme = 'http' | 'https' | 'ssh' | 'scp' | null
 
 export interface CloneHistoryEntry {
     id: string
@@ -174,6 +174,7 @@ export function clearHistory(): void {
 
 export function getGitUrlScheme(url: string): GitUrlScheme {
     const trimmed = url.trim()
+    if (trimmed.startsWith('http://')) return 'http'
     if (trimmed.startsWith('https://')) return 'https'
     if (trimmed.startsWith('ssh://')) return 'ssh'
     if (/^git@[^:\s]+:[^\s]+$/.test(trimmed)) return 'scp'
@@ -215,8 +216,8 @@ export function parseRepoUrl(url: string): { platform: GitPlatform; owner: strin
 
     try {
         const parsed = new URL(trimmed)
-        if (parsed.protocol !== 'https:' && parsed.protocol !== 'ssh:') return null
-        if (parsed.protocol === 'https:' && (parsed.username || parsed.password)) return null
+        if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:' && parsed.protocol !== 'ssh:') return null
+        if ((parsed.protocol === 'https:' || parsed.protocol === 'http:') && (parsed.username || parsed.password)) return null
         if (parsed.protocol === 'ssh:' && parsed.password) return null
         return repoPartsToInfo(platform, repoPathToParts(parsed.pathname))
     } catch {

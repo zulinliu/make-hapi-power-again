@@ -167,4 +167,41 @@ describe('useGitClone', () => {
 
         expect(result.current.state.auth).toBeNull()
     })
+
+    it('keeps password auth for internal HTTP URLs', () => {
+        const api = createApi()
+        const { result } = renderHook(() => useGitClone({ api, machineId: 'machine-1' }))
+
+        act(() => {
+            result.current.setUrl('http://git.tsintergy.com:8070/liuzulin/cq-dataworks/repo.git')
+            result.current.setAuth({ type: 'password', username: 'liuzl', password: 'secret' })
+        })
+        expect(result.current.state.auth).toEqual({ type: 'password', username: 'liuzl', password: 'secret' })
+
+        act(() => {
+            result.current.setUrl('http://git.tsintergy.com:8070/liuzulin/cq-dataworks/other.git')
+        })
+
+        expect(result.current.state.auth).toEqual({ type: 'password', username: 'liuzl', password: 'secret' })
+    })
+
+    it('tracks current directory as the default clone parent until the user customizes it', () => {
+        const api = createApi()
+        const { result, rerender } = renderHook(
+            ({ currentPath }) => useGitClone({ api, machineId: 'machine-1', currentPath }),
+            { initialProps: { currentPath: '/home/liuzl' } }
+        )
+
+        expect(result.current.state.config.targetDir).toBe('/home/liuzl')
+
+        rerender({ currentPath: '/home/liuzl/agent/temp_test' })
+        expect(result.current.state.config.targetDir).toBe('/home/liuzl/agent/temp_test')
+
+        act(() => {
+            result.current.setConfig({ targetDir: '/custom/path' })
+        })
+        rerender({ currentPath: '/home/liuzl/agent/another' })
+
+        expect(result.current.state.config.targetDir).toBe('/custom/path')
+    })
 })

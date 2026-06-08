@@ -18,6 +18,17 @@ describe('GitCloneRequestSchema', () => {
         expect(parsed.success).toBe(true)
     })
 
+    it('accepts internal HTTP Git repositories with password authentication', () => {
+        const parsed = GitCloneRequestSchema.safeParse({
+            url: 'http://git.tsintergy.com:8070/liuzulin/cq-dataworks/cq-dataworks-design-skill.git',
+            targetDir: '/workspace/projects',
+            cloneId: VALID_UUID,
+            auth: { type: 'password', username: 'liuzl', password: 'secret-password' }
+        })
+
+        expect(parsed.success).toBe(true)
+    })
+
     it('accepts SSH repository forms without embedded passwords', () => {
         expect(GitCloneRequestSchema.safeParse({
             url: 'git@github.com:zulinliu/make-hapi-power-again.git',
@@ -47,12 +58,17 @@ describe('GitCloneRequestSchema', () => {
 
     it('rejects non-git protocols and embedded credentials', () => {
         expect(GitCloneRequestSchema.safeParse({
-            url: 'http://github.com/zulinliu/make-hapi-power-again.git',
+            url: 'ftp://github.com/zulinliu/make-hapi-power-again.git',
             cloneId: VALID_UUID
         }).success).toBe(false)
 
         expect(GitCloneRequestSchema.safeParse({
             url: 'https://user:pass@github.com/zulinliu/make-hapi-power-again.git',
+            cloneId: VALID_UUID
+        }).success).toBe(false)
+
+        expect(GitCloneRequestSchema.safeParse({
+            url: 'http://user:pass@git.tsintergy.com:8070/liuzulin/repo.git',
             cloneId: VALID_UUID
         }).success).toBe(false)
 

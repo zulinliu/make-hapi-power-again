@@ -330,7 +330,7 @@ function hasAllowedGitCloneUrlCredentials(url: string): boolean {
 
     try {
         const parsed = new URL(url)
-        if (parsed.protocol === 'https:') {
+        if (parsed.protocol === 'https:' || parsed.protocol === 'http:') {
             return parsed.username === '' && parsed.password === ''
         }
         if (parsed.protocol === 'ssh:') {
@@ -344,7 +344,7 @@ function hasAllowedGitCloneUrlCredentials(url: string): boolean {
 
 function isGitCloneAuthCompatible(url: string, auth: GitCloneAuth | undefined): boolean {
     if (!auth) return true
-    if (url.startsWith('https://')) return auth.type === 'password' || auth.type === 'token'
+    if (url.startsWith('https://') || url.startsWith('http://')) return auth.type === 'password' || auth.type === 'token'
     if (url.startsWith('ssh://') || url.startsWith('git@')) return auth.type === 'ssh'
     return false
 }
@@ -361,7 +361,7 @@ export const GitCloneRequestSchema = z.object({
         .trim()
         .min(1)
         .max(2048)
-        .regex(/^(https:\/\/|ssh:\/\/|git@)/, 'Only https://, ssh://, and git@ URLs are allowed')
+        .regex(/^(https:\/\/|http:\/\/|ssh:\/\/|git@)/, 'Only http://, https://, ssh://, and git@ URLs are allowed')
         .refine(hasAllowedGitCloneUrlCredentials, 'URL must not contain embedded credentials'),
     targetDir: GitClonePathSchema.optional(),
     targetName: GitCloneTargetNameSchema.optional(),

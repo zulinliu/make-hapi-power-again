@@ -79,6 +79,10 @@ function isActiveClonePhase(phase: ClonePhase): boolean {
     return phase === 'connecting' || phase === 'transferring' || phase === 'unpacking'
 }
 
+function supportsPasswordAuthScheme(scheme: ReturnType<typeof getGitUrlScheme>): boolean {
+    return scheme === 'https' || scheme === 'http'
+}
+
 export function useGitClone({ api, machineId, sessionId, currentPath, onCloneComplete }: UseGitCloneOptions) {
     const { t } = useTranslation()
     const [state, setState] = useState<CloneState>({
@@ -94,6 +98,7 @@ export function useGitClone({ api, machineId, sessionId, currentPath, onCloneCom
     const stateRef = useRef(state)
     stateRef.current = state
     const completeTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+    const defaultTargetDirRef = useRef(currentPath ?? '')
 
     const emitCompletionOnce = useCallback((cloneId: string, clonedPath: string) => {
         if (completedCloneIdRef.current === cloneId) return
@@ -199,11 +204,31 @@ export function useGitClone({ api, machineId, sessionId, currentPath, onCloneCom
         return subscribeCloneProgressEvents(handleProgressEvent)
     }, [handleProgressEvent])
 
+    useEffect(() => {
+        const nextDefaultTargetDir = currentPath ?? ''
+        const previousDefaultTargetDir = defaultTargetDirRef.current
+
+        setState(prev => {
+            if (prev.phase !== 'input' || prev.config.targetDir !== previousDefaultTargetDir) {
+                return prev
+            }
+            return {
+                ...prev,
+                config: {
+                    ...prev.config,
+                    targetDir: nextDefaultTargetDir
+                }
+            }
+        })
+
+        defaultTargetDirRef.current = nextDefaultTargetDir
+    }, [currentPath])
+
     const setUrl = useCallback((url: string) => {
         setState(prev => {
             const previousScheme = getGitUrlScheme(prev.url)
             const nextScheme = getGitUrlScheme(url)
-            const shouldClearAuth = previousScheme !== nextScheme || nextScheme !== 'https'
+            const shouldClearAuth = previousScheme !== nextScheme || !supportsPasswordAuthScheme(nextScheme)
             return {
                 ...prev,
                 url,
@@ -307,6 +332,7 @@ export function useGitClone({ api, machineId, sessionId, currentPath, onCloneCom
         cloneIdRef.current = ''
         completedCloneIdRef.current = ''
         if (completeTimerRef.current) clearTimeout(completeTimerRef.current)
+        defaultTargetDirRef.current = currentPath ?? ''
         setState({
             ...INITIAL_STATE,
             config: { targetDir: currentPath ?? '', branch: '', depth: null }
@@ -318,6 +344,7 @@ export function useGitClone({ api, machineId, sessionId, currentPath, onCloneCom
         cloneIdRef.current = ''
         completedCloneIdRef.current = ''
         if (completeTimerRef.current) clearTimeout(completeTimerRef.current)
+        defaultTargetDirRef.current = currentPath ?? ''
         setState({
             ...INITIAL_STATE,
             config: { targetDir: currentPath ?? '', branch: '', depth: null },

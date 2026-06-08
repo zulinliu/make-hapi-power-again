@@ -245,8 +245,8 @@ describe('git clone RPC handlers', () => {
         const destinationPath = join(rootDir, 'repo')
         const previousStallTimeout = process.env.HAPI_POWER_GIT_CLONE_STALL_TIMEOUT_MS
         const previousForceKillGrace = process.env.HAPI_POWER_GIT_CLONE_FORCE_KILL_GRACE_MS
-        process.env.HAPI_POWER_GIT_CLONE_STALL_TIMEOUT_MS = '30'
-        process.env.HAPI_POWER_GIT_CLONE_FORCE_KILL_GRACE_MS = '20'
+        process.env.HAPI_POWER_GIT_CLONE_STALL_TIMEOUT_MS = '300'
+        process.env.HAPI_POWER_GIT_CLONE_FORCE_KILL_GRACE_MS = '50'
 
         try {
             const clonePromise = callRpc<GitCommandResponse>(rpc, RPC_METHODS.MachineGitClone, {
@@ -257,14 +257,14 @@ describe('git clone RPC handlers', () => {
 
             await vi.waitFor(() => expect(spawnMock).toHaveBeenCalledTimes(1))
             await mkdir(destinationPath, { recursive: true })
-            await delay(80)
+            await delay(450)
 
             expect(child.kill).toHaveBeenCalledWith('SIGTERM')
             expect(child.kill).toHaveBeenCalledWith('SIGKILL')
 
             await expect(clonePromise).resolves.toEqual(expect.objectContaining({
                 success: false,
-                error: 'git clone stalled with no output for 30ms'
+                error: 'git clone stalled with no output for 300ms'
             }))
             expect(existsSync(destinationPath)).toBe(false)
         } finally {
@@ -317,8 +317,9 @@ describe('git clone RPC handlers', () => {
         expect(spawnMock).not.toHaveBeenCalled()
     })
 
-    it('rejects private and local network clone URLs before spawning git', async () => {
+    it('rejects local network clone URLs before spawning git', async () => {
         const urls = [
+            'http://localhost/acme/repo.git',
             'https://localhost/acme/repo.git',
             'https://127.0.0.1/acme/repo.git',
             'https://[::ffff:7f00:1]/acme/repo.git',
@@ -339,18 +340,52 @@ describe('git clone RPC handlers', () => {
         expect(spawnMock).not.toHaveBeenCalled()
     })
 
-    it('rejects DNS answers that resolve to private network addresses', async () => {
+    it('allows DNS answers that resolve to private network addresses for internal repositories', async () => {
+        const child = createFakeChild()
+        spawnMock.mockReturnValueOnce(child)
         lookupMock.mockResolvedValueOnce([{ address: '10.0.0.10', family: 4 }])
 
-        const result = await callRpc<GitCommandResponse>(rpc, RPC_METHODS.MachineGitClone, {
+        const clonePromise = callRpc<GitCommandResponse>(rpc, RPC_METHODS.MachineGitClone, {
             url: 'https://internal.example/acme/repo.git',
             targetDir: '.',
             cloneId: '44444444-4444-4444-8444-444444444444'
         })
 
-        expect(result.success).toBe(false)
-        expect(result.error).toBe('Cannot clone from private or local network addresses')
-        expect(spawnMock).not.toHaveBeenCalled()
+        await vi.waitFor(() => expect(spawnMock).toHaveBeenCalledTimes(1))
+        const [, args] = spawnMock.mock.calls[0] as [string, string[]]
+        expect(args).toEqual(expect.arrayContaining([
+            'http.curloptResolve=internal.example:443:10.0.0.10'
+        ]))
+
+        child.emit('close', 0, null)
+        await expect(clonePromise).resolves.toEqual(expect.objectContaining({ success: true }))
+    })
+
+    it('clones internal HTTP GitLab repositories with password auth and pinned DNS', async () => {
+        const child = createFakeChild()
+        spawnMock.mockReturnValueOnce(child)
+        lookupMock.mockResolvedValueOnce([{ address: '172.18.83.102', family: 4 }])
+
+        const clonePromise = callRpc<GitCommandResponse>(rpc, RPC_METHODS.MachineGitClone, {
+            url: 'http://git.tsintergy.com:8070/liuzulin/cq-dataworks/cq-dataworks-design-skill.git',
+            targetDir: '.',
+            cloneId: '45454545-4545-4545-8545-454545454545',
+            auth: { type: 'password', username: 'liuzl', password: 'secret-password' }
+        })
+
+        await vi.waitFor(() => expect(spawnMock).toHaveBeenCalledTimes(1))
+        const [, args, options] = spawnMock.mock.calls[0] as [string, string[], { env: Record<string, string> }]
+        expect(args).toEqual(expect.arrayContaining([
+            'http.followRedirects=false',
+            'http.curloptResolve=git.tsintergy.com:8070:172.18.83.102',
+            'http://git.tsintergy.com:8070/liuzulin/cq-dataworks/cq-dataworks-design-skill.git',
+            'cq-dataworks-design-skill'
+        ]))
+        expect(options.env.GIT_ASKPASS).toMatch(/askpass\.sh$/)
+        expect(options.env.GIT_TERMINAL_PROMPT).toBe('0')
+
+        child.emit('close', 0, null)
+        await expect(clonePromise).resolves.toEqual(expect.objectContaining({ success: true }))
     })
 
     it('pins SSH clone DNS resolution into GIT_SSH_COMMAND', async () => {
@@ -538,17 +573,7 @@ describe('git clone RPC handlers', () => {
         expect(result.error).toContain('outside the working directory')
     })
 
-    it('validates git remote add URLs with the clone SSRF guard', async () => {
-        lookupMock.mockResolvedValueOnce([{ address: '10.0.0.10', family: 4 }])
-
-        const privateResult = await callRpc<GitCommandResponse>(rpc, RPC_METHODS.GitRemoteAdd, {
-            cwd: '.',
-            name: 'origin',
-            url: 'https://internal.example/acme/repo.git'
-        })
-        expect(privateResult.success).toBe(false)
-        expect(privateResult.error).toBe('Cannot clone from private or local network addresses')
-
+    it('validates git remote add URLs with the clone URL guard', async () => {
         const fileResult = await callRpc<GitCommandResponse>(rpc, RPC_METHODS.GitRemoteAdd, {
             cwd: '.',
             name: 'origin',
