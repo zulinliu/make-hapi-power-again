@@ -126,7 +126,7 @@
 - **设计评审已完成**：经过三轮专业评审（UI/UX + 前端架构 + 系统架构 + 安全），11 项架构决策（ADR-001~011）已穿透到所有模块文档
 - **安全发现已修复**：8 项安全发现（N-1~N-8）已全部在设计层面修复并穿透到对应模块
 - **分支策略**：dev 分支为主开发分支，feat/v1 为当前功能分支
-- **开发服务器**：本地 3210 端口，公网 https://test.liuzl.asia
+- **开发服务器**：本地 3210 端口，公网 https://test.example.com
 - **参考项目**：Aider、OpenHands、Langfuse、LangGraph、Cursor、Claude Code
 
 ## Constraints

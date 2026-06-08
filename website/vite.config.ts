@@ -6,6 +6,10 @@ import { defineConfig } from "vite";
 import { vitePluginManusRuntime } from "vite-plugin-manus-runtime";
 
 const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime()];
+const allowedHosts = (process.env.VITE_ALLOWED_HOSTS ?? "")
+  .split(",")
+  .map((host) => host.trim())
+  .filter(Boolean);
 
 export default defineConfig({
   plugins,
@@ -23,12 +27,7 @@ export default defineConfig({
     port: 3000,
     strictPort: false, // Will find next available port if 3000 is busy
     host: true,
-    allowedHosts: [
-      "hapi-power.liuzl.asia",
-      "test.liuzl.asia",
-      "localhost",
-      "127.0.0.1",
-    ],
+    allowedHosts: allowedHosts.length > 0 ? allowedHosts : undefined,
     fs: {
       strict: true,
       deny: ["**/.*"],

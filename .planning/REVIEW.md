@@ -37,7 +37,7 @@ Reviewed the login page redesign comprising a new CSS stylesheet (`login.css`), 
 ```tsx
 // Replace with actual domain or make configurable
 <a
-    href="https://test.liuzl.asia/docs"  // or use env var / config
+    href="https://test.example.com/docs"  // or use env var / config
     target="_blank"
     rel="noopener noreferrer"
     className="login-link"

@@ -30,7 +30,7 @@
 ### 发现的问题（初步）
 
 1. **Session 按钮无 hover 状态** — session 列表项在 hover 时没有视觉反馈（cursor: pointer 但无背景色变化）
-2. **Copy 路径按钮间距过密** — "Copy: /home/liuzl/..." 按钮与下方 session 按钮间距不足
+2. **Copy 路径按钮间距过密** — "Copy: /home/tester/..." 按钮与下方 session 按钮间距不足
 3. **PWA 安装提示遮挡** — 底部 "Install HAPI" 卡片可能遮挡输入区域
 4. **Agentic Browsing 67 分** — 需要进一步分析失败项
 

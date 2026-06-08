@@ -46,6 +46,17 @@ function readHookToken(req: IncomingMessage): string | null {
     return header ?? null;
 }
 
+function summarizeHookData(data: SessionHookData): Record<string, unknown> {
+    return {
+        keys: Object.keys(data).sort(),
+        hookEvent: typeof data.hook_event_name === 'string' ? data.hook_event_name : undefined,
+        source: typeof data.source === 'string' ? data.source : undefined,
+        hasSessionId: typeof (data.session_id || data.sessionId) === 'string',
+        hasTranscriptPath: typeof data.transcript_path === 'string',
+        hasCwd: typeof data.cwd === 'string'
+    };
+}
+
 /**
  * Start a dedicated HTTP server for receiving Claude session hooks.
  */
@@ -87,7 +98,7 @@ export async function startHookServer(options: HookServerOptions): Promise<HookS
                     }
 
                     const body = Buffer.concat(chunks).toString('utf-8');
-                    logger.debug('[hookServer] Received session hook:', body);
+                    logger.debug('[hookServer] Received session hook', { byteLength: Buffer.byteLength(body) });
 
                     let data: SessionHookData = {};
                     try {
@@ -98,6 +109,7 @@ export async function startHookServer(options: HookServerOptions): Promise<HookS
                             return;
                         }
                         data = parsed as SessionHookData;
+                        logger.debug('[hookServer] Parsed session hook summary:', summarizeHookData(data));
                     } catch (parseError) {
                         logger.debug('[hookServer] Failed to parse hook data as JSON:', parseError);
                         res.writeHead(400, { 'Content-Type': 'text/plain' }).end('invalid json');

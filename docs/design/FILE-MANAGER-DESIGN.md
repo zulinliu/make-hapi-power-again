@@ -109,7 +109,7 @@ FileManager (全局文件管理器)
 ├─────────────────────────────┤
 │ Machine: Runner-1      ▼   │  ← Machine selector
 ├─────────────────────────────┤
-│ / home / liuzl / projects   │  ← Breadcrumb
+│ / home / tester / project    │  ← Breadcrumb
 ├─────────────────────────────┤
 │ 🔍 Search  ☐ Hidden  ⬇ ↓  │  ← Toolbar (search + toggles + sort)
 ├─────────────────────────────┤
@@ -127,7 +127,7 @@ FileManager (全局文件管理器)
 **Desktop Layout (≥ 768px):**
 ```
 ┌────────────┬──────────────────────────────────────────┐
-│            │ ←  / home / liuzl / projects             │  ← Breadcrumb bar
+│            │ ←  / home / tester / project             │  ← Breadcrumb bar
 │  Session   ├──────────────────────────────────────────┤
 │  List      │ 🔍 Search  ☐ Hidden  Sort:Name ▼  + New │  ← Toolbar
 │            ├──────────────────────────────────────────┤

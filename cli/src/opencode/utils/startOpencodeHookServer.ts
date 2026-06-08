@@ -22,6 +22,18 @@ function readHookToken(req: IncomingMessage): string | null {
     return header ?? null;
 }
 
+function summarizeOpencodeHook(data: Record<string, unknown>): Record<string, unknown> {
+    const payload = data.payload;
+    return {
+        keys: Object.keys(data).sort(),
+        event: typeof data.event === 'string' ? data.event : undefined,
+        hasSessionId: typeof data.sessionId === 'string',
+        payloadKeys: payload && typeof payload === 'object' && !Array.isArray(payload)
+            ? Object.keys(payload).sort()
+            : undefined
+    };
+}
+
 export async function startOpencodeHookServer(options: OpencodeHookServerOptions): Promise<OpencodeHookServer> {
     const hookToken = options.token || randomBytes(16).toString('hex');
 
@@ -59,7 +71,7 @@ export async function startOpencodeHookServer(options: OpencodeHookServerOptions
                     }
 
                     const body = Buffer.concat(chunks).toString('utf-8');
-                    logger.debug('[opencode-hook] Received hook:', body);
+                    logger.debug('[opencode-hook] Received hook', { byteLength: Buffer.byteLength(body) });
 
                     let data: Record<string, unknown> = {};
                     try {
@@ -70,6 +82,7 @@ export async function startOpencodeHookServer(options: OpencodeHookServerOptions
                             return;
                         }
                         data = parsed as Record<string, unknown>;
+                        logger.debug('[opencode-hook] Parsed hook summary:', summarizeOpencodeHook(data));
                     } catch (parseError) {
                         logger.debug('[opencode-hook] Failed to parse hook data as JSON:', parseError);
                         res.writeHead(400, { 'Content-Type': 'text/plain' }).end('invalid json');

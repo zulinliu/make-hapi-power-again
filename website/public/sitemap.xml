@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://hapi-power.liuzl.asia/</loc>
+    <loc>https://hapi-power.example.com/</loc>
     <lastmod>2026-06-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://hapi-power.liuzl.asia/?lng=en"/>
-    <xhtml:link rel="alternate" hreflang="zh" href="https://hapi-power.liuzl.asia/?lng=zh"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://hapi-power.example.com/?lng=en"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://hapi-power.example.com/?lng=zh"/>
   </url>
 </urlset>

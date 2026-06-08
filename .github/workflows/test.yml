@@ -12,6 +12,8 @@ jobs:
               with:
                   bun-version: 1.3.14
             - run: bun install
+            - run: bun run check:git-standards
+            - run: bun run check:sensitive-info
             - run: bun typecheck
             - name: Create integration test env
               run: |

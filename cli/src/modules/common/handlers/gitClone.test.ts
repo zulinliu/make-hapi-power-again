@@ -12,13 +12,14 @@ import { registerGitHandlers } from './git'
 
 const spawnMock = vi.hoisted(() => vi.fn())
 const lookupMock = vi.hoisted(() => vi.fn(async () => [{ address: '140.82.112.4', family: 4 }]))
+const GIT_NULL_DEVICE = process.platform === 'win32' ? 'NUL' : '/dev/null'
 const SAFE_GIT_NETWORK_CONFIG_ARGS = [
     '-c',
     'protocol.file.allow=never',
     '-c',
     'protocol.ext.allow=never',
     '-c',
-    'core.hooksPath=/dev/null',
+    `core.hooksPath=${GIT_NULL_DEVICE}`,
     '-c',
     'credential.helper=',
     '-c',
@@ -144,8 +145,8 @@ describe('git clone RPC handlers', () => {
         expect(options.cwd).toBe(rootDir)
         expect(options.env.GIT_TERMINAL_PROMPT).toBe('0')
         expect(options.env.GIT_CONFIG_NOSYSTEM).toBe('1')
-        expect(options.env.GIT_CONFIG_SYSTEM).toBe('/dev/null')
-        expect(options.env.GIT_CONFIG_GLOBAL).toBe('/dev/null')
+        expect(options.env.GIT_CONFIG_SYSTEM).toBe(GIT_NULL_DEVICE)
+        expect(options.env.GIT_CONFIG_GLOBAL).toBe(GIT_NULL_DEVICE)
         expect(options.env.GIT_CONFIG_COUNT).toBe('0')
         expect(options.env.GIT_ASKPASS).toMatch(/askpass\.sh$/)
         expect(options.env.GIT_ASKPASS).not.toContain(cloneId)
@@ -361,25 +362,25 @@ describe('git clone RPC handlers', () => {
         await expect(clonePromise).resolves.toEqual(expect.objectContaining({ success: true }))
     })
 
-    it('clones internal HTTP GitLab repositories with password auth and pinned DNS', async () => {
+    it('clones internal HTTP Git repositories with password auth and pinned DNS', async () => {
         const child = createFakeChild()
         spawnMock.mockReturnValueOnce(child)
-        lookupMock.mockResolvedValueOnce([{ address: '172.18.83.102', family: 4 }])
+        lookupMock.mockResolvedValueOnce([{ address: '10.0.0.10', family: 4 }])
 
         const clonePromise = callRpc<GitCommandResponse>(rpc, RPC_METHODS.MachineGitClone, {
-            url: 'http://git.tsintergy.com:8070/liuzulin/cq-dataworks/cq-dataworks-design-skill.git',
+            url: 'http://git.internal.example.com:8070/test-user/project/example-skill.git',
             targetDir: '.',
             cloneId: '45454545-4545-4545-8545-454545454545',
-            auth: { type: 'password', username: 'liuzl', password: 'secret-password' }
+            auth: { type: 'password', username: 'test-user', password: 'example-password' }
         })
 
         await vi.waitFor(() => expect(spawnMock).toHaveBeenCalledTimes(1))
         const [, args, options] = spawnMock.mock.calls[0] as [string, string[], { env: Record<string, string> }]
         expect(args).toEqual(expect.arrayContaining([
             'http.followRedirects=false',
-            'http.curloptResolve=git.tsintergy.com:8070:172.18.83.102',
-            'http://git.tsintergy.com:8070/liuzulin/cq-dataworks/cq-dataworks-design-skill.git',
-            'cq-dataworks-design-skill'
+            'http.curloptResolve=git.internal.example.com:8070:10.0.0.10',
+            'http://git.internal.example.com:8070/test-user/project/example-skill.git',
+            'example-skill'
         ]))
         expect(options.env.GIT_ASKPASS).toMatch(/askpass\.sh$/)
         expect(options.env.GIT_TERMINAL_PROMPT).toBe('0')
@@ -414,7 +415,7 @@ describe('git clone RPC handlers', () => {
                 'repo'
             ])
             expect(options.env.GIT_SSH_COMMAND).toContain("HostName='140.82.112.4'")
-            expect(options.env.GIT_SSH_COMMAND).toContain("-F '/dev/null'")
+            expect(options.env.GIT_SSH_COMMAND).toContain(`-F '${GIT_NULL_DEVICE}'`)
             expect(options.env.GIT_SSH_COMMAND).toContain("HostKeyAlias='github.com'")
             expect(options.env.GIT_SSH_COMMAND).toContain('ProxyCommand=none')
             expect(options.env.GIT_SSH_COMMAND).toContain('ProxyJump=none')
@@ -513,7 +514,7 @@ describe('git clone RPC handlers', () => {
                 'http.curloptResolve=github.com:443:140.82.112.4'
             ]))
             expect(args).not.toContain('url.https://token@example.com/.insteadOf=https://github.com/')
-            expect(options.env.GIT_CONFIG_GLOBAL).toBe('/dev/null')
+            expect(options.env.GIT_CONFIG_GLOBAL).toBe(GIT_NULL_DEVICE)
 
             child.emit('close', 0, null)
             await expect(clonePromise).resolves.toEqual(expect.objectContaining({ success: true }))

@@ -33,35 +33,35 @@ function SessionsEmptyState(props: {
 }) {
     const { t } = useTranslation()
     const steps = [
-        { icon: '↓', label: 'Clone a project', desc: 'Clone a Git repository to get started' },
-        { icon: '✎', label: 'Edit & Develop', desc: 'Use Monaco Editor + Terminal to code' },
-        { icon: '↑', label: 'Review & Push', desc: 'Compare changes, commit and push' },
+        { icon: '↓', label: t('sessions.empty.step.clone.title'), desc: t('sessions.empty.step.clone.desc') },
+        { icon: '✎', label: t('sessions.empty.step.edit.title'), desc: t('sessions.empty.step.edit.desc') },
+        { icon: '↑', label: t('sessions.empty.step.review.title'), desc: t('sessions.empty.step.review.desc') },
     ]
 
     return (
-        <div className="flex flex-col items-center justify-center gap-4 px-6 py-12 text-center">
-            <div className="text-xl font-semibold text-(--hp-text-primary)">
-                Welcome to Hapi Power
+        <div className="mx-auto flex w-full max-w-2xl min-w-0 flex-col items-center justify-center gap-4 overflow-hidden px-4 py-10 text-center sm:px-6 sm:py-12">
+            <div className="max-w-full text-balance text-xl font-semibold text-(--hp-text-primary)">
+                {t('sessions.empty.welcome')}
             </div>
-            <div className="max-w-md text-sm text-(--hp-text-tertiary)">
-                One workbench for every AI coding agent. Clone a repo, code with AI, review and push.
+            <div className="max-w-lg text-balance text-sm leading-6 text-(--hp-text-tertiary)">
+                {t('sessions.empty.hint')}
             </div>
 
-            <div className="flex gap-4 mt-4">
+            <div className="mt-3 grid w-full min-w-0 grid-cols-1 gap-3 min-[460px]:grid-cols-3">
                 {steps.map((step, i) => (
-                    <div key={i} className="flex flex-col items-center gap-2 w-36 p-3 rounded-lg bg-(--hp-surface-2)">
-                        <div className="text-2xl">{step.icon}</div>
-                        <div className="text-sm font-medium text-(--hp-text-primary)">{step.label}</div>
-                        <div className="text-xs text-(--hp-text-tertiary)">{step.desc}</div>
+                    <div key={i} className="flex min-w-0 flex-col items-center gap-2 rounded-lg bg-(--hp-surface-2) p-3">
+                        <div className="text-2xl leading-none">{step.icon}</div>
+                        <div className="max-w-full text-sm font-medium leading-5 text-(--hp-text-primary)">{step.label}</div>
+                        <div className="max-w-full text-xs leading-5 text-(--hp-text-tertiary)">{step.desc}</div>
                     </div>
                 ))}
             </div>
 
-            <div className="flex items-center gap-2 mt-4">
+            <div className="mt-4 flex w-full max-w-sm flex-col items-stretch gap-2 min-[380px]:flex-row min-[380px]:justify-center">
                 <button
                     type="button"
                     onClick={props.onNewSession}
-                    className="px-4 py-1.5 text-sm rounded-lg bg-(--hp-primary) text-(--hp-primary-text) font-medium hover:bg-(--hp-primary-hover) transition-colors"
+                    className="min-h-10 px-4 py-2 text-sm rounded-lg bg-(--hp-primary) text-(--hp-primary-text) font-medium hover:bg-(--hp-primary-hover) transition-colors"
                 >
                     {t('sessions.empty.startSession')}
                 </button>
@@ -69,7 +69,7 @@ function SessionsEmptyState(props: {
                     <button
                         type="button"
                         onClick={props.onBrowse}
-                        className="px-4 py-1.5 text-sm rounded-lg border border-(--hp-border) text-(--hp-text-primary) hover:bg-(--hp-surface-1) transition-colors"
+                        className="min-h-10 px-4 py-2 text-sm rounded-lg border border-(--hp-border) text-(--hp-text-primary) hover:bg-(--hp-surface-1) transition-colors"
                     >
                         {t('sessions.empty.browse')}
                     </button>

@@ -1,7 +1,7 @@
 /**
  * Tests for Claude settings reading functionality
  * 
- * Tests reading Claude's settings.json file and respecting the includeCoAuthoredBy setting
+ * Tests reading Claude's settings.json file and project-level commit credit policy
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
@@ -63,17 +63,17 @@ describe('Claude Settings', () => {
   });
 
   describe('shouldIncludeCoAuthoredBy', () => {
-    it('returns true when no settings file exists (default behavior)', () => {
+    it('returns false when no settings file exists', () => {
       const result = shouldIncludeCoAuthoredBy();
-      expect(result).toBe(true);
+      expect(result).toBe(false);
     });
 
-    it('returns true when includeCoAuthoredBy is not set (default behavior)', () => {
+    it('returns false when includeCoAuthoredBy is not set', () => {
       const settingsPath = join(testClaudeDir, 'settings.json');
       writeFileSync(settingsPath, JSON.stringify({ otherSetting: 'value' }));
 
       const result = shouldIncludeCoAuthoredBy();
-      expect(result).toBe(true);
+      expect(result).toBe(false);
     });
 
     it('returns false when includeCoAuthoredBy is explicitly set to false', () => {
@@ -84,12 +84,12 @@ describe('Claude Settings', () => {
       expect(result).toBe(false);
     });
 
-    it('returns true when includeCoAuthoredBy is explicitly set to true', () => {
+    it('returns false when includeCoAuthoredBy is explicitly set to true', () => {
       const settingsPath = join(testClaudeDir, 'settings.json');
       writeFileSync(settingsPath, JSON.stringify({ includeCoAuthoredBy: true }));
 
       const result = shouldIncludeCoAuthoredBy();
-      expect(result).toBe(true);
+      expect(result).toBe(false);
     });
   });
 });

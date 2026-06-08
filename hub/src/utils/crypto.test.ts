@@ -6,7 +6,7 @@ describe('crypto', () => {
     describe('AES-256-GCM', () => {
         test('encrypts and decrypts correctly', () => {
             const key = randomBytes(32)
-            const plaintext = 'sk-ant-api03-secret-key-12345'
+            const plaintext = 'example-api-key-12345'
             const encrypted = encryptAES256GCM(plaintext, key)
             const decrypted = decryptAES256GCM(encrypted, key)
             expect(decrypted).toBe(plaintext)
@@ -38,7 +38,7 @@ describe('crypto', () => {
 
         test('handles unicode API keys', () => {
             const key = randomBytes(32)
-            const plaintext = 'sk-密钥-🔑-test'
+            const plaintext = 'example-密钥-🔑-test'
             const encrypted = encryptAES256GCM(plaintext, key)
             const decrypted = decryptAES256GCM(encrypted, key)
             expect(decrypted).toBe(plaintext)

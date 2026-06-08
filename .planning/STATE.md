@@ -154,7 +154,7 @@
 **根因**:
 1. `http_proxy` 环境变量导致 axios 把 localhost 请求转发到代理，代理返回 502 → **修复: `NO_PROXY=localhost,127.0.0.1`**
 2. 测试时用 curl 预创建了空 metadata 的机器记录，hub 的 `getOrCreateMachine` 是 get-OR-create 不更新已有记录 → **修复: 清理 DB + 重启**
-3. `--workspace-root` 设置过窄（只包含项目目录）→ **修复: 改为 `/home/liuzl`**
+3. `--workspace-root` 设置过窄（只包含项目目录）→ **修复: 改为 `/home/tester`**
 
 **完整记录**: .planning/research/OPS-LESSONS.md
 **启动脚本**: scripts/start-runner.sh

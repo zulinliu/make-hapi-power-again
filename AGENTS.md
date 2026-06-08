@@ -238,6 +238,15 @@ Socket 服务器创建早于 SyncEngine，使用 `getSyncEngine?: () => SyncEngi
 3. **三位版本号**：分支/tag/release 必须使用 `vX.Y.Z` 三位语义化版本号，禁止 `v1`、`v0.6` 等非完整格式
 4. **分支命名**：功能分支必须为 `feat/vX.Y.Z` 格式
 
+### 敏感信息处理边界
+
+1. **认证引导允许明示**：Hub 首次生成的 `CLI_API_TOKEN`、Relay 直达链接和二维码是用户登录/授权所必需的信息，允许在交互式控制台展示，不得简单禁止或删除。
+2. **日志默认脱敏**：写入本地/远程 debug 日志前必须递归脱敏 `token/password/secret/key/auth/credential/apiKey` 等字段；默认不得记录完整 prompt、hook body、RPC options、shell command。
+3. **敏感落盘最小权限**：保存 settings、access key、runner state、临时 auth 文件时，目录按 0700、文件按 0600 best-effort 处理；临时 auth 文件必须在对应子进程结束或启动失败后清理。
+4. **Git/Release 门禁**：必须启用 `.githooks` 或在 CI 中运行 `bun run check:git-standards`，阻止作者、分支/tag 版本号、Co-Authored-By、第三方品牌残留和 release notes 违规。
+5. **迭代文档可入库但不可发布**：`.planning`、`.understand-anything`、GSD/understand/impeccable 等迭代文档应持续沉淀并纳入 Git 管理，但发布包、官网部署、Release 附件不得默认包含；公开前必须脱敏。
+6. **示例数据使用占位值**：测试和文档示例优先使用 `example.com`、`git.internal.example.com`、`test-user`、`/home/tester/project`，避免真实用户名、内部域名、个人域名和真实 key 前缀。
+
 ## 规则
 
 - TypeScript strict，禁止 `any`（用 `unknown` + 类型收窄）

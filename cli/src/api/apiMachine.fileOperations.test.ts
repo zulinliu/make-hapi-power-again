@@ -46,6 +46,27 @@ async function callRpc<T>(rpc: RpcHandlerManager, machineId: string, method: str
     return JSON.parse(raw) as T
 }
 
+async function createDirectoryLink(target: string, path: string): Promise<boolean> {
+    try {
+        await symlink(target, path, process.platform === 'win32' ? 'junction' : 'dir')
+        return true
+    } catch (error) {
+        if (isSymlinkPermissionError(error)) {
+            return false
+        }
+        throw error
+    }
+}
+
+function isSymlinkPermissionError(error: unknown): boolean {
+    if (!(error instanceof Error)) {
+        return false
+    }
+
+    const code = (error as { code?: unknown }).code
+    return code === 'EPERM' || code === 'EACCES'
+}
+
 describe('ApiMachineClient workspace file operations', () => {
     it('honors showHidden when listing machine directories', async () => {
         const root = await createTempDir('hapi-power-machine-list')
@@ -236,13 +257,15 @@ describe('ApiMachineClient workspace file operations', () => {
             expect(nullByte.success).toBe(false)
             expect(nullByte.error).toContain('null bytes')
 
-            await symlink(outside, join(root, 'escape'))
-            const symlinkEscape = await callRpc<{ success: boolean; error?: string }>(rpc, machine.id, RPC_METHODS.WriteFile, {
-                path: join(root, 'escape', 'blocked.txt'),
-                content: Buffer.from('no').toString('base64')
-            })
-            expect(symlinkEscape.success).toBe(false)
-            expect(symlinkEscape.error).toContain('outside workspace roots')
+            const linkPath = join(root, 'escape')
+            if (await createDirectoryLink(outside, linkPath)) {
+                const symlinkEscape = await callRpc<{ success: boolean; error?: string }>(rpc, machine.id, RPC_METHODS.WriteFile, {
+                    path: join(linkPath, 'blocked.txt'),
+                    content: Buffer.from('no').toString('base64')
+                })
+                expect(symlinkEscape.success).toBe(false)
+                expect(symlinkEscape.error).toContain('outside workspace roots')
+            }
         } finally {
             await rm(root, { recursive: true, force: true })
             await rm(outside, { recursive: true, force: true })

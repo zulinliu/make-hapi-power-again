@@ -1,8 +1,7 @@
 /**
  * Utilities for reading Claude's settings.json configuration
  * 
- * Handles reading Claude's settings.json file to respect user preferences
- * like includeCoAuthoredBy setting for commit message generation.
+ * Handles reading Claude's settings.json file for Claude integration settings.
  */
 
 import { existsSync, readFileSync } from 'node:fs';
@@ -12,7 +11,7 @@ import { logger } from '@/ui/logger';
 
 export interface ClaudeSettings {
   includeCoAuthoredBy?: boolean;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
@@ -51,19 +50,16 @@ export function readClaudeSettings(): ClaudeSettings | null {
 }
 
 /**
- * Check if Co-Authored-By lines should be included in commit messages
- * based on Claude's settings
+ * Project Git standards forbid third-party commit credits.
  * 
- * @returns true if Co-Authored-By should be included, false otherwise
+ * @returns always false for this repository.
  */
 export function shouldIncludeCoAuthoredBy(): boolean {
   const settings = readClaudeSettings();
-  
-  // If no settings file or includeCoAuthoredBy is not explicitly set,
-  // default to true to maintain backward compatibility
-  if (!settings || settings.includeCoAuthoredBy === undefined) {
-    return true;
+
+  if (settings?.includeCoAuthoredBy === true) {
+    logger.debug('[ClaudeSettings] includeCoAuthoredBy ignored because project Git standards forbid third-party commit credits');
   }
-  
-  return settings.includeCoAuthoredBy;
+
+  return false;
 }

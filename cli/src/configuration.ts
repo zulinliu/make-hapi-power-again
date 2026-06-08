@@ -5,11 +5,11 @@
  * Environment files should be loaded using Node's --env-file flag
  */
 
-import { existsSync, mkdirSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 import packageJson from '../package.json'
 import { getCliArgs } from '@/utils/cliArgs'
+import { ensurePrivateDirSync } from '@/utils/privateFiles'
 
 export function parseExtraHeaders(raw: string | undefined, warn: (message: string) => void = console.warn): Record<string, string> {
     if (!raw) {
@@ -85,13 +85,8 @@ class Configuration {
 
         this.currentCliVersion = packageJson.version
 
-        if (!existsSync(this.hapiPowerHomeDir)) {
-            mkdirSync(this.hapiPowerHomeDir, { recursive: true })
-        }
-        // Ensure directories exist
-        if (!existsSync(this.logsDir)) {
-            mkdirSync(this.logsDir, { recursive: true })
-        }
+        ensurePrivateDirSync(this.hapiPowerHomeDir)
+        ensurePrivateDirSync(this.logsDir)
     }
 
     get apiUrl(): string {

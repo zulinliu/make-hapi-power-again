@@ -11,6 +11,7 @@ import type { WebAppEnv } from '../middleware/auth'
 import { requireMachine } from './guards'
 import { decryptAES256GCM, getEncryptionKey } from '../../utils/crypto'
 import { gitCloneGate, parseGitCloneCancelRequest, parseGitCloneRequest } from './gitCloneSafety'
+import { sanitizeLogValue } from '../../middleware/logSanitizer'
 
 const machineFileQuerySchema = z.object({
     path: z.string().min(1)
@@ -68,7 +69,7 @@ async function runRpc<T>(fn: () => Promise<T>): Promise<T | { success: false; er
     try {
         return await fn()
     } catch (error) {
-        console.error('[machines] RPC failed', error)
+        console.error('[machines] RPC failed', sanitizeLogValue(error))
         return { success: false, error: 'Machine operation failed' }
     }
 }

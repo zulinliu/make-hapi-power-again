@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useAppContext } from '@/lib/app-context'
 import { useTranslation } from '@/lib/use-translation'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { sanitizeGitUrl } from '@/lib/git-portal-storage'
 
 interface GitRemoteManagerProps {
     sessionId: string
@@ -109,7 +110,7 @@ export function GitRemoteManager({ sessionId, onRemotesLoaded }: { sessionId: st
                             <div className="min-w-0 flex-1">
                                 <div className="text-sm font-medium text-(--hp-text-primary)">{remote.name}</div>
                                 <div className="truncate text-xs font-mono text-(--hp-text-secondary)">
-                                    {remote.url}
+                                    {sanitizeGitUrl(remote.url)}
                                 </div>
                             </div>
                             <button

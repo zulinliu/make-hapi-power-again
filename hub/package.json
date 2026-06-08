@@ -14,7 +14,7 @@
     },
     "scripts": {
         "start": "bun run src/index.ts",
-        "dev": "bun --watch run src/index.ts",
+        "dev": "bun --watch run scripts/dev.ts",
         "test": "bun test",
         "typecheck": "tsc --noEmit",
         "build": "bun build src/index.ts --outdir dist --target bun",

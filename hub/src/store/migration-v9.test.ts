@@ -1,9 +1,10 @@
 import { describe, expect, it, setDefaultTimeout } from 'bun:test'
 import { Database } from 'bun:sqlite'
-import { mkdtempSync, rmSync } from 'node:fs'
+import { mkdtempSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import { Store } from './index'
+import { removeTempDir } from '../test/removeTempDir'
 
 setDefaultTimeout(90_000)
 
@@ -51,7 +52,7 @@ describe('Store V8→V9 migration: scheduled_at column', () => {
             expect(m2.scheduledAt).toBeNull()
         } finally {
             store?.close()
-            rmSync(dir, { recursive: true, force: true })
+            removeTempDir(dir)
         }
     })
 
@@ -73,7 +74,7 @@ describe('Store V8→V9 migration: scheduled_at column', () => {
             expect(cols).toContain('scheduled_at')
         } finally {
             store?.close()
-            rmSync(dir, { recursive: true, force: true })
+            removeTempDir(dir)
         }
     })
 
@@ -96,7 +97,7 @@ describe('Store V8→V9 migration: scheduled_at column', () => {
             expect(sessionCols).toContain('model_reasoning_effort')
         } finally {
             store?.close()
-            rmSync(dir, { recursive: true, force: true })
+            removeTempDir(dir)
         }
     })
 
@@ -117,7 +118,7 @@ describe('Store V8→V9 migration: scheduled_at column', () => {
         } finally {
             store2?.close()
             store1?.close()
-            rmSync(dir, { recursive: true, force: true })
+            removeTempDir(dir)
         }
     })
 
@@ -139,7 +140,7 @@ describe('Store V8→V9 migration: scheduled_at column', () => {
             expect(count).toBe(1)
         } finally {
             store?.close()
-            rmSync(dir, { recursive: true, force: true })
+            removeTempDir(dir)
         }
     })
 
@@ -172,7 +173,7 @@ describe('Store V8→V9 migration: scheduled_at column', () => {
             expect(rows).toHaveLength(1)
         } finally {
             store?.close()
-            rmSync(dir, { recursive: true, force: true })
+            removeTempDir(dir)
         }
     })
 })
@@ -300,7 +301,7 @@ describe('Store V9: scheduled_at store operations', () => {
             expect(cols).toContain('scheduled_at')
         } finally {
             store?.close()
-            rmSync(dir, { recursive: true, force: true })
+            removeTempDir(dir)
         }
     })
 })

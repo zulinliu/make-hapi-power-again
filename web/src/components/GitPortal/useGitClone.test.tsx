@@ -173,34 +173,34 @@ describe('useGitClone', () => {
         const { result } = renderHook(() => useGitClone({ api, machineId: 'machine-1' }))
 
         act(() => {
-            result.current.setUrl('http://git.tsintergy.com:8070/liuzulin/cq-dataworks/repo.git')
-            result.current.setAuth({ type: 'password', username: 'liuzl', password: 'secret' })
+            result.current.setUrl('http://git.internal.example.com:8070/test-user/project/repo.git')
+            result.current.setAuth({ type: 'password', username: 'test-user', password: 'example-password' })
         })
-        expect(result.current.state.auth).toEqual({ type: 'password', username: 'liuzl', password: 'secret' })
+        expect(result.current.state.auth).toEqual({ type: 'password', username: 'test-user', password: 'example-password' })
 
         act(() => {
-            result.current.setUrl('http://git.tsintergy.com:8070/liuzulin/cq-dataworks/other.git')
+            result.current.setUrl('http://git.internal.example.com:8070/test-user/project/other.git')
         })
 
-        expect(result.current.state.auth).toEqual({ type: 'password', username: 'liuzl', password: 'secret' })
+        expect(result.current.state.auth).toEqual({ type: 'password', username: 'test-user', password: 'example-password' })
     })
 
     it('tracks current directory as the default clone parent until the user customizes it', () => {
         const api = createApi()
         const { result, rerender } = renderHook(
             ({ currentPath }) => useGitClone({ api, machineId: 'machine-1', currentPath }),
-            { initialProps: { currentPath: '/home/liuzl' } }
+            { initialProps: { currentPath: '/home/tester/project' } }
         )
 
-        expect(result.current.state.config.targetDir).toBe('/home/liuzl')
+        expect(result.current.state.config.targetDir).toBe('/home/tester/project')
 
-        rerender({ currentPath: '/home/liuzl/agent/temp_test' })
-        expect(result.current.state.config.targetDir).toBe('/home/liuzl/agent/temp_test')
+        rerender({ currentPath: '/home/tester/project/temp_test' })
+        expect(result.current.state.config.targetDir).toBe('/home/tester/project/temp_test')
 
         act(() => {
             result.current.setConfig({ targetDir: '/custom/path' })
         })
-        rerender({ currentPath: '/home/liuzl/agent/another' })
+        rerender({ currentPath: '/home/tester/project/another' })
 
         expect(result.current.state.config.targetDir).toBe('/custom/path')
     })

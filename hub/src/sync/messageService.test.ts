@@ -8,11 +8,12 @@
  * Race-E (partial ack): broadcast ack receives err + [{ removed: true }] → DELETE + status='cancelled'
  */
 import { describe, expect, it, setDefaultTimeout } from 'bun:test'
-import { mkdtempSync, rmSync } from 'node:fs'
+import { mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { MessageService } from './messageService'
 import { Store } from '../store'
+import { removeTempDir } from '../test/removeTempDir'
 import type { Server } from 'socket.io'
 import type { SyncEvent } from '@hapipower/protocol/types'
 
@@ -1014,7 +1015,7 @@ describe('MessageService.releaseMatureScheduledMessages', () => {
         } finally {
             store2?.close()
             store1?.close()
-            rmSync(dir, { recursive: true, force: true })
+            removeTempDir(dir)
         }
     })
 })

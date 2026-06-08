@@ -17,8 +17,8 @@
  *   HOMEBREW_TAP_REPO - Git URL of the tap repository (default: https://github.com/tiann/homebrew-tap.git)
  */
 
-import { execSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { chmodSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
@@ -121,6 +121,37 @@ Examples:
 `);
 }
 
+function writeGitAskPassScript(tempDir: string): string {
+    const scriptPath = join(tempDir, process.platform === 'win32' ? 'git-askpass.cmd' : 'git-askpass.sh');
+    const content = process.platform === 'win32'
+        ? [
+            '@echo off',
+            'echo %1 | findstr /I "Username" >nul',
+            'if %errorlevel%==0 (',
+            '  echo x-access-token',
+            ') else (',
+            '  echo %GITHUB_TOKEN%',
+            ')',
+            ''
+        ].join('\r\n')
+        : [
+            '#!/bin/sh',
+            'case "$1" in',
+            '  *Username*) printf "%s\\n" "x-access-token" ;;',
+            '  *) printf "%s\\n" "$GITHUB_TOKEN" ;;',
+            'esac',
+            ''
+        ].join('\n');
+
+    writeFileSync(scriptPath, content, { encoding: 'utf8', mode: 0o700 });
+    try {
+        chmodSync(scriptPath, 0o700);
+    } catch {
+        // Best effort on platforms that do not support POSIX modes.
+    }
+    return scriptPath;
+}
+
 async function main(): Promise<void> {
     const args = process.argv.slice(2);
 
@@ -176,23 +207,25 @@ async function main(): Promise<void> {
 
     // Clone and push to tap repository
     const githubToken = process.env.GITHUB_TOKEN;
-    let cloneUrl = tapRepo;
-
-    // Use token-authenticated URL in CI
-    if (githubToken && tapRepo.includes('github.com')) {
-        cloneUrl = tapRepo.replace('https://github.com/', `https://x-access-token:${githubToken}@github.com/`);
-    }
-
     console.log(`Cloning ${tapRepo}...`);
 
-    const tempDir = join(tmpdir(), `homebrew-tap-${Date.now()}`);
-    mkdirSync(tempDir, { recursive: true });
+    const tempRoot = join(tmpdir(), `homebrew-tap-${Date.now()}`);
+    const repoDir = join(tempRoot, 'repo');
+    mkdirSync(tempRoot, { recursive: true });
 
     try {
-        execSync(`git clone --depth 1 "${cloneUrl}" "${tempDir}"`, { stdio: 'pipe' });
+        const gitEnv = githubToken && tapRepo.includes('github.com')
+            ? {
+                ...process.env,
+                GIT_ASKPASS: writeGitAskPassScript(tempRoot),
+                GIT_TERMINAL_PROMPT: '0'
+            }
+            : process.env;
+
+        execFileSync('git', ['clone', '--depth', '1', tapRepo, repoDir], { stdio: 'pipe', env: gitEnv });
 
         // Ensure Formula directory exists
-        const formulaDir = join(tempDir, 'Formula');
+        const formulaDir = join(repoDir, 'Formula');
         mkdirSync(formulaDir, { recursive: true });
 
         // Write formula
@@ -202,16 +235,16 @@ async function main(): Promise<void> {
 
         // Configure git user for CI
         if (githubToken) {
-            execSync('git config user.name "github-actions[bot]"', { cwd: tempDir, stdio: 'pipe' });
-            execSync('git config user.email "github-actions[bot]@users.noreply.github.com"', { cwd: tempDir, stdio: 'pipe' });
+            execFileSync('git', ['config', 'user.name', 'github-actions[bot]'], { cwd: repoDir, stdio: 'pipe' });
+            execFileSync('git', ['config', 'user.email', 'github-actions[bot]@users.noreply.github.com'], { cwd: repoDir, stdio: 'pipe' });
         }
 
         // Commit and push
-        execSync('git add Formula/hapi-power.rb', { cwd: tempDir, stdio: 'pipe' });
+        execFileSync('git', ['add', 'Formula/hapi-power.rb'], { cwd: repoDir, stdio: 'pipe' });
 
         try {
-            execSync(`git commit -m "Update hapi to v${version}"`, { cwd: tempDir, stdio: 'pipe' });
-            execSync('git push origin main', { cwd: tempDir, stdio: 'pipe' });
+            execFileSync('git', ['commit', '-m', `Update hapi to v${version}`], { cwd: repoDir, stdio: 'pipe' });
+            execFileSync('git', ['push', 'origin', 'main'], { cwd: repoDir, stdio: 'pipe', env: gitEnv });
             console.log(`\nSuccessfully pushed hapi v${version} to homebrew-tap`);
         } catch {
             console.log('\nNo changes to commit (formula already up to date)');
@@ -221,7 +254,7 @@ async function main(): Promise<void> {
         console.log('  brew install zulinliu/tap/hapi-power');
     } finally {
         // Cleanup
-        rmSync(tempDir, { recursive: true, force: true });
+        rmSync(tempRoot, { recursive: true, force: true });
     }
 }
 

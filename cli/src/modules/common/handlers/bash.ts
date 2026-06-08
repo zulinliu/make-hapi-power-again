@@ -22,9 +22,16 @@ interface BashResponse {
     error?: string
 }
 
+function summarizeShellCommand(command: string): Record<string, unknown> {
+    return {
+        length: command.length,
+        hasNewline: /[\r\n]/.test(command)
+    }
+}
+
 export function registerBashHandlers(rpcHandlerManager: RpcHandlerManager, workingDirectory: string): void {
     rpcHandlerManager.registerHandler<BashRequest, BashResponse>(RPC_METHODS.Bash, async (data) => {
-        logger.debug('Shell command request:', data.command)
+        logger.debug('Shell command request:', summarizeShellCommand(data.command))
 
         if (data.cwd) {
             const validation = validatePath(data.cwd, workingDirectory)

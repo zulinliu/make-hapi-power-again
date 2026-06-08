@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://hapi-power.liuzl.asia/sitemap.xml
+Sitemap: https://hapi-power.example.com/sitemap.xml
