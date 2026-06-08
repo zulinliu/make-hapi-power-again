@@ -188,12 +188,14 @@ export function GitPortal({
   }, [cloneState.phase, handleClose])
 
   const handleOpenDir = useCallback((path: string) => {
+    reset()
     onOpenDirectory?.(path)
-  }, [onOpenDirectory])
+  }, [onOpenDirectory, reset])
 
   const handleStartSession = useCallback((path: string) => {
+    reset()
     onStartSession?.(path)
-  }, [onStartSession])
+  }, [onStartSession, reset])
 
   if (!isOpen) return null
 
