@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, mock } from 'bun:test'
 import { Hono } from 'hono'
-import type { ProviderOverviewResponse, ProviderWithAssignments } from '@hapipower/protocol'
+import { eventBus, type ProviderKeyRevealTokenCreatedEvent, type ProviderOverviewResponse, type ProviderWithAssignments } from '@hapipower/protocol'
 import { Store } from '../../store'
 import type { WebAppEnv } from '../middleware/auth'
 import { createProviderRoutes } from './providers'
@@ -36,6 +36,7 @@ describe('providers routes', () => {
 
     afterEach(() => {
         globalThis.fetch = originalFetch
+        eventBus.removeAllListeners('provider:key-reveal-token-created')
         console.info = originalConsoleInfo
         if (originalEncryptionKey === undefined) {
             delete process.env.HAPI_POWER_PROVIDER_ENCRYPTION_KEY
@@ -265,6 +266,8 @@ describe('providers routes', () => {
 
     it('reveal key 必须二次确认且 token 只能消费一次，旧 GET 接口返回 410', async () => {
         const created = await createProvider('Reveal Gateway', 'secret-key-1234')
+        const auditEvents: ProviderKeyRevealTokenCreatedEvent[] = []
+        eventBus.on('provider:key-reveal-token-created', event => auditEvents.push(event))
 
         const legacy = await app.request(`/api/providers/${created.provider.id}/api-key`)
         expect(legacy.status).toBe(410)
@@ -285,6 +288,17 @@ describe('providers routes', () => {
         const body = await response.json() as { revealToken: string; expiresAt: number }
         expect(body.revealToken).toHaveLength(32)
         expect(body.expiresAt).toBeGreaterThan(Date.now())
+        expect(auditEvents).toHaveLength(1)
+        expect(auditEvents[0]).toEqual({
+            namespace,
+            providerId: created.provider.id,
+            userId: null,
+            createdAt: expect.any(Number),
+            expiresAt: body.expiresAt,
+        })
+        const auditJson = JSON.stringify(auditEvents[0])
+        expect(auditJson).not.toContain('secret-key-1234')
+        expect(auditJson).not.toContain(body.revealToken)
 
         const reveal = await app.request(`/api/providers/${created.provider.id}/reveal-key`, {
             method: 'POST',

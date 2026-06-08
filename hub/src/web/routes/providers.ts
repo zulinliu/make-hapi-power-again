@@ -13,6 +13,7 @@ import {
     RotateProviderKeyRequestSchema,
     type UpdateProviderRequest,
     UpdateProviderRequestSchema,
+    eventBus,
 } from '@hapipower/protocol'
 import { Hono } from 'hono'
 import { randomBytes, randomUUID } from 'node:crypto'
@@ -348,10 +349,19 @@ export function createProviderRoutes(store: Store, discoveryService = new ModelD
         }
 
         pruneRevealGrants()
-        const expiresAt = Date.now() + REVEAL_TTL_MS
+        const createdAt = Date.now()
+        const expiresAt = createdAt + REVEAL_TTL_MS
         const revealToken = randomBytes(16).toString('hex')
         revealGrants.set(revealToken, { namespace, providerId: id, expiresAt })
-        console.info('provider-key-reveal', { namespace, providerId: id, expiresAt })
+        const auditEvent = {
+            namespace,
+            providerId: id,
+            userId: c.get('userId') ?? null,
+            createdAt,
+            expiresAt,
+        }
+        eventBus.emit('provider:key-reveal-token-created', auditEvent)
+        console.info('provider-key-reveal', auditEvent)
         return c.json({ revealToken, expiresAt })
     })
 

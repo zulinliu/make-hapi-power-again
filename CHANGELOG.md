@@ -29,7 +29,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Validation
 
 - 发布准备阶段已通过 `bun run typecheck`、`bun run test`、`bun run build`、`bun run check:git-standards`、`bun run check:sensitive-info` 和 `git diff --check`。
-- 尚未创建 `v0.18.0` tag 或 GitHub Release；正式发布前仍需补齐五张 signature moment 截图和 iOS PWA 实机验收。
+- 五张 signature moment 截图已补齐；尚未创建 `v0.18.0` tag 或 GitHub Release，正式发布前仍需真实 iOS PWA 实机验收。
 
 ## [0.15.0] - 2026-06-06
 
