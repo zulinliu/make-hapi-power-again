@@ -2,11 +2,21 @@
 
 ## What This Is
 
-**Hapi Power** 是一个面向 AI 编码代理的全栈开发者工作台（Bun + Hono + React 19 monorepo），将远程代理管理、本地开发工具链（文件管理 + 代码编辑 + PTY 终端 + Git 管理）、扩展生态系统（插件 + Skill + Claude Plugin）、自定义模型 API 配置融合为统一的 Web 体验。项目基于 hapi（AGPL-3.0）上游源码二次开发，保留 CLI-Hub-Web 三层架构，在其上构建完整的开发者工具链。
+**Hapi Power** 是一个面向 AI 编码代理的全栈开发者工作台（Bun + Hono + React 19 monorepo），将远程代理管理、本地开发工具链（文件管理 + 代码编辑 + PTY 终端 + Git 管理）、扩展生态系统（插件 + Skill + Claude Plugin）、模型供应商治理、会话驾驶、上下文观测和项目记忆沉淀融合为统一的 Web 体验。项目基于 hapi（AGPL-3.0）上游源码二次开发，保留 CLI-Hub-Web 三层架构，在其上构建完整的 AI 编码工程闭环。
 
 ## Core Value
 
-**让 AI 编码代理拥有完整的开发者环境 — 代码编辑、终端操作、版本控制、插件扩展、自定义模型 API 配置，全部在浏览器中完成。**
+**把 AI 编码对话变成可驾驶、可观测、可复盘的工程闭环：接入可信模型，工作中即时纠偏，观察上下文风险，追踪每次代码变化，并把会话沉淀为项目记忆。**
+
+## v0.18.0 五节点能力环
+
+| 顺序 | 节点 | 品牌能力 | 工程价值 |
+|---|---|---|---|
+| 1 | 接入 | 模型星桥 / Model Nexus | 统一治理 Provider、健康检测、能力缓存和 Agent 分配。 |
+| 2 | 驾驶 | 引导光标 / Guide Beam | Agent 工作中仍能即时纠偏，且不清空普通队列。 |
+| 3 | 观测 | 上下文脉冲 / Context Pulse | 用 `上下文：40%` 和诊断信息展示可靠性风险。 |
+| 4 | 追踪 | Git 脉络 / Git Atlas | 聚合分支态势、变更地图、Diff、提交篮和同步风险。 |
+| 5 | 沉淀 | 会话织锦 / Session Loom | 把对话导出、提炼并转为可复用项目记忆。 |
 
 ## Requirements
 
@@ -69,19 +79,19 @@
 - [x] ~~简易白板工具（Canvas 绘图 → base64 → 代理）~~ → v0.12.0 已删除
 
 **Module G — 会话上下文管理**
-- [ ] 上下文用量可视化（进度条 + 状态指示）
+- [x] 上下文脉冲（Context Pulse）：`上下文：40%` 已用比例、59/60/80/81 阈值、不可用原因诊断
 - [ ] 压缩事件通知与详情查看
 - [ ] 手动压缩触发
 
-**Module H — 自定义模型 API 配置与切换（v0.7 新增）**
-- [ ] 全局供应商池管理（CRUD：名称 + Base URL + API Key + 分配给代理）
-- [ ] API Key 加密存储（AES-256-GCM，SQLite 存储）
-- [ ] 模型自动发现（/v1/models 端点探测，兼容子路径自动剥离）
-- [ ] 供应商配置 Hub→CLI RPC 下发（融入现有 sessionConfigRpc 机制）
-- [ ] ModelSelector 下拉框融合（自定义供应商无缝嵌入现有模型选择器）
-- [ ] 支持 Claude / Codex / Gemini / OpenCode 四种代理
-- [ ] Settings 页面新增"API 供应商"管理区域
-- [ ] 多供应商切换 + 会话级供应商绑定
+**Module H — 模型星桥 / Model Nexus（v0.18.0 升级）**
+- [x] Provider namespace 隔离、CRUD、健康检测、能力缓存、模型缓存和 Agent 分配矩阵
+- [x] API Key 加密存储（AES-256-GCM，SQLite 存储）与二次确认 reveal
+- [x] 模型自动发现和 SSRF 防护（DNS、redirect、IPv6、metadata IP、userinfo、端口、超时、响应大小）
+- [x] 供应商配置 Hub→CLI RPC 下发（融入现有 sessionConfigRpc 机制）
+- [x] ModelSelector 下拉框融合（自定义供应商无缝嵌入现有模型选择器）
+- [x] 支持 Claude / Codex / Gemini / OpenCode 四种代理
+- [x] Settings 页面升级为“模型星桥 / Model Nexus”控制舱
+- [x] 多供应商切换 + 会话级供应商绑定
 
 **Module I — API 协议转换（v0.8 规划）**
 - [ ] Hub 端 API 协议代理（Anthropic ↔ OpenAI Chat/Responses 双向转换）
@@ -95,6 +105,11 @@
 - [ ] 所有子页面布局统一（CSS 变量、max-w-content、安全区域、返回按钮、Tab 指示器、padding）
 - [ ] 右键菜单全局适配（桌面端右键、移动端"..."按钮，统一封装 useContextMenu hook）
 - [ ] Git 状态页文件预览（点击变更文件预览内容）
+
+**Module K — v0.18.0 特色工作流**
+- [x] 引导光标 / Guide Beam：deliveryMode、capability handshake、isolated guide queue、fallback queue、`messages-consumed` 时序
+- [x] Git 脉络 / Git Atlas：结构化 dashboard、变更地图、Diff preview、Commit Basket、Sync Center、危险操作服务端确认
+- [x] 会话织锦 / Session Loom：服务端全量 outline、Markdown 导出、默认 redaction、本地提炼、资产下载/复制/share fallback
 
 **Cross-cutting（跨模块）**
 - [ ] Hub EventBus 事件总线（ADR-003：跨模块事件通知）
@@ -159,6 +174,9 @@
 | v0.7 Hub→CLI RPC 配置下发（ADR-013） | 融入现有 sessionConfigRpc，不修改 CLI 配置文件 | — Pending |
 | v0.7 AES-256-GCM API Key 加密（ADR-014） | SQLite 加密存储，优于 cc-switch 的明文方案 | — Pending |
 | v0.8 协议转换延后（ADR-015） | v0.7 仅做配置+发现，协议转换由中转服务或 v0.8 Hub 代理实现 | — Pending |
+| v0.18 五节点能力环（ADR-016） | README、PRODUCT、功能页面和 release notes 使用接入 → 驾驶 → 观测 → 追踪 → 沉淀顺序 | ✓ Good |
+| v0.18 Guide capability handshake（ADR-017） | 旧 CLI 不支持立即引导时降级 queue，避免 stuck 和队列丢失 | ✓ Good |
+| v0.18 默认导出脱敏（ADR-018） | Session Loom 默认 redaction，外部 LLM 提炼默认关闭并显式确认 | ✓ Good |
 
 ## v0.12.0 功能精简 (2026-06-04)
 
@@ -179,6 +197,16 @@
 | 推送通知 | Web Push + Badge API + ServerChan + Telegram | ✓ 活跃 |
 | PWA | Service Worker + 离线 + 安装引导 | ✓ 活跃 |
 | i18n | 中英双语 | ✓ 活跃 |
+
+## v0.18.0 特色能力补充 (2026-06-09)
+
+| 模块 | 功能 | 状态 |
+|------|------|------|
+| 模型星桥 | Provider 治理、健康检测、能力缓存、Agent 分配矩阵、Wizard、安全 reveal | ✓ 活跃 |
+| 引导光标 | 排队 / 立即引导、capability fallback、isolated guide queue、队列保留 | ✓ 活跃 |
+| 上下文脉冲 | `上下文：40%`、阈值风险、usage 来源、不可用诊断 | ✓ 活跃 |
+| Git 脉络 | Git dashboard、变更地图、Diff preview、Commit Basket、Sync Center | ✓ 活跃 |
+| 会话织锦 | 大纲、导出预览、Markdown 导出、redaction、本地提炼、资产管理 | ✓ 活跃 |
 
 ## Evolution
 
