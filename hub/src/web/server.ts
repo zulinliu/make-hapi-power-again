@@ -106,7 +106,7 @@ function createWebApp(options: {
     app.route('/api', createSkillManagementRoutes(options.getSyncEngine))
     app.route('/api', createPushRoutes(options.store, options.vapidPublicKey))
     app.route('/api', createProviderRoutes(options.store))
-    app.route('/api', createSessionLoomRoutes(options.getSyncEngine))
+    app.route('/api', createSessionLoomRoutes(options.getSyncEngine, options.store))
 
     // Skip static serving in relay mode, show helpful message on root
     if (options.relayMode) {

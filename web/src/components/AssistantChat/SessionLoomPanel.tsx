@@ -121,6 +121,7 @@ export function ConversationOutlinePanel(props: {
     const [synthesis, setSynthesis] = useState<SessionLoomSynthesisResponse | null>(null)
     const [synthesisStatus, setSynthesisStatus] = useState<PanelStatus>('idle')
     const [synthesisError, setSynthesisError] = useState<string | null>(null)
+    const [synthesisCopyState, setSynthesisCopyState] = useState<'idle' | 'copied' | 'failed'>('idle')
     const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle')
     const [statusMessage, setStatusMessage] = useState<string | null>(null)
 
@@ -294,6 +295,7 @@ export function ConversationOutlinePanel(props: {
                 explicitConfirmation: false
             })
             setSynthesis(response)
+            setAssets((prev) => [response.asset, ...prev.filter((asset) => asset.exportId !== response.asset.exportId)])
             setSynthesisStatus('idle')
             setStatusMessage(t('sessionLoom.status.synthesisReady'))
         } catch (error) {
@@ -301,6 +303,27 @@ export function ConversationOutlinePanel(props: {
             setSynthesisStatus('error')
         }
     }, [filters, language, props.api, props.sessionId, t, template])
+
+    const copySynthesis = useCallback(async () => {
+        if (!synthesis) return
+        try {
+            await safeCopyToClipboard(synthesis.markdown)
+            setSynthesisCopyState('copied')
+            setStatusMessage(t('sessionLoom.status.synthesisCopied'))
+        } catch {
+            setSynthesisCopyState('failed')
+            setStatusMessage(t('sessionLoom.copyFailed'))
+        }
+    }, [synthesis, t])
+
+    const downloadSynthesis = useCallback(async () => {
+        if (!synthesis) return
+        await saveMarkdownWithFallback({
+            fileName: synthesis.asset.fileName,
+            title: synthesis.asset.title,
+            markdown: synthesis.markdown
+        })
+    }, [saveMarkdownWithFallback, synthesis])
 
     const downloadAsset = useCallback(async (asset: SessionLoomExportAsset) => {
         if (!props.api || !props.sessionId) return
@@ -621,16 +644,51 @@ export function ConversationOutlinePanel(props: {
                 {activeTab === 'synthesis' ? (
                     <div className="space-y-3">
                         <div className="rounded-md border border-[var(--app-border)] bg-[var(--app-subtle-bg)] px-3 py-2 text-xs text-[var(--app-hint)]">
-                            {t('sessionLoom.synthesis.externalOff')}
+                            {t('sessionLoom.synthesis.agentDescription')}
                         </div>
                         <Button size="sm" onClick={createSynthesis} disabled={!canUseApi || synthesisStatus === 'loading'} className="min-h-11 w-full">
-                            {t('sessionLoom.synthesis.local')}
+                            {t('sessionLoom.synthesis.createBackgroundDesign')}
                         </Button>
                         {renderStatus(synthesisStatus, synthesisError)}
                         {synthesis ? (
-                            <pre className="max-h-96 overflow-auto rounded-md border border-[var(--app-border)] bg-[var(--app-subtle-bg)] p-3 text-xs leading-relaxed text-[var(--app-fg)] whitespace-pre-wrap">
-                                {synthesis.markdown}
-                            </pre>
+                            <div className="space-y-3 rounded-md border border-[var(--app-border)] p-3 text-sm text-[var(--app-fg)]">
+                                <div>
+                                    <div className="font-medium">{t('sessionLoom.synthesis.readyTitle')}</div>
+                                    <p className="mt-1 text-xs leading-5 text-[var(--app-hint)]">{synthesis.summary}</p>
+                                    <p className="mt-1 text-xs leading-5 text-[var(--app-hint)]">
+                                        {t('sessionLoom.synthesis.provider')}: {synthesis.provider.providerName} · {synthesis.provider.model}
+                                    </p>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <Button size="sm" variant="outline" onClick={downloadSynthesis} className="min-h-11 w-full">
+                                        {t('sessionLoom.downloadMarkdown')}
+                                    </Button>
+                                    <Button size="sm" variant="outline" onClick={copySynthesis} className="min-h-11 w-full gap-1.5">
+                                        {synthesisCopyState === 'copied' ? <CheckIcon className="h-3.5 w-3.5" /> : <CopyIcon className="h-3.5 w-3.5" />}
+                                        {synthesisCopyState === 'copied' ? t('button.copied') : t('button.copy')}
+                                    </Button>
+                                </div>
+                                {synthesisCopyState === 'failed' ? (
+                                    <div className="text-xs text-(--hp-danger)">{t('sessionLoom.copyFailed')}</div>
+                                ) : null}
+                                <div className="grid grid-cols-3 gap-2 text-center">
+                                    <div className="rounded-md bg-[var(--app-subtle-bg)] p-2">
+                                        <div className="text-sm font-semibold">{synthesis.stats.messageCount}</div>
+                                        <div className="text-[11px] text-[var(--app-hint)]">{t('sessionLoom.stats.messages')}</div>
+                                    </div>
+                                    <div className="rounded-md bg-[var(--app-subtle-bg)] p-2">
+                                        <div className="text-sm font-semibold">{synthesis.stats.userMessages}</div>
+                                        <div className="text-[11px] text-[var(--app-hint)]">{t('sessionLoom.stats.userMessages')}</div>
+                                    </div>
+                                    <div className="rounded-md bg-[var(--app-subtle-bg)] p-2">
+                                        <div className="text-sm font-semibold">{synthesis.stats.assistantMessages}</div>
+                                        <div className="text-[11px] text-[var(--app-hint)]">{t('sessionLoom.stats.assistantMessages')}</div>
+                                    </div>
+                                </div>
+                                <pre className="max-h-96 overflow-auto rounded-md border border-[var(--app-border)] bg-[var(--app-subtle-bg)] p-3 text-xs leading-relaxed text-[var(--app-fg)] whitespace-pre-wrap">
+                                    {synthesis.markdown}
+                                </pre>
+                            </div>
                         ) : null}
                     </div>
                 ) : null}

@@ -18,6 +18,7 @@ import type {
     SessionLoomExportPreviewRequest,
     SessionLoomExportPreviewResponse,
     SessionLoomOutlineResponse,
+    SessionLoomSynthesisResponse,
 } from '@/types/api'
 
 const originalNavigatorShare = (navigator as Navigator & { share?: unknown }).share
@@ -91,6 +92,7 @@ function createSessionLoomApi(overrides: Partial<Pick<
     | 'listSessionLoomExports'
     | 'previewSessionLoomExport'
     | 'createSessionLoomExport'
+    | 'createSessionLoomSynthesis'
     | 'downloadSessionLoomExport'
     | 'deleteSessionLoomExport'
 >> = {}): ApiClient {
@@ -142,6 +144,36 @@ function createSessionLoomApi(overrides: Partial<Pick<
         },
         warnings: []
     }
+    const synthesis: SessionLoomSynthesisResponse = {
+        success: true,
+        sessionId: 'session-1',
+        generatedAt: 5000,
+        template: 'raw',
+        provider: {
+            providerId: 'provider-1',
+            providerName: 'Test Provider',
+            protocol: 'openai',
+            model: 'gpt-test',
+            agentFlavor: 'codex'
+        },
+        summary: 'Generated in the background with Test Provider / gpt-test. The active session conversation was not interrupted.',
+        markdown: '# Design Plan\n\n## Background and Goal\n\nKeep the server outline.',
+        asset: {
+            exportId: 'synthesis-export-1',
+            sessionId: 'session-1',
+            title: 'Design Plan',
+            fileName: 'project-design-plan.md',
+            format: 'markdown',
+            template: 'raw',
+            createdAt: 5000,
+            expiresAt: 5000 + 7 * 24 * 60 * 60 * 1000,
+            sizeBytes: 68,
+            checksum: 'abcdef0123456789',
+            stats: preview.stats
+        },
+        filters: preview.filters,
+        stats: preview.stats
+    }
 
     return {
         getSessionLoomOutline: vi.fn(async () => outline),
@@ -164,6 +196,7 @@ function createSessionLoomApi(overrides: Partial<Pick<
             },
             markdown: preview.markdown
         })),
+        createSessionLoomSynthesis: vi.fn(async () => synthesis),
         downloadSessionLoomExport: vi.fn(async () => preview.markdown),
         deleteSessionLoomExport: vi.fn(async () => undefined),
         ...overrides
@@ -457,6 +490,87 @@ describe('ConversationOutlinePanel', () => {
             expect(writeText).toHaveBeenCalledWith('# Export fallback')
         })
         expect(await screen.findByText('Share was unavailable, so the Markdown was copied.')).toBeInTheDocument()
+    })
+
+    it('generates a background design synthesis and shows Markdown actions', async () => {
+        const createSessionLoomSynthesis = vi.fn(async () => ({
+            success: true,
+            sessionId: 'session-1',
+            generatedAt: 5000,
+            template: 'raw',
+            provider: {
+                providerId: 'provider-1',
+                providerName: 'Test Provider',
+                protocol: 'openai' as const,
+                model: 'gpt-test',
+                agentFlavor: 'codex'
+            },
+            summary: 'Generated in the background with Test Provider / gpt-test. The active session conversation was not interrupted.',
+            markdown: '# Design Plan\n\n## Background and Goal\n\nKeep the server outline.',
+            asset: {
+                exportId: 'synthesis-export-1',
+                sessionId: 'session-1',
+                title: 'Design Plan',
+                fileName: 'project-design-plan.md',
+                format: 'markdown' as const,
+                template: 'raw' as const,
+                createdAt: 5000,
+                expiresAt: 5000 + 7 * 24 * 60 * 60 * 1000,
+                sizeBytes: 68,
+                checksum: 'abcdef0123456789',
+                stats: {
+                    messageCount: 2,
+                    outlineCount: 1,
+                    userMessages: 1,
+                    assistantMessages: 1,
+                    systemEvents: 0,
+                    redactions: 1,
+                    filteredToolDetails: 0
+                }
+            },
+            filters: {
+                redactSecrets: true,
+                includeSystemEvents: false,
+                includeToolDetails: false
+            },
+            stats: {
+                messageCount: 2,
+                outlineCount: 1,
+                userMessages: 1,
+                assistantMessages: 1,
+                systemEvents: 0,
+                redactions: 1,
+                filteredToolDetails: 0
+            }
+        } satisfies SessionLoomSynthesisResponse))
+        const api = createSessionLoomApi({ createSessionLoomSynthesis })
+
+        renderPanel({
+            api,
+            sessionId: 'session-1'
+        })
+
+        fireEvent.click(screen.getByRole('tab', { name: 'Synthesis' }))
+        expect(screen.getByText('Synthesis calls the current session agent provider API model in the background, analyzes the full conversation, and produces a reusable Design Plan Markdown file without inserting a message into the active chat.')).toBeInTheDocument()
+
+        fireEvent.click(screen.getByRole('button', { name: 'Generate design plan in background' }))
+
+        await waitFor(() => {
+            expect(createSessionLoomSynthesis).toHaveBeenCalledWith(
+                'session-1',
+                expect.objectContaining({
+                    language: 'en',
+                    template: 'raw',
+                    useExternalModel: false,
+                    explicitConfirmation: false
+                })
+            )
+        })
+        expect(await screen.findByText('Design plan generated')).toBeInTheDocument()
+        expect(await screen.findByText('Background design plan is ready.')).toBeInTheDocument()
+        expect(await screen.findByText('Model: Test Provider · gpt-test')).toBeInTheDocument()
+        expect(await screen.findByText(/# Design Plan/)).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: 'Download Markdown' })).toBeInTheDocument()
     })
 
     it('deletes exported assets from the asset list', async () => {

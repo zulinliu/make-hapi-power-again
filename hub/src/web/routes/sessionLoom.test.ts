@@ -1,6 +1,7 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it, mock } from 'bun:test'
 import { Hono } from 'hono'
 import type { DecryptedMessage, Session } from '@hapipower/protocol/types'
+import type { Store } from '../../store'
 import type { SyncEngine } from '../../sync/syncEngine'
 import type { WebAppEnv } from '../middleware/auth'
 import {
@@ -61,13 +62,25 @@ function makeMessage(params: {
     }
 }
 
-function createApp(engine: Partial<SyncEngine>): Hono<WebAppEnv> {
+function createTestStore(): Store {
+    return {
+        providers: {
+            getDefaultForFlavor: () => null,
+            getAssignmentsForFlavor: () => [],
+        }
+    } as unknown as Store
+}
+
+function createApp(
+    engine: Partial<SyncEngine>,
+    options?: Parameters<typeof createSessionLoomRoutes>[2]
+): Hono<WebAppEnv> {
     const app = new Hono<WebAppEnv>()
     app.use('*', async (c, next) => {
         c.set('namespace', 'default')
         await next()
     })
-    app.route('/api', createSessionLoomRoutes(() => engine as SyncEngine))
+    app.route('/api', createSessionLoomRoutes(() => engine as SyncEngine, createTestStore(), options))
     return app
 }
 
@@ -443,7 +456,107 @@ describe('Session Loom export', () => {
         expect(listed.assets).toEqual([])
     })
 
-    it('rejects external synthesis unless the user explicitly confirms it', async () => {
+    it('generates synthesis through a background provider call and stores Markdown as an export asset', async () => {
+        const session = makeSession()
+        const sendMessage = mock(async (
+            _sessionId: string,
+            _payload: {
+                text: string
+                localId?: string | null
+                sentFrom?: 'webapp'
+                deliveryMode?: 'queue'
+            }
+        ) => undefined)
+        const engine = {
+            resolveSessionAccess: (sessionId: string, namespace: string) => ({
+                ok: true,
+                sessionId,
+                session: { ...session, namespace }
+            }),
+            getMessagesPage: () => ({
+                messages: [
+                    makeMessage({ id: 'm-1', seq: 1, role: 'user', text: '需要沉淀设计方案。' }),
+                    makeMessage({ id: 'm-2', seq: 2, role: 'agent', text: '决定：提炼应由当前 Agent 使用当前模型完成。' })
+                ],
+                page: {
+                    limit: 200,
+                    nextBeforeAt: null,
+                    nextBeforeSeq: null,
+                    hasMore: false
+                }
+            }),
+            sendMessage
+        } as Partial<SyncEngine>
+        const synthesizeDesign = mock(async (input: {
+            session: Session
+            systemPrompt: string
+            prompt: string
+        }) => {
+            expect(input.session.id).toBe('session-1')
+            expect(input.systemPrompt).toContain('background design synthesis agent')
+            expect(input.prompt).toContain('# 会话织锦深度提炼任务')
+            expect(input.prompt).toContain('决定：提炼应由当前 Agent 使用当前模型完成。')
+            return {
+                markdown: '# 设计方案\n\n## 背景与目标\n\n沉淀当前会话经验。',
+                provider: {
+                    providerId: 'provider-1',
+                    providerName: 'Test Provider',
+                    protocol: 'openai' as const,
+                    model: 'gpt-test',
+                    agentFlavor: 'codex',
+                }
+            }
+        })
+        const app = createApp(engine, { synthesizeDesign })
+
+        const response = await app.request('/api/sessions/session-1/synthesis', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                language: 'zh-CN',
+                template: 'design',
+                filters: {
+                    redactSecrets: true,
+                    includeSystemEvents: true,
+                    includeToolDetails: false
+                }
+            })
+        })
+        const body = await response.json() as {
+            provider: {
+                providerId: string
+                providerName: string
+                protocol: string
+                model: string
+                agentFlavor: string
+            }
+            summary: string
+            markdown: string
+            asset: { exportId: string; fileName: string; checksum: string }
+        }
+
+        expect(response.status).toBe(200)
+        expect(body.provider).toEqual({
+            providerId: 'provider-1',
+            providerName: 'Test Provider',
+            protocol: 'openai',
+            model: 'gpt-test',
+            agentFlavor: 'codex',
+        })
+        expect(body.summary).toContain('Test Provider / gpt-test')
+        expect(body.summary).toContain('未打断当前会话主线')
+        expect(body.markdown).toContain('# 设计方案')
+        expect(body.asset.fileName).toContain('.md')
+        expect(body.asset.checksum).toMatch(/^[a-f0-9]{64}$/)
+        expect(sendMessage).not.toHaveBeenCalled()
+        expect(synthesizeDesign).toHaveBeenCalledTimes(1)
+
+        const downloadResponse = await app.request(`/api/sessions/session-1/exports/${body.asset.exportId}/download`)
+        expect(downloadResponse.status).toBe(200)
+        expect(await downloadResponse.text()).toContain('# 设计方案')
+    })
+
+    it('rejects explicit external model synthesis because synthesis uses the session agent', async () => {
         const session = makeSession()
         const engine = {
             resolveSessionAccess: (sessionId: string, namespace: string) => ({
@@ -480,6 +593,8 @@ describe('Session Loom export', () => {
         })
 
         expect(response.status).toBe(400)
-        expect(await response.json()).toEqual({ error: 'External synthesis requires explicit confirmation' })
+        expect(await response.json()).toEqual({
+            error: 'Session Loom synthesis uses the current session agent. External model selection is not supported.'
+        })
     })
 })

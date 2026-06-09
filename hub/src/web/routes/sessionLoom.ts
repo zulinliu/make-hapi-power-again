@@ -21,6 +21,12 @@ import type {
     SessionLoomTemplate,
 } from '@hapipower/protocol/apiTypes'
 import type { DecryptedMessage, Session } from '@hapipower/protocol/types'
+import type { Store } from '../../store'
+import {
+    SessionLoomSynthesisError,
+    synthesizeSessionLoomDesign,
+    type SessionLoomDesignSynthesizer,
+} from '../../services/sessionLoomSynthesis'
 import type { SyncEngine } from '../../sync/syncEngine'
 import type { WebAppEnv } from '../middleware/auth'
 import { requireSessionFromParam, requireSyncEngine } from './guards'
@@ -53,6 +59,13 @@ const DEFAULT_SESSION_LOOM_FILTERS: SessionLoomFilters = {
     includeSystemEvents: false,
     includeToolDetails: false
 }
+
+const SESSION_LOOM_SYNTHESIS_SYSTEM_PROMPT = [
+    'You are Session Loom, a background design synthesis agent.',
+    'Analyze the supplied session transcript and produce a reusable design plan.',
+    'Do not mention that this was generated in the background.',
+    'Return only Markdown.',
+].join('\n')
 
 function isRecord(value: unknown): value is Record<string, unknown> {
     return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
@@ -776,47 +789,66 @@ export function buildSessionLoomExportPreview(params: {
     }
 }
 
-function buildLocalSynthesis(preview: SessionLoomExportPreviewResponse, template: SessionLoomTemplate, language: SessionLoomLanguage): SessionLoomSynthesisResponse {
-    const heading = language === 'en' ? 'Local synthesis' : '本地提炼'
-    const lines = language === 'en'
-        ? [
-            `${heading}: ${preview.title}`,
+function buildAgentSynthesisPrompt(preview: SessionLoomExportPreviewResponse, template: SessionLoomTemplate, language: SessionLoomLanguage): string {
+    if (language === 'en') {
+        return [
+            '# Session Loom Deep Synthesis Task',
             '',
-            `- Messages: ${preview.stats.messageCount}`,
-            `- User prompts: ${preview.stats.userMessages}`,
-            `- Assistant replies: ${preview.stats.assistantMessages}`,
-            `- Template: ${template}`,
-            `- Redactions: ${preview.stats.redactions}`,
-        ]
-        : [
-            `${heading}：${preview.title}`,
+            'Please analyze the full session material below with the current session provider model. Do not only summarize it.',
             '',
-            `- 消息数：${preview.stats.messageCount}`,
-            `- 用户消息：${preview.stats.userMessages}`,
-            `- 助手回复：${preview.stats.assistantMessages}`,
-            `- 模板：${template}`,
-            `- 脱敏次数：${preview.stats.redactions}`,
-        ]
-
-    return {
-        success: true,
-        sessionId: preview.sessionId,
-        generatedAt: preview.generatedAt,
-        template,
-        provider: 'local',
-        summary: lines.join('\n'),
-        markdown: [
-            `# ${heading}`,
+            'Create a reusable design plan document for the work completed in this session. Focus on experience transfer, key decisions, implementation rationale, tradeoffs, risks, and reusable lessons.',
             '',
-            ...lines,
+            'Output only Markdown. Use this structure:',
             '',
-            '---',
+            '# Design Plan',
+            '## Background and Goal',
+            '## Final Solution',
+            '## Key Decisions and Tradeoffs',
+            '## Implementation Notes',
+            '## Risks and Follow-ups',
+            '## Reusable Lessons',
+            '## Source Evidence',
+            '',
+            `Template hint: ${templateName(template, language)} (${templateDescription(template, language)})`,
+            `Messages: ${preview.stats.messageCount}; user prompts: ${preview.stats.userMessages}; assistant replies: ${preview.stats.assistantMessages}; redactions: ${preview.stats.redactions}.`,
+            '',
+            'Session material:',
             '',
             preview.markdown
-        ].join('\n'),
-        filters: preview.filters,
-        stats: preview.stats
+        ].join('\n')
     }
+    return [
+        '# 会话织锦深度提炼任务',
+        '',
+        '请使用当前会话正在使用的供应商 API 模型，深度分析下面的完整会话材料。不要只做摘要。',
+        '',
+        '请沉淀一份可传递、可复用的“设计方案”文档，重点提炼：本会话完成的工作、关键决策、实现思路、取舍原因、风险、后续动作和可复用经验。',
+        '',
+        '只输出 Markdown，并使用以下结构：',
+        '',
+        '# 设计方案',
+        '## 背景与目标',
+        '## 最终方案',
+        '## 关键决策与取舍',
+        '## 实现要点',
+        '## 风险与后续',
+        '## 可复用经验',
+        '## 来源依据',
+        '',
+        `模板线索：${templateName(template, language)}（${templateDescription(template, language)}）`,
+        `消息数：${preview.stats.messageCount}；用户消息：${preview.stats.userMessages}；助手回复：${preview.stats.assistantMessages}；脱敏次数：${preview.stats.redactions}。`,
+        '',
+        '会话材料：',
+        '',
+        preview.markdown
+    ].join('\n')
+}
+
+function buildSynthesisSummary(language: SessionLoomLanguage, providerName: string, model: string): string {
+    if (language === 'en') {
+        return `Generated in the background with ${providerName} / ${model}. The active session conversation was not interrupted.`
+    }
+    return `已在后台使用 ${providerName} / ${model} 生成设计方案，未打断当前会话主线。`
 }
 
 async function readAllMessages(engine: SyncEngine, sessionId: string): Promise<DecryptedMessage[]> {
@@ -865,8 +897,48 @@ function checksumMarkdown(markdown: string): string {
     return createHash('sha256').update(markdown, 'utf8').digest('hex')
 }
 
-export function createSessionLoomRoutes(getSyncEngine: () => SyncEngine | null): Hono<WebAppEnv> {
+function storeExportAsset(params: {
+    sessionId: string
+    title: string
+    fileName: string
+    format: 'markdown'
+    template: SessionLoomTemplate
+    createdAt: number
+    markdown: string
+    stats: SessionLoomExportStats
+}): SessionLoomExportAsset {
+    const exportId = randomUUID()
+    const asset: SessionLoomExportAsset = {
+        exportId,
+        sessionId: params.sessionId,
+        title: params.title,
+        fileName: safeFileName(params.fileName),
+        format: params.format,
+        template: params.template,
+        createdAt: params.createdAt,
+        expiresAt: params.createdAt + EXPORT_TTL_MS,
+        sizeBytes: Buffer.byteLength(params.markdown, 'utf8'),
+        checksum: checksumMarkdown(params.markdown),
+        stats: params.stats
+    }
+    exportsById.set(exportId, { asset, markdown: params.markdown })
+    pruneOldExports(params.sessionId)
+    return asset
+}
+
+function synthesisFileName(title: string, language: SessionLoomLanguage): string {
+    return language === 'en'
+        ? `${title}-design-plan`
+        : `${title}-设计方案`
+}
+
+export function createSessionLoomRoutes(
+    getSyncEngine: () => SyncEngine | null,
+    store: Store,
+    options: { synthesizeDesign?: SessionLoomDesignSynthesizer } = {}
+): Hono<WebAppEnv> {
     const app = new Hono<WebAppEnv>()
+    const synthesizeDesign = options.synthesizeDesign ?? synthesizeSessionLoomDesign
 
     app.get('/sessions/:id/conversation-outline', async (c) => {
         const engine = requireSyncEngine(c, getSyncEngine)
@@ -928,23 +1000,16 @@ export function createSessionLoomRoutes(getSyncEngine: () => SyncEngine | null):
             request: parsed.data,
             generatedAt
         })
-        const exportId = randomUUID()
-        const fileName = safeFileName(parsed.data.fileName ?? preview.title)
-        const asset: SessionLoomExportAsset = {
-            exportId,
+        const asset = storeExportAsset({
             sessionId: sessionResult.sessionId,
             title: preview.title,
-            fileName,
+            fileName: parsed.data.fileName ?? preview.title,
             format: parsed.data.format,
             template: parsed.data.template,
             createdAt: generatedAt,
-            expiresAt: generatedAt + EXPORT_TTL_MS,
-            sizeBytes: Buffer.byteLength(preview.markdown, 'utf8'),
-            checksum: checksumMarkdown(preview.markdown),
+            markdown: preview.markdown,
             stats: preview.stats
-        }
-        exportsById.set(exportId, { asset, markdown: preview.markdown })
-        pruneOldExports(sessionResult.sessionId)
+        })
 
         return c.json({ success: true, asset, markdown: preview.markdown })
     })
@@ -1012,13 +1077,11 @@ export function createSessionLoomRoutes(getSyncEngine: () => SyncEngine | null):
         if (!parsed.success) {
             return c.json({ error: 'Invalid body', issues: parsed.error.flatten() }, 400)
         }
-        if (parsed.data.useExternalModel && !parsed.data.explicitConfirmation) {
-            return c.json({ error: 'External synthesis requires explicit confirmation' }, 400)
-        }
         if (parsed.data.useExternalModel) {
-            return c.json({ error: 'External synthesis is not configured' }, 400)
+            return c.json({ error: 'Session Loom synthesis uses the current session agent. External model selection is not supported.' }, 400)
         }
 
+        const generatedAt = Date.now()
         const messages = await readAllMessages(engine, sessionResult.sessionId)
         const preview = buildSessionLoomExportPreview({
             session: sessionResult.session,
@@ -1029,9 +1092,45 @@ export function createSessionLoomRoutes(getSyncEngine: () => SyncEngine | null):
                 template: parsed.data.template,
                 filters: parsed.data.filters
             },
-            generatedAt: Date.now()
+            generatedAt
         })
-        return c.json(buildLocalSynthesis(preview, parsed.data.template, parsed.data.language))
+        try {
+            const synthesis = await synthesizeDesign({
+                store,
+                session: sessionResult.session,
+                systemPrompt: SESSION_LOOM_SYNTHESIS_SYSTEM_PROMPT,
+                prompt: buildAgentSynthesisPrompt(preview, parsed.data.template, parsed.data.language),
+            })
+            const asset = storeExportAsset({
+                sessionId: sessionResult.sessionId,
+                title: parsed.data.language === 'en' ? 'Design Plan' : '设计方案',
+                fileName: synthesisFileName(preview.title, parsed.data.language),
+                format: 'markdown',
+                template: parsed.data.template,
+                createdAt: generatedAt,
+                markdown: synthesis.markdown,
+                stats: preview.stats
+            })
+            const response: SessionLoomSynthesisResponse = {
+                success: true,
+                sessionId: sessionResult.sessionId,
+                generatedAt,
+                template: parsed.data.template,
+                provider: synthesis.provider,
+                summary: buildSynthesisSummary(parsed.data.language, synthesis.provider.providerName, synthesis.provider.model),
+                markdown: synthesis.markdown,
+                asset,
+                filters: preview.filters,
+                stats: preview.stats
+            }
+            return c.json(response)
+        } catch (error) {
+            if (error instanceof SessionLoomSynthesisError) {
+                return c.json({ error: error.message }, error.status === 409 ? 409 : 502)
+            }
+            const message = error instanceof Error ? error.message : 'Failed to synthesize session design plan'
+            return c.json({ error: message }, 502)
+        }
     })
 
     return app

@@ -217,14 +217,23 @@ export type SessionLoomExportListResponse = {
     assets: SessionLoomExportAsset[]
 }
 
+export type SessionLoomSynthesisProvider = {
+    providerId: string
+    providerName: string
+    protocol: 'anthropic' | 'openai' | 'gemini'
+    model: string
+    agentFlavor: string
+}
+
 export type SessionLoomSynthesisResponse = {
     success: boolean
     sessionId: string
     generatedAt: number
     template: SessionLoomTemplate
-    provider: 'local'
+    provider: SessionLoomSynthesisProvider
     summary: string
     markdown: string
+    asset: SessionLoomExportAsset
     filters: SessionLoomFilters
     stats: SessionLoomExportStats
 }

@@ -11,7 +11,9 @@ const REQUIRED_SESSION_LOOM_KEYS = [
     'sessionLoom.tabs.assets',
     'sessionLoom.downloadMarkdown',
     'sessionLoom.filters.redactSecrets',
-    'sessionLoom.synthesis.externalOff',
+    'sessionLoom.synthesis.agentDescription',
+    'sessionLoom.synthesis.createBackgroundDesign',
+    'sessionLoom.synthesis.readyTitle',
     'sessionLoom.assets.download',
 ] as const
 
