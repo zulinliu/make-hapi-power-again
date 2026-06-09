@@ -8,13 +8,15 @@
  * Race-E (partial ack): broadcast ack receives err + [{ removed: true }] → DELETE + status='cancelled'
  */
 import { describe, expect, it, setDefaultTimeout } from 'bun:test'
-import { mkdtempSync, rmSync } from 'node:fs'
+import { mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { MessageService } from './messageService'
 import { Store } from '../store'
+import { removeTempDir } from '../test/removeTempDir'
 import type { Server } from 'socket.io'
-import type { SyncEvent } from '@hapipower/protocol/types'
+import type { Session, SyncEvent } from '@hapipower/protocol/types'
+import type { EventPublisher } from './eventPublisher'
 
 setDefaultTimeout(30_000)
 
@@ -60,6 +62,90 @@ function makePublisher() {
     return {
         emit: (event: SyncEvent) => { events.push(event) },
         events
+    }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+    return value !== null && typeof value === 'object' && !Array.isArray(value)
+}
+
+function getUpdateBody(update: unknown): Record<string, unknown> {
+    if (!isRecord(update) || !isRecord(update.body)) {
+        throw new Error('Expected Socket.IO update body')
+    }
+    return update.body
+}
+
+function getMessageMeta(content: unknown): Record<string, unknown> {
+    if (!isRecord(content) || !isRecord(content.meta)) {
+        throw new Error('Expected message meta')
+    }
+    return content.meta
+}
+
+function getGuideMeta(content: unknown): Record<string, unknown> {
+    const meta = getMessageMeta(content)
+    if (!isRecord(meta.guide)) {
+        throw new Error('Expected guide meta')
+    }
+    return meta.guide
+}
+
+function makeProtocolSession(params: {
+    id: string
+    thinking: boolean
+    pendingPermission?: boolean
+    guideCapability?: {
+        supported: boolean
+        preservesQueue: boolean
+        isolatedDelivery: boolean
+        version?: number
+    }
+}): Session {
+    const metadata: NonNullable<Session['metadata']> = {
+        path: `/tmp/${params.id}`,
+        host: 'test-host',
+        flavor: 'codex',
+        ...(params.guideCapability
+            ? {
+                capabilities: {
+                    guideInterrupt: params.guideCapability
+                }
+            }
+            : {})
+    }
+
+    return {
+        id: params.id,
+        namespace: 'default',
+        seq: 1,
+        createdAt: 1,
+        updatedAt: 1,
+        active: true,
+        activeAt: 1,
+        metadata,
+        metadataVersion: 1,
+        agentState: null,
+        agentStateVersion: 1,
+        thinking: params.thinking,
+        thinkingAt: 1,
+        ...(params.pendingPermission
+            ? {
+                agentState: {
+                    requests: {
+                        'permission-1': {
+                            tool: 'Edit',
+                            arguments: { file_path: '/tmp/test.ts' },
+                            createdAt: 1
+                        }
+                    },
+                    completedRequests: {}
+                }
+            }
+            : {}),
+        model: null,
+        modelReasoningEffort: null,
+        effort: null
     }
 }
 
@@ -813,6 +899,437 @@ describe('MessageService.sendMessage with scheduledAt', () => {
         const msgs = store.messages.getUninvokedLocalMessages(session.id)
         expect(msgs).toHaveLength(1)
     })
+
+    it('sends guide-message only when capability handshake preserves and isolates queue', async () => {
+        const store = makeStore()
+        const session = makeSession(store, 'guide-capability-supported')
+        const publisher = makePublisher()
+        const cliEmitted: unknown[] = []
+        const io = {
+            of: (ns: string) => ({
+                to: (_room: string) => ({
+                    emit: (_event: string, data: unknown) => {
+                        if (ns === '/cli') cliEmitted.push(data)
+                    },
+                    timeout: (_ms: number) => ({ emit: () => {} })
+                }),
+                adapter: { rooms: { get: () => undefined } }
+            })
+        } as unknown as Server
+
+        const service = new MessageService(
+            store,
+            io,
+            publisher as unknown as EventPublisher,
+            undefined,
+            () => makeProtocolSession({
+                id: session.id,
+                thinking: true,
+                guideCapability: {
+                    supported: true,
+                    preservesQueue: true,
+                    isolatedDelivery: true,
+                    version: 1
+                }
+            }),
+            () => true
+        )
+
+        await service.sendMessage(session.id, {
+            text: 'guide now',
+            localId: 'local-guide-supported',
+            deliveryMode: 'guide'
+        })
+
+        expect(cliEmitted).toHaveLength(1)
+        const body = getUpdateBody(cliEmitted[0])
+        expect(body.t).toBe('guide-message')
+
+        const stored = store.messages.getUninvokedLocalMessages(session.id)
+        expect(stored).toHaveLength(1)
+        const meta = getMessageMeta(stored[0].content)
+        const guide = getGuideMeta(stored[0].content)
+        expect(meta.deliveryMode).toBe('guide')
+        expect(guide.status).toBe('requested')
+
+        expect(publisher.events.some((event) => event.type === 'guide-requested')).toBe(true)
+        expect(publisher.events.some((event) => event.type === 'guide-fallback-queued')).toBe(false)
+    })
+
+    it('falls back when stored metadata supports guide but the connected socket did not handshake it', async () => {
+        const store = makeStore()
+        const session = makeSession(store, 'guide-connected-capability-missing')
+        const publisher = makePublisher()
+        const cliEmitted: unknown[] = []
+        const io = {
+            of: (ns: string) => ({
+                to: (_room: string) => ({
+                    emit: (_event: string, data: unknown) => {
+                        if (ns === '/cli') cliEmitted.push(data)
+                    },
+                    timeout: (_ms: number) => ({ emit: () => {} })
+                }),
+                adapter: { rooms: { get: () => undefined } }
+            })
+        } as unknown as Server
+
+        const service = new MessageService(
+            store,
+            io,
+            publisher as unknown as EventPublisher,
+            undefined,
+            () => makeProtocolSession({
+                id: session.id,
+                thinking: true,
+                guideCapability: {
+                    supported: true,
+                    preservesQueue: true,
+                    isolatedDelivery: true,
+                    version: 1
+                }
+            }),
+            () => false
+        )
+
+        await service.sendMessage(session.id, {
+            text: 'guide without connected handshake',
+            localId: 'local-guide-no-connected-handshake',
+            deliveryMode: 'guide'
+        })
+
+        expect(cliEmitted).toHaveLength(1)
+        expect(getUpdateBody(cliEmitted[0]).t).toBe('new-message')
+
+        const guide = getGuideMeta(store.messages.getUninvokedLocalMessages(session.id)[0].content)
+        expect(guide.status).toBe('fallback-queued')
+        expect(guide.fallbackReason).toBe('unsupported-capability')
+
+        const fallback = publisher.events.find((event) => event.type === 'guide-fallback-queued')
+        expect(fallback).toBeDefined()
+        if (fallback?.type === 'guide-fallback-queued') {
+            expect(fallback.reason).toBe('unsupported-capability')
+            expect(fallback.localId).toBe('local-guide-no-connected-handshake')
+        }
+    })
+
+    it('falls back to normal queue when guide capability is missing', async () => {
+        const store = makeStore()
+        const session = makeSession(store, 'guide-capability-missing')
+        const publisher = makePublisher()
+        const cliEmitted: unknown[] = []
+        const io = {
+            of: (ns: string) => ({
+                to: (_room: string) => ({
+                    emit: (_event: string, data: unknown) => {
+                        if (ns === '/cli') cliEmitted.push(data)
+                    },
+                    timeout: (_ms: number) => ({ emit: () => {} })
+                }),
+                adapter: { rooms: { get: () => undefined } }
+            })
+        } as unknown as Server
+
+        const service = new MessageService(
+            store,
+            io,
+            publisher as unknown as EventPublisher,
+            undefined,
+            () => makeProtocolSession({ id: session.id, thinking: true })
+        )
+
+        await service.sendMessage(session.id, {
+            text: 'guide fallback',
+            localId: 'local-guide-fallback',
+            deliveryMode: 'guide'
+        })
+
+        expect(cliEmitted).toHaveLength(1)
+        expect(getUpdateBody(cliEmitted[0]).t).toBe('new-message')
+
+        const stored = store.messages.getUninvokedLocalMessages(session.id)
+        expect(stored).toHaveLength(1)
+        const guide = getGuideMeta(stored[0].content)
+        expect(guide.status).toBe('fallback-queued')
+        expect(guide.fallbackReason).toBe('unsupported-capability')
+
+        const fallback = publisher.events.find((event) => event.type === 'guide-fallback-queued')
+        expect(fallback).toBeDefined()
+        if (fallback?.type === 'guide-fallback-queued') {
+            expect(fallback.reason).toBe('unsupported-capability')
+            expect(fallback.localId).toBe('local-guide-fallback')
+        }
+    })
+
+    it('falls back to normal queue when guide is requested outside thinking state', async () => {
+        const store = makeStore()
+        const session = makeSession(store, 'guide-not-thinking')
+        const publisher = makePublisher()
+        const cliEmitted: unknown[] = []
+        const io = {
+            of: (ns: string) => ({
+                to: (_room: string) => ({
+                    emit: (_event: string, data: unknown) => {
+                        if (ns === '/cli') cliEmitted.push(data)
+                    },
+                    timeout: (_ms: number) => ({ emit: () => {} })
+                }),
+                adapter: { rooms: { get: () => undefined } }
+            })
+        } as unknown as Server
+
+        const service = new MessageService(
+            store,
+            io,
+            publisher as unknown as EventPublisher,
+            undefined,
+            () => makeProtocolSession({
+                id: session.id,
+                thinking: false,
+                guideCapability: {
+                    supported: true,
+                    preservesQueue: true,
+                    isolatedDelivery: true,
+                    version: 1
+                }
+            }),
+            () => true
+        )
+
+        await service.sendMessage(session.id, {
+            text: 'guide while idle',
+            localId: 'local-guide-idle',
+            deliveryMode: 'guide'
+        })
+
+        expect(cliEmitted).toHaveLength(1)
+        expect(getUpdateBody(cliEmitted[0]).t).toBe('new-message')
+
+        const fallback = publisher.events.find((event) => event.type === 'guide-fallback-queued')
+        expect(fallback).toBeDefined()
+        if (fallback?.type === 'guide-fallback-queued') {
+            expect(fallback.reason).toBe('not-thinking')
+        }
+    })
+
+    it('falls back to normal queue when a permission request is pending', async () => {
+        const store = makeStore()
+        const session = makeSession(store, 'guide-permission-pending')
+        const publisher = makePublisher()
+        const cliEmitted: unknown[] = []
+        const io = {
+            of: (ns: string) => ({
+                to: (_room: string) => ({
+                    emit: (_event: string, data: unknown) => {
+                        if (ns === '/cli') cliEmitted.push(data)
+                    },
+                    timeout: (_ms: number) => ({ emit: () => {} })
+                }),
+                adapter: { rooms: { get: () => undefined } }
+            })
+        } as unknown as Server
+
+        const service = new MessageService(
+            store,
+            io,
+            publisher as unknown as EventPublisher,
+            undefined,
+            () => makeProtocolSession({
+                id: session.id,
+                thinking: true,
+                pendingPermission: true,
+                guideCapability: {
+                    supported: true,
+                    preservesQueue: true,
+                    isolatedDelivery: true,
+                    version: 1
+                }
+            }),
+            () => true
+        )
+
+        await service.sendMessage(session.id, {
+            text: 'guide while permission pending',
+            localId: 'local-guide-permission',
+            deliveryMode: 'guide'
+        })
+
+        expect(cliEmitted).toHaveLength(1)
+        expect(getUpdateBody(cliEmitted[0]).t).toBe('new-message')
+
+        const stored = store.messages.getUninvokedLocalMessages(session.id)
+        expect(stored).toHaveLength(1)
+        const guide = getGuideMeta(stored[0].content)
+        expect(guide.status).toBe('fallback-queued')
+        expect(guide.fallbackReason).toBe('permission-pending')
+
+        const fallback = publisher.events.find((event) => event.type === 'guide-fallback-queued')
+        expect(fallback).toBeDefined()
+        if (fallback?.type === 'guide-fallback-queued') {
+            expect(fallback.reason).toBe('permission-pending')
+            expect(fallback.localId).toBe('local-guide-permission')
+        }
+    })
+
+    it('does not re-send guide-message for duplicate guide localId', async () => {
+        const store = makeStore()
+        const session = makeSession(store, 'guide-duplicate-local-id')
+        const publisher = makePublisher()
+        const cliEmitted: unknown[] = []
+        const io = {
+            of: (ns: string) => ({
+                to: (_room: string) => ({
+                    emit: (_event: string, data: unknown) => {
+                        if (ns === '/cli') cliEmitted.push(data)
+                    },
+                    timeout: (_ms: number) => ({ emit: () => {} })
+                }),
+                adapter: { rooms: { get: () => undefined } }
+            })
+        } as unknown as Server
+        const service = new MessageService(
+            store,
+            io,
+            publisher as unknown as EventPublisher,
+            undefined,
+            () => makeProtocolSession({
+                id: session.id,
+                thinking: true,
+                guideCapability: {
+                    supported: true,
+                    preservesQueue: true,
+                    isolatedDelivery: true,
+                    version: 1
+                }
+            }),
+            () => true
+        )
+
+        await service.sendMessage(session.id, {
+            text: 'guide once',
+            localId: 'local-guide-duplicate',
+            deliveryMode: 'guide'
+        })
+        await service.sendMessage(session.id, {
+            text: 'guide duplicate',
+            localId: 'local-guide-duplicate',
+            deliveryMode: 'guide'
+        })
+
+        expect(cliEmitted).toHaveLength(1)
+        expect(getUpdateBody(cliEmitted[0]).t).toBe('guide-message')
+        expect(publisher.events.filter((event) => event.type === 'guide-requested')).toHaveLength(1)
+        expect(publisher.events.filter((event) => event.type === 'message-received')).toHaveLength(2)
+        expect(store.messages.getUninvokedLocalMessages(session.id)).toHaveLength(1)
+    })
+
+    it('emits guide-consumed only for consumed guide localIds', () => {
+        const store = makeStore()
+        const session = makeSession(store, 'guide-consumed-localids')
+        const publisher = makePublisher()
+        const service = new MessageService(store, makeNoopIo(), publisher as unknown as EventPublisher)
+        const invokedAt = Date.now()
+
+        store.messages.addMessage(
+            session.id,
+            {
+                role: 'user',
+                content: { type: 'text', text: 'guide' },
+                meta: {
+                    sentFrom: 'webapp',
+                    deliveryMode: 'guide',
+                    guide: { requestedAt: invokedAt - 1, status: 'requested' }
+                }
+            },
+            'local-guide-consumed'
+        )
+        store.messages.addMessage(
+            session.id,
+            {
+                role: 'user',
+                content: { type: 'text', text: 'normal' },
+                meta: {
+                    sentFrom: 'webapp',
+                    deliveryMode: 'queue'
+                }
+            },
+            'local-normal-consumed'
+        )
+
+        service.emitGuideConsumedFromLocalIds(
+            session.id,
+            ['local-guide-consumed', 'local-normal-consumed'],
+            invokedAt
+        )
+
+        const consumed = publisher.events.filter((event) => event.type === 'guide-consumed')
+        expect(consumed).toHaveLength(1)
+        if (consumed[0]?.type === 'guide-consumed') {
+            expect(consumed[0].localIds).toEqual(['local-guide-consumed'])
+            expect(consumed[0].invokedAt).toBe(invokedAt)
+        }
+
+        const rows = store.messages.getMessagesByLocalIds(
+            session.id,
+            ['local-guide-consumed', 'local-normal-consumed']
+        )
+        const guideRow = rows.find((row) => row.localId === 'local-guide-consumed')
+        const normalRow = rows.find((row) => row.localId === 'local-normal-consumed')
+        if (!guideRow || !normalRow) throw new Error('Expected stored test rows')
+        expect(getGuideMeta(guideRow.content).status).toBe('consumed')
+        expect(() => getGuideMeta(normalRow.content)).toThrow('Expected guide meta')
+    })
+
+    it('rejects direct guide send with scheduledAt', async () => {
+        const store = makeStore()
+        const session = makeSession(store, 'guide-direct-scheduled')
+        const publisher = makePublisher()
+        const service = new MessageService(store, makeNoopIo(), publisher as unknown as EventPublisher)
+
+        await expect(
+            service.sendMessage(session.id, {
+                text: 'scheduled guide',
+                localId: 'local-guide-scheduled',
+                scheduledAt: Date.now() + 60_000,
+                deliveryMode: 'guide'
+            })
+        ).rejects.toThrow(/guide messages cannot be scheduled/)
+    })
+
+    it('rejects direct guide send with attachments', async () => {
+        const store = makeStore()
+        const session = makeSession(store, 'guide-direct-attachments')
+        const publisher = makePublisher()
+        const service = new MessageService(store, makeNoopIo(), publisher as unknown as EventPublisher)
+
+        await expect(
+            service.sendMessage(session.id, {
+                text: 'attachment guide',
+                localId: 'local-guide-attachment',
+                deliveryMode: 'guide',
+                attachments: [{
+                    id: 'att-guide',
+                    filename: 'a.png',
+                    mimeType: 'image/png',
+                    size: 10,
+                    path: '/tmp/a.png'
+                }]
+            })
+        ).rejects.toThrow(/guide messages with attachments/)
+    })
+
+    it('rejects direct guide send without localId', async () => {
+        const store = makeStore()
+        const session = makeSession(store, 'guide-direct-local-id')
+        const publisher = makePublisher()
+        const service = new MessageService(store, makeNoopIo(), publisher as unknown as EventPublisher)
+
+        await expect(
+            service.sendMessage(session.id, {
+                text: 'guide without local id',
+                deliveryMode: 'guide'
+            })
+        ).rejects.toThrow(/guide messages require localId/)
+    })
 })
 
 // ---------------------------------------------------------------------------
@@ -1014,7 +1531,7 @@ describe('MessageService.releaseMatureScheduledMessages', () => {
         } finally {
             store2?.close()
             store1?.close()
-            rmSync(dir, { recursive: true, force: true })
+            removeTempDir(dir)
         }
     })
 })

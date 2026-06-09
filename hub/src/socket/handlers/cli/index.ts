@@ -46,10 +46,30 @@ export type CliHandlersDeps = {
     onBackgroundTaskDelta?: (sessionId: string, delta: { started: number; completed: number }) => void
     onSessionActivity?: (sessionId: string, updatedAt: number) => void
     onSweepImmediateQueued?: (sessionId: string, now: number) => void
+    onMessagesConsumed?: (sessionId: string, localIds: string[], invokedAt: number) => void
+    onConnectedSessionCapabilities?: (sessionId: string, socketId: string, metadata: unknown) => void
+    onSessionSocketClosed?: (sessionId: string, socketId: string) => void
+    onCliSocketDisconnect?: (socketId: string) => void
 }
 
 export function registerCliHandlers(socket: CliSocketWithData, deps: CliHandlersDeps): void {
-    const { io, store, rpcRegistry, terminalRegistry, onSessionAlive, onSessionEnd, onMachineAlive, onWebappEvent, onBackgroundTaskDelta, onSessionActivity, onSweepImmediateQueued } = deps
+    const {
+        io,
+        store,
+        rpcRegistry,
+        terminalRegistry,
+        onSessionAlive,
+        onSessionEnd,
+        onMachineAlive,
+        onWebappEvent,
+        onBackgroundTaskDelta,
+        onSessionActivity,
+        onSweepImmediateQueued,
+        onMessagesConsumed,
+        onConnectedSessionCapabilities,
+        onSessionSocketClosed,
+        onCliSocketDisconnect
+    } = deps
     const terminalNamespace = io.of('/terminal')
     const namespace = typeof socket.data.namespace === 'string' ? socket.data.namespace : null
 
@@ -114,7 +134,10 @@ export function registerCliHandlers(socket: CliSocketWithData, deps: CliHandlers
         onWebappEvent,
         onBackgroundTaskDelta,
         onSessionActivity,
-        onSweepImmediateQueued
+        onSweepImmediateQueued,
+        onMessagesConsumed,
+        onConnectedSessionCapabilities,
+        onSessionSocketClosed
     })
     registerMachineHandlers(socket, {
         store,
@@ -171,5 +194,6 @@ export function registerCliHandlers(socket: CliSocketWithData, deps: CliHandlers
     socket.on('disconnect', () => {
         rpcRegistry.unregisterAll(socket)
         cleanupTerminalHandlers(socket, { terminalRegistry, terminalNamespace })
+        onCliSocketDisconnect?.(socket.id)
     })
 }

@@ -74,6 +74,15 @@ function asRecord(value: unknown): Record<string, unknown> | null {
         : null
 }
 
+function metadataHasGuideCapability(metadata: unknown): boolean {
+    const record = asRecord(metadata)
+    const capabilities = asRecord(record?.capabilities)
+    const guide = asRecord(capabilities?.guideInterrupt)
+    return guide?.supported === true
+        && guide.preservesQueue === true
+        && guide.isolatedDelivery === true
+}
+
 function normalizeUserMessageText(value: string): string | undefined {
     const text = value.trim().replace(/\s+/g, ' ')
     return text.length > 0 ? text : undefined
@@ -123,6 +132,7 @@ export class SyncEngine {
     private readonly machineCache: MachineCache
     private readonly messageService: MessageService
     private readonly rpcGateway: RpcGateway
+    private readonly connectedGuideCapableSessions = new Map<string, Set<string>>()
     private inactivityTimer: NodeJS.Timeout | null = null
 
     constructor(
@@ -138,7 +148,9 @@ export class SyncEngine {
             store,
             io,
             this.eventPublisher,
-            (sessionId, updatedAt) => this.recordSessionActivity(sessionId, updatedAt)
+            (sessionId, updatedAt) => this.recordSessionActivity(sessionId, updatedAt),
+            (sessionId) => this.getSession(sessionId),
+            (sessionId) => this.hasConnectedGuideCapability(sessionId)
         )
         this.rpcGateway = new RpcGateway(io, rpcRegistry)
         this.reloadAll()
@@ -192,6 +204,38 @@ export class SyncEngine {
             return undefined
         }
         return session
+    }
+
+    recordConnectedSessionCapabilities(sessionId: string, socketId: string, metadata: unknown): void {
+        if (!metadataHasGuideCapability(metadata)) {
+            this.forgetConnectedSessionCapabilities(sessionId, socketId)
+            return
+        }
+        const sockets = this.connectedGuideCapableSessions.get(sessionId) ?? new Set<string>()
+        sockets.add(socketId)
+        this.connectedGuideCapableSessions.set(sessionId, sockets)
+    }
+
+    forgetConnectedSessionCapabilities(sessionId: string, socketId: string): void {
+        const sockets = this.connectedGuideCapableSessions.get(sessionId)
+        if (!sockets) return
+        sockets.delete(socketId)
+        if (sockets.size === 0) {
+            this.connectedGuideCapableSessions.delete(sessionId)
+        }
+    }
+
+    forgetSocketGuideCapabilities(socketId: string): void {
+        for (const [sessionId, sockets] of this.connectedGuideCapableSessions.entries()) {
+            sockets.delete(socketId)
+            if (sockets.size === 0) {
+                this.connectedGuideCapableSessions.delete(sessionId)
+            }
+        }
+    }
+
+    hasConnectedGuideCapability(sessionId: string): boolean {
+        return (this.connectedGuideCapableSessions.get(sessionId)?.size ?? 0) > 0
     }
 
     resolveSessionAccess(
@@ -369,6 +413,7 @@ export class SyncEngine {
             }>
             sentFrom?: 'telegram-bot' | 'webapp'
             scheduledAt?: number | null
+            deliveryMode?: 'queue' | 'guide'
         }
     ): Promise<void> {
         await this.messageService.sendMessage(sessionId, payload)
@@ -385,6 +430,10 @@ export class SyncEngine {
 
     sweepImmediateQueuedOnSessionEnd(sessionId: string, invokedAt: number): void {
         this.messageService.sweepImmediateQueuedOnSessionEnd(sessionId, invokedAt)
+    }
+
+    emitGuideConsumedFromLocalIds(sessionId: string, localIds: string[], invokedAt: number): void {
+        this.messageService.emitGuideConsumedFromLocalIds(sessionId, localIds, invokedAt)
     }
 
     async approvePermission(

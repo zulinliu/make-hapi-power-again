@@ -7,6 +7,7 @@ import { EMPTY_STATE } from '@/hooks/queries/useMessages'
 import { normalizeDecryptedMessage } from '@/chat/normalize'
 import type { DecryptedMessage } from '@/types/api'
 import { useCancelQueuedMessage } from '@/hooks/mutations/useCancelQueuedMessage'
+import { getGuideMessageStatus, isGuideDeliveryMessage } from '@/lib/message-delivery'
 import { useTranslation } from '@/lib/use-translation'
 import { useToast } from '@/lib/toast-context'
 import type { PendingSchedule } from '@/components/AssistantChat/ScheduleTimePicker'
@@ -44,6 +45,9 @@ function ClockIcon() {
  */
 export function sortQueuedMessages(msgs: DecryptedMessage[]): DecryptedMessage[] {
     return [...msgs].sort((a, b) => {
+        const aGuide = isGuideDeliveryMessage(a)
+        const bGuide = isGuideDeliveryMessage(b)
+        if (aGuide !== bGuide) return aGuide ? -1 : 1
         const aSched = a.scheduledAt != null
         const bSched = b.scheduledAt != null
         if (aSched !== bSched) return aSched ? 1 : -1
@@ -51,6 +55,16 @@ export function sortQueuedMessages(msgs: DecryptedMessage[]): DecryptedMessage[]
         if (aSched && bSched) return a.scheduledAt! - b.scheduledAt!
         return (a.createdAt ?? 0) - (b.createdAt ?? 0)
     })
+}
+
+/** @internal Exported for unit testing. */
+export function getQueuedMessageStatusLabelKey(msg: DecryptedMessage): string | null {
+    const guideStatus = getGuideMessageStatus(msg)
+    if (guideStatus === 'requested') return 'queuedMessages.guide.requested'
+    if (guideStatus === 'fallback-queued') return 'queuedMessages.guide.fallbackQueued'
+    if (guideStatus === 'consumed') return 'queuedMessages.guide.consumed'
+    if (guideStatus === 'failed') return 'queuedMessages.guide.failed'
+    return null
 }
 
 /**
@@ -190,20 +204,21 @@ export function QueuedMessagesBar({
     return (
         <div
             role="status"
-            aria-label={`${queued.length} queued message${queued.length === 1 ? '' : 's'} pending invocation`}
+            aria-label={t('queuedMessages.ariaLabel', { count: queued.length })}
             className="mx-auto w-full max-w-content mb-1"
         >
             <div className="px-3 py-2 text-sm text-[var(--app-fg-muted)]">
                 <div className="flex items-center gap-1.5 mb-1.5 text-xs font-medium text-[var(--app-hint)]">
                     <ClockIcon />
-                    <span>Queued</span>
+                    <span>{t('queuedMessages.title')}</span>
                 </div>
                 <ul
                     className="flex flex-col gap-1.5 max-h-32 sm:max-h-48 overflow-y-auto"
-                    aria-label="Queued messages"
+                    aria-label={t('queuedMessages.title')}
                 >
                     {queued.map((msg) => {
                         const text = getTextFromMessage(msg)
+                        const statusLabelKey = getQueuedMessageStatusLabelKey(msg)
                         const localId = msg.localId ?? msg.id
                         const isPending = cancelMutation.isPending && cancelMutation.variables?.localId === localId
                         const canCancel = computeCanCancel({ id: msg.id, localId: msg.localId, isPending })
@@ -274,15 +289,21 @@ export function QueuedMessagesBar({
                                             </span>
                                         </div>
                                     )}
+                                    {statusLabelKey ? (
+                                        <div className="mt-1 text-xs text-[var(--app-hint)]">
+                                            {t(statusLabelKey)}
+                                        </div>
+                                    ) : null}
                                 </div>
                                 <div className="flex shrink-0 items-center gap-1">
                                     <button
                                         type="button"
-                                        aria-label="Edit queued message"
+                                        aria-label={t('queuedMessages.edit')}
+                                        title={t('queuedMessages.edit')}
                                         disabled={!canEdit}
                                         onClick={handleEdit}
                                         onMouseDown={(e) => e.preventDefault()}
-                                        className="flex h-6 w-6 items-center justify-center rounded text-[var(--app-hint)] transition-colors hover:bg-[var(--app-border)] hover:text-[var(--app-fg)] disabled:cursor-not-allowed disabled:opacity-40"
+                                        className="flex h-11 w-11 items-center justify-center rounded text-[var(--app-hint)] transition-colors hover:bg-[var(--app-border)] hover:text-[var(--app-fg)] disabled:cursor-not-allowed disabled:opacity-40 sm:h-6 sm:w-6"
                                     >
                                         <svg
                                             viewBox="0 0 16 16"
@@ -301,11 +322,12 @@ export function QueuedMessagesBar({
                                     </button>
                                     <button
                                         type="button"
-                                        aria-label="Cancel queued message"
+                                        aria-label={t('queuedMessages.cancel')}
+                                        title={t('queuedMessages.cancel')}
                                         disabled={!canCancel}
                                         onClick={handleCancel}
                                         onMouseDown={(e) => e.preventDefault()}
-                                        className="flex h-6 w-6 items-center justify-center rounded text-[var(--app-hint)] transition-colors hover:bg-[var(--app-border)] hover:text-[var(--app-fg)] disabled:cursor-not-allowed disabled:opacity-40"
+                                        className="flex h-11 w-11 items-center justify-center rounded text-[var(--app-hint)] transition-colors hover:bg-[var(--app-border)] hover:text-[var(--app-fg)] disabled:cursor-not-allowed disabled:opacity-40 sm:h-6 sm:w-6"
                                     >
                                         <svg
                                             viewBox="0 0 16 16"

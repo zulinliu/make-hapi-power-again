@@ -143,7 +143,7 @@
 | npm 包名 | @hapipower/protocol | @hapi/protocol |
 | 环境变量 | HAPI_POWER_* | HAPI_* |
 | 数据目录 | ~/.hapi-power | ~/.hapi |
-| 官方仓库 | github.com/zulinliu/make-hapi-power-again | hapi.run |
+| 官方仓库 | github.com/zulinliu/make-hapi-power-again | 旧官网域名 |
 
 ## v0.4 运维踩坑记录
 
@@ -154,7 +154,7 @@
 **根因**:
 1. `http_proxy` 环境变量导致 axios 把 localhost 请求转发到代理，代理返回 502 → **修复: `NO_PROXY=localhost,127.0.0.1`**
 2. 测试时用 curl 预创建了空 metadata 的机器记录，hub 的 `getOrCreateMachine` 是 get-OR-create 不更新已有记录 → **修复: 清理 DB + 重启**
-3. `--workspace-root` 设置过窄（只包含项目目录）→ **修复: 改为 `/home/liuzl`**
+3. `--workspace-root` 设置过窄（只包含项目目录）→ **修复: 改为 `/home/tester`**
 
 **完整记录**: .planning/research/OPS-LESSONS.md
 **启动脚本**: scripts/start-runner.sh
@@ -540,3 +540,76 @@ Phase 19 (PWA 更新机制修复) 引入了三个叠加问题：
 
 ---
 *状态更新: 2026-06-07 (v0.17 Phase 35.6 质量门禁完成 — 文件管理器生产化专项已完成，feat/v0.17.0 已推送，待合并/发版)*
+
+## v0.18.0 已完成实施，待发布 — 五大特色功能品牌化重塑
+
+### 启动原因
+
+用户要求综合检索 Hapi Power 当前项目，对以下五类能力进行全新整体设计并完整实施：设置页 API 供应商、会话 Git 工具页、会话工作中的排队/引导双模式、上下文用量 UI 与不可用排查、以及大纲扩展为会话导出和总结提炼。
+
+### 本轮核心决策
+
+| 决策 | 结果 |
+|---|---|
+| 设计方式 | 使用 `$impeccable` 产品界面原则与 GSD 既有项目规划方式；不重建 `.planning/PROJECT.md`。 |
+| 实施边界 | 已从 docs-only 方案推进到 `shared`、`hub`、`cli`、`web` 端到端实施。 |
+| 品牌体系 | 五个特色功能命名为 模型星桥、引导光标、上下文脉冲、Git 脉络、会话织锦。 |
+| 五节点顺序 | 对外叙事固定为：接入 → 驾驶 → 观测 → 追踪 → 沉淀。 |
+| 引导模式原则 | 默认排队；引导必须中断当前 turn 并优先发送，但不得清空普通 queued messages；失败降级为排队。 |
+| 上下文诊断 | tsintergy/GLM-5.1 direct `/v1/messages` 实测返回 usage，因此不可用问题需继续排查 stream-json、normalizer、context window、分页等路径。 |
+| 大纲升级 | 大纲从导航面板升级为 Session Loom，会话资产工作台，支持导出、提炼、下载、i18n、iOS PWA。 |
+
+### 规划文档
+
+- `.planning/phases/37-v0.18.0-feature-redesign/37-CONTEXT.md`
+- `.planning/phases/37-v0.18.0-feature-redesign/37-BRAND-SYSTEM.md`
+- `.planning/phases/37-v0.18.0-feature-redesign/37-UX-SHAPE.md`
+- `.planning/phases/37-v0.18.0-feature-redesign/37-TECH-DESIGN.md`
+- `.planning/phases/37-v0.18.0-feature-redesign/37-REQUIREMENTS.md`
+- `.planning/phases/37-v0.18.0-feature-redesign/37-ROADMAP.md`
+- `.planning/phases/37-v0.18.0-feature-redesign/37-README-BRAND-COPY.md`
+- `.planning/research/2026-06-08-feature-redesign-references.md`
+- `.planning/phases/37-v0.18.0-feature-redesign/37-DEEP-REVIEW.md`
+- `.planning/phases/37-v0.18.0-feature-redesign/37-BRAND-CONTRACT.md`
+- `.planning/phases/37-v0.18.0-feature-redesign/37-PROTOCOL-ADDENDUM.md`
+- `.planning/phases/37-v0.18.0-feature-redesign/37-SECURITY-ADDENDUM.md`
+- `.planning/phases/37-v0.18.0-feature-redesign/37-UX-ACCEPTANCE-MATRIX.md`
+- `.planning/phases/37-v0.18.0-feature-redesign/38-MODEL-NEXUS-IMPLEMENTATION.md`
+- `.planning/phases/37-v0.18.0-feature-redesign/39-GUIDE-BEAM-CONTEXT-PULSE-IMPLEMENTATION.md`
+- `.planning/phases/37-v0.18.0-feature-redesign/40-GIT-ATLAS-IMPLEMENTATION.md`
+- `.planning/phases/37-v0.18.0-feature-redesign/41-SESSION-LOOM-IMPLEMENTATION.md`
+- `.planning/phases/37-v0.18.0-feature-redesign/42-BRAND-INTEGRATION-IMPLEMENTATION.md`
+- `.planning/phases/37-v0.18.0-feature-redesign/43-RELEASE-READINESS-AUDIT.md`
+- `.planning/phases/37-v0.18.0-feature-redesign/44-VISUAL-PWA-ACCEPTANCE.md`
+- `.planning/phases/37-v0.18.0-feature-redesign/45-FINAL-COMPLETION-AUDIT.md`
+- `.planning/phases/37-v0.18.0-feature-redesign/46-TEST-STABILITY-AUDIT.md`
+
+### 当前状态
+
+- [x] 37-00: 代码检索、外部参考、品牌系统、UX Shape、技术设计、需求清单、README 文案草稿全部完成。
+- [x] 37-01: 按评审结论补充前置门禁：深度评审、品牌契约、协议补充、安全补充、UX 验收矩阵。
+- [x] 38: 模型星桥 / Model Nexus，Provider namespace、health/capability/model cache、SSRF 防护、key reveal、Agent 分配矩阵、Wizard、i18n 与测试完成。
+- [x] 39: 引导光标 / Guide Beam 与上下文脉冲 / Context Pulse，deliveryMode、capability handshake、isolated guide queue、fallback、`messages-consumed` 时序、上下文阈值与 i18n 完成。
+- [x] 40: Git 脉络 / Git Atlas，结构化 Git dashboard、Diff preview、Commit Basket、Sync Center、selected paths、危险操作服务端确认与测试完成。
+- [x] 41: 会话织锦 / Session Loom，服务端全量 outline、export preview、Markdown 导出、redaction、本地提炼、资产下载/复制/share fallback 与 i18n 完成。
+- [x] 42: 品牌整合，README、README.zh-CN、PRODUCT、截图计划、规划状态和品牌自审文档同步完成。
+- [x] 43: 发布准备审计，补齐 `CHANGELOG.md` v0.18.0 待发布说明，并通过全量 typecheck、test、build、Git 规范和敏感信息扫描。
+- [x] 44: 视觉截图与浏览器级 PWA 验收，补齐五张 signature moment 截图、README 截图引用、移动端触控目标和 Playwright 验收脚本；真实 iOS 设备仍需人工验收。
+- [x] 45: 最终完成审计，重新通过全量 typecheck、test、build、截图脚本、Git 规范、敏感信息扫描和 whitespace 检查；修正 `CHANGELOG.md` 截图待办口径；真实 iOS 设备、tag 和 GitHub Release 仍待发布收尾。
+- [x] 46: 测试稳定性收尾，将 Hub ready 通知节流测试改为可控时间推进，并重新通过全量 typecheck、test、build、Git 规范、敏感信息扫描和 whitespace 检查。
+- [ ] 发布收尾：尚未创建 v0.18.0 tag 或 GitHub Release；发布前仍需真实 iOS PWA 人工验收和推送流程。
+
+---
+*状态更新: 2026-06-08 (v0.18.0 五大特色功能品牌化重塑设计完成，进入实施阶段)*
+
+*状态更新: 2026-06-08 (v0.18.0 Phase 37.1 评审后协议/安全/UX/品牌门禁补充完成)*
+
+*状态更新: 2026-06-09 (v0.18.0 Phase 38~42 实施与品牌整合完成，待发布验收与发版)*
+
+*状态更新: 2026-06-09 (v0.18.0 Phase 43 发布准备审计完成，待截图、iOS PWA 实机验收与发版)*
+
+*状态更新: 2026-06-09 (v0.18.0 Phase 44 截图与浏览器级 PWA 验收完成，真实 iOS 设备仍待人工验收)*
+
+*状态更新: 2026-06-09 (v0.18.0 Phase 45 最终完成审计通过，进入真实 iOS 验收与发版收尾)*
+
+*状态更新: 2026-06-09 (v0.18.0 Phase 46 测试稳定性收尾完成，发布前门禁保持通过)*

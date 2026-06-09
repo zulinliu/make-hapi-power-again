@@ -10,12 +10,12 @@ import type {
     Session,
     SlashCommand
 } from '@/types/api'
+import type { MessageDeliveryMode } from '@/types/api'
 import type { ChatBlock, NormalizedMessage } from '@/chat/types'
 import type { Suggestion } from '@/hooks/useActiveSuggestions'
 import { normalizeDecryptedMessage } from '@/chat/normalize'
 import { reduceChatBlocks } from '@/chat/reducer'
 import { reconcileChatBlocks } from '@/chat/reconcile'
-import { buildConversationOutline } from '@/chat/outline'
 import { buildVisibleChatBlocks, isToolGroupBlock, type ToolGroupBlock } from '@/chat/toolGroups'
 import { isQueuedForInvocation, mergeMessages } from '@/lib/messages'
 import { HappyComposer } from '@/components/AssistantChat/HappyComposer'
@@ -37,6 +37,7 @@ import { useOpencodeModels } from '@/hooks/queries/useOpencodeModels'
 import { useFlavorModels } from '@/hooks/queries/useFlavorModels'
 import { getClaudeComposerModelOptions } from '@/components/AssistantChat/claudeModelOptions'
 import { isRemoteTerminalSupported } from '@/utils/terminalSupport'
+import { hasGuideInterruptCapability } from '@/lib/session-capabilities'
 
 /**
  * Returns whether a PendingSchedule should trigger an auto-clear timer.
@@ -64,19 +65,6 @@ export function buildGoalStateMessages(
     return eligiblePendingMessages.length > 0
         ? mergeMessages(eligibleMessages, eligiblePendingMessages)
         : eligibleMessages
-}
-
-function getOutlineTitle(session: Session): string {
-    if (session.metadata?.name) {
-        return session.metadata.name
-    }
-    if (session.metadata?.summary?.text) {
-        return session.metadata.summary.text
-    }
-    if (session.metadata?.path) {
-        return session.metadata.path
-    }
-    return session.id.slice(0, 8)
 }
 
 function hasAbortableAgentRun(blocks: readonly ChatBlock[]): boolean {
@@ -115,26 +103,23 @@ export function SessionChat(props: {
     // pre-mutation guards (no-api / no-session / pending) rejected the call OR async
     // inactive-session resume failed. Composer state that should only be cleared on
     // actual send (pendingSchedule) must await this — see handleSend below.
-    onSend: (text: string, attachments?: AttachmentMetadata[], scheduledAt?: number | null) => Promise<boolean>
+    onSend: (text: string, attachments?: AttachmentMetadata[], scheduledAt?: number | null, deliveryMode?: MessageDeliveryMode) => Promise<boolean>
     onFlushPending: () => void
     onAtBottomChange: (atBottom: boolean) => void
     onRetryMessage?: (localId: string) => void
     autocompleteSuggestions?: (query: string) => Promise<Suggestion[]>
     availableSlashCommands?: readonly SlashCommand[]
-    outlineOpen?: boolean
-    onOutlineOpenChange?: (open: boolean | ((prev: boolean) => boolean)) => void
 }) {
     const { haptic } = usePlatform()
     const { t } = useTranslation()
     const navigate = useNavigate()
     const sessionInactive = !props.session.active
     const terminalSupported = isRemoteTerminalSupported(props.session.metadata)
+    const guideInterruptSupported = hasGuideInterruptCapability(props.session.metadata)
     const normalizedCacheRef = useRef<Map<string, { source: DecryptedMessage; normalized: NormalizedMessage | null }>>(new Map())
     const blocksByIdRef = useRef<Map<string, ChatBlock>>(new Map())
     const visibleGroupsRef = useRef<ToolGroupBlock[]>([])
     const [forceScrollToken, setForceScrollToken] = useState(0)
-    const outlineOpen = props.outlineOpen ?? false
-    const setOutlineOpen = props.onOutlineOpenChange ?? (() => {})
     const { uploadBinaryFile } = useBinaryUpload()
     const agentFlavor = props.session.metadata?.flavor ?? null
     const controlledByUser = props.session.agentState?.controlledByUser === true
@@ -324,16 +309,6 @@ export function SessionChat(props: {
         visibleGroupsRef.current = visibleBlocks.filter(isToolGroupBlock)
     }, [visibleBlocks])
 
-    const outlineItems = useMemo(
-        () => buildConversationOutline(reconciled.blocks),
-        [reconciled.blocks]
-    )
-
-    const outlineTitle = useMemo(
-        () => getOutlineTitle(props.session),
-        [props.session]
-    )
-
     // Permission mode change handler
     const handlePermissionModeChange = useCallback(async (mode: PermissionMode) => {
         try {
@@ -417,6 +392,7 @@ export function SessionChat(props: {
     // absolute epoch-ms using Date.now() at that moment (send-time base for presets).
     const [pendingSchedule, setPendingSchedule] = useState<PendingSchedule | null>(null)
     const pendingScheduleRef = useRef<PendingSchedule | null>(null)
+    const deliveryModeRef = useRef<MessageDeliveryMode>('queue')
     // Keep render ref in sync so onNew can snapshot at send time
     pendingScheduleRef.current = pendingSchedule
 
@@ -438,8 +414,13 @@ export function SessionChat(props: {
         return () => clearTimeout(timer)
     }, [pendingSchedule])
 
-    const handleSend = useCallback(async (text: string, attachments?: AttachmentMetadata[], scheduledAt?: number | null) => {
-        const accepted = await props.onSend(text, attachments, scheduledAt)
+    const handleSend = useCallback(async (
+        text: string,
+        attachments?: AttachmentMetadata[],
+        scheduledAt?: number | null,
+        deliveryMode?: MessageDeliveryMode
+    ) => {
+        const accepted = await props.onSend(text, attachments, scheduledAt, deliveryMode)
         if (!accepted) return
         // Clear pendingSchedule only after the mutation is actually accepted —
         // covers both pre-mutation guards AND async inactive-session resume
@@ -465,7 +446,8 @@ export function SessionChat(props: {
         onAbort: handleAbort,
         attachmentAdapter,
         allowSendWhenInactive: true,
-        pendingScheduleRef
+        pendingScheduleRef,
+        deliveryModeRef
     })
 
     return (
@@ -517,10 +499,6 @@ export function SessionChat(props: {
                         normalizedMessagesCount={normalizedMessages.length}
                         messagesVersion={props.messagesVersion}
                         forceScrollToken={forceScrollToken}
-                        outlineOpen={outlineOpen}
-                        outlineTitle={outlineTitle}
-                        outlineItems={outlineItems}
-                        onOutlineOpenChange={setOutlineOpen}
                     />
 
                     {codexCollaborationModeSupported && codexModelsState.error ? (
@@ -549,6 +527,7 @@ export function SessionChat(props: {
                         pendingSchedule={pendingSchedule}
                         onSchedule={setPendingSchedule}
                         onClearSchedule={() => setPendingSchedule(null)}
+                        deliveryModeRef={deliveryModeRef}
                         permissionMode={props.session.permissionMode}
                         collaborationMode={codexCollaborationModeSupported ? props.session.collaborationMode : undefined}
                         threadGoal={reduced.latestGoal}
@@ -598,6 +577,7 @@ export function SessionChat(props: {
                         onSwitchToRemote={handleSwitchToRemote}
                         onTerminal={props.session.active && terminalSupported ? handleViewTerminal : undefined}
                         terminalUnsupported={props.session.active && !terminalSupported}
+                        guideInterruptSupported={guideInterruptSupported}
                         autocompleteSuggestions={props.autocompleteSuggestions}
                     />
                 </div>

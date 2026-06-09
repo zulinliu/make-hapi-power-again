@@ -16,6 +16,8 @@
 
 <p align="center">
   <a href="#why-hapi-power">Why</a> ·
+  <a href="#the-hapi-power-loop">Loop</a> ·
+  <a href="#v0180-five-modules">v0.18</a> ·
   <a href="#features">Features</a> ·
   <a href="#install">Install</a> ·
   <a href="#quick-start">Quick Start</a> ·
@@ -29,11 +31,41 @@
 
 Most AI coding tools lock you into one agent, one terminal, one machine. Hapi Power gives you a unified workbench where you can switch between Claude Code, Codex, Gemini, and more — anytime, anywhere, on any device.
 
+Hapi Power turns agent chats into a controllable engineering loop: connect trusted models, steer agents while they run, watch context risk, trace every code change, and preserve the session as project memory.
+
 **Code on your phone.** Review AI agent changes with a swipe, monitor terminal output, and approve or reject file edits — all from your phone. No laptop needed.
 
-**A complete development toolkit in the browser.** Visual Git management, full file operations, Monaco code editor, and custom model provider support with encrypted API keys. Everything you need to code with AI agents, in one place.
+**A complete development toolkit in the browser.** Model Nexus, Guide Beam, Context Pulse, Git Atlas, Session Loom, full file operations, Monaco code editor, and terminal access. Everything you need to code with AI agents, in one place.
 
 **Deploy anywhere in seconds.** Single binary, zero dependencies. Self-host on any server, or run locally with one command.
+
+---
+
+## The Hapi Power Loop
+
+1. **Connect**: Model Nexus connects trusted model providers, checks health and capabilities, and routes each agent to the right model.
+2. **Drive**: Guide Beam lets you correct course while an agent is still working, without dropping the normal message queue.
+3. **Observe**: Context Pulse shows reliability risk at a glance with `Context: 40%` and clear diagnostics when usage is unavailable.
+4. **Trace**: Git Atlas maps branch state, agent changes, diffs, commit basket, and remote sync risk in one Git workspace.
+5. **Preserve**: Session Loom turns conversations into Markdown exports, decision records, drift checks, and reusable project memory.
+
+---
+
+## v0.18.0 Five Modules
+
+v0.18.0 is organized around five product modules. Each module has a clear entry point, a concrete output, and a safe fallback when the connected agent or provider cannot support the advanced path.
+
+| Step | Module | Entry | What it does |
+|------|--------|-------|--------------|
+| Connect | **Model Nexus** | Settings -> Model Nexus | Adds provider governance, health checks, model discovery, capability cache, encrypted keys, and default agent route assignment. |
+| Drive | **Guide Beam** | Session composer while the agent is thinking | Sends urgent corrections as isolated guide messages when supported, otherwise falls back to the normal queue without dropping text. |
+| Observe | **Context Pulse** | Session status bar | Shows `Context: n%`, token/cache details, source diagnostics, and unavailable reasons instead of a silent zero or vague token string. |
+| Trace | **Git Atlas** | Session -> Git | Combines branch state, change map, diff preview, commit basket, sync center, and dangerous-operation confirmations in one Git page. |
+| Preserve | **Session Loom** | Session -> Loom | Builds server-side outlines, Markdown exports, background design synthesis, and downloadable session assets. |
+
+Session Loom has two separate output paths: **Export** creates deterministic Markdown from stored conversation history, while **Synthesis** calls the current session agent's configured provider API model in the background to produce a reusable Design Plan Markdown file. Synthesis does not insert a message into the active chat.
+
+See [v0.18.0 Five Modules](./docs/v0.18-five-modules.md) for detailed behavior, safety boundaries, and implementation references.
 
 ---
 
@@ -53,11 +85,11 @@ Most AI coding tools lock you into one agent, one terminal, one machine. Hapi Po
     <td><img src="docs/assets/screenshot-new-session.png" alt="Multi-agent selection" width="360"></td>
   </tr>
   <tr>
-    <td align="center"><b>Settings & Model Providers</b></td>
+    <td align="center"><b>Settings & Model Nexus</b></td>
     <td align="center"><b>Dark Mode</b></td>
   </tr>
   <tr>
-    <td><img src="docs/assets/screenshot-settings.png" alt="Provider configuration" width="360"></td>
+    <td><img src="docs/assets/screenshot-settings.png" alt="Model Nexus provider configuration" width="360"></td>
     <td><img src="docs/assets/screenshot-dark.png" alt="Dark mode" width="360"></td>
   </tr>
 </table>
@@ -68,17 +100,43 @@ Most AI coding tools lock you into one agent, one terminal, one machine. Hapi Po
   <img src="docs/assets/screenshot-mobile-sessions.png" alt="Mobile: Sessions" height="360">
 </p>
 
+<table align="center">
+  <tr>
+    <td align="center"><b>Connect: Model Nexus</b></td>
+    <td align="center"><b>Drive: Guide Beam</b></td>
+  </tr>
+  <tr>
+    <td><img src="docs/assets/screenshot-model-nexus.png" alt="Model Nexus health, capability, and agent assignment matrix" width="360"></td>
+    <td><img src="docs/assets/screenshot-guide-beam.png" alt="Guide Beam mobile composer with queue and guide-now modes" width="240"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Observe: Context Pulse</b></td>
+    <td align="center"><b>Trace: Git Atlas</b></td>
+  </tr>
+  <tr>
+    <td><img src="docs/assets/screenshot-context-pulse.png" alt="Context Pulse showing Context 40% with usage diagnostics" width="360"></td>
+    <td><img src="docs/assets/screenshot-git-atlas.png" alt="Git Atlas branch hero, change map, diff preview, basket, and sync center" width="360"></td>
+  </tr>
+</table>
+
+<p align="center">
+  <b>Preserve: Session Loom</b><br>
+  <img src="docs/assets/screenshot-session-loom.png" alt="Session Loom mobile export preview with redaction status" height="360">
+</p>
+
 ---
 
 ## Features
 
-**Multi-Agent Orchestration** — Run Claude Code, OpenAI Codex, Google Gemini, Cursor Agent, OpenCode, and Kimi side by side. Switch agents per session, each with its own permission modes — from read-only to autopilot.
+**Model Nexus** — Connect Anthropic, OpenAI, Gemini, and custom-compatible providers. Detect models, latency, usage support, and context limits, then assign default model routes per agent.
 
-**Change Review & Approval** — Every AI file change grouped by conversation turn. Review diffs file by file, approve or reject individually or in bulk.
+**Guide Beam** — While an agent is working, new messages queue by default. Switch to Guide now to send a correction immediately without losing the conversation or pending queue.
 
-**Visual Git + File Management** — Commit, diff, branch, push, pull, and clone from the browser. Browse directory trees, create, rename, move, copy, upload, download, and search files — all via an intuitive context menu.
+**Context Pulse** — Replace noisy token strings with a clear `Context: 40%` signal, threshold colors, source details, and unavailable-state explanations.
 
-**Custom Model Providers** — Configure third-party API endpoints, auto-discover available models, and bind providers per session. API keys stored with AES-256-GCM encryption.
+**Git Atlas** — See branch state, agent changes, diffs, commit basket, and remote sync risk in one Git map. Review, commit, and sync from desktop or iOS PWA.
+
+**Session Loom** — Turn the Outline panel into a standalone conversation asset workbench. Export deterministic Markdown transcripts, filter noise, and run background design synthesis through the current session agent's provider route.
 
 **Mobile-First PWA** — Responsive mobile UI with tap and long-press gestures for change review, read-only terminal, and iOS-optimized PWA experience. Review and approve AI agent changes from your phone, anytime, anywhere.
 
@@ -89,13 +147,20 @@ Most AI coding tools lock you into one agent, one terminal, one machine. Hapi Po
 
 ### AI Workflow
 
-**Change Review** — File changes grouped by agent conversation turn. Review diffs file by file, approve or reject individually or in bulk. Context window token usage bar shows how much context your agent has consumed (normal, warning, critical).
+**Guide Beam** — Composer delivery modes distinguish normal queued messages from immediate guidance. Unsupported or older agents fall back to the queue instead of losing the message.
 
-**Context Monitoring** — Real-time token usage bar with color-coded status (normal, warning, critical) so you know when to compact or start a fresh session.
+**Context Pulse** — Real-time context usage uses the consumed percentage, not remaining tokens. Popovers show source, used/max, model, cache details, and unavailable reasons.
+
+**Session Loom** — Server-side outlines and exports read the full session history, apply secret redaction by default, and provide copy, download, and share fallbacks.
+Export is deterministic Markdown generation; synthesis is a separate background model call that produces a Design Plan Markdown asset without interrupting the active conversation.
 
 ### Platform
 
-**Custom Model Providers** — Configure third-party API endpoints, auto-discover models via `/v1/models`, and bind providers per session or agent type. AES-256-GCM encrypted key storage.
+**Model Nexus** — Configure third-party API endpoints, auto-discover models via safe health checks, cache capabilities, and bind providers per session or agent type. AES-256-GCM encrypted key storage.
+
+**Git Atlas** — Structured Git dashboard, diff preview, commit basket, sync center, selected-path commits, and server-side confirmation for dangerous operations.
+
+**File Management** — Browse directory trees, create, rename, move, copy, upload, download, search, and edit files with Monaco in the browser.
 
 **Permission Modes** — Each agent supports its own permission modes. Claude: default, acceptEdits, bypassPermissions, plan. Codex/Gemini/Kimi: default, read-only, safe-yolo, yolo. Cursor: default, plan, ask, yolo. OpenCode: default, plan, yolo.
 
@@ -231,14 +296,14 @@ bun run build:single-exe
 | `ANTHROPIC_API_KEY` | Claude API key | — |
 | `OPENAI_API_KEY` | OpenAI API key (for Codex, Whisper) | — |
 
-### Custom Model Providers
+### Model Nexus
 
-Configure third-party API providers in Settings → API Providers:
+Configure third-party API providers in Settings → Model Nexus:
 
-1. Add a provider with name, base URL, and API key
-2. Click "Discover Models" to auto-detect available models
-3. Assign the provider to an agent type (Claude, Codex, Gemini, etc.)
-4. Select the provider when creating a new session
+1. Add a provider with namespace, protocol, base URL, and API key
+2. Run health and capability detection to discover models, usage support, context limits, and latency
+3. Assign the provider and default model to an agent type (Claude, Codex, Gemini, etc.)
+4. Select the provider route when creating or controlling a session
 
 API keys are encrypted with AES-256-GCM and never stored in plaintext.
 
@@ -288,6 +353,7 @@ Three-layer monorepo connected via Socket.IO and REST/SSE:
 - [CLI Reference](./cli/README.md) — commands, configuration, agent setup
 - [Hub API Reference](./hub/README.md) — REST endpoints, Socket.IO events
 - [Web Architecture](./web/README.md) — routes, components, data flow
+- [v0.18.0 Five Modules](./docs/v0.18-five-modules.md) — Model Nexus, Guide Beam, Context Pulse, Git Atlas, and Session Loom
 - [AGENTS.md](./AGENTS.md) — development guide for contributors and AI agents
 
 ---

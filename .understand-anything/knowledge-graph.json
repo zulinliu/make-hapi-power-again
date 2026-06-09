@@ -3519,7 +3519,7 @@
       "type": "file",
       "name": "systemPrompt.ts",
       "filePath": "hapi/cli/src/claude/utils/systemPrompt.ts",
-      "summary": "生成注入到 Claude 会话中的系统提示词，包含自动设置聊天标题、展示图片和可选的 Co-Authored-By 署名指令。",
+      "summary": "生成注入到 Claude 会话中的系统提示词，包含自动设置聊天标题和展示图片指令；项目 Git 规范禁止第三方署名。",
       "tags": [
         "system-prompt",
         "config",
@@ -16887,7 +16887,7 @@
       "type": "pipeline",
       "name": "webapp.yml",
       "filePath": "hapi/.github/workflows/webapp.yml",
-      "summary": "当 web/ 目录有变更并推送到 main 分支时，自动构建 Web 应用并部署到 GitHub Pages，使用自定义域名 app.hapi.run。",
+      "summary": "当 web/ 目录有变更并手动触发部署时，自动构建 Web 应用并部署到 GitHub Pages，发布域名使用占位配置。",
       "tags": [
         "ci-cd",
         "deployment",

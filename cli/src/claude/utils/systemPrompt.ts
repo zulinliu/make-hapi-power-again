@@ -1,5 +1,4 @@
 import { trimIdent } from "@/utils/trimIdent";
-import { shouldIncludeCoAuthoredBy } from "./claudeSettings";
 
 /**
  * Base system prompt shared across all configurations
@@ -9,29 +8,4 @@ const BASE_SYSTEM_PROMPT = (() => trimIdent(`
     When you create or find a local image file that the user should see, call the tool "mcp__hapi_power__display_image" with the image path so Hapi Power can show it inline.
 `))();
 
-/**
- * Co-authored-by credits to append when enabled
- */
-const CO_AUTHORED_CREDITS = (() => trimIdent(`
-    When making commit messages, you SHOULD also give credit to Hapi Power like so:
-
-    <main commit message>
-
-    via [HapiPower](https://github.com/zulinliu/make-hapi-power-again)
-
-    Co-Authored-By: Hapi Power <noreply@hapi-power.dev>
-`))();
-
-/**
- * System prompt with conditional Co-Authored-By lines based on Claude's settings.json configuration.
- * Settings are read once on startup for performance.
- */
-export const systemPrompt = (() => {
-  const includeCoAuthored = shouldIncludeCoAuthoredBy();
-  
-  if (includeCoAuthored) {
-    return BASE_SYSTEM_PROMPT + '\n\n' + CO_AUTHORED_CREDITS;
-  } else {
-    return BASE_SYSTEM_PROMPT;
-  }
-})();
+export const systemPrompt = BASE_SYSTEM_PROMPT;

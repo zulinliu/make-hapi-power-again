@@ -4,6 +4,13 @@ import { randomUUID } from 'node:crypto'
 import type { StoredMessage } from './types'
 import { safeJsonParse } from './json'
 
+type GuideMessageStatus = 'requested' | 'fallback-queued' | 'consumed' | 'failed'
+
+type GuideStatusUpdate = {
+    status: GuideMessageStatus
+    fallbackReason?: string
+}
+
 type DbMessageRow = {
     id: string
     session_id: string
@@ -25,6 +32,32 @@ function toStoredMessage(row: DbMessageRow): StoredMessage {
         localId: row.local_id,
         invokedAt: row.invoked_at ?? null,
         scheduledAt: row.scheduled_at ?? null
+    }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+    return value !== null && typeof value === 'object' && !Array.isArray(value)
+}
+
+function withGuideStatus(content: unknown, update: GuideStatusUpdate): unknown | null {
+    if (!isRecord(content)) return null
+
+    const meta = isRecord(content.meta) ? content.meta : null
+    if (!meta || meta.deliveryMode !== 'guide') return null
+
+    const guide = isRecord(meta.guide) ? meta.guide : null
+    if (!guide) return null
+
+    return {
+        ...content,
+        meta: {
+            ...meta,
+            guide: {
+                ...guide,
+                status: update.status,
+                ...(update.fallbackReason ? { fallbackReason: update.fallbackReason } : {})
+            }
+        }
     }
 }
 
@@ -375,6 +408,65 @@ export function lookupQueuedMessage(
     }
 
     return { status: 'queued' as const, localId: row.local_id, resolvedId: row.id, scheduledAt: row.scheduled_at }
+}
+
+export function getMessagesByLocalIds(
+    db: Database,
+    sessionId: string,
+    localIds: string[]
+): StoredMessage[] {
+    if (localIds.length === 0) return []
+
+    const placeholders = localIds.map(() => '?').join(', ')
+    const rows = db.prepare(`
+        SELECT * FROM messages
+        WHERE session_id = ?
+          AND local_id IN (${placeholders})
+        ORDER BY seq ASC
+    `).all(sessionId, ...localIds) as DbMessageRow[]
+
+    return rows.map(toStoredMessage)
+}
+
+export function updateGuideStatusByLocalIds(
+    db: Database,
+    sessionId: string,
+    localIds: string[],
+    update: GuideStatusUpdate,
+    options?: { onlyUninvoked?: boolean }
+): StoredMessage[] {
+    const uniqueLocalIds = Array.from(new Set(localIds.filter((id) => id.length > 0)))
+    if (uniqueLocalIds.length === 0) return []
+
+    const placeholders = uniqueLocalIds.map(() => '?').join(', ')
+    return db.transaction(() => {
+        const rows = db.prepare(`
+            SELECT * FROM messages
+            WHERE session_id = ?
+              AND local_id IN (${placeholders})
+            ORDER BY seq ASC
+        `).all(sessionId, ...uniqueLocalIds) as DbMessageRow[]
+
+        const updatedRows: StoredMessage[] = []
+        const statement = db.prepare('UPDATE messages SET content = ? WHERE id = ?')
+        for (const row of rows) {
+            if (options?.onlyUninvoked === true && row.invoked_at !== null) {
+                continue
+            }
+            const content = safeJsonParse(row.content)
+            const updatedContent = withGuideStatus(content, update)
+            if (updatedContent === null) {
+                continue
+            }
+            const contentJson = JSON.stringify(updatedContent)
+            statement.run(contentJson, row.id)
+            updatedRows.push(toStoredMessage({
+                ...row,
+                content: contentJson
+            }))
+        }
+        return updatedRows
+    })()
 }
 
 /** Delete a queued (invoked_at IS NULL) message by id or local_id.

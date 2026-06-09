@@ -23,12 +23,12 @@
  * - DB_PATH: SQLite database path (default: {HAPI_POWER_HOME}/hapi-power.db)
  */
 
-import { existsSync, mkdirSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 import { getOrCreateCliApiToken } from './config/cliApiToken'
 import { getSettingsFile } from './config/settings'
 import { loadServerSettings, type ServerSettings, type ServerSettingsResult } from './config/serverSettings'
+import { ensurePrivateDirSync } from '@/utils/privateFiles'
 
 export type ConfigSource = 'env' | 'file' | 'default'
 
@@ -126,9 +126,7 @@ class Configuration {
         } as ConfigSources
 
         // Ensure data directory exists
-        if (!existsSync(this.dataDir)) {
-            mkdirSync(this.dataDir, { recursive: true })
-        }
+        ensurePrivateDirSync(this.dataDir)
     }
 
     /** Create configuration asynchronously */
@@ -139,9 +137,7 @@ class Configuration {
             : join(homedir(), '.hapi-power')
 
         // Ensure data directory exists before loading settings
-        if (!existsSync(dataDir)) {
-            mkdirSync(dataDir, { recursive: true })
-        }
+        ensurePrivateDirSync(dataDir)
 
         // 2. Determine DB path (env only - not persisted)
         const dbPath = process.env.DB_PATH

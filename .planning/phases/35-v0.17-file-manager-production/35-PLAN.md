@@ -6,7 +6,6 @@ created: 2026-06-06
 status: completed
 autonomous: true
 ---
-
 # Plan: v0.17.0 全功能文件管理器生产化
 
 ## 总体策略
@@ -197,4 +196,3 @@ git diff --check
 3. 提交信息使用中文，禁止 Co-Authored-By 和第三方品牌残留。
 4. 如发现 P0 架构阻塞，先修架构，不做 UI 补丁掩盖。
 5. 用户明确反馈的问题优先级高于历史规划中的“已完成”标记。
-

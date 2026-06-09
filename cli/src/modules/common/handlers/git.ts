@@ -72,6 +72,7 @@ interface GitCommitRequest {
     cwd?: string
     message: string
     all?: boolean
+    paths?: string[]
     timeout?: number
 }
 
@@ -649,6 +650,7 @@ async function sanitizeCloneOriginRemote(destinationPath: string, url: string): 
 
 const GIT_SAFE_NAME_RE = /^[A-Za-z0-9._/-]+$/
 const GIT_SAFE_REF_RE = /^[A-Za-z0-9._/@{}~^:-]+$/
+const GIT_PATHSPEC_MAGIC_RE = /[*?[\]{}]/
 
 function validateGitName(value: string | undefined, label: string): string | null {
     if (!value) return null
@@ -663,6 +665,30 @@ function validateGitRef(value: string | undefined, label: string): string | null
     if (value.startsWith('-') || value.includes('\0') || /\s/.test(value) || !GIT_SAFE_REF_RE.test(value)) {
         return `Invalid ${label}`
     }
+    return null
+}
+
+function validateGitPathspecs(paths: string[] | undefined, workingDirectory: string): string | null {
+    if (!paths) return null
+    if (paths.length === 0) return 'No paths specified'
+    if (paths.length > 500) return 'Too many paths specified'
+
+    for (const path of paths) {
+        if (!path || path.length > 4096 || path.includes('\0')) {
+            return `Invalid path: ${path}`
+        }
+        if (path.startsWith('-') || isAbsolute(path) || path.split(/[\\/]+/).some((part) => part === '..')) {
+            return `Invalid path: ${path}`
+        }
+        if (path.startsWith(':(') || GIT_PATHSPEC_MAGIC_RE.test(path)) {
+            return `Invalid path: ${path}`
+        }
+        const validation = validatePath(path, workingDirectory)
+        if (!validation.valid) {
+            return validation.error ?? `Invalid path: ${path}`
+        }
+    }
+
     return null
 }
 
@@ -1452,6 +1478,13 @@ export function registerGitHandlers(
         const resolved = resolveCwd(data.cwd, workingDirectory)
         if (resolved.error) return rpcError(resolved.error)
         if (!data.message) return rpcError('Commit message required')
+        const pathError = validateGitPathspecs(data.paths, workingDirectory)
+        if (pathError) return rpcError(pathError)
+        if (data.paths?.length) {
+            const addResult = await runGitCommand(['--literal-pathspecs', 'add', '--', ...data.paths], resolved.cwd, data.timeout)
+            if (!addResult.success) return addResult
+            return await runGitCommand(['--literal-pathspecs', 'commit', '-m', data.message, '--', ...data.paths], resolved.cwd, data.timeout)
+        }
         const args = ['commit', '-m', data.message]
         if (data.all) args.push('-a')
         return await runGitCommand(args, resolved.cwd, data.timeout)
@@ -1463,10 +1496,9 @@ export function registerGitHandlers(
         if (resolved.error) return rpcError(resolved.error)
         if (!data.paths?.length) return rpcError('No paths specified')
         // Validate paths don't start with - to prevent argument injection
-        for (const p of data.paths) {
-            if (p.startsWith('-')) return rpcError(`Invalid path: ${p}`)
-        }
-        return await runGitCommand(['add', '--', ...data.paths], resolved.cwd, data.timeout)
+        const pathError = validateGitPathspecs(data.paths, workingDirectory)
+        if (pathError) return rpcError(pathError)
+        return await runGitCommand(['--literal-pathspecs', 'add', '--', ...data.paths], resolved.cwd, data.timeout)
     })
 
     // Git Auto Commit (add + commit in one step, for GitInternalAPI)
@@ -1478,10 +1510,9 @@ export function registerGitHandlers(
         // Add specific paths or all tracked changes
         if (data.paths?.length) {
             // Validate paths don't start with - to prevent argument injection
-            for (const p of data.paths) {
-                if (p.startsWith('-')) return rpcError(`Invalid path: ${p}`)
-            }
-            const addResult = await runGitCommand(['add', '--', ...data.paths], resolved.cwd, data.timeout)
+            const pathError = validateGitPathspecs(data.paths, workingDirectory)
+            if (pathError) return rpcError(pathError)
+            const addResult = await runGitCommand(['--literal-pathspecs', 'add', '--', ...data.paths], resolved.cwd, data.timeout)
             if (!addResult.success) return addResult
         } else {
             const addResult = await runGitCommand(['add', '-u'], resolved.cwd, data.timeout)

@@ -890,6 +890,6 @@
     "hapi/website/tsconfig.json",
     "hapi/website/vite.config.ts"
   ],
-  "projectRoot": "/home/liuzl/agent/make-hapi-again",
+  "projectRoot": "/home/tester/project/make-hapi-again",
   "gitCommitHash": "no-git"
 }

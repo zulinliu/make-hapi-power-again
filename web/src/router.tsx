@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import {
     Navigate,
@@ -46,6 +46,7 @@ import BrowseFilePage from '@/routes/browse/file'
 import TerminalPage from '@/routes/sessions/terminal'
 import GitPage from '@/routes/sessions/git'
 import ExtensionsPage from '@/routes/sessions/extensions'
+import LoomPage from '@/routes/sessions/loom'
 import SettingsPage from '@/routes/settings'
 
 function BackIcon(props: { className?: string }) {
@@ -263,7 +264,7 @@ function SessionsIndexPage() {
     return null
 }
 
-function SessionPage(props: { outlineOpen?: boolean; setOutlineOpen?: (open: boolean | ((prev: boolean) => boolean)) => void }) {
+function SessionPage() {
     const { api } = useAppContext()
     const { t } = useTranslation()
     const goBack = useAppGoBack()
@@ -435,8 +436,6 @@ function SessionPage(props: { outlineOpen?: boolean; setOutlineOpen?: (open: boo
             onRetryMessage={retryMessage}
             autocompleteSuggestions={getAutocompleteSuggestions}
             availableSlashCommands={slashCommands}
-            outlineOpen={props.outlineOpen ?? false}
-            onOutlineOpenChange={props.setOutlineOpen}
         />
     )
 }
@@ -449,7 +448,6 @@ function SessionDetailRoute() {
     const navigate = useNavigate()
     const goBack = useAppGoBack()
     const { session, notFound: sessionNotFound } = useSession(api, sessionId)
-    const [outlineOpen, setOutlineOpen] = useState(false)
 
     const basePath = `/sessions/${sessionId}`
     const isChat = pathname === basePath || pathname === `${basePath}/`
@@ -496,11 +494,10 @@ function SessionDetailRoute() {
                     sessionId={sessionId}
                     isSubPage={!isChat}
                     onSessionDeleted={() => navigate({ to: '/sessions' })}
-                    onToggleOutline={() => setOutlineOpen(prev => !prev)}
                 />
             )}
             {isChat ? (
-                <SessionPage outlineOpen={outlineOpen} setOutlineOpen={setOutlineOpen} />
+                <SessionPage />
             ) : (
                 <Outlet />
             )}
@@ -609,9 +606,10 @@ function BrowsePage() {
     const goBack = useAppGoBack()
     const { api } = useAppContext()
     const search = useRouterState({ select: (s) => s.location.search as { machineId?: string; path?: string } })
-    const { machines } = useMachines(api, true)
-    const machineId = search.machineId ?? machines[0]?.id ?? null
-    const machine = machines.find(m => m.id === machineId)
+    const { machines, isLoading: machinesLoading, error: machinesError } = useMachines(api, true)
+    const requestedMachineId = search.machineId ?? null
+    const requestedMachine = requestedMachineId ? machines.find(m => m.id === requestedMachineId) ?? null : null
+    const machine = requestedMachine ?? machines[0] ?? null
     const workspaceRoot = machine?.metadata?.workspaceRoots?.[0]
     const initialPath = useMemo(() => {
         if (typeof search.path === 'string' && search.path) {
@@ -638,11 +636,32 @@ function BrowsePage() {
             </div>
 
             <div className="flex-1 min-h-0">
-                {initialPath ? (
-                    <FileManager api={api} machineId={machineId} initialPath={initialPath} rootPath={workspaceRoot} />
+                {machinesLoading ? (
+                    <div className="flex items-center justify-center h-full">
+                        <LoadingState label={t('loading.machines')} className="text-sm" />
+                    </div>
+                ) : machinesError ? (
+                    <div className="flex items-center justify-center h-full px-6 text-center">
+                        <div className="text-sm text-(--hp-danger)">{machinesError}</div>
+                    </div>
+                ) : machines.length === 0 ? (
+                    <div className="flex items-center justify-center h-full px-6 text-center">
+                        <div className="max-w-md text-sm text-(--hp-text-tertiary)">{t('browse.noMachinesConnected')}</div>
+                    </div>
+                ) : !machine || !workspaceRoot ? (
+                    <div className="flex flex-col items-center justify-center h-full gap-3 px-6 text-center">
+                        <div className="text-sm font-medium text-(--hp-text-primary)">{t('browse.noRootTitle')}</div>
+                        <div className="max-w-md text-sm text-(--hp-text-tertiary)">{t('browse.noRootHint')}</div>
+                        <code className="px-3 py-1.5 text-xs rounded-[var(--hp-radius-sm,6px)] bg-(--hp-surface-1) text-(--hp-text-primary)">
+                            hapi-power runner start --workspace-root /path/a --workspace-root /path/b
+                        </code>
+                        <div className="text-xs text-(--hp-text-tertiary)">{t('browse.noRootFooter')}</div>
+                    </div>
+                ) : initialPath ? (
+                    <FileManager api={api} machineId={machine.id} initialPath={initialPath} rootPath={workspaceRoot} />
                 ) : (
                     <div className="flex items-center justify-center h-full">
-                        <div className="animate-pulse text-(--hp-text-tertiary)">{t('session.loading')}</div>
+                        <LoadingState label={t('loading.session')} className="text-sm" />
                     </div>
                 )}
             </div>
@@ -805,6 +824,12 @@ const sessionGitRoute = createRoute({
     component: GitPage,
 })
 
+const sessionLoomRoute = createRoute({
+    getParentRoute: () => sessionDetailRoute,
+    path: 'loom',
+    component: LoomPage,
+})
+
 const sessionExtensionsRoute = createRoute({
     getParentRoute: () => sessionDetailRoute,
     path: 'extensions',
@@ -824,6 +849,7 @@ export const routeTree = rootRoute.addChildren([
         newSessionRoute,
         sessionDetailRoute.addChildren([
             sessionGitRoute,
+            sessionLoomRoute,
             sessionTerminalRoute,
             sessionFilesRoute,
             sessionFileRoute,

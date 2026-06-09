@@ -21,10 +21,10 @@ describe('gitCloneSafety', () => {
 
     it('accepts internal HTTP clone requests with explicit credentials', () => {
         const parsed = parseGitCloneRequest({
-            url: 'http://git.tsintergy.com:8070/liuzulin/cq-dataworks/cq-dataworks-design-skill.git',
+            url: 'http://git.internal.example.com:8070/test-user/project/example-skill.git',
             targetDir: '/workspace',
             cloneId: VALID_UUID,
-            auth: { type: 'password', username: 'liuzl', password: 'secret-password' }
+            auth: { type: 'password', username: 'test-user', password: 'example-password' }
         })
 
         expect(parsed.success).toBe(true)

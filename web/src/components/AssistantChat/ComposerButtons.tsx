@@ -4,6 +4,7 @@ import { ScheduleIcon } from '@/components/icons'
 import { ScheduleTimePicker } from './ScheduleTimePicker'
 import type { PendingSchedule } from './ScheduleTimePicker'
 import { useRef, useState } from 'react'
+import type { MessageDeliveryMode } from '@/types/api'
 
 function SettingsIcon() {
     return (
@@ -136,6 +137,7 @@ function UnifiedButton(props: {
     canSend: boolean
     controlsDisabled: boolean
     onSend: () => void
+    deliveryMode?: MessageDeliveryMode
 }) {
     const { t } = useTranslation()
 
@@ -154,7 +156,9 @@ function UnifiedButton(props: {
     if (hasText) {
         icon = <SendIcon />
         className = 'bg-(--hp-primary) text-(--hp-text-inverse)'
-        ariaLabel = t('composer.send')
+        ariaLabel = props.deliveryMode === 'guide'
+            ? t('composer.deliveryMode.sendGuide')
+            : t('composer.send')
     } else {
         icon = <SendIcon />
         className = 'bg-(--hp-surface-2) text-(--hp-text-disabled)'
@@ -203,6 +207,7 @@ export function ComposerButtons(props: {
     // The composer must surface that constraint at UI time so the user never
     // builds a submission the hub will reject — see hub/web/routes/messages.ts.
     hasAttachments?: boolean
+    deliveryMode?: MessageDeliveryMode
 }) {
     const { t } = useTranslation()
     const [showSchedulePicker, setShowSchedulePicker] = useState(false)
@@ -218,7 +223,7 @@ export function ComposerButtons(props: {
                     aria-label={t('composer.attach')}
                     title={t('composer.attach')}
                     disabled={props.controlsDisabled || hasSchedule}
-                    className="flex h-10 w-10 items-center justify-center rounded-full text-(--hp-text-tertiary) transition-colors hover:bg-(--hp-surface-2) hover:text-(--hp-text-primary) disabled:cursor-not-allowed disabled:opacity-50 sm:h-8 sm:w-8"
+                    className="flex h-11 w-11 items-center justify-center rounded-full text-(--hp-text-tertiary) transition-colors hover:bg-(--hp-surface-2) hover:text-(--hp-text-primary) disabled:cursor-not-allowed disabled:opacity-50 sm:h-8 sm:w-8"
                 >
                     <AttachmentIcon />
                 </ComposerPrimitive.AddAttachment>
@@ -228,7 +233,7 @@ export function ComposerButtons(props: {
                         type="button"
                         aria-label={t('composer.settings')}
                         title={t('composer.settings')}
-                        className="settings-button flex h-10 w-10 items-center justify-center rounded-full text-(--hp-text-tertiary) transition-colors hover:bg-(--hp-surface-2) hover:text-(--hp-text-primary) sm:h-8 sm:w-8"
+                        className="settings-button flex h-11 w-11 items-center justify-center rounded-full text-(--hp-text-tertiary) transition-colors hover:bg-(--hp-surface-2) hover:text-(--hp-text-primary) sm:h-8 sm:w-8"
                         onClick={props.onSettingsToggle}
                         disabled={props.controlsDisabled}
                     >
@@ -241,7 +246,7 @@ export function ComposerButtons(props: {
                         type="button"
                         aria-label={props.terminalLabel}
                         title={props.terminalLabel}
-                        className="flex h-10 w-10 items-center justify-center rounded-full text-(--hp-text-tertiary) transition-colors hover:bg-(--hp-surface-2) hover:text-(--hp-success) disabled:cursor-not-allowed disabled:opacity-50 sm:h-8 sm:w-8"
+                        className="flex h-11 w-11 items-center justify-center rounded-full text-(--hp-text-tertiary) transition-colors hover:bg-(--hp-surface-2) hover:text-(--hp-success) disabled:cursor-not-allowed disabled:opacity-50 sm:h-8 sm:w-8"
                         onClick={props.onTerminal}
                         disabled={props.terminalDisabled}
                     >
@@ -252,10 +257,10 @@ export function ComposerButtons(props: {
                 {props.showAbortButton ? (
                     <button
                         type="button"
-                        aria-label={t('composer.abort')}
-                        title={t('composer.abort')}
+                        aria-label={t('composer.stop')}
+                        title={t('composer.stop')}
                         disabled={props.abortDisabled}
-                        className="flex h-10 w-10 items-center justify-center rounded-full text-(--hp-text-tertiary) transition-colors hover:bg-(--hp-surface-2) hover:text-(--hp-danger) disabled:cursor-not-allowed disabled:opacity-50 sm:h-8 sm:w-8"
+                        className="flex h-11 w-11 items-center justify-center rounded-full text-(--hp-text-tertiary) transition-colors hover:bg-(--hp-surface-2) hover:text-(--hp-danger) disabled:cursor-not-allowed disabled:opacity-50 sm:h-8 sm:w-8"
                         onClick={props.onAbort}
                     >
                         <AbortIcon spinning={props.isAborting} />
@@ -268,7 +273,7 @@ export function ComposerButtons(props: {
                         aria-label={t('composer.switchRemote')}
                         title={t('composer.switchRemote')}
                         disabled={props.switchDisabled}
-                        className="flex h-10 w-10 items-center justify-center rounded-full text-(--hp-text-tertiary) transition-colors hover:bg-(--hp-surface-2) hover:text-(--hp-info) disabled:cursor-not-allowed disabled:opacity-50 sm:h-8 sm:w-8 hidden sm:flex"
+                        className="flex h-11 w-11 items-center justify-center rounded-full text-(--hp-text-tertiary) transition-colors hover:bg-(--hp-surface-2) hover:text-(--hp-info) disabled:cursor-not-allowed disabled:opacity-50 sm:h-8 sm:w-8 hidden sm:flex"
                         onClick={props.onSwitch}
                     >
                         <SwitchToRemoteIcon />
@@ -291,7 +296,7 @@ export function ComposerButtons(props: {
                                     setShowSchedulePicker((v) => !v)
                                 }
                             }}
-                            className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50 sm:h-8 sm:w-8 ${
+                            className={`flex h-11 w-11 items-center justify-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50 sm:h-8 sm:w-8 ${
                                 hasSchedule
                                     ? 'bg-(--hp-primary) text-(--hp-text-inverse) hover:bg-(--hp-primary-hover)'
                                     : 'text-(--hp-text-tertiary) hover:bg-(--hp-surface-2) hover:text-(--hp-text-primary)'
@@ -319,6 +324,7 @@ export function ComposerButtons(props: {
                 canSend={props.canSend}
                 controlsDisabled={props.controlsDisabled}
                 onSend={props.onSend}
+                deliveryMode={props.deliveryMode}
             />
         </div>
     )

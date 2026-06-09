@@ -28,7 +28,7 @@ export { PushStore } from './pushStore'
 export { SessionStore } from './sessionStore'
 export { UserStore } from './userStore'
 
-const SCHEMA_VERSION: number = 11
+const SCHEMA_VERSION: number = 12
 const REQUIRED_TABLES = [
     'sessions',
     'machines',
@@ -129,6 +129,7 @@ export class Store {
             8: () => this.migrateFromV8ToV9(),
             9: () => this.migrateFromV9ToV10(),
             10: () => this.migrateFromV10ToV11(),
+            11: () => this.migrateFromV11ToV12(),
         })
 
         if (currentVersion === 0) {
@@ -289,24 +290,34 @@ export class Store {
 
             CREATE TABLE IF NOT EXISTS providers (
                 id TEXT PRIMARY KEY,
+                namespace TEXT NOT NULL DEFAULT 'default',
                 name TEXT NOT NULL,
                 base_url TEXT NOT NULL,
                 api_key_encrypted TEXT NOT NULL,
+                protocol TEXT NOT NULL DEFAULT 'auto',
+                default_model TEXT,
+                health_json TEXT,
+                model_cache_json TEXT,
+                model_cache_updated_at INTEGER,
                 notes TEXT NOT NULL DEFAULT '',
                 created_at INTEGER NOT NULL,
-                updated_at INTEGER NOT NULL
+                updated_at INTEGER NOT NULL,
+                UNIQUE(namespace, name)
             );
+            CREATE INDEX IF NOT EXISTS idx_providers_namespace ON providers(namespace);
 
             CREATE TABLE IF NOT EXISTS provider_assignments (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                namespace TEXT NOT NULL DEFAULT 'default',
                 provider_id TEXT NOT NULL,
                 agent_flavor TEXT NOT NULL,
                 is_default INTEGER NOT NULL DEFAULT 0,
-                UNIQUE(provider_id, agent_flavor),
+                model TEXT,
+                UNIQUE(namespace, provider_id, agent_flavor),
                 FOREIGN KEY (provider_id) REFERENCES providers(id) ON DELETE CASCADE
             );
             CREATE INDEX IF NOT EXISTS idx_provider_assignments_provider ON provider_assignments(provider_id);
-            CREATE INDEX IF NOT EXISTS idx_provider_assignments_flavor ON provider_assignments(agent_flavor);
+            CREATE INDEX IF NOT EXISTS idx_provider_assignments_flavor ON provider_assignments(namespace, agent_flavor);
         `)
     }
 
@@ -528,6 +539,16 @@ export class Store {
         return new Set(rows.map((row) => row.name))
     }
 
+    private getProviderColumnNames(): Set<string> {
+        const rows = this.db.prepare('PRAGMA table_info(providers)').all() as Array<{ name: string }>
+        return new Set(rows.map((row) => row.name))
+    }
+
+    private getProviderAssignmentColumnNames(): Set<string> {
+        const rows = this.db.prepare('PRAGMA table_info(provider_assignments)').all() as Array<{ name: string }>
+        return new Set(rows.map((row) => row.name))
+    }
+
     private getUserVersion(): number {
         const row = this.db.prepare('PRAGMA user_version').get() as { user_version: number } | undefined
         return row?.user_version ?? 0
@@ -583,6 +604,177 @@ export class Store {
             CREATE INDEX IF NOT EXISTS idx_provider_assignments_provider ON provider_assignments(provider_id);
             CREATE INDEX IF NOT EXISTS idx_provider_assignments_flavor ON provider_assignments(agent_flavor);
         `)
+    }
+
+    private migrateFromV11ToV12(): void {
+        const providerColumns = this.getProviderColumnNames()
+        const assignmentColumns = this.getProviderAssignmentColumnNames()
+        this.db.exec('BEGIN')
+        try {
+            this.db.exec(`
+                CREATE TABLE providers_v12 (
+                    id TEXT PRIMARY KEY,
+                    namespace TEXT NOT NULL DEFAULT 'default',
+                    name TEXT NOT NULL,
+                    base_url TEXT NOT NULL,
+                    api_key_encrypted TEXT NOT NULL,
+                    protocol TEXT NOT NULL DEFAULT 'auto',
+                    default_model TEXT,
+                    health_json TEXT,
+                    model_cache_json TEXT,
+                    model_cache_updated_at INTEGER,
+                    notes TEXT NOT NULL DEFAULT '',
+                    created_at INTEGER NOT NULL,
+                    updated_at INTEGER NOT NULL,
+                    UNIQUE(namespace, name)
+                );
+            `)
+
+            if (providerColumns.size > 0) {
+                const namespaceExpr = providerColumns.has('namespace')
+                    ? "COALESCE(NULLIF(namespace, ''), 'default')"
+                    : "'default'"
+                const protocolExpr = providerColumns.has('protocol')
+                    ? "COALESCE(NULLIF(protocol, ''), 'auto')"
+                    : "'auto'"
+                const defaultModelExpr = providerColumns.has('default_model') ? 'default_model' : 'NULL'
+                const healthExpr = providerColumns.has('health_json') ? 'health_json' : 'NULL'
+                const modelCacheExpr = providerColumns.has('model_cache_json') ? 'model_cache_json' : 'NULL'
+                const modelCacheUpdatedAtExpr = providerColumns.has('model_cache_updated_at') ? 'model_cache_updated_at' : 'NULL'
+                const notesExpr = providerColumns.has('notes') ? "COALESCE(notes, '')" : "''"
+
+                this.db.exec(`
+                    WITH source AS (
+                        SELECT id,
+                               ${namespaceExpr} AS namespace,
+                               COALESCE(NULLIF(name, ''), id) AS raw_name,
+                               base_url,
+                               api_key_encrypted,
+                               ${protocolExpr} AS protocol,
+                               ${defaultModelExpr} AS default_model,
+                               ${healthExpr} AS health_json,
+                               ${modelCacheExpr} AS model_cache_json,
+                               ${modelCacheUpdatedAtExpr} AS model_cache_updated_at,
+                               ${notesExpr} AS notes,
+                               created_at,
+                               updated_at
+                        FROM providers
+                    ),
+                    ranked AS (
+                        SELECT *,
+                               ROW_NUMBER() OVER (
+                                   PARTITION BY namespace, raw_name
+                                   ORDER BY created_at, id
+                               ) AS name_rank
+                        FROM source
+                    )
+                    INSERT INTO providers_v12 (
+                        id, namespace, name, base_url, api_key_encrypted, protocol, default_model,
+                        health_json, model_cache_json, model_cache_updated_at, notes, created_at, updated_at
+                    )
+                    SELECT id,
+                           namespace,
+                           CASE
+                               WHEN name_rank = 1 THEN raw_name
+                               ELSE raw_name || ' (' || substr(id, 1, 8) || ')'
+                           END,
+                           base_url,
+                           api_key_encrypted,
+                           protocol,
+                           default_model,
+                           health_json,
+                           model_cache_json,
+                           model_cache_updated_at,
+                           notes,
+                           created_at,
+                           updated_at
+                    FROM ranked;
+                `)
+            }
+
+            if (assignmentColumns.size > 0) {
+                const assignmentNamespaceExpr = assignmentColumns.has('namespace')
+                    ? "COALESCE(NULLIF(namespace, ''), 'default')"
+                    : "'default'"
+                const assignmentModelExpr = assignmentColumns.has('model') ? 'model' : 'NULL'
+                this.db.exec(`
+                    CREATE TABLE provider_assignments_backup (
+                        id INTEGER,
+                        namespace TEXT NOT NULL,
+                        provider_id TEXT NOT NULL,
+                        agent_flavor TEXT NOT NULL,
+                        is_default INTEGER NOT NULL,
+                        model TEXT
+                    );
+                    INSERT INTO provider_assignments_backup (
+                        id, namespace, provider_id, agent_flavor, is_default, model
+                    )
+                    SELECT id,
+                           ${assignmentNamespaceExpr},
+                           provider_id,
+                           agent_flavor,
+                           is_default,
+                           ${assignmentModelExpr}
+                    FROM provider_assignments;
+                    DROP TABLE provider_assignments;
+                `)
+            }
+
+            if (providerColumns.size > 0) {
+                this.db.exec('DROP TABLE providers')
+            }
+            this.db.exec('ALTER TABLE providers_v12 RENAME TO providers')
+            this.db.exec('CREATE INDEX IF NOT EXISTS idx_providers_namespace ON providers(namespace)')
+
+            this.db.exec(`
+                CREATE TABLE provider_assignments (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    namespace TEXT NOT NULL DEFAULT 'default',
+                    provider_id TEXT NOT NULL,
+                    agent_flavor TEXT NOT NULL,
+                    is_default INTEGER NOT NULL DEFAULT 0,
+                    model TEXT,
+                    UNIQUE(namespace, provider_id, agent_flavor),
+                    FOREIGN KEY (provider_id) REFERENCES providers(id) ON DELETE CASCADE
+                );
+            `)
+            if (assignmentColumns.size > 0) {
+                this.db.exec(`
+                    WITH ranked AS (
+                        SELECT b.id,
+                               b.namespace,
+                               b.provider_id,
+                               b.agent_flavor,
+                               b.is_default,
+                               b.model,
+                               ROW_NUMBER() OVER (
+                                   PARTITION BY b.namespace, b.agent_flavor
+                                   ORDER BY b.is_default DESC, b.id
+                               ) AS default_rank
+                        FROM provider_assignments_backup b
+                        JOIN providers p ON p.id = b.provider_id AND p.namespace = b.namespace
+                    )
+                    INSERT OR IGNORE INTO provider_assignments (
+                        id, namespace, provider_id, agent_flavor, is_default, model
+                    )
+                    SELECT id,
+                           namespace,
+                           provider_id,
+                           agent_flavor,
+                           CASE WHEN is_default = 1 AND default_rank = 1 THEN 1 ELSE 0 END,
+                           model
+                    FROM ranked;
+                    DROP TABLE provider_assignments_backup;
+                `)
+            }
+            this.db.exec('CREATE INDEX IF NOT EXISTS idx_provider_assignments_provider ON provider_assignments(provider_id)')
+            this.db.exec('CREATE INDEX IF NOT EXISTS idx_provider_assignments_flavor ON provider_assignments(namespace, agent_flavor)')
+            this.db.exec('COMMIT')
+        } catch (error) {
+            this.db.exec('ROLLBACK')
+            const message = error instanceof Error ? error.message : String(error)
+            throw new Error(`SQLite schema migration v11->v12 failed: ${message}`)
+        }
     }
 
     private buildSchemaMismatchError(currentVersion: number): Error {

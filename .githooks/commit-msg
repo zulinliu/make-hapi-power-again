@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+COMMIT_MSG_FILE="$1"
+
+if command -v bun >/dev/null 2>&1; then
+    bun run scripts/check-git-standards.ts --commit-msg "$COMMIT_MSG_FILE"
+    exit 0
+fi
+
+if grep -Eiq '^[[:space:]]*Co-Authored-By:|^[[:space:]]*via \[(HAPI|HapiPower|Claude Code)\]|hapi\.run|Generated with \[Claude Code\]' "$COMMIT_MSG_FILE"; then
+    echo "[git-standards] commit message contains forbidden co-author or brand marker" >&2
+    exit 1
+fi
+
+AUTHOR_NAME="$(git var GIT_AUTHOR_IDENT | sed -E 's/^([^<]+)[[:space:]]<.*$/\1/' | xargs)"
+if [ "$AUTHOR_NAME" != "zulinliu" ]; then
+    echo "[git-standards] commit author must be zulinliu, got $AUTHOR_NAME" >&2
+    exit 1
+fi
+
+BRANCH_NAME="$(git branch --show-current || true)"
+if [ -n "$BRANCH_NAME" ] && [ "$BRANCH_NAME" != "main" ] && [ "$BRANCH_NAME" != "dev" ]; then
+    if ! printf '%s' "$BRANCH_NAME" | grep -Eq '^feat/v[0-9]+\.[0-9]+\.[0-9]+$'; then
+        echo "[git-standards] branch name must be main, dev, or feat/vX.Y.Z: $BRANCH_NAME" >&2
+        exit 1
+    fi
+fi

@@ -5,10 +5,11 @@
  */
 
 import { FileHandle } from 'node:fs/promises'
-import { readFile, writeFile, mkdir, open, unlink, rename, stat } from 'node:fs/promises'
+import { readFile, writeFile, open, unlink, rename, stat } from 'node:fs/promises'
 import { existsSync, writeFileSync, readFileSync, unlinkSync } from 'node:fs'
 import { configuration } from '@/configuration'
 import { isProcessAlive } from '@/utils/process';
+import { chmodPrivateFile, chmodPrivateFileSync, ensurePrivateDir, ensurePrivateDirSync } from '@/utils/privateFiles'
 
 interface Settings {
   // This ID is used as the actual database ID on the server
@@ -24,6 +25,12 @@ interface Settings {
 }
 
 const defaultSettings: Settings = {}
+
+function isNodeErrorCode(error: unknown, code: string): boolean {
+  return error instanceof Error
+    && 'code' in error
+    && (error as { code?: unknown }).code === code
+}
 
 /**
  * Runner state persisted locally (different from API RunnerState)
@@ -56,11 +63,10 @@ export async function readSettings(): Promise<Settings> {
 }
 
 export async function writeSettings(settings: Settings): Promise<void> {
-  if (!existsSync(configuration.hapiPowerHomeDir)) {
-    await mkdir(configuration.hapiPowerHomeDir, { recursive: true })
-  }
+  await ensurePrivateDir(configuration.hapiPowerHomeDir)
 
-  await writeFile(configuration.settingsFile, JSON.stringify(settings, null, 2))
+  await writeFile(configuration.settingsFile, JSON.stringify(settings, null, 2), { encoding: 'utf8', mode: 0o600 })
+  await chmodPrivateFile(configuration.settingsFile)
 }
 
 /**
@@ -76,9 +82,7 @@ export async function updateSettings(
   const MAX_LOCK_ATTEMPTS = 50;        // Maximum number of attempts (5 seconds total)
   const STALE_LOCK_TIMEOUT_MS = 10000; // Consider lock stale after 10 seconds
 
-  if (!existsSync(configuration.hapiPowerHomeDir)) {
-    await mkdir(configuration.hapiPowerHomeDir, { recursive: true });
-  }
+  await ensurePrivateDir(configuration.hapiPowerHomeDir)
 
   const lockFile = configuration.settingsFile + '.lock';
   const tmpFile = configuration.settingsFile + '.tmp';
@@ -89,10 +93,10 @@ export async function updateSettings(
   while (attempts < MAX_LOCK_ATTEMPTS) {
     try {
       // 'wx' = create exclusively, fail if exists (cross-platform compatible)
-      fileHandle = await open(lockFile, 'wx');
+      fileHandle = await open(lockFile, 'wx', 0o600);
       break;
-    } catch (err: any) {
-      if (err.code === 'EEXIST') {
+    } catch (err: unknown) {
+      if (isNodeErrorCode(err, 'EEXIST')) {
         // Lock file exists, wait and retry
         attempts++;
         await new Promise(resolve => setTimeout(resolve, LOCK_RETRY_INTERVAL_MS));
@@ -122,8 +126,10 @@ export async function updateSettings(
     const updated = await updater(current);
 
     // Write atomically using rename
-    await writeFile(tmpFile, JSON.stringify(updated, null, 2));
+    await writeFile(tmpFile, JSON.stringify(updated, null, 2), { encoding: 'utf8', mode: 0o600 });
+    await chmodPrivateFile(tmpFile);
     await rename(tmpFile, configuration.settingsFile); // Atomic on POSIX
+    await chmodPrivateFile(configuration.settingsFile);
 
     return updated;
   } finally {
@@ -138,13 +144,12 @@ export async function updateSettings(
 //
 
 export async function writeCredentialsDataKey(credentials: { publicKey: Uint8Array, machineKey: Uint8Array, token: string }): Promise<void> {
-  if (!existsSync(configuration.hapiPowerHomeDir)) {
-    await mkdir(configuration.hapiPowerHomeDir, { recursive: true })
-  }
+  await ensurePrivateDir(configuration.hapiPowerHomeDir)
   await writeFile(configuration.privateKeyFile, JSON.stringify({
     encryption: { publicKey: Buffer.from(credentials.publicKey).toString('base64'), machineKey: Buffer.from(credentials.machineKey).toString('base64') },
     token: credentials.token
-  }, null, 2));
+  }, null, 2), { encoding: 'utf8', mode: 0o600 });
+  await chmodPrivateFile(configuration.privateKeyFile);
 }
 
 export async function clearCredentials(): Promise<void> {
@@ -181,7 +186,9 @@ export async function readRunnerState(): Promise<RunnerLocallyPersistedState | n
  * Write runner state to local file (synchronously for atomic operation)
  */
 export function writeRunnerState(state: RunnerLocallyPersistedState): void {
-  writeFileSync(configuration.runnerStateFile, JSON.stringify(state, null, 2), 'utf-8');
+  ensurePrivateDirSync(configuration.hapiPowerHomeDir);
+  writeFileSync(configuration.runnerStateFile, JSON.stringify(state, null, 2), { encoding: 'utf-8', mode: 0o600 });
+  chmodPrivateFileSync(configuration.runnerStateFile);
 }
 
 /**
@@ -210,15 +217,16 @@ export async function acquireRunnerLock(
   maxAttempts: number = 5,
   delayIncrementMs: number = 200
 ): Promise<FileHandle | null> {
+  await ensurePrivateDir(configuration.hapiPowerHomeDir)
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
       // 'wx' ensures we only create if it doesn't exist (atomic lock acquisition)
-      const fileHandle = await open(configuration.runnerLockFile, 'wx');
+      const fileHandle = await open(configuration.runnerLockFile, 'wx', 0o600);
       // Write PID to lock file for debugging
       await fileHandle.writeFile(String(process.pid));
       return fileHandle;
-    } catch (error: any) {
-      if (error.code === 'EEXIST') {
+    } catch (error: unknown) {
+      if (isNodeErrorCode(error, 'EEXIST')) {
         // Lock file exists, check if process is still running
         try {
           const lockPid = readFileSync(configuration.runnerLockFile, 'utf-8').trim();

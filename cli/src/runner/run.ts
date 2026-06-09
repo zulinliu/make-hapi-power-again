@@ -243,6 +243,7 @@ export async function startRunner(options: { workspaceRoots?: string[] } = {}): 
       let spawnDirectory = directory;
       let worktreeInfo: WorktreeInfo | null = null;
       let happyProcess: ReturnType<typeof spawnHappyCLI> | null = null;
+      let codexHomeDir: string | null = null;
 
       if (sessionType === 'simple') {
         try {
@@ -343,6 +344,18 @@ export async function startRunner(options: { workspaceRoots?: string[] } = {}): 
         }
         await cleanupWorktree();
       };
+      const cleanupCodexHomeDir = async () => {
+        if (!codexHomeDir) {
+          return;
+        }
+        const dirToRemove = codexHomeDir;
+        codexHomeDir = null;
+        try {
+          await fs.rm(dirToRemove, { recursive: true, force: true });
+        } catch (error) {
+          logger.debug(`[RUNNER RUN] Failed to remove temporary Codex auth dir ${dirToRemove}`, error);
+        }
+      };
 
       try {
 
@@ -352,10 +365,13 @@ export async function startRunner(options: { workspaceRoots?: string[] } = {}): 
           if (options.agent === 'codex') {
 
             // Create a temporary directory for Codex
-            const codexHomeDir = await fs.mkdtemp(join(os.tmpdir(), 'hapi-power-codex-'));
+            codexHomeDir = await fs.mkdtemp(join(os.tmpdir(), 'hapi-power-codex-'));
+            await fs.chmod(codexHomeDir, 0o700).catch(() => { });
 
             // Write the token to the temporary directory
-            await fs.writeFile(join(codexHomeDir, 'auth.json'), options.token);
+            const codexAuthFile = join(codexHomeDir, 'auth.json');
+            await fs.writeFile(codexAuthFile, options.token, { encoding: 'utf8', mode: 0o600 });
+            await fs.chmod(codexAuthFile, 0o600).catch(() => { });
 
             // Set the environment variable for Codex
             extraEnv = {
@@ -409,6 +425,11 @@ export async function startRunner(options: { workspaceRoots?: string[] } = {}): 
             ...extraEnv
           }
         });
+        if (codexHomeDir) {
+          happyProcess.once('exit', () => {
+            void cleanupCodexHomeDir();
+          });
+        }
 
         happyProcess.stderr?.on('data', (data) => {
           stderrTail = appendTail(stderrTail, data);
@@ -436,6 +457,7 @@ export async function startRunner(options: { workspaceRoots?: string[] } = {}): 
             }
           });
           await maybeCleanupWorktree('no-pid');
+          await cleanupCodexHomeDir();
           return {
             type: 'error',
             errorMessage
@@ -592,6 +614,9 @@ export async function startRunner(options: { workspaceRoots?: string[] } = {}): 
         const errorMessage = error instanceof Error ? error.message : String(error);
         logger.debug('[RUNNER RUN] Failed to spawn session:', error);
         await maybeCleanupWorktree('exception');
+        if (!happyProcess?.pid || !isProcessAlive(happyProcess.pid)) {
+          await cleanupCodexHomeDir();
+        }
         reportSpawnOutcomeToHub?.({
           type: 'error',
           details: {

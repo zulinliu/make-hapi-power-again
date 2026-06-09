@@ -1,0 +1,20 @@
+# CodeGraph persistent graph database is local-only agent state.
+
+# Runtime database
+codegraph.db
+
+# Runtime database sidecars
+*.db-wal
+*.db-shm
+
+# Cache
+cache/
+
+# Logs
+*.log
+
+# Runtime process marker
+*.pid
+
+# Hook markers
+.dirty

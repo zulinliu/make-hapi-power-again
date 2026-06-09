@@ -13,7 +13,13 @@ import type {
     SyncEvent
 } from '@/types/api'
 import { queryKeys } from '@/lib/query-keys'
-import { clearMessageWindow, getMessageWindowState, ingestIncomingMessages, markMessagesConsumed, removeOptimisticMessage, updateMessageStatus } from '@/lib/message-window-store'
+import {
+    clearMessageWindow,
+    ingestIncomingMessages,
+    markMessagesConsumed,
+    removeOptimisticMessage,
+    updateGuideMessageState
+} from '@/lib/message-window-store'
 import { emitCloneProgressEvent } from '@/lib/git-portal-events'
 
 type SSESubscription = {
@@ -28,7 +34,11 @@ const MESSAGE_STREAM_EVENT_TYPES = new Set<SyncEvent['type']>([
     'message-received',
     'messages-consumed',
     'message-cancelled',
-    'scheduled-matured'
+    'scheduled-matured',
+    'guide-requested',
+    'guide-fallback-queued',
+    'guide-consumed',
+    'guide-failed'
 ])
 
 export function isGlobalScopedMessageStreamEvent(scope: SSEScope, eventType: SyncEvent['type']): boolean {
@@ -465,6 +475,38 @@ export function useSSE(options: {
 
             if (event.type === 'messages-consumed') {
                 markMessagesConsumed(event.sessionId, event.localIds, event.invokedAt)
+            }
+
+            if (event.type === 'guide-requested') {
+                updateGuideMessageState(
+                    event.sessionId,
+                    { localId: event.localId, messageId: event.messageId },
+                    'requested'
+                )
+            }
+
+            if (event.type === 'guide-fallback-queued') {
+                updateGuideMessageState(
+                    event.sessionId,
+                    { localId: event.localId, messageId: event.messageId },
+                    'fallback-queued',
+                    event.reason
+                )
+            }
+
+            if (event.type === 'guide-consumed') {
+                for (const localId of event.localIds) {
+                    updateGuideMessageState(event.sessionId, { localId }, 'consumed')
+                }
+            }
+
+            if (event.type === 'guide-failed') {
+                updateGuideMessageState(
+                    event.sessionId,
+                    { localId: event.localId },
+                    'failed',
+                    event.reason
+                )
             }
 
             if (event.type === 'message-cancelled') {

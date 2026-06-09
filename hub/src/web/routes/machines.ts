@@ -11,6 +11,7 @@ import type { WebAppEnv } from '../middleware/auth'
 import { requireMachine } from './guards'
 import { decryptAES256GCM, getEncryptionKey } from '../../utils/crypto'
 import { gitCloneGate, parseGitCloneCancelRequest, parseGitCloneRequest } from './gitCloneSafety'
+import { sanitizeLogValue } from '../../middleware/logSanitizer'
 
 const machineFileQuerySchema = z.object({
     path: z.string().min(1)
@@ -68,7 +69,7 @@ async function runRpc<T>(fn: () => Promise<T>): Promise<T | { success: false; er
     try {
         return await fn()
     } catch (error) {
-        console.error('[machines] RPC failed', error)
+        console.error('[machines] RPC failed', sanitizeLogValue(error))
         return { success: false, error: 'Machine operation failed' }
     }
 }
@@ -177,6 +178,23 @@ export function createMachinesRoutes(getSyncEngine: () => SyncEngine | null, sto
             return c.json({ error: 'Invalid body' }, 400)
         }
 
+        let providerConfig: { providerBaseUrl: string; providerApiKey: string } | null = null
+        if (parsed.data.providerId) {
+            const provider = store.providers.getById(parsed.data.providerId, machine.namespace)
+            if (!provider) {
+                return c.json({ error: 'Provider not found' }, 400)
+            }
+            try {
+                const key = getEncryptionKey()
+                providerConfig = {
+                    providerBaseUrl: provider.baseUrl,
+                    providerApiKey: decryptAES256GCM(provider.apiKeyEncrypted, key),
+                }
+            } catch {
+                return c.json({ error: 'Provider key could not be decrypted' }, 409)
+            }
+        }
+
         const result = await engine.spawnSession(
             machineId,
             parsed.data.directory,
@@ -190,20 +208,15 @@ export function createMachinesRoutes(getSyncEngine: () => SyncEngine | null, sto
             parsed.data.effort
         )
 
-        if (result.type === 'success' && parsed.data.providerId) {
+        if (result.type === 'success' && providerConfig) {
             try {
-                const provider = store.providers.getById(parsed.data.providerId)
-                if (provider) {
-                    const key = getEncryptionKey()
-                    const apiKey = decryptAES256GCM(provider.apiKeyEncrypted, key)
-                    await engine.applySessionConfig(result.sessionId, {
-                        model: parsed.data.model,
-                        providerBaseUrl: provider.baseUrl,
-                        providerApiKey: apiKey,
-                    })
+                const config = {
+                    ...providerConfig,
+                    ...(parsed.data.model !== undefined ? { model: parsed.data.model } : {}),
                 }
+                await engine.applySessionConfig(result.sessionId, config)
             } catch {
-                // Provider config is best-effort; session already created
+                return c.json({ error: 'Provider config could not be applied to spawned session' }, 409)
             }
         }
 

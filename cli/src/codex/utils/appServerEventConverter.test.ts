@@ -469,9 +469,22 @@ describe('AppServerEventConverter', () => {
             tokenUsage: {
                 thread_id: 'child-thread',
                 turn_id: 'child-turn',
+                prompt: 'do not persist this prompt',
+                headers: { authorization: 'Bearer secret' },
+                path: '/home/tester/project',
                 last_token_usage: {
                     input_tokens: 10,
-                    output_tokens: 2
+                    output_tokens: 2,
+                    prompt: 'nested secret'
+                },
+                total: {
+                    prompt_tokens: 20,
+                    completion_tokens: 4,
+                    total_tokens: 24,
+                    prompt_tokens_details: {
+                        cached_tokens: 3
+                    },
+                    apiKey: 'redacted-test-key'
                 }
             }
         });
@@ -485,6 +498,14 @@ describe('AppServerEventConverter', () => {
                 last_token_usage: {
                     input_tokens: 10,
                     output_tokens: 2
+                },
+                total: {
+                    prompt_tokens: 20,
+                    completion_tokens: 4,
+                    total_tokens: 24,
+                    prompt_tokens_details: {
+                        cached_tokens: 3
+                    }
                 }
             }
         }]);

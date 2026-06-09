@@ -6,6 +6,10 @@ import { resolve } from 'node:path'
 
 const base = process.env.VITE_BASE_URL || '/'
 const hubTarget = process.env.VITE_HUB_PROXY || 'http://127.0.0.1:3016'
+const allowedHosts = (process.env.VITE_ALLOWED_HOSTS ?? '')
+    .split(',')
+    .map(host => host.trim())
+    .filter(Boolean)
 const appVersion = readAppVersion()
 
 function readAppVersion(): string {
@@ -54,7 +58,7 @@ export default defineConfig({
     },
     server: {
         host: true,
-        allowedHosts: ['test.liuzl.asia', '172.30.1.63'],
+        allowedHosts: allowedHosts.length > 0 ? allowedHosts : undefined,
         proxy: {
             '/api': {
                 target: hubTarget,

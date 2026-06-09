@@ -26,7 +26,7 @@
 
 ```bash
 NO_PROXY=localhost,127.0.0.1 no_proxy=localhost,127.0.0.1 \
-  hapi-power runner start --workspace-root /home/liuzl
+  hapi-power runner start --workspace-root /home/tester
 ```
 
 ### 根因 2: 机器 metadata 为 null（数据库残留）
@@ -41,13 +41,13 @@ NO_PROXY=localhost,127.0.0.1 no_proxy=localhost,127.0.0.1 \
 
 ### 根因 3: workspace root 过窄
 
-**场景**: 首次启动 runner 时使用 `--workspace-root /home/liuzl/agent/make-hapi-power-again/make-hapi-power-again`（项目子目录）。
+**场景**: 首次启动 runner 时使用 `--workspace-root /home/tester/project/make-hapi-power-again`（项目子目录）。
 
 **机制**: hub 在创建会话时会验证目录是否在机器的 `workspaceRoots` 范围内。超出范围的目录被拒绝。
 
 **结果**: 用户尝试在任何其他目录创建会话时都被拒绝。
 
-**修复**: 使用更宽的 workspace root: `--workspace-root /home/liuzl`。
+**修复**: 使用更宽的 workspace root: `--workspace-root /home/tester`。
 
 ## 完整的服务启动流程（正确版）
 
@@ -70,7 +70,7 @@ NO_PROXY=localhost,127.0.0.1 no_proxy=localhost,127.0.0.1 \
 ### 启动顺序
 
 ```bash
-PROJECT_DIR=/home/liuzl/agent/make-hapi-power-again/make-hapi-power-again
+PROJECT_DIR=/home/tester/project/make-hapi-power-again
 cd $PROJECT_DIR
 
 # 1. 启动 Hub
@@ -89,10 +89,10 @@ HAPI_POWER_API_URL=http://localhost:3206 \
 NO_PROXY=localhost,127.0.0.1 \
 no_proxy=localhost,127.0.0.1 \
 bun run cli/src/index.ts runner start \
-  --workspace-root /home/liuzl
+  --workspace-root /home/tester
 
 # 4. 确认验证
-# - 浏览器访问 http://172.30.1.63:5173
+# - 浏览器访问 http://192.0.2.63:5173
 # - 登录 token: 见 ~/.hapi-power/settings.json -> cliApiToken
 # - 创建会话: 机器下拉应显示主机名，目录浏览应可用
 ```

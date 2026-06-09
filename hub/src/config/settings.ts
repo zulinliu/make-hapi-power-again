@@ -1,6 +1,6 @@
-import { existsSync } from 'node:fs'
-import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
+import { readFile, rename, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
+import { chmodPrivateFile, ensurePrivateDir } from '@/utils/privateFiles'
 
 export interface Settings {
     machineId?: string
@@ -31,13 +31,13 @@ export function getSettingsFile(dataDir: string): string {
  * Returns null if file exists but cannot be parsed (to avoid data loss).
  */
 export async function readSettings(settingsFile: string): Promise<Settings | null> {
-    if (!existsSync(settingsFile)) {
-        return {}
-    }
     try {
         const content = await readFile(settingsFile, 'utf8')
         return JSON.parse(content)
     } catch (error) {
+        if (error instanceof Error && 'code' in error && (error as { code?: unknown }).code === 'ENOENT') {
+            return {}
+        }
         // Return null to signal parse error - caller should not overwrite
         console.error(`[WARN] Failed to parse ${settingsFile}: ${error}`)
         return null
@@ -59,11 +59,11 @@ export async function readSettingsOrThrow(settingsFile: string): Promise<Setting
  */
 export async function writeSettings(settingsFile: string, settings: Settings): Promise<void> {
     const dir = dirname(settingsFile)
-    if (!existsSync(dir)) {
-        await mkdir(dir, { recursive: true, mode: 0o700 })
-    }
+    await ensurePrivateDir(dir)
 
     const tmpFile = settingsFile + '.tmp'
-    await writeFile(tmpFile, JSON.stringify(settings, null, 2))
+    await writeFile(tmpFile, JSON.stringify(settings, null, 2), { encoding: 'utf8', mode: 0o600 })
+    await chmodPrivateFile(tmpFile)
     await rename(tmpFile, settingsFile)
+    await chmodPrivateFile(settingsFile)
 }

@@ -184,6 +184,20 @@ describe('computeSchedulePickerPlacement', () => {
         expect(placement.maxHeight).toBe(panel.panelHeight)
     })
 
+    it('prefers above when requested so the picker does not cover the composer input', () => {
+        const placement = computeSchedulePickerPlacement({
+            anchor: { top: 120, right: 132, bottom: 152, left: 100 },
+            panelWidth: 288,
+            panelHeight: 180,
+            viewport: { width: 390, height: 700 },
+            preferAbove: true,
+        })
+
+        expect(placement.placement).toBe('above')
+        expect(placement.top).toBe(8)
+        expect(placement.maxHeight).toBe(104)
+    })
+
     it('uses the larger side with a constrained maxHeight when neither side fully fits', () => {
         const placement = computeSchedulePickerPlacement({
             anchor: { top: 140, right: 132, bottom: 172, left: 100 },
@@ -207,5 +221,17 @@ describe('computeSchedulePickerPlacement', () => {
         expect(placement.left).toBe(89)
         expect(placement.top).toBeGreaterThanOrEqual(108)
         expect(placement.top + placement.maxHeight).toBeLessThanOrEqual(600 - 8)
+    })
+
+    it('opens above the mobile composer anchor instead of attaching to the viewport bottom', () => {
+        const placement = computeSchedulePickerPlacement({
+            anchor: { top: 610, right: 370, bottom: 654, left: 326 },
+            panelWidth: 288,
+            panelHeight: 220,
+            viewport: { width: 390, height: 700 },
+        })
+
+        expect(placement.placement).toBe('above')
+        expect(placement.top + placement.maxHeight).toBeLessThanOrEqual(602)
     })
 })

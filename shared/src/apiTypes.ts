@@ -7,6 +7,7 @@ import {
     GitCloneCancelRequestSchema,
     GitCloneRequestSchema,
     MachineSchema,
+    MessageDeliveryModeSchema,
     PermissionModeSchema,
     SessionSchema
 } from './schemas'
@@ -91,6 +92,152 @@ export type MessagesResponse = {
 
 export type MachinesResponse = { machines: Machine[] }
 
+export const SessionLoomLanguageSchema = z.enum(['en', 'zh-CN'])
+export type SessionLoomLanguage = z.infer<typeof SessionLoomLanguageSchema>
+
+export const SessionLoomExportFormatSchema = z.enum(['markdown'])
+export type SessionLoomExportFormat = z.infer<typeof SessionLoomExportFormatSchema>
+
+export const SessionLoomTemplateSchema = z.enum([
+    'raw',
+    'design',
+    'prd',
+    'decisions',
+    'retrospective',
+    'drift-check',
+    'lesson-card'
+])
+export type SessionLoomTemplate = z.infer<typeof SessionLoomTemplateSchema>
+
+export const SessionLoomFiltersSchema = z.object({
+    redactSecrets: z.boolean().optional().default(true),
+    includeSystemEvents: z.boolean().optional().default(false),
+    includeToolDetails: z.boolean().optional().default(false)
+}).strict()
+export type SessionLoomFilters = z.infer<typeof SessionLoomFiltersSchema>
+
+export const SessionLoomExportPreviewRequestSchema = z.object({
+    language: SessionLoomLanguageSchema.optional().default('zh-CN'),
+    format: SessionLoomExportFormatSchema.optional().default('markdown'),
+    template: SessionLoomTemplateSchema.optional().default('raw'),
+    filters: SessionLoomFiltersSchema.optional().default({
+        redactSecrets: true,
+        includeSystemEvents: false,
+        includeToolDetails: false
+    })
+}).strict()
+export type SessionLoomExportPreviewRequest = z.infer<typeof SessionLoomExportPreviewRequestSchema>
+
+export const SessionLoomExportRequestSchema = SessionLoomExportPreviewRequestSchema.extend({
+    fileName: z.string().trim().min(1).max(128).optional()
+}).strict()
+export type SessionLoomExportRequest = z.infer<typeof SessionLoomExportRequestSchema>
+
+export const SessionLoomSynthesisRequestSchema = z.object({
+    language: SessionLoomLanguageSchema.optional().default('zh-CN'),
+    template: SessionLoomTemplateSchema.optional().default('decisions'),
+    filters: SessionLoomFiltersSchema.optional().default({
+        redactSecrets: true,
+        includeSystemEvents: false,
+        includeToolDetails: false
+    }),
+    useExternalModel: z.boolean().optional().default(false),
+    explicitConfirmation: z.boolean().optional().default(false)
+}).strict()
+export type SessionLoomSynthesisRequest = z.infer<typeof SessionLoomSynthesisRequestSchema>
+
+export type SessionLoomOutlineKind = 'user' | 'assistant' | 'system' | 'tool' | 'decision'
+
+export type SessionLoomOutlineItem = {
+    id: string
+    targetMessageId: string
+    kind: SessionLoomOutlineKind
+    label: string
+    createdAt: number
+    depth: number
+}
+
+export type SessionLoomOutlineResponse = {
+    success: boolean
+    sessionId: string
+    title: string
+    generatedAt: number
+    items: SessionLoomOutlineItem[]
+    stats: {
+        totalMessages: number
+        outlineItems: number
+        firstMessageAt: number | null
+        lastMessageAt: number | null
+    }
+}
+
+export type SessionLoomExportStats = {
+    messageCount: number
+    outlineCount: number
+    userMessages: number
+    assistantMessages: number
+    systemEvents: number
+    redactions: number
+    filteredToolDetails: number
+}
+
+export type SessionLoomExportPreviewResponse = {
+    success: boolean
+    sessionId: string
+    generatedAt: number
+    markdown: string
+    title: string
+    stats: SessionLoomExportStats
+    filters: SessionLoomFilters
+    warnings: string[]
+}
+
+export type SessionLoomExportAsset = {
+    exportId: string
+    sessionId: string
+    title: string
+    fileName: string
+    format: SessionLoomExportFormat
+    template: SessionLoomTemplate
+    createdAt: number
+    expiresAt: number
+    sizeBytes: number
+    checksum: string
+    stats: SessionLoomExportStats
+}
+
+export type SessionLoomExportResponse = {
+    success: boolean
+    asset: SessionLoomExportAsset
+    markdown: string
+}
+
+export type SessionLoomExportListResponse = {
+    success: boolean
+    assets: SessionLoomExportAsset[]
+}
+
+export type SessionLoomSynthesisProvider = {
+    providerId: string
+    providerName: string
+    protocol: 'anthropic' | 'openai' | 'gemini'
+    model: string
+    agentFlavor: string
+}
+
+export type SessionLoomSynthesisResponse = {
+    success: boolean
+    sessionId: string
+    generatedAt: number
+    template: SessionLoomTemplate
+    provider: SessionLoomSynthesisProvider
+    summary: string
+    markdown: string
+    asset: SessionLoomExportAsset
+    filters: SessionLoomFilters
+    stats: SessionLoomExportStats
+}
+
 export type SpawnResponse =
     | { type: 'success'; sessionId: string }
     | { type: 'error'; message: string }
@@ -167,7 +314,8 @@ export const SendMessageRequestSchema = z.object({
     text: z.string(),
     localId: z.string().min(1).optional(),
     attachments: z.array(AttachmentMetadataSchema).optional(),
-    scheduledAt: z.number().int().positive().nullable().optional()
+    scheduledAt: z.number().int().positive().nullable().optional(),
+    deliveryMode: MessageDeliveryModeSchema.optional().default('queue')
 }).refine(
     (data) => data.scheduledAt == null || typeof data.localId === 'string',
     { message: 'scheduledAt requires localId', path: ['localId'] }
@@ -177,6 +325,15 @@ export const SendMessageRequestSchema = z.object({
 ).refine(
     (data) => data.scheduledAt == null || !data.attachments?.length,
     { message: 'scheduled messages with attachments are not supported', path: ['attachments'] }
+).refine(
+    (data) => data.deliveryMode !== 'guide' || data.scheduledAt == null,
+    { message: 'guide messages cannot be scheduled', path: ['deliveryMode'] }
+).refine(
+    (data) => data.deliveryMode !== 'guide' || !data.attachments?.length,
+    { message: 'guide messages with attachments are not supported', path: ['deliveryMode'] }
+).refine(
+    (data) => data.deliveryMode !== 'guide' || typeof data.localId === 'string',
+    { message: 'guide messages require localId', path: ['localId'] }
 )
 
 export type SendMessageRequest = z.infer<typeof SendMessageRequestSchema>
@@ -227,6 +384,127 @@ export type CommandResponse = {
 }
 
 export type GitCommandResponse = CommandResponse
+
+export type GitAtlasChangeStatus =
+    | 'modified'
+    | 'added'
+    | 'deleted'
+    | 'renamed'
+    | 'untracked'
+    | 'conflicted'
+
+export type GitAtlasChangeStage = 'staged' | 'unstaged' | 'mixed' | 'untracked'
+
+export type GitAtlasChange = {
+    path: string
+    oldPath?: string
+    status: GitAtlasChangeStatus
+    stage: GitAtlasChangeStage
+    linesAdded: number
+    linesRemoved: number
+    binary: boolean
+    selectable: boolean
+}
+
+export type GitAtlasGroup = {
+    id: string
+    label: string
+    kind: 'conflicted' | 'staged' | 'unstaged' | 'untracked'
+    total: number
+    paths: string[]
+}
+
+export type GitAtlasRemote = {
+    name: string
+    url: string
+}
+
+export type GitAtlasCommitSummary = {
+    hash: string
+    message: string
+    refs?: string
+}
+
+export type GitAtlasRecommendation = {
+    kind: 'clone' | 'resolve-conflicts' | 'review' | 'commit' | 'pull' | 'push' | 'clean'
+    label: string
+    description: string
+}
+
+export type GitAtlasDashboardResponse = {
+    success: boolean
+    repo?: {
+        isRepo: boolean
+        root: string | null
+        branch: string | null
+        upstream: string | null
+        detached: boolean
+        ahead: number
+        behind: number
+        hasConflicts: boolean
+    }
+    summary?: {
+        totalChanges: number
+        staged: number
+        unstaged: number
+        untracked: number
+        conflicted: number
+        linesAdded: number
+        linesRemoved: number
+    }
+    recommendation?: GitAtlasRecommendation
+    changes?: GitAtlasChange[]
+    groups?: GitAtlasGroup[]
+    remotes?: GitAtlasRemote[]
+    recentCommits?: GitAtlasCommitSummary[]
+    sync?: {
+        remote: string | null
+        branch: string | null
+        ahead: number
+        behind: number
+        canPull: boolean
+        canPush: boolean
+        requiresRemote: boolean
+        inFlight: boolean
+    }
+    error?: string
+}
+
+export type GitAtlasDiffResponse = {
+    success: boolean
+    path?: string
+    staged?: boolean
+    diff?: string
+    binary?: boolean
+    tooLarge?: boolean
+    truncated?: boolean
+    error?: string
+}
+
+export type GitCommitBasketRequest = {
+    message: string
+    paths: string[]
+}
+
+export type GitCommitBasketResponse = CommandResponse & {
+    committedPaths?: string[]
+}
+
+export type GitSyncAction = 'fetch' | 'pull' | 'push'
+
+export type GitSyncRequest = {
+    action: GitSyncAction
+    remote?: string
+    branch?: string
+    force?: boolean
+    confirmation?: string
+}
+
+export type GitSyncResponse = CommandResponse & {
+    action?: GitSyncAction
+    remote?: string
+    branch?: string
+}
 
 export type GitCloneResponse = CommandResponse & {
     clonedPath?: string

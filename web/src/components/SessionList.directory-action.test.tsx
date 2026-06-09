@@ -6,7 +6,10 @@ import type { SessionSummary } from '@/types/api'
 import { I18nProvider } from '@/lib/i18n-context'
 import { SessionList } from './SessionList'
 
-afterEach(() => cleanup())
+afterEach(() => {
+    cleanup()
+    localStorage.clear()
+})
 
 function makeSession(overrides: Partial<SessionSummary> & { id: string }): SessionSummary {
     return {
@@ -96,6 +99,34 @@ describe('SessionList directory action', () => {
         )
 
         expect(screen.queryByRole('button', { name: 'New session in this directory' })).toBeNull()
+    })
+})
+
+describe('SessionList empty state', () => {
+    it('uses localized copy for the welcome content', () => {
+        localStorage.setItem('hapi-power-lang', 'zh-CN')
+
+        renderWithProviders(
+            <SessionList
+                sessions={[]}
+                selectedSessionId={null}
+                onSelect={vi.fn()}
+                onNewSession={vi.fn()}
+                onBrowse={vi.fn()}
+                onRefresh={vi.fn()}
+                isLoading={false}
+                renderHeader={false}
+                api={null}
+            />
+        )
+
+        expect(screen.getByText('欢迎使用 Hapi Power')).toBeInTheDocument()
+        expect(screen.getByText('克隆项目')).toBeInTheDocument()
+        expect(screen.getByText('编辑开发')).toBeInTheDocument()
+        expect(screen.getByText('审查推送')).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: '浏览工作区' })).toBeInTheDocument()
+        expect(screen.queryByText('Welcome to Hapi Power')).toBeNull()
+        expect(screen.queryByText('Clone a project')).toBeNull()
     })
 })
 

@@ -9,6 +9,7 @@ export type {
     GitCloneAuth,
     GitCloneCancelRequest,
     GitCloneRequest,
+    MessageDeliveryMode,
     Metadata,
     Machine,
     MachineMetadata,

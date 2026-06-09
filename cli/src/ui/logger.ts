@@ -12,6 +12,18 @@ import { existsSync, readdirSync, statSync } from 'node:fs'
 import { join, basename } from 'node:path'
 import { readRunnerState } from '@/persistence'
 
+const REDACTED_LOG_VALUE = '[REDACTED]'
+const CIRCULAR_LOG_VALUE = '[Circular]'
+const SENSITIVE_KEY_PATTERN = /token|password|passwd|pwd|secret|credential|api[-_]?key|auth|authorization|cookie|private[-_]?key|access[-_]?key|refresh[-_]?token|access[-_]?token/i
+const SENSITIVE_JSON_PROPERTY_PATTERN = /("(?:(?:\\.)|[^"\\])*(?:token|password|passwd|pwd|secret|credential|api[-_]?key|auth|authorization|cookie|private[-_]?key|access[-_]?key|refresh[-_]?token|access[-_]?token)(?:(?:\\.)|[^"\\])*"\s*:\s*)("(?:\\.|[^"\\])*"|[^\s,}\]]+)/gi
+const SENSITIVE_ASSIGNMENT_PATTERN = /\b([A-Za-z0-9_.-]*(?:token|password|passwd|pwd|secret|credential|api[-_]?key|auth|authorization|cookie|private[-_]?key|access[-_]?key|refresh[-_]?token|access[-_]?token)[A-Za-z0-9_.-]*\s*=\s*)(["']?)([^\s"',;&)}\]\[]+)\2/gi
+const SENSITIVE_COLON_PATTERN = /\b([A-Za-z0-9_.-]*(?:token|password|passwd|pwd|secret|credential|api[-_]?key|auth|authorization|cookie|private[-_]?key|access[-_]?key|refresh[-_]?token|access[-_]?token)[A-Za-z0-9_.-]*\s*:\s*)(["']?)(?!Bearer\b|Basic\b)([^\s"',;&)}\]\[]+)\2/gi
+const SENSITIVE_QUERY_PATTERN = /([?&][^=&#\s]*(?:token|password|passwd|pwd|secret|credential|api[-_]?key|auth|authorization|cookie|private[-_]?key|access[-_]?key|refresh[-_]?token|access[-_]?token)[^=&#\s]*=)[^&#\s]+/gi
+const SENSITIVE_CLI_OPTION_PATTERN = /((?:^|[\s[("{,])--?(?:token|password|passwd|pwd|secret|credential|api[-_]?key|api_key|auth|authorization|cookie|private-key|access-key|access-token|refresh-token|client-secret|key)(?:=|\s+))(["']?)([^\s"',)\]}\[]+)\2/gi
+const BEARER_TOKEN_PATTERN = /\b(Bearer\s+)[A-Za-z0-9._~+/-]+=*/gi
+const AUTH_HEADER_PATTERN = /\b(Authorization\s*:\s*)(Bearer|Basic)\s+[^\s"',;&)}\]\[]+/gi
+const PRIVATE_KEY_BLOCK_PATTERN = /-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----/g
+
 /**
  * Consistent date/time formatting functions
  */
@@ -42,6 +54,79 @@ function getSessionLogPath(): string {
   const timestamp = createTimestampForFilename()
   const filename = configuration.isRunnerProcess ? `${timestamp}-runner.log` : `${timestamp}.log`
   return join(configuration.logsDir, filename)
+}
+
+function sanitizeStringForLog(value: string): string {
+  return value
+    .replace(PRIVATE_KEY_BLOCK_PATTERN, REDACTED_LOG_VALUE)
+    .replace(/:\/\/([^@\s/?#]+)@/g, `://${REDACTED_LOG_VALUE}@`)
+    .replace(SENSITIVE_QUERY_PATTERN, `$1${REDACTED_LOG_VALUE}`)
+    .replace(SENSITIVE_JSON_PROPERTY_PATTERN, `$1"${REDACTED_LOG_VALUE}"`)
+    .replace(AUTH_HEADER_PATTERN, `$1$2 ${REDACTED_LOG_VALUE}`)
+    .replace(SENSITIVE_ASSIGNMENT_PATTERN, `$1$2${REDACTED_LOG_VALUE}$2`)
+    .replace(SENSITIVE_COLON_PATTERN, `$1$2${REDACTED_LOG_VALUE}$2`)
+    .replace(SENSITIVE_CLI_OPTION_PATTERN, `$1$2${REDACTED_LOG_VALUE}$2`)
+    .replace(BEARER_TOKEN_PATTERN, `$1${REDACTED_LOG_VALUE}`)
+}
+
+export function sanitizeForLog(value: unknown, seen: WeakSet<object> = new WeakSet()): unknown {
+  if (typeof value === 'string') {
+    return sanitizeStringForLog(value)
+  }
+
+  if (value === null || typeof value !== 'object') {
+    return value
+  }
+
+  if (seen.has(value)) {
+    return CIRCULAR_LOG_VALUE
+  }
+
+  if (value instanceof Date) {
+    return value.toISOString()
+  }
+
+  if (value instanceof Error) {
+    seen.add(value)
+    return {
+      name: value.name,
+      message: sanitizeStringForLog(value.message),
+      stack: value.stack ? sanitizeStringForLog(value.stack) : undefined
+    }
+  }
+
+  if (Buffer.isBuffer(value)) {
+    return `[Buffer length=${value.length}]`
+  }
+
+  if (ArrayBuffer.isView(value)) {
+    return `[${value.constructor.name} length=${value.byteLength}]`
+  }
+
+  seen.add(value)
+
+  if (Array.isArray(value)) {
+    return value.map(item => sanitizeForLog(item, seen))
+  }
+
+  const result: Record<string, unknown> = {}
+  for (const [key, entryValue] of Object.entries(value)) {
+    if (SENSITIVE_KEY_PATTERN.test(key)) {
+      result[key] = REDACTED_LOG_VALUE
+      continue
+    }
+    result[key] = sanitizeForLog(entryValue, seen)
+  }
+  return result
+}
+
+function formatLogArg(arg: unknown): string {
+  const sanitized = sanitizeForLog(arg)
+  if (typeof sanitized === 'string') {
+    return sanitized
+  }
+  const json = JSON.stringify(sanitized)
+  return json ?? String(sanitized)
 }
 
 class Logger {
@@ -85,6 +170,7 @@ class Logger {
   ): void {
     if (!process.env.DEBUG) {
       this.debug(`In production, skipping message inspection`)
+      return
     }
 
     // Some of our messages are huge, but we still want to show them in the logs
@@ -118,7 +204,7 @@ class Logger {
       return obj
     }
 
-    const truncatedObject = truncateStrings(object)
+    const truncatedObject = truncateStrings(sanitizeForLog(object))
     const json = JSON.stringify(truncatedObject, null, 2)
     this.logToFile(`[${this.localTimezoneTimestamp()}]`, message, '\n', json)
   }
@@ -181,13 +267,15 @@ class Logger {
     if (!this.dangerouslyUnencryptedServerLoggingUrl) return
     
     try {
+      const sanitizedMessage = sanitizeStringForLog(message)
+      const sanitizedArgs = args.map(arg => sanitizeForLog(arg))
       await fetch(this.dangerouslyUnencryptedServerLoggingUrl + '/logs-combined-from-cli-and-mobile-for-simple-ai-debugging', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           timestamp: new Date().toISOString(),
           level,
-          message: `${message} ${args.map(a => 
+          message: `${sanitizedMessage} ${sanitizedArgs.map(a =>
             typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a)
           ).join(' ')}`,
           source: 'cli',
@@ -200,9 +288,9 @@ class Logger {
   }
 
   private logToFile(prefix: string, message: string, ...args: unknown[]): void {
-    const logLine = `${prefix} ${message} ${args.map(arg => 
-      typeof arg === 'string' ? arg : JSON.stringify(arg)
-    ).join(' ')}\n`
+    const sanitizedMessage = sanitizeStringForLog(message)
+    const sanitizedArgs = args.map(arg => sanitizeForLog(arg))
+    const logLine = `${prefix} ${sanitizedMessage} ${sanitizedArgs.map(formatLogArg).join(' ')}\n`
     
     // Send to remote server if configured
     if (this.dangerouslyUnencryptedServerLoggingUrl) {
@@ -212,7 +300,7 @@ class Logger {
         level = 'debug'
       }
       // Fire and forget, with explicit .catch to prevent unhandled rejection
-      this.sendToRemoteServer(level, message, ...args).catch(() => {
+      this.sendToRemoteServer(level, sanitizedMessage, ...sanitizedArgs).catch(() => {
         // Silently ignore remote logging errors to prevent loops
       })
     }

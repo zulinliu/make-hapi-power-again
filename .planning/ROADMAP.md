@@ -559,3 +559,38 @@ Plans:
 
 *Roadmap created: 2026-05-30*
 *Last updated: 2026-06-07 — Phase 35.6 质量门禁和发布准备已完成*
+
+### Phase 37: v0.18.0 五大特色功能品牌化重塑设计
+**Goal**: 将 API 供应商、Git 工具页、对话引导、上下文用量、大纲导出提炼五个方向作为 Hapi Power 新一代特色功能进行完整品牌、UX、交互、动效和 API 设计。
+**Depends on**: Phase 35, Phase 36
+**Requirements**: PROVIDER-01~06, GIT-01~07, GUIDE-01~06, CTX-01~06, LOOM-01~08, BRAND-01~04
+**Success Criteria**:
+  1. 五个功能均有品牌名、Logo 概念、Slogan、README 传播文案。
+  2. 完成现有代码全面检索，明确当前实现、缺口和不可破坏约束。
+  3. 完成前端优先的 UI/交互/动效/iOS PWA 设计。
+  4. 完成 Hub/Web/CLI/Shared 的后续 API 与协议设计，尤其 Guide 不清空队列、不破坏核心会话。
+  5. 完成上下文用量不可用诊断，并记录 tsintergy GLM-5.1 direct API usage 测试结论。
+  6. 完成 Session Loom 导出、提炼、下载、i18n、隐私清洗、移动端设计。
+  7. 全部设计沉淀到 `.planning/phases/37-v0.18.0-feature-redesign/` 并纳入 Git 管理。
+**Planning Artifacts**:
+  - `.planning/phases/37-v0.18.0-feature-redesign/37-CONTEXT.md`
+  - `.planning/phases/37-v0.18.0-feature-redesign/37-BRAND-SYSTEM.md`
+  - `.planning/phases/37-v0.18.0-feature-redesign/37-UX-SHAPE.md`
+  - `.planning/phases/37-v0.18.0-feature-redesign/37-TECH-DESIGN.md`
+  - `.planning/phases/37-v0.18.0-feature-redesign/37-REQUIREMENTS.md`
+  - `.planning/phases/37-v0.18.0-feature-redesign/37-ROADMAP.md`
+  - `.planning/phases/37-v0.18.0-feature-redesign/37-README-BRAND-COPY.md`
+  - `.planning/research/2026-06-08-feature-redesign-references.md`
+  - `.planning/phases/37-v0.18.0-feature-redesign/37-DEEP-REVIEW.md`
+  - `.planning/phases/37-v0.18.0-feature-redesign/37-BRAND-CONTRACT.md`
+  - `.planning/phases/37-v0.18.0-feature-redesign/37-PROTOCOL-ADDENDUM.md`
+  - `.planning/phases/37-v0.18.0-feature-redesign/37-SECURITY-ADDENDUM.md`
+  - `.planning/phases/37-v0.18.0-feature-redesign/37-UX-ACCEPTANCE-MATRIX.md`
+**Plans**: 1 design-only plan
+
+Plans:
+- [x] 37-00: 五大特色功能全新设计与品牌系统沉淀
+- [x] 37-01: 按深度评审补充协议、安全、UX、品牌前置门禁
+
+---
+*Last updated: 2026-06-08 — Phase 37 v0.18.0 特色功能重塑设计与评审后门禁补充完成*

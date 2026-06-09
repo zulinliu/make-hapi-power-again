@@ -445,4 +445,50 @@ describe('AcpSdkBackend', () => {
             contextWindow: 65_536
         });
     });
+
+    it('extracts OpenAI-compatible prompt usage fields', async () => {
+        backendStatics.UPDATE_QUIET_PERIOD_MS = 1;
+        backendStatics.UPDATE_DRAIN_TIMEOUT_MS = 50;
+        backendStatics.PRE_PROMPT_UPDATE_QUIET_PERIOD_MS = 1;
+        backendStatics.PRE_PROMPT_UPDATE_DRAIN_TIMEOUT_MS = 50;
+
+        const backend = new AcpSdkBackend({ command: 'opencode' });
+        const backendInternal = backend as unknown as {
+            transport: {
+                sendRequest: (...args: unknown[]) => Promise<unknown>;
+                close: () => Promise<void>;
+            } | null;
+        };
+
+        const messages: AgentMessage[] = [];
+        backendInternal.transport = {
+            sendRequest: async () => ({
+                stopReason: 'end_turn',
+                usage: {
+                    prompt_tokens: 12_345,
+                    completion_tokens: 678,
+                    total_tokens: 13_023,
+                    prompt_tokens_details: {
+                        cached_tokens: 2_048
+                    }
+                }
+            }),
+            close: async () => {}
+        };
+
+        await backend.prompt('session-1', [{ type: 'text', text: 'hello' }], (message) => {
+            messages.push(message);
+        });
+
+        expect(messages).toContainEqual({
+            type: 'usage',
+            inputTokens: 12_345,
+            outputTokens: 678,
+            totalTokens: 13_023,
+            cacheReadTokens: 2_048,
+            thoughtTokens: undefined,
+            contextTokens: undefined,
+            contextWindow: undefined
+        });
+    });
 });

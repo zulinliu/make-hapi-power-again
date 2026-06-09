@@ -5,6 +5,7 @@ import {
     type ClipboardEvent as ReactClipboardEvent,
     type FormEvent as ReactFormEvent,
     type KeyboardEvent as ReactKeyboardEvent,
+    type MutableRefObject,
     type SyntheticEvent as ReactSyntheticEvent,
     useCallback,
     useEffect,
@@ -12,7 +13,7 @@ import {
     useRef,
     useState
 } from 'react'
-import type { AgentState, CodexCollaborationMode, PermissionMode, ThreadGoal } from '@/types/api'
+import type { AgentState, CodexCollaborationMode, MessageDeliveryMode, PermissionMode, ThreadGoal } from '@/types/api'
 import type { Suggestion } from '@/hooks/useActiveSuggestions'
 import { useActiveWord } from '@/hooks/useActiveWord'
 import { useActiveSuggestions } from '@/hooks/useActiveSuggestions'
@@ -23,6 +24,7 @@ import { supportsEffort, supportsModelChange } from '@hapipower/protocol'
 import { markSkillUsed } from '@/lib/recent-skills'
 import { useComposerDraft } from '@/hooks/useComposerDraft'
 import { useComposerEnterBehavior } from '@/hooks/useComposerEnterBehavior'
+import { useFollowUpBehavior } from '@/hooks/useFollowUpBehavior'
 import { FloatingOverlay } from '@/components/ChatInput/FloatingOverlay'
 import { Autocomplete } from '@/components/ChatInput/Autocomplete'
 import { StatusBar } from '@/components/AssistantChat/StatusBar'
@@ -69,12 +71,14 @@ export function HappyComposer(props: {
     onSwitchToRemote?: () => void
     onTerminal?: () => void
     terminalUnsupported?: boolean
+    guideInterruptSupported?: boolean
     autocompletePrefixes?: string[]
     autocompleteSuggestions?: (query: string) => Promise<Suggestion[]>
     // Schedule props (lifted from internal state when provided)
     pendingSchedule?: PendingSchedule | null
     onSchedule?: (pending: PendingSchedule) => void
     onClearSchedule?: () => void
+    deliveryModeRef?: MutableRefObject<MessageDeliveryMode>
 }) {
     const { t } = useTranslation()
     const {
@@ -105,11 +109,13 @@ export function HappyComposer(props: {
         onSwitchToRemote,
         onTerminal,
         terminalUnsupported = false,
+        guideInterruptSupported = false,
         autocompletePrefixes = ['@', '/', '$'],
         autocompleteSuggestions = defaultSuggestionHandler,
         pendingSchedule: pendingScheduleProp,
         onSchedule: onScheduleProp,
-        onClearSchedule: onClearScheduleProp
+        onClearSchedule: onClearScheduleProp,
+        deliveryModeRef
     } = props
 
     // Use ?? so missing values fall back to default (destructuring defaults only handle undefined)
@@ -121,6 +127,7 @@ export function HappyComposer(props: {
 
     const api = useAssistantApi()
     const { composerEnterBehavior } = useComposerEnterBehavior()
+    const { followUpBehavior } = useFollowUpBehavior()
     const composerText = useAssistantState(({ composer }) => composer.text)
     const attachments = useAssistantState(({ composer }) => composer.attachments)
     const threadIsRunning = useAssistantState(({ thread }) => thread.isRunning)
@@ -155,6 +162,13 @@ export function HappyComposer(props: {
     const isControlled = onScheduleProp !== undefined
     const pendingSchedule = isControlled ? (pendingScheduleProp ?? null) : pendingScheduleLocal
     const setPendingSchedule = isControlled ? onScheduleProp : setPendingScheduleLocal
+    const hasPendingPermission = Boolean(agentState?.requests && Object.keys(agentState.requests).length > 0)
+    const guideModeAvailable = thinking
+        && guideInterruptSupported
+        && !hasPendingPermission
+        && !hasAttachments
+        && pendingSchedule === null
+    const activeDeliveryMode: MessageDeliveryMode = guideModeAvailable && followUpBehavior === 'guide' ? 'guide' : 'queue'
 
     const textareaRef = useRef<HTMLTextAreaElement>(null)
     const prevControlledByUser = useRef(controlledByUser)
@@ -170,6 +184,12 @@ export function HappyComposer(props: {
             return { text: composerText, selection: { start: newPos, end: newPos } }
         })
     }, [composerText])
+
+    useEffect(() => {
+        if (deliveryModeRef) {
+            deliveryModeRef.current = activeDeliveryMode
+        }
+    }, [deliveryModeRef, activeDeliveryMode])
 
     // Track one-time "continue" hint after switching from local to remote.
     useEffect(() => {
@@ -846,6 +866,7 @@ export function HappyComposer(props: {
                             onSchedule={setPendingSchedule}
                             onClearSchedule={isControlled ? onClearScheduleProp : () => setPendingScheduleLocal(null)}
                             hasAttachments={hasAttachments}
+                            deliveryMode={activeDeliveryMode}
                         />
                     </div>
                 </ComposerPrimitive.Root>

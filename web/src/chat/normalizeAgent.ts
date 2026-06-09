@@ -1,4 +1,4 @@
-import type { AgentEvent, CodexReview, CodexReviewFinding, NormalizedAgentContent, NormalizedMessage, ToolResultPermission } from '@/chat/types'
+import type { AgentEvent, CodexReview, CodexReviewFinding, NormalizedAgentContent, NormalizedMessage, ToolResultPermission, UsageData } from '@/chat/types'
 import { AGENT_MESSAGE_PAYLOAD_TYPE, asNumber, asString, isObject } from '@hapipower/protocol'
 import { isClaudeChatVisibleMessage } from '@hapipower/protocol/messages'
 
@@ -51,6 +51,87 @@ function normalizeThreadGoal(value: unknown) {
     }
 }
 
+const TOKEN_USAGE_NUMBER_KEYS = new Set([
+    'input_tokens',
+    'inputTokens',
+    'prompt_tokens',
+    'promptTokens',
+    'output_tokens',
+    'outputTokens',
+    'completion_tokens',
+    'completionTokens',
+    'total_tokens',
+    'totalTokens',
+    'context_tokens',
+    'contextTokens',
+    'context_window',
+    'contextWindow',
+    'model_context_window',
+    'modelContextWindow',
+    'cache_creation_input_tokens',
+    'cacheCreationInputTokens',
+    'cache_read_input_tokens',
+    'cacheReadInputTokens',
+    'cached_input_tokens',
+    'cachedInputTokens',
+    'cached_tokens',
+    'cachedTokens',
+    'prompt_cache_hit_tokens',
+    'promptCacheHitTokens'
+])
+
+const TOKEN_USAGE_OBJECT_KEYS = new Set([
+    'last',
+    'last_token_usage',
+    'lastTokenUsage',
+    'total',
+    'total_token_usage',
+    'totalTokenUsage',
+    'prompt_tokens_details',
+    'promptTokensDetails',
+    'input_tokens_details',
+    'inputTokensDetails'
+])
+
+const TOKEN_USAGE_STRING_KEYS = new Set([
+    'thread_id',
+    'threadId',
+    'turn_id',
+    'turnId'
+])
+
+function sanitizeCodexTokenUsageInfo(value: unknown): Record<string, unknown> {
+    if (!isObject(value) || Array.isArray(value)) return {}
+
+    const sanitized: Record<string, unknown> = {}
+    for (const [key, nestedValue] of Object.entries(value)) {
+        if (TOKEN_USAGE_NUMBER_KEYS.has(key)) {
+            const numberValue = asNumber(nestedValue)
+            if (numberValue !== null) {
+                sanitized[key] = numberValue
+            }
+            continue
+        }
+
+        if (TOKEN_USAGE_STRING_KEYS.has(key)) {
+            const stringValue = asString(nestedValue)
+            if (stringValue) {
+                sanitized[key] = stringValue
+            }
+            continue
+        }
+
+        if (TOKEN_USAGE_OBJECT_KEYS.has(key)) {
+            const nested = sanitizeCodexTokenUsageInfo(nestedValue)
+            if (Object.keys(nested).length > 0) {
+                sanitized[key] = nested
+            }
+        }
+    }
+
+    return sanitized
+}
+
 function normalizeCodexTokenUsage(value: unknown, data?: Record<string, unknown>) {
     const info = isObject(value) ? value : null
     if (!info) return null
@@ -72,9 +153,28 @@ function normalizeCodexTokenUsage(value: unknown, data?: Record<string, unknown>
                         : isObject(info.total_token_usage)
                             ? info.total_token_usage
                             : info
-    const inputTokens = asNumber(usageSource.inputTokens ?? usageSource.input_tokens)
-    const outputTokens = asNumber(usageSource.outputTokens ?? usageSource.output_tokens)
+    const inputTokens = asNumber(
+        usageSource.inputTokens
+        ?? usageSource.input_tokens
+        ?? usageSource.promptTokens
+        ?? usageSource.prompt_tokens
+    )
+    const outputTokens = asNumber(
+        usageSource.outputTokens
+        ?? usageSource.output_tokens
+        ?? usageSource.completionTokens
+        ?? usageSource.completion_tokens
+    )
     if (inputTokens === null || outputTokens === null) return null
+    const promptTokensDetails = isObject(usageSource.prompt_tokens_details)
+        ? usageSource.prompt_tokens_details
+        : isObject(usageSource.promptTokensDetails)
+            ? usageSource.promptTokensDetails
+            : isObject(usageSource.input_tokens_details)
+                ? usageSource.input_tokens_details
+                : isObject(usageSource.inputTokensDetails)
+                    ? usageSource.inputTokensDetails
+                    : null
 
     return {
         input_tokens: inputTokens,
@@ -87,6 +187,12 @@ function normalizeCodexTokenUsage(value: unknown, data?: Record<string, unknown>
             ?? usageSource.cached_input_tokens
             ?? usageSource.cacheReadInputTokens
             ?? usageSource.cache_read_input_tokens
+            ?? usageSource.cachedTokens
+            ?? usageSource.cached_tokens
+            ?? usageSource.promptCacheHitTokens
+            ?? usageSource.prompt_cache_hit_tokens
+            ?? promptTokensDetails?.cachedTokens
+            ?? promptTokensDetails?.cached_tokens
         ) ?? undefined,
         context_tokens: asNumber(
             info.contextTokens
@@ -104,6 +210,78 @@ function normalizeCodexTokenUsage(value: unknown, data?: Record<string, unknown>
             ?? info.threadId
         ) ?? undefined,
         scope_role: asString(data?.scope_role ?? data?.scopeRole ?? scope?.role) ?? undefined
+    }
+}
+
+function pickPromptTokenDetails(usage: Record<string, unknown>): Record<string, unknown> | null {
+    return isObject(usage.prompt_tokens_details)
+        ? usage.prompt_tokens_details
+        : isObject(usage.promptTokensDetails)
+            ? usage.promptTokensDetails
+            : isObject(usage.input_tokens_details)
+                ? usage.input_tokens_details
+                : isObject(usage.inputTokensDetails)
+                    ? usage.inputTokensDetails
+                    : null
+}
+
+function normalizeAssistantUsage(value: unknown): UsageData | undefined {
+    const usage = isObject(value) ? value : null
+    if (!usage) return undefined
+
+    const inputTokens = asNumber(
+        usage.input_tokens
+        ?? usage.inputTokens
+        ?? usage.prompt_tokens
+        ?? usage.promptTokens
+    )
+    const outputTokens = asNumber(
+        usage.output_tokens
+        ?? usage.outputTokens
+        ?? usage.completion_tokens
+        ?? usage.completionTokens
+    )
+    if (inputTokens === null || outputTokens === null) return undefined
+
+    const promptTokensDetails = pickPromptTokenDetails(usage)
+    return {
+        input_tokens: inputTokens,
+        output_tokens: outputTokens,
+        cache_creation_input_tokens: asNumber(
+            usage.cache_creation_input_tokens
+            ?? usage.cacheCreationInputTokens
+        ) ?? undefined,
+        cache_read_input_tokens: asNumber(
+            usage.cache_read_input_tokens
+            ?? usage.cacheReadInputTokens
+            ?? usage.cached_read_tokens
+            ?? usage.cachedReadTokens
+            ?? usage.cached_input_tokens
+            ?? usage.cachedInputTokens
+            ?? usage.cached_tokens
+            ?? usage.cachedTokens
+            ?? usage.prompt_cache_hit_tokens
+            ?? usage.promptCacheHitTokens
+            ?? promptTokensDetails?.cached_tokens
+            ?? promptTokensDetails?.cachedTokens
+        ) ?? undefined,
+        context_tokens: asNumber(
+            usage.context_tokens
+            ?? usage.contextTokens
+            ?? usage.total_tokens
+            ?? usage.totalTokens
+            ?? usage.prompt_tokens
+            ?? usage.promptTokens
+            ?? usage.input_tokens
+            ?? usage.inputTokens
+        ) ?? inputTokens,
+        context_window: asNumber(
+            usage.context_window
+            ?? usage.contextWindow
+            ?? usage.model_context_window
+            ?? usage.modelContextWindow
+        ) ?? undefined,
+        service_tier: asString(usage.service_tier ?? usage.serviceTier) ?? undefined
     }
 }
 
@@ -255,9 +433,6 @@ function normalizeAssistantOutput(
         }
     }
 
-    const usage = isObject(message.usage) ? (message.usage as Record<string, unknown>) : null
-    const inputTokens = usage ? asNumber(usage.input_tokens) : null
-    const outputTokens = usage ? asNumber(usage.output_tokens) : null
     const model = asString(message.model) ?? null
 
     return {
@@ -269,14 +444,7 @@ function normalizeAssistantOutput(
         isSidechain,
         content: blocks,
         meta,
-        usage: inputTokens !== null && outputTokens !== null ? {
-            input_tokens: inputTokens,
-            output_tokens: outputTokens,
-            cache_creation_input_tokens: asNumber(usage?.cache_creation_input_tokens) ?? undefined,
-            cache_read_input_tokens: asNumber(usage?.cache_read_input_tokens) ?? undefined,
-            service_tier: asString(usage?.service_tier) ?? undefined,
-            context_window: asNumber(usage?.context_window) ?? undefined
-        } : undefined
+        usage: normalizeAssistantUsage(message.usage)
     }
 }
 
@@ -631,7 +799,8 @@ export function normalizeAgentRecord(
         }
 
         if (data.type === 'token_count') {
-            const usage = normalizeCodexTokenUsage(data.info, data)
+            const info = sanitizeCodexTokenUsageInfo(data.info)
+            const usage = normalizeCodexTokenUsage(info, data)
             return usage ? {
                 id: messageId,
                 localId,
@@ -639,7 +808,7 @@ export function normalizeAgentRecord(
                 role: 'event',
                 content: {
                     type: 'token-count',
-                    info: data.info
+                    info
                 },
                 isSidechain: false,
                 meta,

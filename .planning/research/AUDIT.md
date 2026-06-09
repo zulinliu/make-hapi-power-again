@@ -326,7 +326,7 @@
 ```bash
 # 使用 Chrome DevTools MCP 的 lighthouse_audit 工具
 # 或命令行:
-npx lighthouse https://test.liuzl.asia --output json --output html --output-path ./audit-results/lighthouse/
+npx lighthouse https://test.example.com --output json --output html --output-path ./audit-results/lighthouse/
 ```
 
 ### 3.2 可访问性（Accessibility）审计
@@ -409,7 +409,7 @@ npx playwright test --project=accessibility
 **测量方式:**
 ```bash
 # 1. Lighthouse CI
-npx lighthouse https://test.liuzl.asia --preset=desktop --output=json
+npx lighthouse https://test.example.com --preset=desktop --output=json
 
 # 2. Chrome DevTools Performance tab 手动录制
 
@@ -556,11 +556,11 @@ npx vite build --mode analyze
 
 ```bash
 # 依赖漏洞扫描
-cd /home/liuzl/agent/make-hapi-power-again/make-hapi-power-again
+cd /home/tester/project/make-hapi-power-again
 bun audit
 
 # HTTP 安全头检查（通过 curl）
-curl -sI https://test.liuzl.asia | grep -E "Strict-Transport|X-Content-Type|X-Frame|Content-Security|Referrer-Policy"
+curl -sI https://test.example.com | grep -E "Strict-Transport|X-Content-Type|X-Frame|Content-Security|Referrer-Policy"
 
 # Socket.IO 认证测试
 # 未携带 JWT 尝试连接 /pty 命名空间

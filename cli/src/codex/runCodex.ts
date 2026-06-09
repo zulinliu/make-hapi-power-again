@@ -24,6 +24,16 @@ export { emitReadyIfIdle } from './utils/emitReadyIfIdle';
 
 const REASONING_EFFORTS = new Set<ReasoningEffort>(['none', 'minimal', 'low', 'medium', 'high', 'xhigh'])
 
+const CODEX_GUIDE_CAPABILITIES = {
+    terminal: true,
+    guideInterrupt: {
+        supported: true,
+        preservesQueue: true,
+        isolatedDelivery: true,
+        version: 1
+    }
+} as const
+
 export async function runCodex(opts: {
     startedBy?: 'runner' | 'terminal';
     codexArgs?: string[];
@@ -48,7 +58,10 @@ export async function runCodex(opts: {
             sessionId: opts.existingSessionId,
             flavor: 'codex',
             startedBy,
-            workingDirectory
+            workingDirectory,
+            metadataOverrides: {
+                capabilities: CODEX_GUIDE_CAPABILITIES
+            }
         })
         : await bootstrapSession({
             flavor: 'codex',
@@ -56,9 +69,17 @@ export async function runCodex(opts: {
             workingDirectory,
             agentState: state,
             model: opts.model,
-            modelReasoningEffort: opts.modelReasoningEffort
+            modelReasoningEffort: opts.modelReasoningEffort,
+            metadataOverrides: {
+                capabilities: CODEX_GUIDE_CAPABILITIES
+            }
         });
     const { api, session } = bootstrap;
+
+    session.updateMetadata((metadata) => ({
+        ...metadata,
+        capabilities: CODEX_GUIDE_CAPABILITIES
+    }));
 
     const startingMode: 'local' | 'remote' = startedBy === 'runner' ? 'remote' : 'local';
 
@@ -149,60 +170,63 @@ export async function runCodex(opts: {
     };
 
     let userMessageChain: Promise<void> = Promise.resolve();
-    session.onUserMessage((message, localId) => {
+    session.onUserMessage((message, localId, deliveryMode) => {
         userMessageChain = userMessageChain.then(async () => {
             try {
                 syncCurrentConfigFromSession();
                 let text = message.content.text;
                 let isolatedCommandText: string | null = null;
-                const commands = await listSlashCommands('codex', workingDirectory).catch(() => []);
-                const slash = resolveCodexSlashCommand(text, {
-                    commands,
-                    permissionMode: currentPermissionMode,
-                    collaborationMode: currentCollaborationMode,
-                    model: currentModel,
-                    modelReasoningEffort: currentModelReasoningEffort
-                });
-                if (slash.kind === 'goal') {
-                    if (slash.message) {
-                        session.sendAgentMessage({
-                            type: 'message',
-                            message: slash.message,
-                            id: randomUUID()
-                        });
-                    }
-                    const goalCommand = slash.action === 'set'
-                        ? `/goal ${slash.objective ?? ''}`
-                        : slash.action === 'show'
-                            ? '/goal'
-                            : `/goal ${slash.action}`;
-                    messageQueue.pushIsolateAndClear(goalCommand, {
-                        permissionMode: currentPermissionMode ?? 'default',
+                const isGuideDelivery = deliveryMode === 'guide';
+                if (!isGuideDelivery) {
+                    const commands = await listSlashCommands('codex', workingDirectory).catch(() => []);
+                    const slash = resolveCodexSlashCommand(text, {
+                        commands,
+                        permissionMode: currentPermissionMode,
+                        collaborationMode: currentCollaborationMode,
                         model: currentModel,
-                        modelReasoningEffort: currentModelReasoningEffort,
-                        collaborationMode: currentCollaborationMode
-                    }, localId);
-                    return;
-                }
-                if (slash.kind !== 'passthrough') {
-                    applySlashUpdates(slash.updates);
-                    if (slash.message) {
-                        session.sendAgentMessage({
-                            type: 'message',
-                            message: slash.message,
-                            id: randomUUID()
-                        });
-                    }
-                    if (slash.kind === 'handled') {
-                        if (localId) session.emitMessagesConsumed([localId]);
+                        modelReasoningEffort: currentModelReasoningEffort
+                    });
+                    if (slash.kind === 'goal') {
+                        if (slash.message) {
+                            session.sendAgentMessage({
+                                type: 'message',
+                                message: slash.message,
+                                id: randomUUID()
+                            });
+                        }
+                        const goalCommand = slash.action === 'set'
+                            ? `/goal ${slash.objective ?? ''}`
+                            : slash.action === 'show'
+                                ? '/goal'
+                                : `/goal ${slash.action}`;
+                        messageQueue.pushIsolatePreservingQueue(goalCommand, {
+                            permissionMode: currentPermissionMode ?? 'default',
+                            model: currentModel,
+                            modelReasoningEffort: currentModelReasoningEffort,
+                            collaborationMode: currentCollaborationMode
+                        }, localId);
                         return;
                     }
-                    text = slash.text;
-                } else {
-                    const specialCommand = parseCodexSpecialCommand(message.content.text);
-                    if (specialCommand.type) {
-                        logger.debug(`[Codex] Detected special command: ${specialCommand.type}`);
-                        isolatedCommandText = message.content.text.trim();
+                    if (slash.kind !== 'passthrough') {
+                        applySlashUpdates(slash.updates);
+                        if (slash.message) {
+                            session.sendAgentMessage({
+                                type: 'message',
+                                message: slash.message,
+                                id: randomUUID()
+                            });
+                        }
+                        if (slash.kind === 'handled') {
+                            if (localId) session.emitMessagesConsumed([localId]);
+                            return;
+                        }
+                        text = slash.text;
+                    } else {
+                        const specialCommand = parseCodexSpecialCommand(message.content.text);
+                        if (specialCommand.type) {
+                            logger.debug(`[Codex] Detected special command: ${specialCommand.type}`);
+                            isolatedCommandText = message.content.text.trim();
+                        }
                     }
                 }
                 text = formatMessageWithAttachments(text, message.content.attachments);
@@ -221,7 +245,11 @@ export async function runCodex(opts: {
                     collaborationMode: currentCollaborationMode
                 };
                 if (isolatedCommandText) {
-                    messageQueue.pushIsolateAndClear(isolatedCommandText, enhancedMode, localId);
+                    messageQueue.pushIsolatePreservingQueue(isolatedCommandText, enhancedMode, localId);
+                    return;
+                }
+                if (isGuideDelivery) {
+                    messageQueue.pushGuide(text, enhancedMode, localId);
                     return;
                 }
                 messageQueue.push(text, enhancedMode, localId);
@@ -233,7 +261,12 @@ export async function runCodex(opts: {
                     modelReasoningEffort: currentModelReasoningEffort,
                     collaborationMode: currentCollaborationMode
                 };
-                messageQueue.push(formatMessageWithAttachments(message.content.text, message.content.attachments), enhancedMode, localId);
+                const fallbackText = formatMessageWithAttachments(message.content.text, message.content.attachments);
+                if (deliveryMode === 'guide') {
+                    messageQueue.pushGuide(fallbackText, enhancedMode, localId);
+                    return;
+                }
+                messageQueue.push(fallbackText, enhancedMode, localId);
             }
         }).catch((error) => {
             logger.debug('[Codex] User message handler chain failed', error);

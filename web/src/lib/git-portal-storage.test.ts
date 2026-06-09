@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { addHistory, getFavorites, getHistory, parseRepoUrl, toggleFavorite, type CloneHistoryEntry } from './git-portal-storage'
+import { addHistory, getFavorites, getHistory, parseRepoUrl, sanitizeGitUrl, toggleFavorite, type CloneHistoryEntry } from './git-portal-storage'
 
 const STORAGE_KEY = 'git-portal'
 
@@ -75,7 +75,7 @@ describe('git-portal-storage', () => {
             platform: 'github',
             repoName: 'zentao-workflow-skills',
             owner: 'zulinliu',
-            targetDir: '/home/liuzl/agent/temp_test'
+            targetDir: '/home/tester/project/temp_test'
         })
 
         expect(getRandomValues).toHaveBeenCalledOnce()
@@ -108,10 +108,15 @@ describe('git-portal-storage', () => {
     })
 
     it('parses internal HTTP repository URLs with subgroup paths', () => {
-        expect(parseRepoUrl('http://git.tsintergy.com:8070/liuzulin/cq-dataworks/cq-dataworks-design-skill.git')).toEqual({
+        expect(parseRepoUrl('http://git.internal.example.com:8070/test-user/project/example-skill.git')).toEqual({
             platform: 'other',
-            owner: 'liuzulin/cq-dataworks',
-            repoName: 'cq-dataworks-design-skill'
+            owner: 'test-user/project',
+            repoName: 'example-skill'
         })
+    })
+
+    it('redacts embedded URL credentials for display', () => {
+        expect(sanitizeGitUrl('https://test-user:example-token@git.internal.example.com/project/repo.git'))
+            .toBe('https://***@git.internal.example.com/project/repo.git')
     })
 })

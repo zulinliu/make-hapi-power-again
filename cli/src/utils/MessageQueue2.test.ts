@@ -581,4 +581,183 @@ describe('MessageQueue2', () => {
         expect(batch3?.message).toBe('after-isolated');
         expect(batch3?.mode.type).toBe('B');
     });
+
+    describe('pushGuide', () => {
+        it('should preserve guide and normal messages when an isolated admin message is inserted', async () => {
+            const queue = new MessageQueue2<string>(mode => mode);
+            const consumed: string[][] = [];
+            queue.onBatchConsumed = (localIds) => { consumed.push(localIds); };
+
+            queue.push('queued', 'A', 'q1');
+            queue.pushGuide('guide', 'A', 'g1');
+            queue.pushIsolatePreservingQueue('/clear', 'A', 'admin1');
+
+            expect(queue.queue.map(item => ({
+                message: item.message,
+                isolate: item.isolate,
+                guide: item.guide ?? false
+            }))).toEqual([
+                { message: '/clear', isolate: true, guide: false },
+                { message: 'guide', isolate: true, guide: true },
+                { message: 'queued', isolate: false, guide: false }
+            ]);
+            expect(consumed).toEqual([]);
+
+            const admin = await queue.waitForMessagesAndGetAsString();
+            expect(admin?.message).toBe('/clear');
+            expect(admin?.isolate).toBe(true);
+            expect(consumed).toEqual([['admin1']]);
+
+            const guide = await queue.waitForMessagesAndGetAsString();
+            expect(guide?.message).toBe('guide');
+            expect(guide?.isolate).toBe(true);
+            expect(consumed).toEqual([['admin1'], ['g1']]);
+
+            const queued = await queue.waitForMessagesAndGetAsString();
+            expect(queued?.message).toBe('queued');
+            expect(queued?.isolate).toBe(false);
+            expect(consumed).toEqual([['admin1'], ['g1'], ['q1']]);
+        });
+
+        it('should insert guide at the front without clearing normal queued messages', async () => {
+            const queue = new MessageQueue2<{ type: string }>((mode) => mode.type);
+
+            queue.push('queued-1', { type: 'A' }, 'q1');
+            queue.push('queued-2', { type: 'A' }, 'q2');
+            queue.pushGuide('guide', { type: 'A' }, 'g1');
+
+            expect(queue.size()).toBe(3);
+
+            const guide = await queue.waitForMessagesAndGetAsString();
+            expect(guide?.message).toBe('guide');
+            expect(guide?.isolate).toBe(true);
+            expect(queue.size()).toBe(2);
+
+            const queued = await queue.waitForMessagesAndGetAsString();
+            expect(queued?.message).toBe('queued-1\nqueued-2');
+            expect(queued?.isolate).toBe(false);
+            expect(queue.size()).toBe(0);
+        });
+
+        it('should not batch guide with normal queued messages of the same mode', async () => {
+            const queue = new MessageQueue2<{ type: string }>((mode) => mode.type);
+
+            queue.pushGuide('guide', { type: 'A' }, 'g1');
+            queue.push('queued-after', { type: 'A' }, 'q1');
+
+            const guide = await queue.waitForMessagesAndGetAsString();
+            expect(guide?.message).toBe('guide');
+            expect(guide?.isolate).toBe(true);
+
+            const queued = await queue.waitForMessagesAndGetAsString();
+            expect(queued?.message).toBe('queued-after');
+            expect(queued?.isolate).toBe(false);
+        });
+
+        it('should report guide localIds only after guide is collected', async () => {
+            const queue = new MessageQueue2<string>(mode => mode);
+            const consumed: string[][] = [];
+            queue.onBatchConsumed = (localIds) => { consumed.push(localIds); };
+
+            queue.push('queued', 'A', 'q1');
+            queue.pushGuide('guide', 'A', 'g1');
+
+            expect(consumed).toEqual([]);
+            const guide = await queue.waitForMessagesAndGetAsString();
+            expect(guide?.message).toBe('guide');
+            expect(consumed).toEqual([['g1']]);
+
+            const queued = await queue.waitForMessagesAndGetAsString();
+            expect(queued?.message).toBe('queued');
+            expect(consumed).toEqual([['g1'], ['q1']]);
+        });
+
+        it('should cancel an uncollected guide by localId', () => {
+            const queue = new MessageQueue2<string>(mode => mode);
+
+            queue.push('queued', 'A', 'q1');
+            queue.pushGuide('guide', 'A', 'g1');
+
+            expect(queue.cancelByLocalId('g1')).toBe(true);
+            expect(queue.queue.map(item => item.message)).toEqual(['queued']);
+        });
+
+        it('should call the guide handler only for guide messages', () => {
+            const queue = new MessageQueue2<string>(mode => mode);
+            const seen: string[] = [];
+            queue.setOnGuideMessage((message) => {
+                seen.push(message);
+            });
+
+            queue.push('queued', 'A');
+            queue.pushImmediate('immediate', 'A');
+            queue.unshift('unshifted', 'A');
+            queue.pushGuide('guide', 'A');
+
+            expect(seen).toEqual(['guide']);
+        });
+
+        it('should report pending guide only while a guide message is queued', async () => {
+            const queue = new MessageQueue2<string>(mode => mode);
+
+            queue.push('queued', 'A');
+            expect(queue.hasPendingGuide()).toBe(false);
+
+            queue.pushGuide('guide', 'A');
+            expect(queue.hasPendingGuide()).toBe(true);
+
+            const guide = await queue.waitForMessagesAndGetAsString();
+            expect(guide?.message).toBe('guide');
+            expect(queue.hasPendingGuide()).toBe(false);
+        });
+
+        it('should report pending isolated messages for interrupting commands', async () => {
+            const queue = new MessageQueue2<string>(mode => mode);
+
+            queue.push('queued', 'A');
+            expect(queue.hasPendingIsolated()).toBe(false);
+            expect(queue.hasNextIsolated()).toBe(false);
+            expect(queue.hasNextMessageMatching(message => message === '/clear')).toBe(false);
+
+            queue.pushIsolateAndClear('/clear', 'A');
+            expect(queue.hasPendingIsolated()).toBe(true);
+            expect(queue.hasNextIsolated()).toBe(true);
+            expect(queue.hasNextMessageMatching(message => message === '/clear')).toBe(true);
+
+            const isolated = await queue.waitForMessagesAndGetAsString();
+            expect(isolated?.message).toBe('/clear');
+            expect(isolated?.isolate).toBe(true);
+            expect(queue.hasPendingIsolated()).toBe(false);
+        });
+
+        it('should downgrade pending guides to normal queued messages after normal items', async () => {
+            const queue = new MessageQueue2<{ type: string }>((mode) => mode.type);
+
+            queue.push('queued-1', { type: 'A' }, 'q1');
+            queue.pushGuide('guide-1', { type: 'A' }, 'g1');
+            queue.push('queued-2', { type: 'A' }, 'q2');
+            queue.pushGuide('guide-2', { type: 'A' }, 'g2');
+
+            const downgraded = queue.downgradePendingGuides();
+
+            expect(downgraded).toEqual(['g2', 'g1']);
+            expect(queue.hasPendingGuide()).toBe(false);
+            expect(queue.queue.map(item => ({
+                message: item.message,
+                localId: item.localId,
+                isolate: item.isolate,
+                guide: item.guide
+            }))).toEqual([
+                { message: 'queued-1', localId: 'q1', isolate: false, guide: undefined },
+                { message: 'queued-2', localId: 'q2', isolate: false, guide: undefined },
+                { message: 'guide-2', localId: 'g2', isolate: false, guide: false },
+                { message: 'guide-1', localId: 'g1', isolate: false, guide: false }
+            ]);
+
+            const batch = await queue.waitForMessagesAndGetAsString();
+
+            expect(batch?.message).toBe('queued-1\nqueued-2\nguide-2\nguide-1');
+            expect(batch?.isolate).toBe(false);
+        });
+    });
 });

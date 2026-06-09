@@ -516,9 +516,28 @@ export class AcpSdkBackend implements AgentBackend {
     private extractPromptUsage(response: unknown): AcpPromptUsage | null {
         if (!isObject(response) || !isObject(response.usage)) return null;
         const usage = response.usage;
-        const inputTokens = this.asFiniteNumber(usage.inputTokens ?? usage.input_tokens);
-        const outputTokens = this.asFiniteNumber(usage.outputTokens ?? usage.output_tokens);
+        const inputTokens = this.asFiniteNumber(
+            usage.inputTokens
+            ?? usage.input_tokens
+            ?? usage.promptTokens
+            ?? usage.prompt_tokens
+        );
+        const outputTokens = this.asFiniteNumber(
+            usage.outputTokens
+            ?? usage.output_tokens
+            ?? usage.completionTokens
+            ?? usage.completion_tokens
+        );
         if (inputTokens === null || outputTokens === null) return null;
+        const promptTokensDetails = isObject(usage.prompt_tokens_details)
+            ? usage.prompt_tokens_details
+            : isObject(usage.promptTokensDetails)
+                ? usage.promptTokensDetails
+                : isObject(usage.input_tokens_details)
+                    ? usage.input_tokens_details
+                    : isObject(usage.inputTokensDetails)
+                        ? usage.inputTokensDetails
+                        : null;
 
         return {
             inputTokens,
@@ -530,6 +549,12 @@ export class AcpSdkBackend implements AgentBackend {
                 ?? usage.cached_read_tokens
                 ?? usage.cachedInputTokens
                 ?? usage.cached_input_tokens
+                ?? usage.cachedTokens
+                ?? usage.cached_tokens
+                ?? usage.promptCacheHitTokens
+                ?? usage.prompt_cache_hit_tokens
+                ?? promptTokensDetails?.cachedTokens
+                ?? promptTokensDetails?.cached_tokens
             ) ?? undefined
         };
     }

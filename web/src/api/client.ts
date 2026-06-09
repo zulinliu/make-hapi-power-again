@@ -9,6 +9,14 @@ import type {
     PushSubscriptionPayload,
     PushUnsubscribePayload,
     PushVapidPublicKeyResponse,
+    SessionLoomExportListResponse,
+    SessionLoomExportPreviewRequest,
+    SessionLoomExportPreviewResponse,
+    SessionLoomExportRequest,
+    SessionLoomExportResponse,
+    SessionLoomOutlineResponse,
+    SessionLoomSynthesisRequest,
+    SessionLoomSynthesisResponse,
     SlashCommandsResponse,
     SkillsResponse,
     SpawnResponse,
@@ -16,12 +24,18 @@ import type {
     SessionResponse,
     SessionsResponse
 } from '@/types/api'
+import type { MessageDeliveryMode } from '@/types/api'
 import type {
     CodexModelsResponse,
     CursorModelsResponse,
     DeleteUploadResponse,
     FileReadResponse,
+    GitAtlasDashboardResponse,
+    GitAtlasDiffResponse,
     GitCommandResponse,
+    GitCommitBasketResponse,
+    GitSyncRequest,
+    GitSyncResponse,
     ListDirectoryResponse,
     MachineListDirectoryResponse,
     MachinePathsExistsResponse,
@@ -31,9 +45,14 @@ import type {
 import type { AgentFlavor } from '@hapipower/protocol'
 import type { CancelMessageResponse } from '@hapipower/protocol/schemas'
 import type {
+    CheckProviderResponse,
+    CreateProviderKeyRevealTokenResponse,
     DiscoverModelsResponse,
+    ProviderOverviewResponse,
+    ProviderProtocol,
     ProviderWithAssignments,
     ProvidersListResponse,
+    RevealProviderKeyResponse,
 } from '@hapipower/protocol'
 
 type ApiClientOptions = {
@@ -44,14 +63,19 @@ type ApiClientOptions = {
 
 type ErrorPayload = {
     error?: unknown
+    code?: unknown
 }
 
-function parseErrorCode(bodyText: string): string | undefined {
+function parseErrorPayload(bodyText: string): { error?: string; code?: string } {
     try {
         const parsed = JSON.parse(bodyText) as ErrorPayload
-        return typeof parsed.error === 'string' ? parsed.error : undefined
+        const error = typeof parsed.error === 'string' ? parsed.error : undefined
+        const code = typeof parsed.code === 'string'
+            ? parsed.code
+            : error
+        return { error, code }
     } catch {
-        return undefined
+        return {}
     }
 }
 
@@ -129,7 +153,10 @@ export class ApiClient {
 
         if (!res.ok) {
             const body = await res.text().catch(() => '')
-            throw new Error(`HTTP ${res.status} ${res.statusText}: ${body}`)
+            const payload = parseErrorPayload(body)
+            const detail = payload.error ?? body
+            const suffix = detail ? `: ${detail}` : ''
+            throw new ApiError(`HTTP ${res.status} ${res.statusText}${suffix}`, res.status, payload.code, body || undefined)
         }
 
         return await res.json() as T
@@ -144,9 +171,9 @@ export class ApiClient {
 
         if (!res.ok) {
             const body = await res.text().catch(() => '')
-            const code = parseErrorCode(body)
+            const payload = parseErrorPayload(body)
             const detail = body ? `: ${body}` : ''
-            throw new ApiError(`Auth failed: HTTP ${res.status} ${res.statusText}${detail}`, res.status, code, body || undefined)
+            throw new ApiError(`Auth failed: HTTP ${res.status} ${res.statusText}${detail}`, res.status, payload.code, body || undefined)
         }
 
         return await res.json() as AuthResponse
@@ -161,9 +188,9 @@ export class ApiClient {
 
         if (!res.ok) {
             const body = await res.text().catch(() => '')
-            const code = parseErrorCode(body)
+            const payload = parseErrorPayload(body)
             const detail = body ? `: ${body}` : ''
-            throw new ApiError(`Bind failed: HTTP ${res.status} ${res.statusText}${detail}`, res.status, code, body || undefined)
+            throw new ApiError(`Bind failed: HTTP ${res.status} ${res.statusText}${detail}`, res.status, payload.code, body || undefined)
         }
 
         return await res.json() as AuthResponse
@@ -226,8 +253,111 @@ export class ApiClient {
         return await this.request<MessagesResponse>(url)
     }
 
+    async getSessionLoomOutline(sessionId: string): Promise<SessionLoomOutlineResponse> {
+        return await this.request<SessionLoomOutlineResponse>(
+            `/api/sessions/${encodeURIComponent(sessionId)}/conversation-outline`
+        )
+    }
+
+    async previewSessionLoomExport(
+        sessionId: string,
+        payload: SessionLoomExportPreviewRequest
+    ): Promise<SessionLoomExportPreviewResponse> {
+        return await this.request<SessionLoomExportPreviewResponse>(
+            `/api/sessions/${encodeURIComponent(sessionId)}/exports/preview`,
+            {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            }
+        )
+    }
+
+    async createSessionLoomExport(
+        sessionId: string,
+        payload: SessionLoomExportRequest
+    ): Promise<SessionLoomExportResponse> {
+        return await this.request<SessionLoomExportResponse>(
+            `/api/sessions/${encodeURIComponent(sessionId)}/exports`,
+            {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            }
+        )
+    }
+
+    async listSessionLoomExports(sessionId: string): Promise<SessionLoomExportListResponse> {
+        return await this.request<SessionLoomExportListResponse>(
+            `/api/sessions/${encodeURIComponent(sessionId)}/exports`
+        )
+    }
+
+    async downloadSessionLoomExport(
+        sessionId: string,
+        exportId: string,
+        attempt: number = 0,
+        overrideToken?: string | null
+    ): Promise<string> {
+        const headers = new Headers()
+        const liveToken = this.getToken ? this.getToken() : null
+        const authToken = overrideToken !== undefined
+            ? (overrideToken ?? (liveToken ?? this.token))
+            : (liveToken ?? this.token)
+        if (authToken) {
+            headers.set('authorization', `Bearer ${authToken}`)
+        }
+
+        const response = await fetch(this.buildUrl(
+            `/api/sessions/${encodeURIComponent(sessionId)}/exports/${encodeURIComponent(exportId)}/download`
+        ), { headers })
+
+        if (response.status === 401 && attempt === 0 && this.onUnauthorized) {
+            const refreshed = await this.onUnauthorized()
+            if (refreshed) {
+                this.token = refreshed
+                return await this.downloadSessionLoomExport(sessionId, exportId, attempt + 1, refreshed)
+            }
+        }
+        if (!response.ok) {
+            throw new ApiError(`HTTP ${response.status}`, response.status, undefined, await response.text().catch(() => undefined))
+        }
+        return await response.text()
+    }
+
+    async deleteSessionLoomExport(sessionId: string, exportId: string): Promise<void> {
+        await this.request(
+            `/api/sessions/${encodeURIComponent(sessionId)}/exports/${encodeURIComponent(exportId)}`,
+            { method: 'DELETE' }
+        )
+    }
+
+    async createSessionLoomSynthesis(
+        sessionId: string,
+        payload: SessionLoomSynthesisRequest
+    ): Promise<SessionLoomSynthesisResponse> {
+        return await this.request<SessionLoomSynthesisResponse>(
+            `/api/sessions/${encodeURIComponent(sessionId)}/synthesis`,
+            {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            }
+        )
+    }
+
     async getGitStatus(sessionId: string): Promise<GitCommandResponse> {
         return await this.request<GitCommandResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/git-status`)
+    }
+
+    async getGitDashboard(sessionId: string): Promise<GitAtlasDashboardResponse> {
+        return await this.request<GitAtlasDashboardResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/git-dashboard`)
+    }
+
+    async getGitAtlasDiff(sessionId: string, path: string, staged?: boolean): Promise<GitAtlasDiffResponse> {
+        const params = new URLSearchParams()
+        params.set('path', path)
+        if (staged !== undefined) {
+            params.set('staged', staged ? 'true' : 'false')
+        }
+        return await this.request<GitAtlasDiffResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/git-diff?${params.toString()}`)
     }
 
     async getGitDiffNumstat(sessionId: string, staged: boolean): Promise<GitCommandResponse> {
@@ -271,11 +401,11 @@ export class ApiClient {
         })
     }
 
-    async deleteGitBranch(sessionId: string, name: string): Promise<GitCommandResponse> {
+    async deleteGitBranch(sessionId: string, name: string, confirmation?: string): Promise<GitCommandResponse> {
         return await this.request<GitCommandResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/git-branches`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, action: 'delete' })
+            body: JSON.stringify({ name, action: 'delete', confirmation })
         })
     }
 
@@ -289,6 +419,14 @@ export class ApiClient {
 
     async createGitCommit(sessionId: string, message: string, paths?: string[]): Promise<GitCommandResponse> {
         return await this.request<GitCommandResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/git-commit`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message, paths })
+        })
+    }
+
+    async createGitCommitBasket(sessionId: string, message: string, paths: string[]): Promise<GitCommitBasketResponse> {
+        return await this.request<GitCommitBasketResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/git-commit-basket`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ message, paths })
@@ -335,13 +473,15 @@ export class ApiClient {
         })
     }
 
-    async removeGitRemote(sessionId: string, name: string): Promise<GitCommandResponse> {
+    async removeGitRemote(sessionId: string, name: string, confirmation?: string): Promise<GitCommandResponse> {
         return await this.request<GitCommandResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/git-remotes/${encodeURIComponent(name)}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ confirmation })
         })
     }
 
-    async gitPush(sessionId: string, options: { remote?: string; branch?: string; force?: boolean }): Promise<GitCommandResponse> {
+    async gitPush(sessionId: string, options: { remote?: string; branch?: string; force?: boolean; confirmation?: string }): Promise<GitCommandResponse> {
         return await this.request<GitCommandResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/git-push`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -359,6 +499,14 @@ export class ApiClient {
 
     async gitFetch(sessionId: string, options: { remote?: string }): Promise<GitCommandResponse> {
         return await this.request<GitCommandResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/git-fetch`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(options)
+        })
+    }
+
+    async gitSync(sessionId: string, options: GitSyncRequest): Promise<GitSyncResponse> {
+        return await this.request<GitSyncResponse>(`/api/sessions/${encodeURIComponent(sessionId)}/git-sync`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(options)
@@ -520,14 +668,22 @@ export class ApiClient {
         return response.sessionId
     }
 
-    async sendMessage(sessionId: string, text: string, localId?: string | null, attachments?: AttachmentMetadata[], scheduledAt?: number | null): Promise<void> {
+    async sendMessage(
+        sessionId: string,
+        text: string,
+        localId?: string | null,
+        attachments?: AttachmentMetadata[],
+        scheduledAt?: number | null,
+        deliveryMode?: MessageDeliveryMode
+    ): Promise<void> {
         await this.request(`/api/sessions/${encodeURIComponent(sessionId)}/messages`, {
             method: 'POST',
             body: JSON.stringify({
                 text,
                 localId: localId ?? undefined,
                 attachments: attachments ?? undefined,
-                scheduledAt: scheduledAt ?? undefined
+                scheduledAt: scheduledAt ?? undefined,
+                deliveryMode: deliveryMode ?? undefined
             })
         })
     }
@@ -844,14 +1000,18 @@ export class ApiClient {
         return await this.request<{ provider: ProviderWithAssignments }>(`/api/providers/${encodeURIComponent(id)}`)
     }
 
-    async createProvider(data: { name: string; baseUrl: string; apiKey: string; notes?: string }): Promise<{ provider: ProviderWithAssignments }> {
+    async getProviderOverview(): Promise<ProviderOverviewResponse> {
+        return await this.request<ProviderOverviewResponse>('/api/providers/overview')
+    }
+
+    async createProvider(data: { name: string; baseUrl: string; apiKey: string; protocol?: ProviderProtocol; defaultModel?: string | null; notes?: string }): Promise<{ provider: ProviderWithAssignments }> {
         return await this.request<{ provider: ProviderWithAssignments }>('/api/providers', {
             method: 'POST',
             body: JSON.stringify(data)
         })
     }
 
-    async updateProvider(id: string, data: { name?: string; baseUrl?: string; apiKey?: string; notes?: string }): Promise<{ provider: ProviderWithAssignments }> {
+    async updateProvider(id: string, data: { name?: string; baseUrl?: string; apiKey?: string; protocol?: ProviderProtocol; defaultModel?: string | null; notes?: string }): Promise<{ provider: ProviderWithAssignments }> {
         return await this.request<{ provider: ProviderWithAssignments }>(`/api/providers/${encodeURIComponent(id)}`, {
             method: 'PUT',
             body: JSON.stringify(data)
@@ -864,10 +1024,10 @@ export class ApiClient {
         })
     }
 
-    async assignProvider(providerId: string, agentFlavor: string, isDefault: boolean): Promise<void> {
+    async assignProvider(providerId: string, agentFlavor: string, isDefault: boolean, model?: string | null): Promise<void> {
         await this.request(`/api/providers/${encodeURIComponent(providerId)}/assign`, {
             method: 'POST',
-            body: JSON.stringify({ agentFlavor, isDefault })
+            body: JSON.stringify({ agentFlavor, isDefault, model })
         })
     }
 
@@ -883,11 +1043,37 @@ export class ApiClient {
         })
     }
 
+    async checkProvider(providerId: string): Promise<CheckProviderResponse> {
+        return await this.request<CheckProviderResponse>(`/api/providers/${encodeURIComponent(providerId)}/check`, {
+            method: 'POST',
+            body: JSON.stringify({ force: true })
+        })
+    }
+
+    async rotateProviderKey(providerId: string, apiKey: string): Promise<{ provider: ProviderWithAssignments }> {
+        return await this.request<{ provider: ProviderWithAssignments }>(`/api/providers/${encodeURIComponent(providerId)}/rotate-key`, {
+            method: 'POST',
+            body: JSON.stringify({ apiKey })
+        })
+    }
+
+    async revealProviderKey(providerId: string): Promise<RevealProviderKeyResponse> {
+        const grant = await this.request<CreateProviderKeyRevealTokenResponse>(`/api/providers/${encodeURIComponent(providerId)}/reveal-key-token`, {
+            method: 'POST',
+            body: JSON.stringify({ confirm: 'reveal-provider-key' })
+        })
+        return await this.request<RevealProviderKeyResponse>(`/api/providers/${encodeURIComponent(providerId)}/reveal-key`, {
+            method: 'POST',
+            body: JSON.stringify({ revealToken: grant.revealToken })
+        })
+    }
+
     async getFlavorModels(flavor: string): Promise<{ models: Array<{ id: string; name: string; providerId: string; providerName: string }> }> {
         return await this.request(`/api/providers/flavor/${encodeURIComponent(flavor)}/models`)
     }
 
     async getProviderApiKey(providerId: string): Promise<{ apiKey: string }> {
-        return await this.request<{ apiKey: string }>(`/api/providers/${encodeURIComponent(providerId)}/api-key`)
+        const response = await this.revealProviderKey(providerId)
+        return { apiKey: response.apiKey }
     }
 }

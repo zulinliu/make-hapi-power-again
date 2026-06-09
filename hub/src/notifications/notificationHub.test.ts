@@ -123,49 +123,54 @@ describe('NotificationHub', () => {
     })
 
     it('throttles ready notifications per session', async () => {
-        const engine = new FakeSyncEngine()
-        const channel = new StubChannel()
-        const hub = new NotificationHub(engine as unknown as SyncEngine, [channel], {
-            permissionDebounceMs: 1,
-            readyCooldownMs: 20
-        })
+        const originalDateNow = Date.now
+        let now = 1_800_000_000_000
+        Date.now = () => now
+        let hub: NotificationHub | undefined
 
-        const session = createSession()
-        engine.setSession(session)
+        try {
+            const engine = new FakeSyncEngine()
+            const channel = new StubChannel()
+            hub = new NotificationHub(engine as unknown as SyncEngine, [channel], {
+                permissionDebounceMs: 1,
+                readyCooldownMs: 20
+            })
 
-        const readyEvent: SyncEvent = {
-            type: 'message-received',
-            sessionId: session.id,
-            message: {
-                id: 'message-1',
-                seq: 1,
-                localId: null,
-                createdAt: 0,
-                content: {
-                    role: 'agent',
+            const session = createSession()
+            engine.setSession(session)
+
+            const readyEvent: SyncEvent = {
+                type: 'message-received',
+                sessionId: session.id,
+                message: {
+                    id: 'message-1',
+                    seq: 1,
+                    localId: null,
+                    createdAt: 0,
                     content: {
-                        id: 'event-1',
-                        type: 'event',
-                        data: { type: 'ready' }
+                        role: 'agent',
+                        content: {
+                            id: 'event-1',
+                            type: 'event',
+                            data: { type: 'ready' }
+                        }
                     }
                 }
             }
+
+            engine.emit(readyEvent)
+            expect(channel.readySessions).toHaveLength(1)
+
+            engine.emit(readyEvent)
+            expect(channel.readySessions).toHaveLength(1)
+
+            now += 21
+            engine.emit(readyEvent)
+            expect(channel.readySessions).toHaveLength(2)
+        } finally {
+            Date.now = originalDateNow
+            hub?.stop()
         }
-
-        engine.emit(readyEvent)
-        await sleep(5)
-        expect(channel.readySessions).toHaveLength(1)
-
-        engine.emit(readyEvent)
-        await sleep(5)
-        expect(channel.readySessions).toHaveLength(1)
-
-        await sleep(30)
-        engine.emit(readyEvent)
-        await sleep(5)
-        expect(channel.readySessions).toHaveLength(2)
-
-        hub.stop()
     })
 
     it('sends task notifications for task_notification system messages', async () => {

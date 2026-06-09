@@ -56,6 +56,55 @@ describe('convertCodexEvent', () => {
         });
     });
 
+    it('sanitizes token_count usage info', () => {
+        const result = convertCodexEvent({
+            type: 'event_msg',
+            payload: {
+                type: 'token_count',
+                info: {
+                    thread_id: 'thread-1',
+                    turn_id: 'turn-1',
+                    prompt: 'do not persist this prompt',
+                    headers: { authorization: 'Bearer secret' },
+                    last: {
+                        inputTokens: 10,
+                        outputTokens: 2,
+                        requestPath: '/home/tester/project'
+                    },
+                    total_token_usage: {
+                        prompt_tokens: 20,
+                        completion_tokens: 4,
+                        total_tokens: 24,
+                        prompt_tokens_details: {
+                            cached_tokens: 3
+                        },
+                        apiKey: 'redacted-test-key'
+                    }
+                }
+            }
+        });
+
+        expect(result?.message).toMatchObject({
+            type: 'token_count',
+            info: {
+                thread_id: 'thread-1',
+                turn_id: 'turn-1',
+                last: {
+                    inputTokens: 10,
+                    outputTokens: 2
+                },
+                total_token_usage: {
+                    prompt_tokens: 20,
+                    completion_tokens: 4,
+                    total_tokens: 24,
+                    prompt_tokens_details: {
+                        cached_tokens: 3
+                    }
+                }
+            }
+        });
+    });
+
     it('converts function_call items', () => {
         const result = convertCodexEvent({
             type: 'response_item',

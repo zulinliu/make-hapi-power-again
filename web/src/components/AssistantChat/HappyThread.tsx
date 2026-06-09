@@ -12,7 +12,8 @@ import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/Spinner'
 import { useTerminalToolDisplayMode } from '@/hooks/useTerminalToolDisplayMode'
 import { useTranslation } from '@/lib/use-translation'
-import { CloseIcon } from '@/components/icons'
+
+export { ConversationOutlinePanel } from '@/components/AssistantChat/SessionLoomPanel'
 
 type ScrollAnchor = {
     id: string
@@ -90,6 +91,17 @@ export function restoreScrollAnchor(viewport: HTMLElement, anchor: ScrollAnchor)
     return true
 }
 
+export function restoreFocusAfterPanelClose(target: HTMLElement | null): void {
+    if (!target || !document.contains(target)) {
+        return
+    }
+    window.setTimeout(() => {
+        if (document.contains(target)) {
+            target.focus()
+        }
+    }, 0)
+}
+
 export async function locateOutlineTargetMessage(options: LocateOutlineTargetOptions): Promise<HTMLElement | null> {
     const anchorId = getConversationMessageAnchorId(options.targetMessageId)
     let target = options.findTarget(anchorId)
@@ -148,97 +160,6 @@ const THREAD_MESSAGE_COMPONENTS = {
     SystemMessage: HappySystemMessage
 } as const
 
-export function ConversationOutlinePanel(props: {
-    title: string
-    items: readonly ConversationOutlineItem[]
-    hasMoreMessages: boolean
-    isLoadingMoreMessages: boolean
-    onLoadMore: () => void
-    onSelect: (item: ConversationOutlineItem) => void
-    onClose: () => void
-}) {
-    const { t } = useTranslation()
-
-    return (
-        <aside
-            className="absolute inset-y-0 right-0 z-30 flex w-full max-w-[24rem] flex-col border-l border-[var(--app-border)] bg-[var(--app-bg)] shadow-2xl sm:w-[24rem]"
-            aria-label={t('session.outline.title')}
-        >
-            <div className="flex items-start gap-3 border-b border-[var(--app-border)] p-3">
-                <div className="min-w-0 flex-1">
-                    <div className="text-sm font-semibold">{t('session.outline.title')}</div>
-                    <div className="mt-0.5 truncate text-xs text-[var(--app-hint)]">{props.title}</div>
-                </div>
-                <button
-                    type="button"
-                    onClick={props.onClose}
-                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[var(--app-hint)] transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]"
-                    aria-label={t('button.close')}
-                    title={t('button.close')}
-                >
-                    <CloseIcon className="h-4 w-4" />
-                </button>
-            </div>
-
-            {props.hasMoreMessages ? (
-                <div className="border-b border-[var(--app-border)] p-3">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={props.onLoadMore}
-                        disabled={props.isLoadingMoreMessages}
-                        aria-busy={props.isLoadingMoreMessages}
-                        className="w-full gap-1.5 text-xs"
-                    >
-                        {props.isLoadingMoreMessages ? (
-                            <>
-                                <Spinner size="sm" label={null} className="text-current" />
-                                {t('misc.loading')}
-                            </>
-                        ) : (
-                            <>
-                                <span aria-hidden="true">↑</span>
-                                {t('session.outline.loadOlder')}
-                            </>
-                        )}
-                    </Button>
-                </div>
-            ) : null}
-
-            <div className="app-scroll-y min-h-0 flex-1 p-2">
-                {props.items.length === 0 ? (
-                    <div className="px-2 py-8 text-center text-sm text-[var(--app-hint)]">
-                        {t('session.outline.empty')}
-                    </div>
-                ) : (
-                    <div className="space-y-1">
-                        {props.items.map((item) => {
-                            return (
-                                <button
-                                    key={item.id}
-                                    type="button"
-                                    onClick={() => props.onSelect(item)}
-                                    className="group flex w-full min-w-0 items-start gap-2 rounded-md px-2 py-2 text-left transition-colors hover:bg-[var(--app-subtle-bg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--app-link)]"
-                                >
-                                    <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[var(--app-button)]" aria-hidden="true" />
-                                    <span className="min-w-0 flex-1">
-                                        <span className="block truncate text-[11px] font-medium uppercase text-[var(--app-hint)]">
-                                            {t('session.outline.kind.user')}
-                                        </span>
-                                        <span className="line-clamp-2 text-sm leading-snug text-[var(--app-fg)]">
-                                            {item.label}
-                                        </span>
-                                    </span>
-                                </button>
-                            )
-                        })}
-                    </div>
-                )}
-            </div>
-        </aside>
-    )
-}
-
 export function HappyThread(props: {
     api: ApiClient
     sessionId: string
@@ -258,11 +179,6 @@ export function HappyThread(props: {
     normalizedMessagesCount: number
     messagesVersion: number
     forceScrollToken: number
-    outlineOpen: boolean
-    outlineTitle: string
-    outlineItems: readonly ConversationOutlineItem[]
-    onOutlineOpenChange: (open: boolean) => void
-    onOutlineItemClick?: (item: ConversationOutlineItem) => void
 }) {
     const { t } = useTranslation()
     const { terminalToolDisplayMode } = useTerminalToolDisplayMode()
@@ -559,21 +475,6 @@ export function HappyThread(props: {
         return loadPromise
     }, [isInitialScrollSettling, settlePendingLoad])
 
-    const handleOutlineSelect = useCallback(async (item: ConversationOutlineItem) => {
-        const target = await locateOutlineTargetMessage({
-            targetMessageId: item.targetMessageId,
-            findTarget: (anchorId) => document.getElementById(anchorId),
-            hasMoreMessages: () => hasMoreMessagesRef.current,
-            loadOlderPreservingScroll
-        })
-        if (target) {
-            target.scrollIntoView({ block: 'start', behavior: 'smooth' })
-            autoScrollEnabledRef.current = false
-        }
-        props.onOutlineItemClick?.(item)
-        props.onOutlineOpenChange(false)
-    }, [loadOlderPreservingScroll, props.onOutlineItemClick, props.onOutlineOpenChange])
-
     useEffect(() => {
         handleLoadMoreRef.current = () => {
             void loadOlderPreservingScroll()
@@ -750,27 +651,6 @@ export function HappyThread(props: {
                     </div>
                 </ThreadPrimitive.Viewport>
                 <NewMessagesIndicator count={props.pendingCount} onClick={scrollToBottom} />
-                {props.outlineOpen ? (
-                    <>
-                        <button
-                            type="button"
-                            className="absolute inset-0 z-20 bg-black/20"
-                            aria-label={t('session.outline.close')}
-                            onClick={() => props.onOutlineOpenChange(false)}
-                        />
-                        <ConversationOutlinePanel
-                            title={props.outlineTitle}
-                            items={props.outlineItems}
-                            hasMoreMessages={props.hasMoreMessages}
-                            isLoadingMoreMessages={props.isLoadingMoreMessages}
-                            onLoadMore={() => {
-                                void loadOlderPreservingScroll()
-                            }}
-                            onSelect={handleOutlineSelect}
-                            onClose={() => props.onOutlineOpenChange(false)}
-                        />
-                    </>
-                ) : null}
             </ThreadPrimitive.Root>
         </HappyChatProvider>
     )

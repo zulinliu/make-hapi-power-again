@@ -21,6 +21,7 @@ import {
 import type { CodexCollaborationMode, Machine, MachineMetadata, PermissionMode, RunnerState } from '@hapipower/protocol/types'
 import { z } from 'zod'
 import { UsageSchema } from '@/claude/types'
+import { MessageDeliveryModeSchema } from '@hapipower/protocol/schemas'
 
 export type Usage = z.infer<typeof UsageSchema>
 
@@ -63,6 +64,12 @@ export type {
 
 export const MessageMetaSchema = z.object({
     sentFrom: z.string().optional(),
+    deliveryMode: MessageDeliveryModeSchema.optional(),
+    guide: z.object({
+        requestedAt: z.number().optional(),
+        status: z.enum(['requested', 'fallback-queued', 'consumed', 'failed']).optional(),
+        fallbackReason: z.string().optional()
+    }).optional(),
     fallbackModel: z.string().nullable().optional(),
     customSystemPrompt: z.string().nullable().optional(),
     appendSystemPrompt: z.string().nullable().optional(),

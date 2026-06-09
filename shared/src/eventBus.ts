@@ -58,6 +58,14 @@ export class EventBus<TEvents extends EventMap = EventMap> {
 }
 
 /** Hapi Power 全局事件定义 */
+export interface ProviderKeyRevealTokenCreatedEvent {
+  namespace: string
+  providerId: string
+  userId: number | null
+  createdAt: number
+  expiresAt: number
+}
+
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface HapiPowerEvents extends Record<string, unknown> {
   'git:status-changed': { sessionId: string; namespace: string; branch: string; dirty: boolean }
@@ -69,6 +77,7 @@ export interface HapiPowerEvents extends Record<string, unknown> {
   'plugin:unloaded': { namespace: string; pluginId: string }
   'workflow:started': { sessionId: string; namespace: string; workflowId: string }
   'workflow:completed': { sessionId: string; namespace: string; workflowId: string; result: unknown }
+  'provider:key-reveal-token-created': ProviderKeyRevealTokenCreatedEvent
 }
 
 /** 全局单例 */

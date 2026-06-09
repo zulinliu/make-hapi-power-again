@@ -6,6 +6,7 @@ import { ProviderSettings } from '@/components/ProviderSettings'
 import { getFontScaleOptions, useFontScale, type FontScale } from '@/hooks/useFontScale'
 import { getTerminalFontSizeOptions, useTerminalFontSize, type TerminalFontSize } from '@/hooks/useTerminalFontSize'
 import { getComposerEnterBehaviorOptions, useComposerEnterBehavior, type ComposerEnterBehavior } from '@/hooks/useComposerEnterBehavior'
+import { getFollowUpBehaviorOptions, useFollowUpBehavior, type FollowUpBehavior } from '@/hooks/useFollowUpBehavior'
 import { getTerminalToolDisplayModeOptions, useTerminalToolDisplayMode, type TerminalToolDisplayMode } from '@/hooks/useTerminalToolDisplayMode'
 import { getSessionListStatusModeOptions, useSessionListStatusMode, type SessionListStatusMode } from '@/hooks/useSessionListStatusMode'
 import {
@@ -273,6 +274,7 @@ export default function SettingsPage() {
     const [isFontOpen, setIsFontOpen] = useState(false)
     const [isTerminalFontOpen, setIsTerminalFontOpen] = useState(false)
     const [isChatOpen, setIsChatOpen] = useState(false)
+    const [isFollowUpOpen, setIsFollowUpOpen] = useState(false)
     const [isTerminalToolDisplayOpen, setIsTerminalToolDisplayOpen] = useState(false)
     const [isSessionListStatusOpen, setIsSessionListStatusOpen] = useState(false)
     const containerRef = useRef<HTMLDivElement>(null)
@@ -280,12 +282,14 @@ export default function SettingsPage() {
     const fontContainerRef = useRef<HTMLDivElement>(null)
     const terminalFontContainerRef = useRef<HTMLDivElement>(null)
     const chatContainerRef = useRef<HTMLDivElement>(null)
+    const followUpContainerRef = useRef<HTMLDivElement>(null)
     const terminalToolDisplayContainerRef = useRef<HTMLDivElement>(null)
     const sessionListStatusContainerRef = useRef<HTMLDivElement>(null)
     const { fontScale, setFontScale } = useFontScale()
     const { terminalFontSize, setTerminalFontSize } = useTerminalFontSize()
     const { sessionPreviewLimit, setSessionPreviewLimit } = useSessionPreviewLimit()
     const { composerEnterBehavior, setComposerEnterBehavior } = useComposerEnterBehavior()
+    const { followUpBehavior, setFollowUpBehavior } = useFollowUpBehavior()
     const { terminalToolDisplayMode, setTerminalToolDisplayMode } = useTerminalToolDisplayMode()
     const { sessionListStatusMode, setSessionListStatusMode } = useSessionListStatusMode()
     const {
@@ -299,6 +303,7 @@ export default function SettingsPage() {
     const fontScaleOptions = getFontScaleOptions()
     const terminalFontSizeOptions = getTerminalFontSizeOptions()
     const composerEnterBehaviorOptions = getComposerEnterBehaviorOptions()
+    const followUpBehaviorOptions = getFollowUpBehaviorOptions()
     const terminalToolDisplayModeOptions = getTerminalToolDisplayModeOptions()
     const sessionListStatusModeOptions = getSessionListStatusModeOptions()
     const appearanceOptions = getAppearanceOptions()
@@ -307,6 +312,7 @@ export default function SettingsPage() {
     const currentFontScaleLabel = fontScaleOptions.find((opt) => opt.value === fontScale)?.label ?? '100%'
     const currentTerminalFontSizeLabel = terminalFontSizeOptions.find((opt) => opt.value === terminalFontSize)?.label ?? '13px'
     const currentComposerEnterBehaviorLabel = composerEnterBehaviorOptions.find((opt) => opt.value === composerEnterBehavior)?.labelKey ?? 'settings.chat.enterBehavior.send'
+    const currentFollowUpBehaviorLabel = followUpBehaviorOptions.find((opt) => opt.value === followUpBehavior)?.labelKey ?? 'settings.chat.followUpBehavior.queue'
     const currentTerminalToolDisplayModeLabel = terminalToolDisplayModeOptions.find((opt) => opt.value === terminalToolDisplayMode)?.labelKey ?? 'settings.chat.terminalToolDisplay.compact'
     const currentSessionListStatusModeLabel = sessionListStatusModeOptions.find((opt) => opt.value === sessionListStatusMode)?.labelKey ?? 'settings.display.sessionListStatus.standard'
 
@@ -335,6 +341,11 @@ export default function SettingsPage() {
         setIsChatOpen(false)
     }
 
+    const handleFollowUpBehaviorChange = (newBehavior: FollowUpBehavior) => {
+        setFollowUpBehavior(newBehavior)
+        setIsFollowUpOpen(false)
+    }
+
     const handleTerminalToolDisplayModeChange = (newMode: TerminalToolDisplayMode) => {
         setTerminalToolDisplayMode(newMode)
         setIsTerminalToolDisplayOpen(false)
@@ -347,7 +358,7 @@ export default function SettingsPage() {
 
     // Close dropdown when clicking outside
     useEffect(() => {
-        if (!isOpen && !isAppearanceOpen && !isFontOpen && !isTerminalFontOpen && !isChatOpen && !isTerminalToolDisplayOpen && !isSessionListStatusOpen) return
+        if (!isOpen && !isAppearanceOpen && !isFontOpen && !isTerminalFontOpen && !isChatOpen && !isFollowUpOpen && !isTerminalToolDisplayOpen && !isSessionListStatusOpen) return
 
         const handleClickOutside = (event: MouseEvent) => {
             if (isOpen && containerRef.current && !containerRef.current.contains(event.target as Node)) {
@@ -365,6 +376,9 @@ export default function SettingsPage() {
             if (isChatOpen && chatContainerRef.current && !chatContainerRef.current.contains(event.target as Node)) {
                 setIsChatOpen(false)
             }
+            if (isFollowUpOpen && followUpContainerRef.current && !followUpContainerRef.current.contains(event.target as Node)) {
+                setIsFollowUpOpen(false)
+            }
             if (isTerminalToolDisplayOpen && terminalToolDisplayContainerRef.current && !terminalToolDisplayContainerRef.current.contains(event.target as Node)) {
                 setIsTerminalToolDisplayOpen(false)
             }
@@ -375,11 +389,11 @@ export default function SettingsPage() {
 
         document.addEventListener('mousedown', handleClickOutside)
         return () => document.removeEventListener('mousedown', handleClickOutside)
-    }, [isOpen, isAppearanceOpen, isFontOpen, isTerminalFontOpen, isChatOpen, isTerminalToolDisplayOpen, isSessionListStatusOpen])
+    }, [isOpen, isAppearanceOpen, isFontOpen, isTerminalFontOpen, isChatOpen, isFollowUpOpen, isTerminalToolDisplayOpen, isSessionListStatusOpen])
 
     // Close on escape key
     useEffect(() => {
-        if (!isOpen && !isAppearanceOpen && !isFontOpen && !isTerminalFontOpen && !isChatOpen && !isTerminalToolDisplayOpen && !isSessionListStatusOpen) return
+        if (!isOpen && !isAppearanceOpen && !isFontOpen && !isTerminalFontOpen && !isChatOpen && !isFollowUpOpen && !isTerminalToolDisplayOpen && !isSessionListStatusOpen) return
 
         const handleEscape = (event: KeyboardEvent) => {
             if (event.key === 'Escape') {
@@ -388,6 +402,7 @@ export default function SettingsPage() {
                 setIsFontOpen(false)
                 setIsTerminalFontOpen(false)
                 setIsChatOpen(false)
+                setIsFollowUpOpen(false)
                 setIsTerminalToolDisplayOpen(false)
                 setIsSessionListStatusOpen(false)
             }
@@ -395,7 +410,7 @@ export default function SettingsPage() {
 
         document.addEventListener('keydown', handleEscape)
         return () => document.removeEventListener('keydown', handleEscape)
-    }, [isOpen, isAppearanceOpen, isFontOpen, isTerminalFontOpen, isChatOpen, isTerminalToolDisplayOpen, isSessionListStatusOpen])
+    }, [isOpen, isAppearanceOpen, isFontOpen, isTerminalFontOpen, isChatOpen, isFollowUpOpen, isTerminalToolDisplayOpen, isSessionListStatusOpen])
 
     return (
         <div className="flex h-full min-h-0 flex-col">
@@ -732,6 +747,57 @@ export default function SettingsPage() {
                                     })}
                                 </div>
                             )}
+                        </div>
+                        <div ref={followUpContainerRef} className="relative">
+                            <button
+                                type="button"
+                                onClick={() => setIsFollowUpOpen(!isFollowUpOpen)}
+                                className="flex w-full items-center justify-between px-3 py-3 text-left transition-colors hover:bg-(--hp-surface-1)"
+                                aria-expanded={isFollowUpOpen}
+                                aria-haspopup="listbox"
+                            >
+                                <span className="text-(--hp-text-primary)">{t('settings.chat.followUpBehavior')}</span>
+                                <span className="flex items-center gap-1 text-(--hp-text-tertiary)">
+                                    <span>{t(currentFollowUpBehaviorLabel)}</span>
+                                    <ChevronDownIcon className={`transition-transform ${isFollowUpOpen ? 'rotate-180' : ''}`} />
+                                </span>
+                            </button>
+
+                            {isFollowUpOpen && (
+                                <div
+                                    className="absolute right-3 top-full mt-1 min-w-[190px] rounded-(--hp-radius-md) border border-(--hp-border) bg-(--hp-surface-0) shadow-(--hp-shadow-md) overflow-hidden z-50"
+                                    role="listbox"
+                                    aria-label={t('settings.chat.followUpBehavior')}
+                                >
+                                    {followUpBehaviorOptions.map((opt) => {
+                                        const isSelected = followUpBehavior === opt.value
+                                        return (
+                                            <button
+                                                key={opt.value}
+                                                type="button"
+                                                role="option"
+                                                aria-selected={isSelected}
+                                                onClick={() => handleFollowUpBehaviorChange(opt.value)}
+                                                className={`flex items-center justify-between w-full px-3 py-2 text-base text-left transition-colors ${
+                                                    isSelected
+                                                        ? 'text-(--hp-primary) bg-(--hp-surface-1)'
+                                                        : 'text-(--hp-text-primary) hover:bg-(--hp-surface-1)'
+                                                }`}
+                                            >
+                                                <span>{t(opt.labelKey)}</span>
+                                                {isSelected && (
+                                                    <span className="ml-2 text-(--hp-primary)">
+                                                        <CheckIcon />
+                                                    </span>
+                                                )}
+                                            </button>
+                                        )
+                                    })}
+                                </div>
+                            )}
+                        </div>
+                        <div className="px-3 pb-3 text-xs leading-5 text-(--hp-text-tertiary)">
+                            {t('settings.chat.followUpBehavior.description')}
                         </div>
                         <div ref={terminalToolDisplayContainerRef} className="relative">
                             <button

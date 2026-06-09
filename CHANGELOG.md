@@ -4,6 +4,34 @@ All notable changes to Hapi Power will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.18.0] - 2026-06-09
+
+### Added
+
+- **接入：模型星桥 / Model Nexus**，把模型 Provider 治理升级为控制舱，支持 namespace 隔离、健康检测、能力缓存、模型发现、Agent 分配矩阵、四步 Wizard 与安全 reveal。
+- **驾驶：引导光标 / Guide Beam**，在 Agent thinking 时提供“排队 / 立即引导”双模式，支持 deliveryMode、capability handshake、isolated guide queue、旧 CLI fallback 与队列保留。
+- **观测：上下文脉冲 / Context Pulse**，用 `上下文：40%` / `Context: 40%` 展示上下文占用，补充 usage 来源、不可用原因、provider capability 诊断和 59/60/80/81 阈值状态。
+- **追踪：Git 脉络 / Git Atlas**，新增结构化 git-dashboard、变更地图、Diff preview、Commit Basket、Sync Center、selected paths 提交和危险同步服务端确认。
+- **沉淀：会话织锦 / Session Loom**，把会话大纲升级为独立资产工作台，支持服务端全量 outline、全部/用户/助手筛选、导出预览、Markdown 导出、北京时间时间戳、默认 redaction、后台模型提炼设计方案、资产历史、下载/复制/share fallback。
+
+### Security
+
+- Provider SSRF 防护覆盖 scheme、userinfo、私网/metadata IP、IPv6、DNS、redirect、端口策略、超时和响应大小限制。
+- Session Loom 导出默认开启敏感信息遮蔽；提炼固定使用当前会话 Agent 的供应商 API 模型路线，拒绝外部模型选择，且不会向主线会话插入消息。
+- Git Atlas 对 force push、删除分支、删除 remote 等危险操作增加服务端确认，并对 remote URL、stdout、stderr 和同步结果做 credential 脱敏。
+- Guide Beam 不绕过 permission pending、attachments 和 scheduled restrictions；不支持 capability 时降级为普通排队，避免消息 stuck 或丢失。
+
+### Changed
+
+- README、README.zh-CN、PRODUCT 和规划文档统一采用五节点顺序：接入 → 驾驶 → 观测 → 追踪 → 沉淀。
+- 新增 `docs/v0.18-five-modules.md`，集中说明五个功能模块的入口、产出、降级策略、安全边界和代码入口。
+- 设置页、会话 Composer、状态栏、Git 页面和会话资产面板的新增文案完成 en / zh-CN i18n parity。
+
+### Validation
+
+- 发布准备阶段通过 `bun run typecheck`、`bun run test`、`bun run build`、`bun run check:git-standards`、`bun run check:sensitive-info` 和 `git diff --check`。
+- 五张 signature moment 截图已补齐；真实 iOS PWA 实机验收仍作为发布后持续验收项跟踪。
+
 ## [0.15.0] - 2026-06-06
 
 ### Changed

@@ -136,6 +136,7 @@ describe('machine git clone routes', () => {
             expect(body).toEqual({ success: false, error: 'Machine operation failed' })
             expect(JSON.stringify(body)).not.toContain('secret-token')
             expect(logs.length).toBe(1)
+            expect(JSON.stringify(logs)).not.toContain('secret-token')
         } finally {
             console.error = originalConsoleError
         }

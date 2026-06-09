@@ -6,7 +6,6 @@ created: 2026-06-06
 skill: impeccable
 status: completed
 ---
-
 # UX Shape: v0.17.0 文件管理器
 
 ## 1. Feature Summary
@@ -130,4 +129,3 @@ status: completed
 | Monaco 是否 P0 | 否，P0 先保证文件打开和安全保存，Monaco 属于 P1 |
 | 目录下载是否 P0 | 否，单文件下载 P1，目录 zip P2 |
 | 是否允许隐藏不可用按钮 | 不允许，v0.17 可见入口必须真实可用或明确禁用原因 |
-

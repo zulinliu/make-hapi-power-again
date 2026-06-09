@@ -1,12 +1,15 @@
 import type {
     DecryptedMessage as ProtocolDecryptedMessage,
     Machine,
+    MessageDeliveryMode,
     RunnerState,
     Session,
     SessionSummary,
     SyncEvent as ProtocolSyncEvent,
     WorktreeMetadata
 } from '@hapipower/protocol/types'
+
+export type { MessageDeliveryMode } from '@hapipower/protocol/types'
 
 export type {
     CodexModelsResponse,
@@ -17,11 +20,35 @@ export type {
     DeleteUploadResponse,
     DirectoryEntry,
     FileReadResponse,
+    GitAtlasChange,
+    GitAtlasDashboardResponse,
+    GitAtlasDiffResponse,
+    GitAtlasGroup,
+    GitAtlasRecommendation,
     GitCommandResponse,
+    GitCommitBasketResponse,
+    GitSyncAction,
+    GitSyncRequest,
+    GitSyncResponse,
     ListDirectoryResponse,
     MachineDirectoryEntry,
     MachineListDirectoryResponse,
     MachinePathsExistsResponse,
+    SessionLoomExportAsset,
+    SessionLoomExportListResponse,
+    SessionLoomExportPreviewRequest,
+    SessionLoomExportPreviewResponse,
+    SessionLoomExportRequest,
+    SessionLoomExportResponse,
+    SessionLoomExportStats,
+    SessionLoomFilters,
+    SessionLoomLanguage,
+    SessionLoomOutlineItem,
+    SessionLoomOutlineKind,
+    SessionLoomOutlineResponse,
+    SessionLoomSynthesisRequest,
+    SessionLoomSynthesisResponse,
+    SessionLoomTemplate,
     AuthResponse,
     MachinesResponse,
     MessagesResponse,
@@ -69,11 +96,17 @@ export type SessionMetadataSummary = {
     flavor?: string | null
     capabilities?: {
         terminal?: boolean
+        guideInterrupt?: {
+            supported: boolean
+            preservesQueue: boolean
+            isolatedDelivery: boolean
+            version?: number
+        }
     }
     worktree?: WorktreeMetadata
 }
 
-export type MessageStatus = 'queued' | 'sending' | 'sent' | 'failed'
+export type MessageStatus = 'queued' | 'guiding' | 'sending' | 'sent' | 'failed'
 
 export type DecryptedMessage = ProtocolDecryptedMessage & {
     status?: MessageStatus

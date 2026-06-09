@@ -246,7 +246,7 @@ bun run build
 ```bash
 POST /api/machines/:machineId/git-clone
 url: https://github.com/octocat/Hello-World.git
-targetDir: /home/liuzl/hapi-git-portal-smoke
+targetDir: /home/tester/project/hapi-git-portal-smoke
 depth: 1
 
 # HTTP 200
@@ -343,7 +343,7 @@ git diff --check && scripts/brand-check.sh
 ```bash
 POST /api/machines/:machineId/git-clone
 url: https://github.com/octocat/Hello-World.git
-targetDir: /home/liuzl
+targetDir: /home/tester
 targetName: hapi-git-portal-smoke-*
 depth: 1
 

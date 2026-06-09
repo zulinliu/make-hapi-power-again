@@ -44,6 +44,14 @@ vi.mock('@/hooks/useComposerEnterBehavior', () => ({
     ],
 }))
 
+vi.mock('@/hooks/useFollowUpBehavior', () => ({
+    useFollowUpBehavior: () => ({ followUpBehavior: 'queue', setFollowUpBehavior: vi.fn() }),
+    getFollowUpBehaviorOptions: () => [
+        { value: 'queue', labelKey: 'settings.chat.followUpBehavior.queue' },
+        { value: 'guide', labelKey: 'settings.chat.followUpBehavior.guide' },
+    ],
+}))
+
 vi.mock('@/hooks/useTerminalToolDisplayMode', () => ({
     useTerminalToolDisplayMode: () => ({ terminalToolDisplayMode: 'compact', setTerminalToolDisplayMode: vi.fn() }),
     getTerminalToolDisplayModeOptions: () => [
@@ -226,6 +234,13 @@ describe('SettingsPage', () => {
         expect(screen.getAllByText('Send message').length).toBeGreaterThanOrEqual(1)
     })
 
+    it('renders the Follow-up Behavior setting', () => {
+        renderWithProviders(<SettingsPage />)
+        expect(screen.getAllByText('Follow-up Behavior').length).toBeGreaterThanOrEqual(1)
+        expect(screen.getAllByText('Queue').length).toBeGreaterThanOrEqual(1)
+        expect(screen.getByText(/Controls how messages sent during an active response are handled/)).toBeInTheDocument()
+    })
+
     it('renders the Terminal Tool Display setting', () => {
         renderWithProviders(<SettingsPage />)
         expect(screen.getAllByText('Terminal Tool Cards').length).toBeGreaterThanOrEqual(1)
@@ -249,6 +264,9 @@ describe('SettingsPage', () => {
         expect(calledKeys).toContain('settings.chat.title')
         expect(calledKeys).toContain('settings.chat.enterBehavior')
         expect(calledKeys).toContain('settings.chat.enterBehavior.send')
+        expect(calledKeys).toContain('settings.chat.followUpBehavior')
+        expect(calledKeys).toContain('settings.chat.followUpBehavior.queue')
+        expect(calledKeys).toContain('settings.chat.followUpBehavior.description')
         expect(calledKeys).toContain('settings.chat.terminalToolDisplay')
         expect(calledKeys).toContain('settings.chat.terminalToolDisplay.compact')
         expect(calledKeys).toContain('settings.chat.groupedToolBackground')

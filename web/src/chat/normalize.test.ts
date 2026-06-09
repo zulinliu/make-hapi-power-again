@@ -582,9 +582,12 @@ describe('normalizeDecryptedMessage', () => {
                         total: {
                             inputTokens: 82_503,
                             cachedInputTokens: 71_808,
-                            outputTokens: 166
+                            outputTokens: 166,
+                            prompt: 'do not persist this prompt'
                         },
-                        modelContextWindow: 258_400
+                        modelContextWindow: 258_400,
+                        headers: { authorization: 'Bearer secret' },
+                        path: '/home/tester/project'
                     }
                 }
             }
@@ -600,6 +603,20 @@ describe('normalizeDecryptedMessage', () => {
             usage: {
                 input_tokens: 82503,
                 output_tokens: 166
+            }
+        })
+        if (!normalized || normalized.role !== 'event') {
+            throw new Error('Expected token-count event')
+        }
+        expect(normalized.content).toEqual({
+            type: 'token-count',
+            info: {
+                total: {
+                    inputTokens: 82_503,
+                    cachedInputTokens: 71_808,
+                    outputTokens: 166
+                },
+                modelContextWindow: 258_400
             }
         })
     })
@@ -673,6 +690,99 @@ describe('normalizeDecryptedMessage', () => {
                 cache_read_input_tokens: 5760,
                 context_tokens: 13879,
                 context_window: 65536
+            }
+        })
+    })
+
+    it('normalizes OpenAI-compatible token_count usage fields', () => {
+        const message = makeMessage({
+            role: 'agent',
+            content: {
+                type: 'codex',
+                data: {
+                    type: 'token_count',
+                    info: {
+                        total: {
+                            prompt_tokens: 12_345,
+                            completion_tokens: 678,
+                            total_tokens: 13_023,
+                            prompt_tokens_details: {
+                                cached_tokens: 2_048
+                            },
+                            prompt: 'do not persist this prompt'
+                        },
+                        model_context_window: 131_072,
+                        apiKey: 'redacted-test-key'
+                    }
+                }
+            }
+        })
+
+        const normalized = normalizeDecryptedMessage(message)
+
+        expect(normalized).toMatchObject({
+            role: 'event',
+            content: {
+                type: 'token-count',
+                info: {
+                    total: {
+                        prompt_tokens: 12_345,
+                        completion_tokens: 678,
+                        total_tokens: 13_023,
+                        prompt_tokens_details: {
+                            cached_tokens: 2_048
+                        }
+                    },
+                    model_context_window: 131_072
+                }
+            },
+            usage: {
+                input_tokens: 12_345,
+                output_tokens: 678,
+                cache_read_input_tokens: 2_048,
+                context_tokens: 12_345,
+                context_window: 131_072
+            }
+        })
+    })
+
+    it('normalizes OpenAI-compatible assistant usage fields for GLM providers', () => {
+        const message = makeMessage({
+            role: 'agent',
+            content: {
+                type: 'output',
+                data: {
+                    type: 'assistant',
+                    uuid: 'assistant-usage-1',
+                    message: {
+                        role: 'assistant',
+                        model: 'glm-5.1',
+                        content: [{ type: 'text', text: 'Done' }],
+                        usage: {
+                            prompt_tokens: 18_240,
+                            completion_tokens: 512,
+                            total_tokens: 18_752,
+                            prompt_tokens_details: {
+                                cached_tokens: 2_048
+                            },
+                            model_context_window: 131_072
+                        }
+                    }
+                }
+            }
+        })
+
+        const normalized = normalizeDecryptedMessage(message)
+
+        expect(normalized).toMatchObject({
+            role: 'agent',
+            model: 'glm-5.1',
+            usage: {
+                input_tokens: 18_240,
+                output_tokens: 512,
+                cache_read_input_tokens: 2_048,
+                context_tokens: 18_752,
+                context_window: 131_072
             }
         })
     })
