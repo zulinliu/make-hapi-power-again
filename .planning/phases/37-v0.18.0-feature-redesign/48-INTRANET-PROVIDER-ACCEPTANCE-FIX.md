@@ -32,6 +32,38 @@
 - `cd web; bun run test -- src/components/ProviderSettings.test.tsx src/lib/locales/model-nexus-i18n.test.ts`
   - 9 tests passed。
 
+## 追加修复：模型探测 DNS lookup 兼容
+
+### 问题
+
+- 内网 Provider 已可保存，但点击“检查”和“发现模型”时报错：
+  - `results.sort is not a function`
+- 根因是保存阶段只执行 URL 安全校验；检查/发现模型阶段会通过安全 HTTP transport 发起真实请求。
+- Bun 在 `node:http` 请求中可能以 `lookup({ all: true })` 调用自定义 DNS lookup，并期望回调返回 `LookupAddress[]`；旧实现始终按普通 lookup 返回单个地址，导致运行时内部排序崩溃。
+
+### 修复范围
+
+- `hub/src/services/modelDiscovery.ts`
+  - `createSafeLookup` 支持 `options.all`，返回 `{ address, family }[]`。
+  - 普通 lookup 仍返回单地址和 family。
+  - 保留 DNS 解析后的 SSRF 校验、私网策略、metadata/loopback/link-local 阻断。
+- `hub/src/services/modelDiscovery.test.ts`
+  - 新增 `createSafeLookup` 回归测试，覆盖 `all: true` 和普通 lookup 两种回调形态。
+
+### 追加验证
+
+- `bun test hub/src/services/modelDiscovery.test.ts hub/src/services/providerSecurity.test.ts hub/src/web/routes/providers.test.ts`
+  - 67 tests passed。
+- `cd hub; bun run typecheck`
+  - 通过。
+- 本地验收环境重启 Hub 后，使用开发 token 登录并调用真实 Provider 检查接口：
+  - `POST /api/providers/:id/check`
+  - 返回 `success: true`，health 更新为 `online`，模型缓存写入 25 个模型。
+- 继续调用：
+  - `POST /api/providers/:id/discover-models`
+  - 返回 `success: true`，模型数量 25。
+- 两个接口均未再出现 `results.sort is not a function`。
+
 ## 自审结论
 
 - 满足用户在公司内网环境同时支持公网和内网 API 供应商的验收诉求。

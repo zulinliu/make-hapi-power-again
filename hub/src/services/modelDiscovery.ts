@@ -6,7 +6,7 @@ import type {
     ProviderProtocol,
     SafeProviderDiagnostic,
 } from '@hapipower/protocol'
-import type { LookupOptions } from 'node:dns'
+import type { LookupAddress, LookupOptions } from 'node:dns'
 import { lookup as dnsLookup } from 'node:dns/promises'
 import type { IncomingMessage } from 'node:http'
 import { request as httpRequest } from 'node:http'
@@ -564,12 +564,35 @@ function createSafeHttpTransport(): ProviderHttpTransport {
     }
 }
 
-function createSafeLookup(security?: ProviderSecurityOptions): LookupFunction {
+type SafeLookupAddress = {
+    address: string
+    family: 4 | 6
+}
+
+export function createSafeLookup(security?: ProviderSecurityOptions): LookupFunction {
     return (hostname: string, options: LookupOptions, callback): void => {
         const familyHint = normalizeLookupFamily(options.family)
-        resolveSafeLookupAddress(hostname, familyHint, security)
-            .then(result => callback(null, result.address, result.family))
+        resolveSafeLookupAddresses(hostname, familyHint, security)
+            .then(results => {
+                if (options.all) {
+                    callback(null, results.map(toLookupAddress))
+                    return
+                }
+                const result = results[0]
+                if (!result) {
+                    callback(toLookupError(new Error('Provider host did not resolve to a public address.')), '', 0)
+                    return
+                }
+                callback(null, result.address, result.family)
+            })
             .catch(error => callback(toLookupError(error), '', 0))
+    }
+}
+
+function toLookupAddress(result: SafeLookupAddress): LookupAddress {
+    return {
+        address: result.address,
+        family: result.family,
     }
 }
 
@@ -579,11 +602,11 @@ function normalizeLookupFamily(family: LookupOptions['family']): 4 | 6 | null {
     return null
 }
 
-async function resolveSafeLookupAddress(
+async function resolveSafeLookupAddresses(
     hostname: string,
     familyHint: 4 | 6 | null,
     security?: ProviderSecurityOptions
-): Promise<{ address: string; family: 4 | 6 }> {
+): Promise<SafeLookupAddress[]> {
     const literalFamily = isIP(hostname)
     if (literalFamily === 4 || literalFamily === 6) {
         const validation = validateProviderResolvedAddress(hostname, security)
@@ -593,11 +616,12 @@ async function resolveSafeLookupAddress(
         if (familyHint && literalFamily !== familyHint) {
             throw new Error('Provider host did not resolve to an address for the requested IP family.')
         }
-        return { address: hostname, family: literalFamily }
+        return [{ address: hostname, family: literalFamily }]
     }
 
     const resolveHost = security?.resolveHost ?? resolveHostname
     const addresses = await resolveHost(hostname)
+    const safeAddresses: SafeLookupAddress[] = []
     for (const address of addresses) {
         const family = isIP(address)
         if (family !== 4 && family !== 6) continue
@@ -606,7 +630,10 @@ async function resolveSafeLookupAddress(
         if (!validation.ok) {
             throw new Error('Provider host resolves to a private or metadata address.')
         }
-        return { address, family }
+        safeAddresses.push({ address, family })
+    }
+    if (safeAddresses.length > 0) {
+        return safeAddresses
     }
     throw new Error('Provider host did not resolve to a public address.')
 }

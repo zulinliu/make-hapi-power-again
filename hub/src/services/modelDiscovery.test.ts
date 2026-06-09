@@ -1,6 +1,7 @@
 import { describe, test, expect, mock, beforeEach, afterEach } from 'bun:test'
 import {
     buildModelsUrlCandidates,
+    createSafeLookup,
     parseModelsResponse,
     isGoogleApi,
     ModelDiscoveryService,
@@ -138,6 +139,43 @@ describe('isGoogleApi', () => {
 
     test('returns false for generic proxy', () => {
         expect(isGoogleApi('https://my-proxy.example.com')).toBe(false)
+    })
+})
+
+describe('createSafeLookup', () => {
+    function callLookup(options: { all?: boolean; family?: 4 | 6 } = {}) {
+        const lookup = createSafeLookup({
+            allowPrivateNetwork: true,
+            resolveHost: async () => ['10.0.0.5', '10.0.0.6'],
+        })
+
+        return new Promise<{ address: unknown; family: number | undefined }>((resolve, reject) => {
+            lookup('api.internal.example.com', options, (err, address, family) => {
+                if (err) {
+                    reject(err)
+                    return
+                }
+                resolve({ address, family })
+            })
+        })
+    }
+
+    test('returns an address array for Node HTTP all=true lookups', async () => {
+        const result = await callLookup({ all: true })
+
+        expect(Array.isArray(result.address)).toBe(true)
+        expect(result.address).toEqual([
+            { address: '10.0.0.5', family: 4 },
+            { address: '10.0.0.6', family: 4 },
+        ])
+        expect(result.family).toBeUndefined()
+    })
+
+    test('returns a single address for normal Node HTTP lookups', async () => {
+        const result = await callLookup()
+
+        expect(result.address).toBe('10.0.0.5')
+        expect(result.family).toBe(4)
     })
 })
 
