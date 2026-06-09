@@ -41,7 +41,7 @@
 ### 2.4 Web
 
 - `useSendMessage`、`ApiClient.sendMessage`、runtime send path 传递 `deliveryMode`。
-- Composer 在 thinking 且无附件/无定时消息时显示 `排队 / 立即引导` segmented control，默认排队。
+- 设置页新增 `跟进行为 / Follow-up Behavior`，默认 `排队 / Queue`，可切换 `引导 / Guide`；Composer 在 thinking 且无附件/无定时消息时按该持久设置决定 follow-up 发送模式，并提供轻量快捷切换。
 - 发送 guide 时 optimistic message 标记为 queued，但 meta 包含 guide state，QueuedMessagesBar 显示 `引导中 / 已降级排队`。
 - StatusBar 替换旧 `ctx used/max left` 文案为 Context Pulse，移动端不再显示 token-left。
 - i18n 新增 `composer.deliveryMode.*` 与 `contextPulse.*`，en/zh-CN 对齐。
@@ -71,7 +71,7 @@
 - Shared 协议：新增 `MessageDeliveryMode`、Guide capability schema、`guide-message` Socket update、Guide SSE 事件、REST send message 校验。
 - Hub：新增 Guide capability 当前连接握手 gate、permission pending gate、fallback/consumed guide meta 持久化、late fallback 防回滚、`deliveryMode` 入库与 SSE 分发。
 - CLI：Codex 显式声明 Guide capability；`ApiSessionClient` 按 Socket update 类型区分 `guide-message` 与 `new-message`；`MessageQueue2` 支持 isolated guide queue 和保留队列的管理命令；Codex remote guide interrupt 等待旧 turn 终端事件后再消费。
-- Web：Composer 支持 `排队 / 立即引导` 发送模式；发送链路传递 `deliveryMode`；QueuedMessagesBar 展示 Guide requested/fallback/consumed；StatusBar 渲染 `上下文：40%` / `Context: 40%` 与阈值状态。
+- Web：设置页支持持久化 `跟进行为 / Follow-up Behavior`；Composer 依据该设置在 thinking 时选择 queue/guide，并保留快捷切换；发送链路传递 `deliveryMode`；QueuedMessagesBar 展示 Guide requested/fallback/consumed；StatusBar 渲染 `上下文：40%` / `Context: 40%` 与阈值状态。
 - Context Pulse 安全：CLI app-server、legacy Codex event、Web normalize 三个 token usage 入口均只保留数值白名单、thread/turn scope 与 `last/total` 嵌套对象，剔除 prompt/header/path/token/apiKey 等字段。
 - 安全扫描门禁：`providerSecurity.test.ts` 中用于脱敏测试的高置信 secret 前缀样例改为运行时拼接，避免源码静态残留真实前缀形态。
 
@@ -128,7 +128,7 @@
 - 新增 Guide / Context Pulse 用户可见文案已做 en/zh-CN parity 测试。
 - Thinking 状态文案已移除随机英文列表，改为 `status.thinking` i18n；状态栏右侧信息允许收缩和换行，降低移动端横向溢出风险。
 - 失败 Guide 消息重试会保留原始 `deliveryMode: guide`，重试 optimistic 状态仍为 `guiding`，并由 `useSendMessage.test.tsx` 覆盖。
-- Composer `排队 / 立即引导` 分段控件已补充方向键、Home/End、Space/Enter 的 roving keyboard 测试。
+- Composer 的 per-send 分段控件已调整为设置页持久偏好：默认排队；选择引导后，thinking 中的新消息才走 Guide delivery；Guide 不可用时仍降级为 queue。
 
 ## 9. 附录门禁
 
@@ -156,3 +156,45 @@
 
 - 进入 Phase 40 Git Atlas：优先服务端结构化 git-dashboard API、selected paths 真实生效验证、危险操作二次确认与移动端差异图适配。
 - 在 Git Atlas 阶段补一次 Playwright 移动端 smoke，覆盖 Composer + StatusBar + queued bar 的 safe-area、键盘与 reduced-motion。
+
+## 13. 2026-06-09 跟进行为体验修正
+
+### 实施范围
+
+- 将 Guide Beam 的发送方式从 Composer 内一次性 `排队 / 立即引导` 分段控件，调整为设置页中的持久 `跟进行为`。
+- 默认值保持 `排队`，可切换为 `引导`。Composer 在 thinking 且 Guide 可用时按该偏好决定 `deliveryMode`；Guide 不可用、存在附件、定时消息或权限请求时仍强制 queue。
+- Composer 保留轻量快捷切换按钮，但它写入同一个持久偏好，不再形成临时 per-send 状态。
+
+### 修改文件
+
+- `web/src/hooks/useFollowUpBehavior.ts`
+- `web/src/hooks/useFollowUpBehavior.test.ts`
+- `web/src/routes/settings/index.tsx`
+- `web/src/routes/settings/index.test.tsx`
+- `web/src/components/AssistantChat/HappyComposer.tsx`
+- `web/src/components/AssistantChat/HappyComposer.test.tsx`
+- `web/src/lib/locales/en.ts`
+- `web/src/lib/locales/zh-CN.ts`
+- `web/src/lib/locales/guide-context-i18n.test.ts`
+- `.planning/phases/37-v0.18.0-feature-redesign/39-GUIDE-BEAM-CONTEXT-PULSE-IMPLEMENTATION.md`
+
+### 测试结果
+
+- `cd web; bun run test -- src/hooks/useFollowUpBehavior.test.ts src/components/AssistantChat/HappyComposer.test.tsx src/routes/settings/index.test.tsx src/lib/locales/guide-context-i18n.test.ts`
+  - 4 files / 24 tests passed
+- 移动端真实化验收：使用 390×844 视口访问 `http://127.0.0.1:5176/settings?acceptance=follow-up-behavior-mobile`。
+  - 默认显示 `Follow-up Behavior Queue`。
+  - 下拉展开后可见 `Queue` / `Guide` 两个选项，选项未被裁剪。
+  - 选择 `Guide` 后刷新仍显示 `Follow-up Behavior Guide`。
+  - 切回 `Queue` 后刷新仍显示 `Follow-up Behavior Queue`。
+
+### 自审结论
+
+- 满足 `37-PROTOCOL-ADDENDUM`：本次只调整 Web 侧发送偏好入口，不改 Hub/CLI Guide protocol；capability handshake、isolated queue、fallback queue、`messages-consumed` 时序均保持原实现。
+- 满足 `37-SECURITY-ADDENDUM`：未新增外部请求、敏感信息落盘或 redaction 变更；localStorage 仅保存枚举值 `queue | guide`。
+- 满足 `37-UX-ACCEPTANCE-MATRIX`：默认排队；用户可在设置页明确选择“引导”；Composer 中途发送时行为与设置一致。
+- 满足 `37-BRAND-CONTRACT`：中文主入口使用“跟进行为”，保留五节点中“驾驶”语义，新增文案 en/zh-CN parity 覆盖。
+
+### 已知风险
+
+- 本次移动端验收覆盖设置项下拉、持久化和刷新回归；未重新覆盖真实 iOS Safari 键盘弹出场景，后续完整 PWA 回归仍需单独跑键盘与 safe-area 检查。

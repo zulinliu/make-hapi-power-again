@@ -7,6 +7,15 @@ const REQUIRED_KEYS = [
     'composer.deliveryMode.guideNow',
     'composer.deliveryMode.sendGuide',
     'composer.deliveryMode.guideDescription',
+    'composer.deliveryMode.queueActiveDescription',
+    'composer.deliveryMode.guideActiveDescription',
+    'composer.deliveryMode.queueOnlyDescription',
+    'composer.deliveryMode.switchToQueue',
+    'composer.deliveryMode.switchToGuide',
+    'settings.chat.followUpBehavior',
+    'settings.chat.followUpBehavior.queue',
+    'settings.chat.followUpBehavior.guide',
+    'settings.chat.followUpBehavior.description',
     'contextPulse.label',
     'contextPulse.unavailable',
     'contextPulse.cache',
@@ -65,5 +74,8 @@ describe('Guide Beam and Context Pulse i18n', () => {
         expect(zhCN['composer.deliveryMode.queue']).toBe('排队')
         expect(zhCN['composer.deliveryMode.guideNow']).toBe('立即引导')
         expect(zhCN['composer.deliveryMode.guideDescription']).toContain('不会删除普通队列')
+        expect(zhCN['settings.chat.followUpBehavior']).toBe('跟进行为')
+        expect(zhCN['settings.chat.followUpBehavior.queue']).toBe('排队')
+        expect(zhCN['settings.chat.followUpBehavior.guide']).toBe('引导')
     })
 })

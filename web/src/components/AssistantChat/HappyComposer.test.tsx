@@ -1,7 +1,8 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
-import type { ButtonHTMLAttributes, FormEventHandler, ReactNode, TextareaHTMLAttributes } from 'react'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import type { ButtonHTMLAttributes, FormEventHandler, MutableRefObject, ReactNode, TextareaHTMLAttributes } from 'react'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { I18nProvider } from '@/lib/i18n-context'
+import type { MessageDeliveryMode } from '@/types/api'
 import { HappyComposer } from './HappyComposer'
 
 const mockAssistantRuntime = vi.hoisted(() => {
@@ -126,7 +127,7 @@ vi.mock('@/hooks/usePWAInstall', () => ({
     })
 }))
 
-function renderComposer() {
+function renderComposer(deliveryModeRef?: MutableRefObject<MessageDeliveryMode>) {
     return render(
         <I18nProvider>
             <HappyComposer
@@ -135,6 +136,7 @@ function renderComposer() {
                 thinking={true}
                 agentState={null}
                 agentFlavor="codex"
+                deliveryModeRef={deliveryModeRef}
             />
         </I18nProvider>
     )
@@ -153,47 +155,52 @@ describe('HappyComposer Guide delivery mode control', () => {
         vi.stubGlobal('cancelAnimationFrame', vi.fn())
     })
 
-    it('supports roving keyboard selection for queue and guide modes', async () => {
-        renderComposer()
+    afterEach(() => {
+        cleanup()
+        vi.unstubAllGlobals()
+    })
 
-        const queue = screen.getByRole('radio', { name: 'Queue' })
-        const guide = screen.getByRole('radio', { name: 'Guide now' })
+    it('defaults follow-up behavior to queue while the agent is thinking', () => {
+        const deliveryModeRef: MutableRefObject<MessageDeliveryMode> = { current: 'guide' }
 
-        expect(queue).toHaveAttribute('aria-checked', 'true')
-        expect(queue).toHaveAttribute('tabindex', '0')
-        expect(guide).toHaveAttribute('aria-checked', 'false')
-        expect(guide).toHaveAttribute('tabindex', '-1')
+        renderComposer(deliveryModeRef)
 
-        fireEvent.keyDown(queue, { key: 'ArrowRight' })
+        expect(screen.getByText('Follow-up behavior: queue')).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: 'Use guide' })).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: 'Send' })).toBeInTheDocument()
+        expect(screen.queryByRole('button', { name: 'Send guide now' })).not.toBeInTheDocument()
+        expect(deliveryModeRef.current).toBe('queue')
+    })
+
+    it('uses guide delivery when the stored follow-up behavior is guide', () => {
+        const deliveryModeRef: MutableRefObject<MessageDeliveryMode> = { current: 'queue' }
+        localStorage.setItem('hapi-power-follow-up-behavior', 'guide')
+
+        renderComposer(deliveryModeRef)
+
+        expect(screen.getByText('Follow-up behavior: guide')).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: 'Use queue' })).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: 'Send guide now' })).toBeInTheDocument()
+        expect(deliveryModeRef.current).toBe('guide')
+    })
+
+    it('quick switch updates the persisted follow-up behavior', async () => {
+        const deliveryModeRef: MutableRefObject<MessageDeliveryMode> = { current: 'queue' }
+
+        renderComposer(deliveryModeRef)
+
+        fireEvent.click(screen.getByRole('button', { name: 'Use guide' }))
         await waitFor(() => {
-            expect(guide).toHaveAttribute('aria-checked', 'true')
-            expect(guide).toHaveFocus()
+            expect(screen.getByText('Follow-up behavior: guide')).toBeInTheDocument()
         })
+        expect(localStorage.getItem('hapi-power-follow-up-behavior')).toBe('guide')
+        expect(deliveryModeRef.current).toBe('guide')
 
-        fireEvent.keyDown(guide, { key: 'ArrowLeft' })
+        fireEvent.click(screen.getByRole('button', { name: 'Use queue' }))
         await waitFor(() => {
-            expect(queue).toHaveAttribute('aria-checked', 'true')
-            expect(queue).toHaveFocus()
+            expect(screen.getByText('Follow-up behavior: queue')).toBeInTheDocument()
         })
-
-        fireEvent.keyDown(queue, { key: 'End' })
-        await waitFor(() => {
-            expect(guide).toHaveAttribute('aria-checked', 'true')
-        })
-
-        fireEvent.keyDown(guide, { key: 'Home' })
-        await waitFor(() => {
-            expect(queue).toHaveAttribute('aria-checked', 'true')
-        })
-
-        fireEvent.keyDown(queue, { key: 'Enter' })
-        await waitFor(() => {
-            expect(queue).toHaveAttribute('aria-checked', 'true')
-        })
-
-        fireEvent.keyDown(queue, { key: ' ' })
-        await waitFor(() => {
-            expect(queue).toHaveAttribute('aria-checked', 'true')
-        })
+        expect(localStorage.getItem('hapi-power-follow-up-behavior')).toBeNull()
+        expect(deliveryModeRef.current).toBe('queue')
     })
 })
