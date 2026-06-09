@@ -251,6 +251,56 @@ describe('ConversationOutlinePanel', () => {
         fireEvent.click(screen.getByRole('tab', { name: 'Export' }))
 
         expect(screen.getByRole('combobox', { name: 'Export template' })).toBeInTheDocument()
+        expect(screen.getByText('Keeps the chronological transcript for debugging, archiving, and manual review.')).toBeInTheDocument()
+    })
+
+    it('explains the selected export template and sends it to the preview API', async () => {
+        const previewSessionLoomExport = vi.fn(async () => ({
+            success: true,
+            sessionId: 'session-1',
+            generatedAt: 4000,
+            markdown: '# Export',
+            title: 'project',
+            stats: {
+                messageCount: 2,
+                outlineCount: 1,
+                userMessages: 1,
+                assistantMessages: 1,
+                systemEvents: 0,
+                redactions: 1,
+                filteredToolDetails: 0
+            },
+            filters: {
+                redactSecrets: true,
+                includeSystemEvents: false,
+                includeToolDetails: false
+            },
+            warnings: []
+        } satisfies SessionLoomExportPreviewResponse))
+        const api = createSessionLoomApi({ previewSessionLoomExport })
+
+        renderPanel({
+            api,
+            sessionId: 'session-1'
+        })
+
+        fireEvent.click(screen.getByRole('tab', { name: 'Export' }))
+        fireEvent.change(screen.getByRole('combobox', { name: 'Export template' }), {
+            target: { value: 'prd' }
+        })
+
+        expect(screen.getByText('Organizes requirements, scope, acceptance signals, risks, and follow-ups.')).toBeInTheDocument()
+
+        fireEvent.click(screen.getByRole('button', { name: 'Preview export' }))
+
+        await waitFor(() => {
+            expect(previewSessionLoomExport).toHaveBeenCalledWith(
+                'session-1',
+                expect.objectContaining({
+                    template: 'prd'
+                } satisfies Partial<SessionLoomExportPreviewRequest>)
+            )
+        })
     })
 
     it('requests export previews with redaction enabled by default', async () => {
@@ -335,8 +385,8 @@ describe('ConversationOutlinePanel', () => {
         })
 
         fireEvent.click(screen.getByRole('tab', { name: 'Export' }))
-        const includeSystemEvents = screen.getByLabelText('Include system events')
-        const redactSecrets = screen.getByLabelText('Redact secrets by default')
+        const includeSystemEvents = screen.getByRole('checkbox', { name: /Include system events/ })
+        const redactSecrets = screen.getByRole('checkbox', { name: /Redact secrets by default/ })
 
         fireEvent.click(includeSystemEvents)
         fireEvent.click(redactSecrets)

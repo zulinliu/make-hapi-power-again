@@ -234,10 +234,11 @@ describe('Session Loom export', () => {
         expect(preview.markdown).toContain('# Example Session')
         expect(preview.markdown).toContain('## 会话元数据')
         expect(preview.markdown).toContain('## 概要')
-        expect(preview.markdown).toContain('## 原始对话')
         expect(preview.markdown).toContain('## 澄清问答')
         expect(preview.markdown).toContain('## 过滤规则')
         expect(preview.markdown).toContain('## 偏差与决策区')
+        expect(preview.markdown).toContain('## 模板说明')
+        expect(preview.markdown).toContain('- 导出模板: 决策记录')
         expect(preview.markdown).toContain('已启用敏感信息脱敏')
         expect(preview.markdown).toContain('- path: [REDACTED_PATH]')
         expect(preview.markdown).toContain('- host: [REDACTED_HOST]')
@@ -247,6 +248,83 @@ describe('Session Loom export', () => {
         expect(preview.markdown).not.toContain('test-host')
         expect(preview.stats.messageCount).toBe(4)
         expect(preview.stats.redactions).toBe(3)
+    })
+
+    it('formats generated, outline, and raw conversation timestamps in Beijing time', () => {
+        const utcTimestamp = 1_780_985_194_883
+        const preview = buildSessionLoomExportPreview({
+            session: makeSession(),
+            generatedAt: utcTimestamp,
+            request: {
+                language: 'zh-CN',
+                format: 'markdown',
+                template: 'raw',
+                filters: {
+                    redactSecrets: true,
+                    includeSystemEvents: false,
+                    includeToolDetails: false
+                }
+            },
+            messages: [
+                makeMessage({
+                    id: 'm-1',
+                    seq: 1,
+                    role: 'user',
+                    text: '导出这个会话',
+                    createdAt: utcTimestamp
+                })
+            ]
+        })
+
+        expect(preview.markdown).toContain('> 生成时间: 2026-06-09 14:06:34.883 北京时间')
+        expect(preview.markdown).toContain('- 2026-06-09 14:06:34.883 北京时间 · user · 导出这个会话')
+        expect(preview.markdown).toContain('### 1. 用户 · 2026-06-09 14:06:34.883 北京时间')
+        expect(preview.markdown).not.toContain('2026-06-09T06:06:34.883Z')
+    })
+
+    it('uses the selected template to change Markdown sections', () => {
+        const messages = [
+            makeMessage({ id: 'm-1', seq: 1, role: 'user', text: '需求：移动端需要下载兜底。' }),
+            makeMessage({ id: 'm-2', seq: 2, role: 'agent', text: '决定：下载失败时复制 Markdown。风险：Safari 分享能力不稳定。' })
+        ]
+        const rawPreview = buildSessionLoomExportPreview({
+            session: makeSession(),
+            generatedAt: 1_800_000_000_200,
+            request: {
+                language: 'zh-CN',
+                format: 'markdown',
+                template: 'raw',
+                filters: {
+                    redactSecrets: true,
+                    includeSystemEvents: false,
+                    includeToolDetails: false
+                }
+            },
+            messages
+        })
+        const prdPreview = buildSessionLoomExportPreview({
+            session: makeSession(),
+            generatedAt: 1_800_000_000_200,
+            request: {
+                language: 'zh-CN',
+                format: 'markdown',
+                template: 'prd',
+                filters: {
+                    redactSecrets: true,
+                    includeSystemEvents: false,
+                    includeToolDetails: false
+                }
+            },
+            messages
+        })
+
+        expect(rawPreview.markdown).toContain('- 导出模板: 原始对话')
+        expect(rawPreview.markdown).toContain('## 原始对话')
+        expect(prdPreview.markdown).toContain('- 导出模板: PRD 笔记')
+        expect(prdPreview.markdown).toContain('## 用户需求')
+        expect(prdPreview.markdown).toContain('## 范围与验收线索')
+        expect(prdPreview.markdown).toContain('## 问题与风险')
+        expect(prdPreview.markdown).not.toBe(rawPreview.markdown)
     })
 
     it('redacts path-derived titles by default', () => {

@@ -508,7 +508,7 @@ export function ConversationOutlinePanel(props: {
                 {activeTab === 'export' ? (
                     <div className="space-y-3">
                         <div className="space-y-2 rounded-md border border-[var(--app-border)] p-3">
-                            <label className="flex min-h-11 items-center gap-2 text-sm text-[var(--app-fg)]">
+                            <label className="flex min-h-11 items-start gap-2 text-sm text-[var(--app-fg)]">
                                 <input
                                     type="checkbox"
                                     checked={filters.redactSecrets}
@@ -516,10 +516,14 @@ export function ConversationOutlinePanel(props: {
                                         const checked = event.currentTarget.checked
                                         setFilters((prev) => ({ ...prev, redactSecrets: checked }))
                                     }}
+                                    className="mt-1"
                                 />
-                                {t('sessionLoom.filters.redactSecrets')}
+                                <span className="min-w-0">
+                                    <span className="block">{t('sessionLoom.filters.redactSecrets')}</span>
+                                    <span className="block text-xs leading-5 text-[var(--app-hint)]">{t('sessionLoom.filters.redactSecrets.help')}</span>
+                                </span>
                             </label>
-                            <label className="flex min-h-11 items-center gap-2 text-sm text-[var(--app-fg)]">
+                            <label className="flex min-h-11 items-start gap-2 text-sm text-[var(--app-fg)]">
                                 <input
                                     type="checkbox"
                                     checked={filters.includeSystemEvents}
@@ -527,10 +531,14 @@ export function ConversationOutlinePanel(props: {
                                         const checked = event.currentTarget.checked
                                         setFilters((prev) => ({ ...prev, includeSystemEvents: checked }))
                                     }}
+                                    className="mt-1"
                                 />
-                                {t('sessionLoom.filters.includeSystemEvents')}
+                                <span className="min-w-0">
+                                    <span className="block">{t('sessionLoom.filters.includeSystemEvents')}</span>
+                                    <span className="block text-xs leading-5 text-[var(--app-hint)]">{t('sessionLoom.filters.includeSystemEvents.help')}</span>
+                                </span>
                             </label>
-                            <label className="flex min-h-11 items-center gap-2 text-sm text-[var(--app-fg)]">
+                            <label className="flex min-h-11 items-start gap-2 text-sm text-[var(--app-fg)]">
                                 <input
                                     type="checkbox"
                                     checked={filters.includeToolDetails}
@@ -538,19 +546,29 @@ export function ConversationOutlinePanel(props: {
                                         const checked = event.currentTarget.checked
                                         setFilters((prev) => ({ ...prev, includeToolDetails: checked }))
                                     }}
+                                    className="mt-1"
                                 />
-                                {t('sessionLoom.filters.includeToolDetails')}
+                                <span className="min-w-0">
+                                    <span className="block">{t('sessionLoom.filters.includeToolDetails')}</span>
+                                    <span className="block text-xs leading-5 text-[var(--app-hint)]">{t('sessionLoom.filters.includeToolDetails.help')}</span>
+                                </span>
                             </label>
-                            <select
-                                value={template}
-                                aria-label={t('sessionLoom.template.label')}
-                                onChange={(event) => setTemplate(event.currentTarget.value as SessionLoomTemplate)}
-                                className="min-h-11 w-full rounded-md border border-[var(--app-border)] bg-[var(--app-bg)] px-2 text-sm text-[var(--app-fg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--app-link)]"
-                            >
-                                {TEMPLATE_OPTIONS.map((option) => (
-                                    <option key={option} value={option}>{t(`sessionLoom.template.${option}`)}</option>
-                                ))}
-                            </select>
+                            <div className="space-y-1">
+                                <select
+                                    value={template}
+                                    aria-label={t('sessionLoom.template.label')}
+                                    aria-describedby="session-loom-template-description"
+                                    onChange={(event) => setTemplate(event.currentTarget.value as SessionLoomTemplate)}
+                                    className="min-h-11 w-full rounded-md border border-[var(--app-border)] bg-[var(--app-bg)] px-2 text-sm text-[var(--app-fg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--app-link)]"
+                                >
+                                    {TEMPLATE_OPTIONS.map((option) => (
+                                        <option key={option} value={option}>{t(`sessionLoom.template.${option}`)}</option>
+                                    ))}
+                                </select>
+                                <p id="session-loom-template-description" className="text-xs leading-5 text-[var(--app-hint)]">
+                                    {t(`sessionLoom.template.${template}.help`)}
+                                </p>
+                            </div>
                         </div>
                         <div className="flex gap-2">
                             <Button size="sm" onClick={loadPreview} disabled={!canUseApi || previewStatus === 'loading'} className="min-h-11 flex-1">

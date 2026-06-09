@@ -47,6 +47,7 @@ const MAX_EXPORTS_PER_SESSION = 20
 const MAX_OUTLINE_LABEL_LENGTH = 96
 const MAX_ENTRY_TEXT_LENGTH = 12_000
 const EXPORT_TTL_MS = 7 * 24 * 60 * 60 * 1000
+const BEIJING_TIME_OFFSET_MS = 8 * 60 * 60 * 1000
 const DEFAULT_SESSION_LOOM_FILTERS: SessionLoomFilters = {
     redactSecrets: true,
     includeSystemEvents: false,
@@ -69,11 +70,25 @@ function truncate(value: string, maxLength: number): string {
     return `${normalized.slice(0, Math.max(0, maxLength - 3)).trimEnd()}...`
 }
 
-function toIso(value: number | null | undefined): string {
+function formatBeijingTime(value: number | null | undefined, language: SessionLoomLanguage): string {
     if (typeof value !== 'number' || !Number.isFinite(value)) {
         return 'n/a'
     }
-    return new Date(value).toISOString()
+    const date = new Date(value + BEIJING_TIME_OFFSET_MS)
+    const pad = (part: number, length = 2) => part.toString().padStart(length, '0')
+    const timestamp = [
+        date.getUTCFullYear(),
+        pad(date.getUTCMonth() + 1),
+        pad(date.getUTCDate())
+    ].join('-')
+        + ' '
+        + [
+            pad(date.getUTCHours()),
+            pad(date.getUTCMinutes()),
+            pad(date.getUTCSeconds())
+        ].join(':')
+        + `.${pad(date.getUTCMilliseconds(), 3)}`
+    return language === 'en' ? `${timestamp} Beijing Time` : `${timestamp} 北京时间`
 }
 
 function extractText(value: unknown, depth = 0): string {
@@ -389,6 +404,7 @@ function labels(language: SessionLoomLanguage) {
     if (language === 'en') {
         return {
             generated: 'Generated',
+            template: 'Template',
             metadata: 'Session metadata',
             summary: 'Summary',
             outline: 'Outline',
@@ -408,6 +424,7 @@ function labels(language: SessionLoomLanguage) {
     }
     return {
         generated: '生成时间',
+        template: '导出模板',
         metadata: '会话元数据',
         summary: '概要',
         outline: '大纲',
@@ -459,6 +476,203 @@ function extractDecisions(entries: readonly ConversationEntry[]): string[] {
         .filter((entry) => /decision|decided|tradeoff|risk|drift|决定|结论|取舍|风险|偏差/i.test(entry.text))
         .slice(0, 10)
         .map((entry) => `- ${truncate(entry.text, 180)}`)
+}
+
+function templateName(template: SessionLoomTemplate, language: SessionLoomLanguage): string {
+    if (language === 'en') {
+        switch (template) {
+            case 'raw': return 'Raw conversation'
+            case 'design': return 'Design handoff'
+            case 'prd': return 'PRD notes'
+            case 'decisions': return 'Decision log'
+            case 'retrospective': return 'Retrospective'
+            case 'drift-check': return 'Drift check'
+            case 'lesson-card': return 'Lesson card'
+        }
+    }
+    switch (template) {
+        case 'raw': return '原始对话'
+        case 'design': return '设计交付'
+        case 'prd': return 'PRD 笔记'
+        case 'decisions': return '决策记录'
+        case 'retrospective': return '复盘'
+        case 'drift-check': return '偏差检查'
+        case 'lesson-card': return '经验卡片'
+    }
+}
+
+function templateDescription(template: SessionLoomTemplate, language: SessionLoomLanguage): string {
+    if (language === 'en') {
+        switch (template) {
+            case 'raw': return 'chronological transcript for archiving and debugging'
+            case 'design': return 'design goals, interaction notes, decisions, and open questions'
+            case 'prd': return 'requirements, scope, acceptance signals, and risks'
+            case 'decisions': return 'decisions, tradeoffs, unresolved questions, and source outline'
+            case 'retrospective': return 'what happened, issues, follow-ups, and reusable takeaways'
+            case 'drift-check': return 'original intent compared with drift, risks, and system/tool signals'
+            case 'lesson-card': return 'reusable lesson, context, practice, and caveats'
+        }
+    }
+    switch (template) {
+        case 'raw': return '按时间顺序留档，适合排查和完整复盘'
+        case 'design': return '整理设计目标、交互线索、决策和待确认问题'
+        case 'prd': return '整理需求、范围、验收线索和风险'
+        case 'decisions': return '集中记录决定、取舍、未决问题和来源大纲'
+        case 'retrospective': return '复盘做了什么、问题、后续动作和可复用经验'
+        case 'drift-check': return '对照原始目标检查偏差、风险和系统/工具信号'
+        case 'lesson-card': return '沉淀可复用经验、适用场景、做法和注意事项'
+    }
+}
+
+function templateSectionLabels(language: SessionLoomLanguage): Record<
+    'templateOverview'
+    | 'designGoals'
+    | 'interactionNotes'
+    | 'requirements'
+    | 'scopeAcceptance'
+    | 'completedWork'
+    | 'issuesRisks'
+    | 'followUps'
+    | 'originalIntent'
+    | 'signals'
+    | 'lesson'
+    | 'applicableContext'
+    | 'practice'
+    | 'caveats',
+    string
+> {
+    if (language === 'en') {
+        return {
+            templateOverview: 'Template overview',
+            designGoals: 'Design goals',
+            interactionNotes: 'Interaction notes',
+            requirements: 'Requirements',
+            scopeAcceptance: 'Scope and acceptance signals',
+            completedWork: 'Completed work',
+            issuesRisks: 'Issues and risks',
+            followUps: 'Follow-ups',
+            originalIntent: 'Original intent',
+            signals: 'Signals',
+            lesson: 'Lesson',
+            applicableContext: 'Applicable context',
+            practice: 'Practice',
+            caveats: 'Caveats'
+        }
+    }
+    return {
+        templateOverview: '模板说明',
+        designGoals: '设计目标',
+        interactionNotes: '交互与交付线索',
+        requirements: '用户需求',
+        scopeAcceptance: '范围与验收线索',
+        completedWork: '完成事项',
+        issuesRisks: '问题与风险',
+        followUps: '后续动作',
+        originalIntent: '原始目标',
+        signals: '信号',
+        lesson: '经验',
+        applicableContext: '适用场景',
+        practice: '可复用做法',
+        caveats: '注意事项'
+    }
+}
+
+function emptyTemplateLine(language: SessionLoomLanguage): string {
+    return language === 'en' ? '- (none detected)' : '- （未检测到）'
+}
+
+function entryLines(
+    entries: readonly ConversationEntry[],
+    language: SessionLoomLanguage,
+    predicate: (entry: ConversationEntry) => boolean,
+    limit = 10
+): string[] {
+    return entries
+        .filter(predicate)
+        .slice(0, limit)
+        .map((entry) => `- ${roleLabel(entry.role, language)}：${truncate(entry.text, 180)}`)
+}
+
+function appendSection(lines: string[], title: string, content: readonly string[], emptyLine: string): void {
+    lines.push(`## ${title}`, '', ...(content.length > 0 ? content : [emptyLine]), '')
+}
+
+function buildTemplateSections(params: {
+    template: SessionLoomTemplate
+    language: SessionLoomLanguage
+    sanitizedEntries: readonly ConversationEntry[]
+    outlineItems: readonly SessionLoomOutlineItem[]
+    conversationLines: readonly string[]
+    clarificationLines: readonly string[]
+    decisionLines: readonly string[]
+    filterLines: readonly string[]
+    copy: ReturnType<typeof labels>
+}): string[] {
+    const section = templateSectionLabels(params.language)
+    const emptyLine = emptyTemplateLine(params.language)
+    const lines: string[] = []
+    const userLines = entryLines(params.sanitizedEntries, params.language, (entry) => entry.role === 'user')
+    const assistantLines = entryLines(params.sanitizedEntries, params.language, (entry) => entry.role === 'assistant')
+    const systemToolLines = entryLines(params.sanitizedEntries, params.language, (entry) => entry.role === 'system' || entry.role === 'tool')
+    const issueRiskLines = entryLines(params.sanitizedEntries, params.language, (entry) => /risk|issue|problem|blocked|failed|风险|问题|失败|阻塞|异常/i.test(entry.text))
+    const followUpLines = entryLines(params.sanitizedEntries, params.language, (entry) => /todo|follow.?up|next|后续|下一步|待办|继续/i.test(entry.text))
+    const outlineLines = params.outlineItems.map((item) => `- ${formatBeijingTime(item.createdAt, params.language)} · ${item.kind} · ${item.label}`)
+
+    appendSection(lines, section.templateOverview, [
+        `- ${params.copy.template}: ${templateName(params.template, params.language)}`,
+        `- ${params.copy.summary}: ${templateDescription(params.template, params.language)}`
+    ], emptyLine)
+
+    switch (params.template) {
+        case 'raw':
+            appendSection(lines, params.copy.outline, outlineLines, '- (empty)')
+            appendSection(lines, params.copy.rawConversation, params.conversationLines, '(empty)')
+            appendSection(lines, params.copy.clarification, params.clarificationLines.length > 0 ? params.clarificationLines : [params.copy.noClarification], emptyLine)
+            appendSection(lines, params.copy.drift, params.decisionLines.length > 0 ? params.decisionLines : [params.copy.noDecision], emptyLine)
+            break
+        case 'design':
+            appendSection(lines, section.designGoals, userLines, emptyLine)
+            appendSection(lines, section.interactionNotes, [...assistantLines, ...params.decisionLines], emptyLine)
+            appendSection(lines, params.copy.clarification, params.clarificationLines.length > 0 ? params.clarificationLines : [params.copy.noClarification], emptyLine)
+            appendSection(lines, section.followUps, followUpLines, emptyLine)
+            appendSection(lines, params.copy.outline, outlineLines, '- (empty)')
+            break
+        case 'prd':
+            appendSection(lines, section.requirements, userLines, emptyLine)
+            appendSection(lines, section.scopeAcceptance, [...params.clarificationLines, ...params.decisionLines], emptyLine)
+            appendSection(lines, section.issuesRisks, issueRiskLines, emptyLine)
+            appendSection(lines, section.followUps, followUpLines, emptyLine)
+            appendSection(lines, params.copy.rawConversation, params.conversationLines, '(empty)')
+            break
+        case 'decisions':
+            appendSection(lines, params.copy.drift, params.decisionLines.length > 0 ? params.decisionLines : [params.copy.noDecision], emptyLine)
+            appendSection(lines, params.copy.clarification, params.clarificationLines.length > 0 ? params.clarificationLines : [params.copy.noClarification], emptyLine)
+            appendSection(lines, section.issuesRisks, issueRiskLines, emptyLine)
+            appendSection(lines, params.copy.outline, outlineLines, '- (empty)')
+            break
+        case 'retrospective':
+            appendSection(lines, section.completedWork, assistantLines, emptyLine)
+            appendSection(lines, section.issuesRisks, issueRiskLines, emptyLine)
+            appendSection(lines, section.followUps, followUpLines, emptyLine)
+            appendSection(lines, section.lesson, params.decisionLines.length > 0 ? params.decisionLines : [params.copy.noDecision], emptyLine)
+            appendSection(lines, params.copy.rawConversation, params.conversationLines, '(empty)')
+            break
+        case 'drift-check':
+            appendSection(lines, section.originalIntent, userLines.slice(0, 3), emptyLine)
+            appendSection(lines, params.copy.drift, params.decisionLines.length > 0 ? params.decisionLines : [params.copy.noDecision], emptyLine)
+            appendSection(lines, section.signals, [...issueRiskLines, ...systemToolLines], emptyLine)
+            appendSection(lines, params.copy.outline, outlineLines, '- (empty)')
+            break
+        case 'lesson-card':
+            appendSection(lines, section.lesson, params.decisionLines.length > 0 ? params.decisionLines : assistantLines.slice(0, 5), emptyLine)
+            appendSection(lines, section.applicableContext, userLines.slice(0, 5), emptyLine)
+            appendSection(lines, section.practice, assistantLines.slice(0, 8), emptyLine)
+            appendSection(lines, section.caveats, issueRiskLines, emptyLine)
+            break
+    }
+
+    appendSection(lines, params.copy.filters, params.filterLines, emptyLine)
+    return lines
 }
 
 export function buildSessionLoomExportPreview(params: {
@@ -513,17 +727,28 @@ export function buildSessionLoomExportPreview(params: {
     ]
     const conversationLines = sanitizedEntries.map((entry, index) => {
         return [
-            `### ${index + 1}. ${roleLabel(entry.role, params.request.language)} · ${toIso(entry.message.createdAt)}`,
+            `### ${index + 1}. ${roleLabel(entry.role, params.request.language)} · ${formatBeijingTime(entry.message.createdAt, params.request.language)}`,
             '',
             entry.text || '(empty)'
         ].join('\n')
     })
     const clarificationLines = extractClarifications(sanitizedEntries)
     const decisionLines = extractDecisions(sanitizedEntries)
+    const templateSections = buildTemplateSections({
+        template: params.request.template,
+        language: params.request.language,
+        sanitizedEntries,
+        outlineItems,
+        conversationLines,
+        clarificationLines,
+        decisionLines,
+        filterLines,
+        copy
+    })
     const markdown = [
         `# ${title}`,
         '',
-        `> ${copy.generated}: ${toIso(params.generatedAt)}`,
+        `> ${copy.generated}: ${formatBeijingTime(params.generatedAt, params.request.language)}`,
         '',
         `## ${copy.metadata}`,
         '',
@@ -533,27 +758,7 @@ export function buildSessionLoomExportPreview(params: {
         '',
         ...buildSummary(sanitizedEntries, params.request.language),
         '',
-        `## ${copy.outline}`,
-        '',
-        ...(outlineItems.length > 0
-            ? outlineItems.map((item) => `- ${toIso(item.createdAt)} · ${item.kind} · ${item.label}`)
-            : ['- (empty)']),
-        '',
-        `## ${copy.rawConversation}`,
-        '',
-        ...(conversationLines.length > 0 ? conversationLines : ['(empty)']),
-        '',
-        `## ${copy.clarification}`,
-        '',
-        ...(clarificationLines.length > 0 ? clarificationLines : [copy.noClarification]),
-        '',
-        `## ${copy.filters}`,
-        '',
-        ...filterLines,
-        '',
-        `## ${copy.drift}`,
-        '',
-        ...(decisionLines.length > 0 ? decisionLines : [copy.noDecision]),
+        ...templateSections,
         ''
     ].join('\n')
 
