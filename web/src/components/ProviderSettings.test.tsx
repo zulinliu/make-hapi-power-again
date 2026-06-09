@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import type { ApiClient } from '@/api/client'
+import { ApiError, type ApiClient } from '@/api/client'
 import { AppContextProvider } from '@/lib/app-context'
 import { I18nProvider } from '@/lib/i18n-context'
 import type { ProviderWithAssignments, RevealProviderKeyResponse } from '@hapipower/protocol'
@@ -287,5 +287,32 @@ describe('ProviderSettings', () => {
                 'glm-5.1'
             )
         })
+    })
+
+    it('keeps the wizard open and shows SSRF validation errors when provider save is blocked', async () => {
+        const api = createApiMock()
+        vi.mocked(api.createProvider).mockRejectedValueOnce(new ApiError(
+            'HTTP 400 Bad Request: Provider host resolves to a private or metadata address.',
+            400,
+            'dns-private-ip-blocked',
+            '{"error":"Provider host resolves to a private or metadata address.","code":"dns-private-ip-blocked"}'
+        ))
+        renderProviderSettings(api)
+
+        fireEvent.click(await screen.findByRole('button', { name: 'Add to Model Nexus' }))
+        fireEvent.click(screen.getByRole('button', { name: 'Next' }))
+        fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Internal Bridge' } })
+        fireEvent.change(screen.getByLabelText('Base URL'), { target: { value: 'https://private.example.com/v1' } })
+        fireEvent.change(screen.getByLabelText('API Key'), { target: { value: 'sk-test-private' } })
+        fireEvent.click(screen.getByRole('button', { name: 'Next' }))
+        fireEvent.click(screen.getByRole('button', { name: 'Next' }))
+        fireEvent.click(screen.getByRole('checkbox', { name: 'Claude' }))
+        fireEvent.click(screen.getByRole('button', { name: 'Save provider' }))
+
+        const alert = await screen.findByRole('alert')
+        expect(alert).toHaveTextContent('Provider was not saved')
+        expect(alert).toHaveTextContent('private or metadata address')
+        expect(screen.getByText('Add provider to Model Nexus')).toBeInTheDocument()
+        expect(api.assignProvider).not.toHaveBeenCalled()
     })
 })

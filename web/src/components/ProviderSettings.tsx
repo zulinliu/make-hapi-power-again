@@ -1,4 +1,5 @@
 import { useCallback, useId, useMemo, useState } from 'react'
+import { ApiError } from '@/api/client'
 import { useAppContext } from '@/lib/app-context'
 import { useTranslation } from '@/lib/use-translation'
 import { useProviderOverview } from '@/hooks/queries/useProviders'
@@ -105,14 +106,45 @@ function statusClass(status: ProviderHealthStatus): string {
     return 'bg-(--hp-surface-1) text-(--hp-text-tertiary)'
 }
 
+type Translate = (key: string, params?: Record<string, string | number>) => string
+
+function formatProviderSaveError(error: unknown, t: Translate): string {
+    if (error instanceof ApiError && error.code === 'dns-private-ip-blocked') {
+        return t('settings.modelNexus.error.dnsPrivateIpBlocked')
+    }
+
+    if (error instanceof ApiError && error.code === 'provider-name-conflict') {
+        return t('settings.modelNexus.error.nameConflict')
+    }
+
+    const detail = error instanceof Error ? error.message : t('dialog.error.default')
+    return t('settings.modelNexus.error.saveFailed', { error: detail })
+}
+
+function ProviderSaveError({ message }: { message: string }) {
+    const { t } = useTranslation()
+
+    return (
+        <div
+            role="alert"
+            className="rounded-(--hp-radius-md) border border-(--hp-danger) bg-(--hp-danger-subtle) px-3 py-2 text-xs leading-5 text-(--hp-danger)"
+        >
+            <div className="font-semibold">{t('settings.modelNexus.error.saveTitle')}</div>
+            <div>{message}</div>
+        </div>
+    )
+}
+
 function ProviderWizard({
     onSubmit,
     onCancel,
     isPending,
+    error,
 }: {
     onSubmit: (data: ProviderFormState, assignedAgents: AgentFlavor[]) => void | Promise<void>
     onCancel: () => void
     isPending: boolean
+    error: string | null
 }) {
     const { t } = useTranslation()
     const formId = useId()
@@ -177,6 +209,7 @@ function ProviderWizard({
                     </div>
                 ))}
             </div>
+            {error ? <ProviderSaveError message={error} /> : null}
 
             {step === 'protocol' ? (
                 <div className="space-y-3">
@@ -361,12 +394,14 @@ function ProviderForm({
     onCancel,
     isPending,
     submitLabel,
+    error,
 }: {
     initial?: ProviderFormState
     onSubmit: (data: ProviderFormState) => void
     onCancel: () => void
     isPending: boolean
     submitLabel: string
+    error: string | null
 }) {
     const { t } = useTranslation()
     const formId = useId()
@@ -386,6 +421,7 @@ function ProviderForm({
             onSubmit={e => { e.preventDefault(); onSubmit(form) }}
             className="flex flex-col gap-3"
         >
+            {error ? <ProviderSaveError message={error} /> : null}
             <div>
                 <label htmlFor={nameId} className="block text-xs text-(--hp-text-tertiary) mb-1">{t('settings.providers.name')}</label>
                 <input
@@ -740,41 +776,52 @@ export function ProviderSettings() {
     const [revealTarget, setRevealTarget] = useState<ProviderWithAssignments | null>(null)
     const [revealedKey, setRevealedKey] = useState<string | null>(null)
     const [copied, setCopied] = useState(false)
+    const [formError, setFormError] = useState<string | null>(null)
 
     const handleCreate = useCallback(async (form: ProviderFormState, assignedAgents: AgentFlavor[]) => {
-        const defaultModel = form.defaultModel.trim() ? form.defaultModel.trim() : null
-        const response = await createProvider({
-            name: form.name,
-            baseUrl: form.baseUrl,
-            apiKey: form.apiKey,
-            protocol: form.protocol,
-            defaultModel,
-            notes: form.notes || undefined,
-        })
-        for (const agentFlavor of assignedAgents) {
-            await assignProvider({
-                providerId: response.provider.id,
-                agentFlavor,
-                isDefault: true,
-                model: defaultModel,
+        setFormError(null)
+        try {
+            const defaultModel = form.defaultModel.trim() ? form.defaultModel.trim() : null
+            const response = await createProvider({
+                name: form.name,
+                baseUrl: form.baseUrl,
+                apiKey: form.apiKey,
+                protocol: form.protocol,
+                defaultModel,
+                notes: form.notes || undefined,
             })
+            for (const agentFlavor of assignedAgents) {
+                await assignProvider({
+                    providerId: response.provider.id,
+                    agentFlavor,
+                    isDefault: true,
+                    model: defaultModel,
+                })
+            }
+            setShowAdd(false)
+        } catch (error) {
+            setFormError(formatProviderSaveError(error, t))
         }
-        setShowAdd(false)
-    }, [assignProvider, createProvider])
+    }, [assignProvider, createProvider, t])
 
     const handleUpdate = useCallback(async (form: ProviderFormState) => {
         if (!editing) return
-        await updateProvider({
-            id: editing.id,
-            name: form.name,
-            baseUrl: form.baseUrl,
-            ...(form.apiKey ? { apiKey: form.apiKey } : {}),
-            protocol: form.protocol,
-            defaultModel: form.defaultModel.trim() ? form.defaultModel.trim() : null,
-            notes: form.notes,
-        })
-        setEditing(null)
-    }, [editing, updateProvider])
+        setFormError(null)
+        try {
+            await updateProvider({
+                id: editing.id,
+                name: form.name,
+                baseUrl: form.baseUrl,
+                ...(form.apiKey ? { apiKey: form.apiKey } : {}),
+                protocol: form.protocol,
+                defaultModel: form.defaultModel.trim() ? form.defaultModel.trim() : null,
+                notes: form.notes,
+            })
+            setEditing(null)
+        } catch (error) {
+            setFormError(formatProviderSaveError(error, t))
+        }
+    }, [editing, t, updateProvider])
 
     const handleDelete = useCallback(async () => {
         if (!deleteTarget) return
@@ -815,7 +862,7 @@ export function ProviderSettings() {
                     </div>
                     <button
                         type="button"
-                        onClick={() => setShowAdd(true)}
+                        onClick={() => { setFormError(null); setShowAdd(true) }}
                         className="inline-flex min-h-[44px] items-center gap-2 rounded-(--hp-radius-md) bg-(--hp-primary) px-3 py-2 text-xs text-(--hp-primary-text) hover:bg-(--hp-primary-hover) transition-colors"
                     >
                         <PlusCircleIcon className="h-4 w-4" />
@@ -858,7 +905,7 @@ export function ProviderSettings() {
                                 onCheck={(providerId) => { void checkProvider(providerId) }}
                                 onDiscover={(providerId) => { void discoverProviderModels(providerId) }}
                                 onReveal={(target) => { setRevealTarget(target); setRevealedKey(null); setCopied(false) }}
-                                onEdit={setEditing}
+                                onEdit={(provider) => { setFormError(null); setEditing(provider) }}
                                 onDeleteClick={setDeleteTarget}
                             />
                         ))}
@@ -875,7 +922,13 @@ export function ProviderSettings() {
                 )}
             </div>
 
-            <Dialog open={showAdd} onOpenChange={setShowAdd}>
+            <Dialog
+                open={showAdd}
+                onOpenChange={open => {
+                    if (!open) setFormError(null)
+                    setShowAdd(open)
+                }}
+            >
                 <DialogContent className="max-w-md">
                     <DialogTitle className="mb-2 text-sm">{t('settings.modelNexus.addDialogTitle')}</DialogTitle>
                     <DialogDescription className="mb-3 text-xs leading-5 text-(--hp-text-tertiary)">
@@ -883,13 +936,14 @@ export function ProviderSettings() {
                     </DialogDescription>
                     <ProviderWizard
                         onSubmit={handleCreate}
-                        onCancel={() => setShowAdd(false)}
+                        onCancel={() => { setFormError(null); setShowAdd(false) }}
                         isPending={isCreating || isAssigning}
+                        error={formError}
                     />
                 </DialogContent>
             </Dialog>
 
-            <Dialog open={!!editing} onOpenChange={open => { if (!open) setEditing(null) }}>
+            <Dialog open={!!editing} onOpenChange={open => { if (!open) { setFormError(null); setEditing(null) } }}>
                 <DialogContent className="max-w-md">
                     <DialogTitle className="mb-2 text-sm">{t('settings.modelNexus.editDialogTitle')}</DialogTitle>
                     <DialogDescription className="mb-3 text-xs leading-5 text-(--hp-text-tertiary)">
@@ -906,9 +960,10 @@ export function ProviderSettings() {
                                 notes: editing.notes ?? '',
                             }}
                             onSubmit={handleUpdate}
-                            onCancel={() => setEditing(null)}
+                            onCancel={() => { setFormError(null); setEditing(null) }}
                             isPending={isUpdating}
                             submitLabel={t('settings.providers.save')}
+                            error={formError}
                         />
                     )}
                 </DialogContent>

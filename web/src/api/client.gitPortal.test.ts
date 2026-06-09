@@ -113,4 +113,28 @@ describe('ApiClient Git Portal requests', () => {
             confirmation: 'backup',
         })
     })
+
+    it('throws ApiError with backend error codes for failed JSON requests', async () => {
+        vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({
+            error: 'Provider host resolves to a private or metadata address.',
+            code: 'dns-private-ip-blocked',
+        }), {
+            status: 400,
+            statusText: 'Bad Request',
+            headers: { 'content-type': 'application/json' },
+        })))
+        const api = new ApiClient('token-1', { baseUrl: 'https://hub.example' })
+
+        await expect(api.createProvider({
+            name: 'Private Bridge',
+            baseUrl: 'https://private.example.com/v1',
+            apiKey: 'sk-test-private',
+            protocol: 'openai',
+        })).rejects.toMatchObject({
+            name: 'ApiError',
+            status: 400,
+            code: 'dns-private-ip-blocked',
+            message: expect.stringContaining('Provider host resolves'),
+        })
+    })
 })
