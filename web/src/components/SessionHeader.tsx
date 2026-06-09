@@ -93,7 +93,6 @@ export function SessionHeader(props: {
     sessionId: string
     isSubPage: boolean
     onSessionDeleted?: () => void
-    onToggleOutline?: () => void
 }) {
     const { t } = useTranslation()
     const { session, api, onSessionDeleted } = props
@@ -136,6 +135,7 @@ export function SessionHeader(props: {
     const isFilesActive = pathSuffix === '/files' || pathSuffix.startsWith('/files/') || pathSuffix.startsWith('/file')
     const isGitActive = pathSuffix === '/git' || pathSuffix.startsWith('/git/')
     const isExtensionsActive = pathSuffix === '/extensions' || pathSuffix.startsWith('/extensions/')
+    const isLoomActive = pathSuffix === '/loom' || pathSuffix.startsWith('/loom/')
 
     // Toggle navigation: active icon -> chat, inactive icon -> that tool
     const handleFilesClick = () => {
@@ -159,11 +159,18 @@ export function SessionHeader(props: {
             navigate({ to: `${basePath}/extensions` })
         }
     }
+    const handleLoomClick = () => {
+        if (isLoomActive) {
+            navigate({ to: basePath })
+        } else {
+            navigate({ to: `${basePath}/loom` })
+        }
+    }
 
     // Mobile menu navigation callbacks
     const handleMenuGit = () => { setMenuOpen(false); navigate({ to: `${basePath}/git` }) }
     const handleMenuExtensions = () => { setMenuOpen(false); navigate({ to: `${basePath}/extensions` }) }
-    const handleMenuOutline = () => { setMenuOpen(false); props.onToggleOutline?.() }
+    const handleMenuOutline = () => { setMenuOpen(false); navigate({ to: `${basePath}/loom` }) }
 
     const ghostBtnClass = 'flex h-11 w-11 items-center justify-center rounded-lg transition-colors duration-(--hp-duration-fast) sm:h-8 sm:w-8 text-(--hp-text-secondary) hover:bg-(--hp-surface-1) hover:text-(--hp-text-primary)'
     const activeTabClass = 'text-(--hp-primary)'
@@ -256,18 +263,17 @@ export function SessionHeader(props: {
                                 </svg>
                             </button>
 
-                            {/* Outline icon — desktop only, overlay toggle */}
-                            {props.onToggleOutline ? (
-                                <button
-                                    type="button"
-                                    onClick={props.onToggleOutline}
-                                    className={`${ghostBtnClass} hidden lg:flex`}
-                                    title={t('session.outline.open')}
-                                    aria-label={t('session.outline.open')}
-                                >
-                                    <OutlineIcon />
-                                </button>
-                            ) : null}
+                            {/* Session Loom icon — desktop only */}
+                            <button
+                                type="button"
+                                onClick={handleLoomClick}
+                                className={`${ghostBtnClass} ${isLoomActive ? activeTabClass : inactiveTabClass} hidden lg:flex`}
+                                title={t('session.outline.open')}
+                                aria-label={t('session.outline.open')}
+                                aria-current={isLoomActive ? 'page' : undefined}
+                            >
+                                <OutlineIcon />
+                            </button>
 
                             {/* More menu — always visible */}
                             <button

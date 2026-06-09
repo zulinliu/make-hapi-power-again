@@ -96,6 +96,7 @@ export function computeSchedulePickerPlacement(params: {
     viewport: SchedulePickerViewport
     margin?: number
     gap?: number
+    preferAbove?: boolean
 }): SchedulePickerPlacement {
     const margin = params.margin ?? 8
     const gap = params.gap ?? 8
@@ -113,6 +114,16 @@ export function computeSchedulePickerPlacement(params: {
     const spaceBelow = viewportBottom - margin - (params.anchor.bottom + gap)
     const fitsAbove = params.panelHeight <= spaceAbove
     const fitsBelow = params.panelHeight <= spaceBelow
+
+    if (params.preferAbove && spaceAbove > 0) {
+        const maxHeight = Math.max(0, Math.min(params.panelHeight, spaceAbove))
+        return {
+            placement: 'above',
+            top: Math.max(viewportTop + margin, params.anchor.top - gap - maxHeight),
+            left,
+            maxHeight,
+        }
+    }
 
     if (fitsAbove || (!fitsBelow && spaceAbove >= spaceBelow)) {
         const maxHeight = Math.max(0, Math.min(params.panelHeight, spaceAbove))
@@ -187,6 +198,7 @@ export function ScheduleTimePicker({ onSchedule, onClose, anchorRef, pendingSche
                     offsetLeft: viewport?.offsetLeft ?? 0,
                     offsetTop: viewport?.offsetTop ?? 0,
                 },
+                preferAbove: true,
             })
             setIsContentConstrained(placement.maxHeight < fullHeight)
             setPos(placement)

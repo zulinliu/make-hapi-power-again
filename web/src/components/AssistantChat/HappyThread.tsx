@@ -8,7 +8,6 @@ import { HappyChatProvider } from '@/components/AssistantChat/context'
 import { HappyAssistantMessage } from '@/components/AssistantChat/messages/AssistantMessage'
 import { HappyUserMessage } from '@/components/AssistantChat/messages/UserMessage'
 import { HappySystemMessage } from '@/components/AssistantChat/messages/SystemMessage'
-import { ConversationOutlinePanel } from '@/components/AssistantChat/SessionLoomPanel'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/Spinner'
 import { useTerminalToolDisplayMode } from '@/hooks/useTerminalToolDisplayMode'
@@ -180,11 +179,6 @@ export function HappyThread(props: {
     normalizedMessagesCount: number
     messagesVersion: number
     forceScrollToken: number
-    outlineOpen: boolean
-    outlineTitle: string
-    outlineItems: readonly ConversationOutlineItem[]
-    onOutlineOpenChange: (open: boolean) => void
-    onOutlineItemClick?: (item: ConversationOutlineItem) => void
 }) {
     const { t } = useTranslation()
     const { terminalToolDisplayMode } = useTerminalToolDisplayMode()
@@ -210,8 +204,6 @@ export function HappyThread(props: {
     const forceScrollTokenRef = useRef(props.forceScrollToken)
     const lastScrollTopRef = useRef(0)
     const sessionIdRef = useRef(props.sessionId)
-    const previousOutlineOpenRef = useRef(props.outlineOpen)
-    const outlineReturnFocusRef = useRef<HTMLElement | null>(null)
     const initialScrollSessionRef = useRef<string | null>(null)
     const initialScrollDeadlineRef = useRef(0)
     const initialScrollTimersRef = useRef<number[]>([])
@@ -240,20 +232,6 @@ export function HappyThread(props: {
     useEffect(() => {
         sessionIdRef.current = props.sessionId
     }, [props.sessionId])
-
-    useEffect(() => {
-        const wasOpen = previousOutlineOpenRef.current
-        if (!wasOpen && props.outlineOpen) {
-            const activeElement = document.activeElement
-            outlineReturnFocusRef.current = activeElement instanceof HTMLElement ? activeElement : null
-        }
-        if (wasOpen && !props.outlineOpen) {
-            const target = outlineReturnFocusRef.current
-            outlineReturnFocusRef.current = null
-            restoreFocusAfterPanelClose(target)
-        }
-        previousOutlineOpenRef.current = props.outlineOpen
-    }, [props.outlineOpen])
 
     const isInitialScrollSettling = useCallback(() => {
         return initialScrollSessionRef.current === sessionIdRef.current && Date.now() < initialScrollDeadlineRef.current
@@ -497,21 +475,6 @@ export function HappyThread(props: {
         return loadPromise
     }, [isInitialScrollSettling, settlePendingLoad])
 
-    const handleOutlineSelect = useCallback(async (item: ConversationOutlineItem) => {
-        const target = await locateOutlineTargetMessage({
-            targetMessageId: item.targetMessageId,
-            findTarget: (anchorId) => document.getElementById(anchorId),
-            hasMoreMessages: () => hasMoreMessagesRef.current,
-            loadOlderPreservingScroll
-        })
-        if (target) {
-            target.scrollIntoView({ block: 'start', behavior: 'smooth' })
-            autoScrollEnabledRef.current = false
-        }
-        props.onOutlineItemClick?.(item)
-        props.onOutlineOpenChange(false)
-    }, [loadOlderPreservingScroll, props.onOutlineItemClick, props.onOutlineOpenChange])
-
     useEffect(() => {
         handleLoadMoreRef.current = () => {
             void loadOlderPreservingScroll()
@@ -688,29 +651,6 @@ export function HappyThread(props: {
                     </div>
                 </ThreadPrimitive.Viewport>
                 <NewMessagesIndicator count={props.pendingCount} onClick={scrollToBottom} />
-                {props.outlineOpen ? (
-                    <>
-                        <button
-                            type="button"
-                            className="absolute inset-0 z-20 bg-black/20"
-                            aria-label={t('session.outline.close')}
-                            onClick={() => props.onOutlineOpenChange(false)}
-                        />
-                        <ConversationOutlinePanel
-                            api={props.api}
-                            sessionId={props.sessionId}
-                            title={props.outlineTitle}
-                            items={props.outlineItems}
-                            hasMoreMessages={props.hasMoreMessages}
-                            isLoadingMoreMessages={props.isLoadingMoreMessages}
-                            onLoadMore={() => {
-                                void loadOlderPreservingScroll()
-                            }}
-                            onSelect={handleOutlineSelect}
-                            onClose={() => props.onOutlineOpenChange(false)}
-                        />
-                    </>
-                ) : null}
             </ThreadPrimitive.Root>
         </HappyChatProvider>
     )

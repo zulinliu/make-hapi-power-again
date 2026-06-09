@@ -746,6 +746,47 @@ describe('normalizeDecryptedMessage', () => {
         })
     })
 
+    it('normalizes OpenAI-compatible assistant usage fields for GLM providers', () => {
+        const message = makeMessage({
+            role: 'agent',
+            content: {
+                type: 'output',
+                data: {
+                    type: 'assistant',
+                    uuid: 'assistant-usage-1',
+                    message: {
+                        role: 'assistant',
+                        model: 'glm-5.1',
+                        content: [{ type: 'text', text: 'Done' }],
+                        usage: {
+                            prompt_tokens: 18_240,
+                            completion_tokens: 512,
+                            total_tokens: 18_752,
+                            prompt_tokens_details: {
+                                cached_tokens: 2_048
+                            },
+                            model_context_window: 131_072
+                        }
+                    }
+                }
+            }
+        })
+
+        const normalized = normalizeDecryptedMessage(message)
+
+        expect(normalized).toMatchObject({
+            role: 'agent',
+            model: 'glm-5.1',
+            usage: {
+                input_tokens: 18_240,
+                output_tokens: 512,
+                cache_read_input_tokens: 2_048,
+                context_tokens: 18_752,
+                context_window: 131_072
+            }
+        })
+    })
+
     it('normalizes Codex context_compacted as a compact event', () => {
         const message = makeMessage({
             role: 'agent',

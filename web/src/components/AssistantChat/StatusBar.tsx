@@ -304,11 +304,23 @@ export function StatusBar(props: {
             closeAndRestoreFocus()
         }
 
+        function handleDismiss() {
+            setContextDetailsOpen(false)
+        }
+
         document.addEventListener('pointerdown', handlePointerDown)
         document.addEventListener('keydown', handleKeyDown)
+        window.addEventListener('scroll', handleDismiss, true)
+        window.addEventListener('resize', handleDismiss)
+        window.visualViewport?.addEventListener('resize', handleDismiss)
+        window.visualViewport?.addEventListener('scroll', handleDismiss)
         return () => {
             document.removeEventListener('pointerdown', handlePointerDown)
             document.removeEventListener('keydown', handleKeyDown)
+            window.removeEventListener('scroll', handleDismiss, true)
+            window.removeEventListener('resize', handleDismiss)
+            window.visualViewport?.removeEventListener('resize', handleDismiss)
+            window.visualViewport?.removeEventListener('scroll', handleDismiss)
         }
     }, [contextDetailsOpen])
 
@@ -340,7 +352,7 @@ export function StatusBar(props: {
                             ref={contextPanelRef}
                             role="dialog"
                             aria-label={t('contextPulse.detail.title')}
-                            className="fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+96px)] z-30 rounded-(--hp-radius-md) border border-(--hp-border) bg-(--hp-surface-0) p-2 shadow-lg sm:absolute sm:inset-x-auto sm:bottom-auto sm:left-0 sm:top-[calc(100%+4px)] sm:w-[260px]"
+                            className="fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+128px)] z-30 max-h-[min(52vh,320px)] overflow-y-auto rounded-(--hp-radius-md) border border-(--hp-border) bg-(--hp-surface-0) p-2 shadow-lg sm:absolute sm:inset-x-auto sm:bottom-auto sm:left-0 sm:top-[calc(100%+4px)] sm:w-[260px]"
                         >
                             <div className="mb-1 flex items-center justify-between gap-2">
                                 <div className="text-[11px] font-semibold text-(--hp-text-primary)">

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import {
     Navigate,
@@ -46,6 +46,7 @@ import BrowseFilePage from '@/routes/browse/file'
 import TerminalPage from '@/routes/sessions/terminal'
 import GitPage from '@/routes/sessions/git'
 import ExtensionsPage from '@/routes/sessions/extensions'
+import LoomPage from '@/routes/sessions/loom'
 import SettingsPage from '@/routes/settings'
 
 function BackIcon(props: { className?: string }) {
@@ -263,7 +264,7 @@ function SessionsIndexPage() {
     return null
 }
 
-function SessionPage(props: { outlineOpen?: boolean; setOutlineOpen?: (open: boolean | ((prev: boolean) => boolean)) => void }) {
+function SessionPage() {
     const { api } = useAppContext()
     const { t } = useTranslation()
     const goBack = useAppGoBack()
@@ -435,8 +436,6 @@ function SessionPage(props: { outlineOpen?: boolean; setOutlineOpen?: (open: boo
             onRetryMessage={retryMessage}
             autocompleteSuggestions={getAutocompleteSuggestions}
             availableSlashCommands={slashCommands}
-            outlineOpen={props.outlineOpen ?? false}
-            onOutlineOpenChange={props.setOutlineOpen}
         />
     )
 }
@@ -449,7 +448,6 @@ function SessionDetailRoute() {
     const navigate = useNavigate()
     const goBack = useAppGoBack()
     const { session, notFound: sessionNotFound } = useSession(api, sessionId)
-    const [outlineOpen, setOutlineOpen] = useState(false)
 
     const basePath = `/sessions/${sessionId}`
     const isChat = pathname === basePath || pathname === `${basePath}/`
@@ -496,11 +494,10 @@ function SessionDetailRoute() {
                     sessionId={sessionId}
                     isSubPage={!isChat}
                     onSessionDeleted={() => navigate({ to: '/sessions' })}
-                    onToggleOutline={() => setOutlineOpen(prev => !prev)}
                 />
             )}
             {isChat ? (
-                <SessionPage outlineOpen={outlineOpen} setOutlineOpen={setOutlineOpen} />
+                <SessionPage />
             ) : (
                 <Outlet />
             )}
@@ -827,6 +824,12 @@ const sessionGitRoute = createRoute({
     component: GitPage,
 })
 
+const sessionLoomRoute = createRoute({
+    getParentRoute: () => sessionDetailRoute,
+    path: 'loom',
+    component: LoomPage,
+})
+
 const sessionExtensionsRoute = createRoute({
     getParentRoute: () => sessionDetailRoute,
     path: 'extensions',
@@ -846,6 +849,7 @@ export const routeTree = rootRoute.addChildren([
         newSessionRoute,
         sessionDetailRoute.addChildren([
             sessionGitRoute,
+            sessionLoomRoute,
             sessionTerminalRoute,
             sessionFilesRoute,
             sessionFileRoute,

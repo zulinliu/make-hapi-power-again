@@ -56,6 +56,25 @@ const outlineItems: ConversationOutlineItem[] = [
     }
 ]
 
+const serverOutlineItems: SessionLoomOutlineResponse['items'] = [
+    {
+        id: 'session-loom:user:m1',
+        targetMessageId: 'user-text:m1',
+        kind: 'user',
+        label: 'Plan the implementation',
+        createdAt: 1000,
+        depth: 0
+    },
+    {
+        id: 'session-loom:assistant:m2',
+        targetMessageId: 'agent-text:m2:0',
+        kind: 'assistant',
+        label: 'Implementation summary',
+        createdAt: 2000,
+        depth: 1
+    }
+]
+
 function rect(values: Pick<DOMRect, 'top' | 'bottom'> & Partial<DOMRect>): DOMRect {
     return {
         left: 0,
@@ -102,6 +121,7 @@ function createSessionLoomApi(overrides: Partial<Pick<
         title: 'project',
         generatedAt: 3000,
         items: [
+            ...serverOutlineItems,
             {
                 id: 'session-loom:decision:m3',
                 targetMessageId: 'agent:m3',
@@ -248,6 +268,34 @@ describe('ConversationOutlinePanel', () => {
         renderPanel({ items: [] })
 
         expect(screen.getByText('No outline items in this session yet.')).toBeInTheDocument()
+    })
+
+    it('filters outline items by all, user, and assistant', async () => {
+        const api = createSessionLoomApi()
+
+        renderPanel({
+            api,
+            sessionId: 'session-1'
+        })
+
+        expect(await screen.findByText('Plan the implementation')).toBeInTheDocument()
+        expect(screen.getByText('Implementation summary')).toBeInTheDocument()
+        expect(screen.getByText('Decision: keep the server outline')).toBeInTheDocument()
+
+        fireEvent.click(screen.getByRole('radio', { name: 'User' }))
+        expect(screen.getByText('Plan the implementation')).toBeInTheDocument()
+        expect(screen.queryByText('Implementation summary')).not.toBeInTheDocument()
+        expect(screen.queryByText('Decision: keep the server outline')).not.toBeInTheDocument()
+
+        fireEvent.click(screen.getByRole('radio', { name: 'Assistant' }))
+        expect(screen.queryByText('Plan the implementation')).not.toBeInTheDocument()
+        expect(screen.getByText('Implementation summary')).toBeInTheDocument()
+        expect(screen.queryByText('Decision: keep the server outline')).not.toBeInTheDocument()
+
+        fireEvent.click(screen.getByRole('radio', { name: 'All' }))
+        expect(screen.getByText('Plan the implementation')).toBeInTheDocument()
+        expect(screen.getByText('Implementation summary')).toBeInTheDocument()
+        expect(screen.getByText('Decision: keep the server outline')).toBeInTheDocument()
     })
 
     it('keeps outline item touch targets at least 44px tall', () => {

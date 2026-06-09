@@ -1,4 +1,4 @@
-import type { AgentEvent, CodexReview, CodexReviewFinding, NormalizedAgentContent, NormalizedMessage, ToolResultPermission } from '@/chat/types'
+import type { AgentEvent, CodexReview, CodexReviewFinding, NormalizedAgentContent, NormalizedMessage, ToolResultPermission, UsageData } from '@/chat/types'
 import { AGENT_MESSAGE_PAYLOAD_TYPE, asNumber, asString, isObject } from '@hapipower/protocol'
 import { isClaudeChatVisibleMessage } from '@hapipower/protocol/messages'
 
@@ -213,6 +213,78 @@ function normalizeCodexTokenUsage(value: unknown, data?: Record<string, unknown>
     }
 }
 
+function pickPromptTokenDetails(usage: Record<string, unknown>): Record<string, unknown> | null {
+    return isObject(usage.prompt_tokens_details)
+        ? usage.prompt_tokens_details
+        : isObject(usage.promptTokensDetails)
+            ? usage.promptTokensDetails
+            : isObject(usage.input_tokens_details)
+                ? usage.input_tokens_details
+                : isObject(usage.inputTokensDetails)
+                    ? usage.inputTokensDetails
+                    : null
+}
+
+function normalizeAssistantUsage(value: unknown): UsageData | undefined {
+    const usage = isObject(value) ? value : null
+    if (!usage) return undefined
+
+    const inputTokens = asNumber(
+        usage.input_tokens
+        ?? usage.inputTokens
+        ?? usage.prompt_tokens
+        ?? usage.promptTokens
+    )
+    const outputTokens = asNumber(
+        usage.output_tokens
+        ?? usage.outputTokens
+        ?? usage.completion_tokens
+        ?? usage.completionTokens
+    )
+    if (inputTokens === null || outputTokens === null) return undefined
+
+    const promptTokensDetails = pickPromptTokenDetails(usage)
+    return {
+        input_tokens: inputTokens,
+        output_tokens: outputTokens,
+        cache_creation_input_tokens: asNumber(
+            usage.cache_creation_input_tokens
+            ?? usage.cacheCreationInputTokens
+        ) ?? undefined,
+        cache_read_input_tokens: asNumber(
+            usage.cache_read_input_tokens
+            ?? usage.cacheReadInputTokens
+            ?? usage.cached_read_tokens
+            ?? usage.cachedReadTokens
+            ?? usage.cached_input_tokens
+            ?? usage.cachedInputTokens
+            ?? usage.cached_tokens
+            ?? usage.cachedTokens
+            ?? usage.prompt_cache_hit_tokens
+            ?? usage.promptCacheHitTokens
+            ?? promptTokensDetails?.cached_tokens
+            ?? promptTokensDetails?.cachedTokens
+        ) ?? undefined,
+        context_tokens: asNumber(
+            usage.context_tokens
+            ?? usage.contextTokens
+            ?? usage.total_tokens
+            ?? usage.totalTokens
+            ?? usage.prompt_tokens
+            ?? usage.promptTokens
+            ?? usage.input_tokens
+            ?? usage.inputTokens
+        ) ?? inputTokens,
+        context_window: asNumber(
+            usage.context_window
+            ?? usage.contextWindow
+            ?? usage.model_context_window
+            ?? usage.modelContextWindow
+        ) ?? undefined,
+        service_tier: asString(usage.service_tier ?? usage.serviceTier) ?? undefined
+    }
+}
+
 function normalizePlanStatus(value: unknown): 'pending' | 'in_progress' | 'completed' {
     const raw = typeof value === 'string' ? value.trim().toLowerCase().replace(/[\s-]/g, '_') : ''
     if (raw === 'completed' || raw === 'complete' || raw === 'done') return 'completed'
@@ -361,9 +433,6 @@ function normalizeAssistantOutput(
         }
     }
 
-    const usage = isObject(message.usage) ? (message.usage as Record<string, unknown>) : null
-    const inputTokens = usage ? asNumber(usage.input_tokens) : null
-    const outputTokens = usage ? asNumber(usage.output_tokens) : null
     const model = asString(message.model) ?? null
 
     return {
@@ -375,14 +444,7 @@ function normalizeAssistantOutput(
         isSidechain,
         content: blocks,
         meta,
-        usage: inputTokens !== null && outputTokens !== null ? {
-            input_tokens: inputTokens,
-            output_tokens: outputTokens,
-            cache_creation_input_tokens: asNumber(usage?.cache_creation_input_tokens) ?? undefined,
-            cache_read_input_tokens: asNumber(usage?.cache_read_input_tokens) ?? undefined,
-            service_tier: asString(usage?.service_tier) ?? undefined,
-            context_window: asNumber(usage?.context_window) ?? undefined
-        } : undefined
+        usage: normalizeAssistantUsage(message.usage)
     }
 }
 

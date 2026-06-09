@@ -18,6 +18,7 @@ import type {
 } from '@/types/api'
 
 type SessionLoomTab = 'outline' | 'export' | 'synthesis' | 'assets'
+type OutlineFilter = 'all' | 'user' | 'assistant'
 
 type PanelStatus = 'idle' | 'loading' | 'error'
 
@@ -52,6 +53,9 @@ function serverToConversationOutline(item: SessionLoomOutlineItem): Conversation
     return {
         id: item.id,
         targetMessageId: item.targetMessageId,
+        // The historical chat overlay can only scroll to user outline anchors.
+        // Keep the richer server kind for Session Loom UI, but downcast when
+        // invoking the legacy chat-scroll callback.
         kind: 'user',
         label: item.label,
         createdAt: item.createdAt
@@ -104,10 +108,86 @@ export function ConversationOutlinePanel(props: {
     onSelect: (item: ConversationOutlineItem) => void
     onClose: () => void
 }) {
-    const { t, locale } = useTranslation()
+    const { t } = useTranslation()
     const closeButtonRef = useRef<HTMLButtonElement | null>(null)
+
+    useEffect(() => {
+        closeButtonRef.current?.focus()
+    }, [])
+
+    const handleKeyDown = useCallback((event: KeyboardEvent<HTMLElement>) => {
+        if (event.key === 'Escape') {
+            props.onClose()
+            return
+        }
+        if (event.key !== 'Tab') return
+        const focusable = Array.from(event.currentTarget.querySelectorAll<HTMLElement>(
+            'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        ))
+        if (focusable.length === 0) return
+        const first = focusable[0]
+        const last = focusable[focusable.length - 1]
+        if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault()
+            last.focus()
+        } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault()
+            first.focus()
+        }
+    }, [props.onClose])
+
+    return (
+        <aside
+            className="absolute inset-0 z-30 flex flex-col border-l border-[var(--app-border)] bg-[var(--app-bg)] shadow-2xl sm:left-auto sm:w-[26rem] [padding-bottom:env(safe-area-inset-bottom)] [padding-top:env(safe-area-inset-top)] motion-reduce:transition-none"
+            aria-label={t('sessionLoom.title')}
+            onKeyDown={handleKeyDown}
+        >
+            <div className="flex items-start gap-3 border-b border-[var(--app-border)] p-3">
+                <div className="min-w-0 flex-1">
+                    <div className="text-sm font-semibold text-[var(--app-fg)]">{t('sessionLoom.title')}</div>
+                    <div className="mt-0.5 truncate text-xs text-[var(--app-hint)]">{props.title}</div>
+                </div>
+                <button
+                    ref={closeButtonRef}
+                    type="button"
+                    onClick={props.onClose}
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[var(--app-hint)] transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--app-link)]"
+                    aria-label={t('button.close')}
+                    title={t('button.close')}
+                >
+                    <CloseIcon className="h-4 w-4" />
+                </button>
+            </div>
+            <SessionLoomContent
+                api={props.api}
+                sessionId={props.sessionId}
+                title={props.title}
+                items={props.items}
+                hasMoreMessages={props.hasMoreMessages}
+                isLoadingMoreMessages={props.isLoadingMoreMessages}
+                onLoadMore={props.onLoadMore}
+                onSelect={props.onSelect}
+                className="min-h-0 flex-1"
+            />
+        </aside>
+    )
+}
+
+export function SessionLoomContent(props: {
+    api?: ApiClient
+    sessionId?: string
+    title: string
+    items?: readonly ConversationOutlineItem[]
+    hasMoreMessages?: boolean
+    isLoadingMoreMessages?: boolean
+    onLoadMore?: () => void
+    onSelect?: (item: ConversationOutlineItem) => void
+    className?: string
+}) {
+    const { t, locale } = useTranslation()
     const [activeTab, setActiveTab] = useState<SessionLoomTab>('outline')
-    const [outline, setOutline] = useState<SessionLoomOutlineItem[]>(() => fallbackToServerOutline(props.items))
+    const [outlineFilter, setOutlineFilter] = useState<OutlineFilter>('all')
+    const [outline, setOutline] = useState<SessionLoomOutlineItem[]>(() => fallbackToServerOutline(props.items ?? []))
     const [outlineStatus, setOutlineStatus] = useState<PanelStatus>('idle')
     const [outlineError, setOutlineError] = useState<string | null>(null)
     const [filters, setFilters] = useState<SessionLoomFilters>(DEFAULT_FILTERS)
@@ -130,11 +210,7 @@ export function ConversationOutlinePanel(props: {
     const canSharePreview = preview !== null && getNavigatorShare() !== null
 
     useEffect(() => {
-        closeButtonRef.current?.focus()
-    }, [])
-
-    useEffect(() => {
-        setOutline(fallbackToServerOutline(props.items))
+        setOutline(fallbackToServerOutline(props.items ?? []))
     }, [props.items])
 
     const loadOutline = useCallback(async () => {
@@ -362,27 +438,15 @@ export function ConversationOutlinePanel(props: {
         { id: 'assets', label: t('sessionLoom.tabs.assets'), tabId: 'session-loom-tab-assets', panelId: 'session-loom-panel-assets' },
     ], [t])
     const activeTabItem = tabItems.find((tab) => tab.id === activeTab) ?? tabItems[0]!
-
-    const handleKeyDown = useCallback((event: KeyboardEvent<HTMLElement>) => {
-        if (event.key === 'Escape') {
-            props.onClose()
-            return
-        }
-        if (event.key !== 'Tab') return
-        const focusable = Array.from(event.currentTarget.querySelectorAll<HTMLElement>(
-            'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-        ))
-        if (focusable.length === 0) return
-        const first = focusable[0]
-        const last = focusable[focusable.length - 1]
-        if (event.shiftKey && document.activeElement === first) {
-            event.preventDefault()
-            last.focus()
-        } else if (!event.shiftKey && document.activeElement === last) {
-            event.preventDefault()
-            first.focus()
-        }
-    }, [props.onClose])
+    const filteredOutline = useMemo(() => {
+        if (outlineFilter === 'all') return outline
+        return outline.filter((item) => item.kind === outlineFilter)
+    }, [outline, outlineFilter])
+    const outlineFilterOptions = useMemo<Array<{ id: OutlineFilter; label: string }>>(() => [
+        { id: 'all', label: t('sessionLoom.outline.filter.all') },
+        { id: 'user', label: t('sessionLoom.outline.filter.user') },
+        { id: 'assistant', label: t('sessionLoom.outline.filter.assistant') },
+    ], [t])
 
     const renderStatus = (status: PanelStatus, error: string | null) => {
         if (status === 'loading') {
@@ -410,28 +474,7 @@ export function ConversationOutlinePanel(props: {
     }
 
     return (
-        <aside
-            className="absolute inset-0 z-30 flex flex-col border-l border-[var(--app-border)] bg-[var(--app-bg)] shadow-2xl sm:left-auto sm:w-[26rem] [padding-bottom:env(safe-area-inset-bottom)] [padding-top:env(safe-area-inset-top)] motion-reduce:transition-none"
-            aria-label={t('sessionLoom.title')}
-            onKeyDown={handleKeyDown}
-        >
-            <div className="flex items-start gap-3 border-b border-[var(--app-border)] p-3">
-                <div className="min-w-0 flex-1">
-                    <div className="text-sm font-semibold text-[var(--app-fg)]">{t('sessionLoom.title')}</div>
-                    <div className="mt-0.5 truncate text-xs text-[var(--app-hint)]">{props.title}</div>
-                </div>
-                <button
-                    ref={closeButtonRef}
-                    type="button"
-                    onClick={props.onClose}
-                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[var(--app-hint)] transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--app-link)]"
-                    aria-label={t('button.close')}
-                    title={t('button.close')}
-                >
-                    <CloseIcon className="h-4 w-4" />
-                </button>
-            </div>
-
+        <div className={`flex min-h-0 flex-col ${props.className ?? ''}`}>
             <div className="grid grid-cols-4 gap-1 border-b border-[var(--app-border)] p-2" role="tablist" aria-label={t('sessionLoom.tabs.label')}>
                 {tabItems.map((tab) => (
                     <button
@@ -477,6 +520,24 @@ export function ConversationOutlinePanel(props: {
                 {activeTab === 'outline' ? (
                     <div className="space-y-3">
                         {renderStatus(outlineStatus, outlineError)}
+                        <div className="grid grid-cols-3 gap-1 rounded-md bg-[var(--app-subtle-bg)] p-1" role="radiogroup" aria-label={t('sessionLoom.outline.filter.label')}>
+                            {outlineFilterOptions.map((option) => (
+                                <button
+                                    key={option.id}
+                                    type="button"
+                                    role="radio"
+                                    aria-checked={outlineFilter === option.id}
+                                    onClick={() => setOutlineFilter(option.id)}
+                                    className={`min-h-11 rounded-sm px-2 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--app-link)] sm:min-h-9 ${
+                                        outlineFilter === option.id
+                                            ? 'bg-[var(--app-bg)] text-[var(--app-fg)] shadow-sm'
+                                            : 'text-[var(--app-hint)] hover:text-[var(--app-fg)]'
+                                    }`}
+                                >
+                                    {option.label}
+                                </button>
+                            ))}
+                        </div>
                         {props.hasMoreMessages ? (
                             <Button
                                 variant="outline"
@@ -503,26 +564,48 @@ export function ConversationOutlinePanel(props: {
                             <div className="px-2 py-8 text-center text-sm text-[var(--app-hint)]">
                                 {t('sessionLoom.outline.empty')}
                             </div>
+                        ) : filteredOutline.length === 0 ? (
+                            <div className="px-2 py-8 text-center text-sm text-[var(--app-hint)]">
+                                {t('sessionLoom.outline.emptyFiltered')}
+                            </div>
                         ) : (
                             <div className="space-y-1">
-                                {outline.map((item) => (
-                                    <button
-                                        key={item.id}
-                                        type="button"
-                                        onClick={() => props.onSelect(serverToConversationOutline(item))}
-                                        className="group flex min-h-11 w-full min-w-0 items-start gap-2 rounded-md px-2 py-2 text-left transition-colors hover:bg-[var(--app-subtle-bg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--app-link)]"
-                                    >
-                                        <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[var(--app-button)]" aria-hidden="true" />
-                                        <span className="min-w-0 flex-1">
-                                            <span className="block truncate text-[11px] font-medium text-[var(--app-hint)]">
-                                                {t(`sessionLoom.kind.${item.kind}`)}
+                                {filteredOutline.map((item) => {
+                                    const selectable = Boolean(props.onSelect)
+                                    const rowClassName = `group flex min-h-11 w-full min-w-0 items-start gap-2 rounded-md px-2 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--app-link)] ${
+                                        selectable ? 'hover:bg-[var(--app-subtle-bg)]' : ''
+                                    }`
+                                    const content = (
+                                        <>
+                                            <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[var(--app-button)]" aria-hidden="true" />
+                                            <span className="min-w-0 flex-1">
+                                                <span className="block truncate text-[11px] font-medium text-[var(--app-hint)]">
+                                                    {t(`sessionLoom.kind.${item.kind}`)}
+                                                </span>
+                                                <span className="line-clamp-2 text-sm leading-snug text-[var(--app-fg)]">
+                                                    {item.label}
+                                                </span>
                                             </span>
-                                            <span className="line-clamp-2 text-sm leading-snug text-[var(--app-fg)]">
-                                                {item.label}
-                                            </span>
-                                        </span>
-                                    </button>
-                                ))}
+                                        </>
+                                    )
+                                    return selectable ? (
+                                        <button
+                                            key={item.id}
+                                            type="button"
+                                            onClick={() => props.onSelect?.(serverToConversationOutline(item))}
+                                            className={rowClassName}
+                                        >
+                                            {content}
+                                        </button>
+                                    ) : (
+                                        <div
+                                            key={item.id}
+                                            className={rowClassName}
+                                        >
+                                            {content}
+                                        </div>
+                                    )
+                                })}
                             </div>
                         )}
                     </div>
@@ -737,6 +820,6 @@ export function ConversationOutlinePanel(props: {
                     </div>
                 ) : null}
             </div>
-        </aside>
+        </div>
     )
 }

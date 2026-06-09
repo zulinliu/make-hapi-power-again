@@ -16,7 +16,6 @@ import type { Suggestion } from '@/hooks/useActiveSuggestions'
 import { normalizeDecryptedMessage } from '@/chat/normalize'
 import { reduceChatBlocks } from '@/chat/reducer'
 import { reconcileChatBlocks } from '@/chat/reconcile'
-import { buildConversationOutline } from '@/chat/outline'
 import { buildVisibleChatBlocks, isToolGroupBlock, type ToolGroupBlock } from '@/chat/toolGroups'
 import { isQueuedForInvocation, mergeMessages } from '@/lib/messages'
 import { HappyComposer } from '@/components/AssistantChat/HappyComposer'
@@ -68,19 +67,6 @@ export function buildGoalStateMessages(
         : eligibleMessages
 }
 
-function getOutlineTitle(session: Session): string {
-    if (session.metadata?.name) {
-        return session.metadata.name
-    }
-    if (session.metadata?.summary?.text) {
-        return session.metadata.summary.text
-    }
-    if (session.metadata?.path) {
-        return session.metadata.path
-    }
-    return session.id.slice(0, 8)
-}
-
 function hasAbortableAgentRun(blocks: readonly ChatBlock[]): boolean {
     for (const block of blocks) {
         if (block.kind === 'tool-call') {
@@ -123,8 +109,6 @@ export function SessionChat(props: {
     onRetryMessage?: (localId: string) => void
     autocompleteSuggestions?: (query: string) => Promise<Suggestion[]>
     availableSlashCommands?: readonly SlashCommand[]
-    outlineOpen?: boolean
-    onOutlineOpenChange?: (open: boolean | ((prev: boolean) => boolean)) => void
 }) {
     const { haptic } = usePlatform()
     const { t } = useTranslation()
@@ -136,8 +120,6 @@ export function SessionChat(props: {
     const blocksByIdRef = useRef<Map<string, ChatBlock>>(new Map())
     const visibleGroupsRef = useRef<ToolGroupBlock[]>([])
     const [forceScrollToken, setForceScrollToken] = useState(0)
-    const outlineOpen = props.outlineOpen ?? false
-    const setOutlineOpen = props.onOutlineOpenChange ?? (() => {})
     const { uploadBinaryFile } = useBinaryUpload()
     const agentFlavor = props.session.metadata?.flavor ?? null
     const controlledByUser = props.session.agentState?.controlledByUser === true
@@ -326,16 +308,6 @@ export function SessionChat(props: {
     useEffect(() => {
         visibleGroupsRef.current = visibleBlocks.filter(isToolGroupBlock)
     }, [visibleBlocks])
-
-    const outlineItems = useMemo(
-        () => buildConversationOutline(reconciled.blocks),
-        [reconciled.blocks]
-    )
-
-    const outlineTitle = useMemo(
-        () => getOutlineTitle(props.session),
-        [props.session]
-    )
 
     // Permission mode change handler
     const handlePermissionModeChange = useCallback(async (mode: PermissionMode) => {
@@ -527,10 +499,6 @@ export function SessionChat(props: {
                         normalizedMessagesCount={normalizedMessages.length}
                         messagesVersion={props.messagesVersion}
                         forceScrollToken={forceScrollToken}
-                        outlineOpen={outlineOpen}
-                        outlineTitle={outlineTitle}
-                        outlineItems={outlineItems}
-                        onOutlineOpenChange={setOutlineOpen}
                     />
 
                     {codexCollaborationModeSupported && codexModelsState.error ? (
