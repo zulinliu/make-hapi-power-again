@@ -316,7 +316,7 @@ async function tryFetchModels(
                     }
 
                     const target = new URL(location, currentUrl)
-                    const redirectValidation = assertSafeRedirect(currentUrl, target)
+                    const redirectValidation = assertSafeRedirect(currentUrl, target, validationSecurity)
                     if (!redirectValidation.ok) {
                         const diagnostic = buildDiagnostic(target.toString(), response.status, latencyMs, redirectValidation.code, redirectValidation.message)
                         return {
@@ -586,7 +586,7 @@ async function resolveSafeLookupAddress(
 ): Promise<{ address: string; family: 4 | 6 }> {
     const literalFamily = isIP(hostname)
     if (literalFamily === 4 || literalFamily === 6) {
-        const validation = validateProviderResolvedAddress(hostname)
+        const validation = validateProviderResolvedAddress(hostname, security)
         if (!validation.ok) {
             throw new Error(validation.message)
         }
@@ -602,7 +602,7 @@ async function resolveSafeLookupAddress(
         const family = isIP(address)
         if (family !== 4 && family !== 6) continue
         if (familyHint && family !== familyHint) continue
-        const validation = validateProviderResolvedAddress(address)
+        const validation = validateProviderResolvedAddress(address, security)
         if (!validation.ok) {
             throw new Error('Provider host resolves to a private or metadata address.')
         }

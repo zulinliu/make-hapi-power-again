@@ -355,6 +355,26 @@ describe('ModelDiscoveryService', () => {
         expect(result.diagnostic?.errorCode).toBe('dns-private-ip-blocked')
     })
 
+    test('allows intranet provider discovery only when private-network policy is explicit', async () => {
+        globalThis.fetch = mock(async () => {
+            return new Response(
+                JSON.stringify({ data: [{ id: 'internal-model', name: 'Internal Model' }] }),
+                { status: 200, headers: { 'content-type': 'application/json' } }
+            )
+        }) as unknown as typeof fetch
+
+        const result = await service.discoverModels('dns-private-allowed', 'https://api.internal.example.com', await encryptTestKey(), {
+            security: {
+                allowPrivateNetwork: true,
+                resolveHost: async () => ['10.0.0.5'],
+            },
+        })
+
+        expect(result.success).toBe(true)
+        expect(result.models?.[0]?.id).toBe('internal-model')
+        expect(result.health?.status).toBe('online')
+    })
+
     test('blocks DNS rebinding when host resolution changes during request', async () => {
         let resolveCount = 0
         globalThis.fetch = mock(async () => {

@@ -651,7 +651,7 @@ export default {
   'settings.modelNexus.revealing': 'Revealing...',
   'settings.modelNexus.error.saveTitle': 'Provider was not saved',
   'settings.modelNexus.error.saveFailed': 'Save failed: {error}',
-  'settings.modelNexus.error.dnsPrivateIpBlocked': 'The host resolves to a private or metadata address, so Model Nexus blocked it to prevent SSRF. Use a public provider endpoint or a controlled proxy entrypoint.',
+  'settings.modelNexus.error.dnsPrivateIpBlocked': 'The host resolves to a private or metadata address, so Model Nexus blocked it to prevent SSRF. For company intranet providers, ask an administrator to enable the controlled private-network provider policy.',
   'settings.modelNexus.error.nameConflict': 'A provider with this name already exists in the current namespace.',
   'settings.modelNexus.wizard.steps': 'Model Nexus setup steps',
   'settings.modelNexus.wizard.protocol': 'Protocol',

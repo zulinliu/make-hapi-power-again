@@ -16,13 +16,19 @@ describe('providers routes', () => {
     let app: Hono<WebAppEnv>
     let originalFetch: typeof globalThis.fetch
     let originalEncryptionKey: string | undefined
+    let originalAllowPrivateNetworks: string | undefined
+    let originalAllowNonStandardPorts: string | undefined
     let originalConsoleInfo: typeof console.info
 
     beforeEach(() => {
         originalFetch = globalThis.fetch
         originalEncryptionKey = process.env.HAPI_POWER_PROVIDER_ENCRYPTION_KEY
+        originalAllowPrivateNetworks = process.env.HAPI_POWER_PROVIDER_ALLOW_PRIVATE_NETWORKS
+        originalAllowNonStandardPorts = process.env.HAPI_POWER_PROVIDER_ALLOW_NON_STANDARD_PORTS
         originalConsoleInfo = console.info
         process.env.HAPI_POWER_PROVIDER_ENCRYPTION_KEY = TEST_ENCRYPTION_KEY
+        delete process.env.HAPI_POWER_PROVIDER_ALLOW_PRIVATE_NETWORKS
+        delete process.env.HAPI_POWER_PROVIDER_ALLOW_NON_STANDARD_PORTS
         console.info = () => {}
         namespace = 'alpha'
         store = new Store(':memory:')
@@ -42,6 +48,16 @@ describe('providers routes', () => {
             delete process.env.HAPI_POWER_PROVIDER_ENCRYPTION_KEY
         } else {
             process.env.HAPI_POWER_PROVIDER_ENCRYPTION_KEY = originalEncryptionKey
+        }
+        if (originalAllowPrivateNetworks === undefined) {
+            delete process.env.HAPI_POWER_PROVIDER_ALLOW_PRIVATE_NETWORKS
+        } else {
+            process.env.HAPI_POWER_PROVIDER_ALLOW_PRIVATE_NETWORKS = originalAllowPrivateNetworks
+        }
+        if (originalAllowNonStandardPorts === undefined) {
+            delete process.env.HAPI_POWER_PROVIDER_ALLOW_NON_STANDARD_PORTS
+        } else {
+            process.env.HAPI_POWER_PROVIDER_ALLOW_NON_STANDARD_PORTS = originalAllowNonStandardPorts
         }
         store.close()
     })
@@ -88,6 +104,33 @@ describe('providers routes', () => {
         })
     })
 
+    it('开启受控私网策略后可创建内网 provider，但仍拒绝 metadata 地址', async () => {
+        process.env.HAPI_POWER_PROVIDER_ALLOW_PRIVATE_NETWORKS = '1'
+
+        const response = await app.request('/api/providers', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+                name: 'Internal Gateway',
+                baseUrl: 'http://10.0.0.20/v1',
+                apiKey: 'test-key',
+            }),
+        })
+        expect(response.status).toBe(201)
+
+        const blocked = await app.request('/api/providers', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+                name: 'Metadata Gateway',
+                baseUrl: 'http://169.254.169.254/v1',
+                apiKey: 'test-key',
+            }),
+        })
+        expect(blocked.status).toBe(400)
+        expect(await blocked.json()).toMatchObject({ code: 'private-ip-blocked' })
+    })
+
     it('创建和更新 provider 时拒绝非标准端口', async () => {
         const createResponse = await app.request('/api/providers', {
             method: 'POST',
@@ -109,6 +152,22 @@ describe('providers routes', () => {
         })
         expect(updateResponse.status).toBe(400)
         expect(await updateResponse.json()).toMatchObject({ code: 'non-standard-port' })
+    })
+
+    it('开启受控端口策略后可创建非标准端口 provider', async () => {
+        process.env.HAPI_POWER_PROVIDER_ALLOW_NON_STANDARD_PORTS = '1'
+
+        const createResponse = await app.request('/api/providers', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+                name: 'Port Gateway',
+                baseUrl: 'https://93.184.216.34:8443',
+                apiKey: 'test-key',
+            }),
+        })
+
+        expect(createResponse.status).toBe(201)
     })
 
     it('创建和更新 provider 时拒绝敏感 query 且响应不泄露 secret', async () => {

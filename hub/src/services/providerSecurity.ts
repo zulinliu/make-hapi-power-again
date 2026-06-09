@@ -18,6 +18,7 @@ export type ProviderDnsResolver = (hostname: string) => Promise<string[]>
 
 export type ProviderSecurityOptions = {
     resolveHost?: ProviderDnsResolver
+    allowPrivateNetwork?: boolean
     allowNonStandardPorts?: boolean
     allowSensitiveQueryParams?: boolean
     allowedSensitiveQueryParams?: string[]
@@ -76,12 +77,15 @@ export async function validateProviderBaseUrl(
         return { ok: false, code: 'host-blocked', message: 'Provider URL host must be public.' }
     }
 
-    const literalResult = validateHostAddress(hostname)
+    const literalResult = validateHostAddress(hostname, options)
     if (!literalResult.ok) {
         return literalResult
     }
 
     const warnings: string[] = []
+    if (isAllowedPrivateNetworkAddress(hostname, options)) {
+        warnings.push('private-network')
+    }
     if (url.protocol === 'http:') {
         warnings.push('insecure-http')
     }
@@ -114,7 +118,7 @@ export async function validateProviderBaseUrl(
         resolvedAddresses = [...addresses].sort()
 
         for (const address of addresses) {
-            const addressResult = validateHostAddress(address)
+            const addressResult = validateHostAddress(address, options)
             if (!addressResult.ok) {
                 return {
                     ok: false,
@@ -122,13 +126,20 @@ export async function validateProviderBaseUrl(
                     message: 'Provider host resolves to a private or metadata address.',
                 }
             }
+            if (isAllowedPrivateNetworkAddress(address, options) && !warnings.includes('private-network')) {
+                warnings.push('private-network')
+            }
         }
     }
 
     return { ok: true, url, warnings, resolvedAddresses }
 }
 
-export function assertSafeRedirect(from: URL, to: URL): ProviderUrlValidationResult {
+export function assertSafeRedirect(
+    from: URL,
+    to: URL,
+    options: ProviderSecurityOptions = {}
+): ProviderUrlValidationResult {
     if (to.protocol !== 'https:' && to.protocol !== 'http:') {
         return { ok: false, code: 'redirect-scheme-blocked', message: 'Redirect target uses an unsupported scheme.' }
     }
@@ -141,15 +152,25 @@ export function assertSafeRedirect(from: URL, to: URL): ProviderUrlValidationRes
     if (from.hostname.toLowerCase() !== to.hostname.toLowerCase()) {
         return { ok: false, code: 'redirect-cross-host', message: 'Cross-host redirects are blocked for provider checks.' }
     }
-    const addressResult = validateHostAddress(to.hostname.toLowerCase())
+    const addressResult = validateHostAddress(to.hostname.toLowerCase(), options)
     if (!addressResult.ok) {
         return { ok: false, code: `redirect-${addressResult.code}`, message: 'Redirect target host must be public.' }
     }
     return { ok: true, url: to, warnings: [], resolvedAddresses: [] }
 }
 
-export function validateProviderResolvedAddress(address: string): ProviderAddressValidationResult {
-    return validateHostAddress(address)
+export function validateProviderResolvedAddress(
+    address: string,
+    options: ProviderSecurityOptions = {}
+): ProviderAddressValidationResult {
+    return validateHostAddress(address, options)
+}
+
+export function getProviderSecurityOptionsFromEnv(): ProviderSecurityOptions {
+    return {
+        allowPrivateNetwork: readBooleanEnv('HAPI_POWER_PROVIDER_ALLOW_PRIVATE_NETWORKS'),
+        allowNonStandardPorts: readBooleanEnv('HAPI_POWER_PROVIDER_ALLOW_NON_STANDARD_PORTS'),
+    }
 }
 
 export function sanitizeProviderDiagnostic(input: {
@@ -259,19 +280,27 @@ function normalizeQueryParamKey(key: string): string {
     return key.toLowerCase().replace(/[^a-z0-9]/g, '')
 }
 
-function validateHostAddress(hostnameOrAddress: string): ProviderAddressValidationResult {
-    const address = normalizeAddress(hostnameOrAddress)
-    if (!address) {
-        return { ok: true }
-    }
+function validateHostAddress(
+    hostnameOrAddress: string,
+    options: ProviderSecurityOptions = {}
+): ProviderAddressValidationResult {
+    const risk = getAddressRisk(hostnameOrAddress)
+    if (!risk) return { ok: true }
+    if (risk === 'private-network' && options.allowPrivateNetwork) return { ok: true }
+    return { ok: false, code: 'private-ip-blocked', message: 'Private, loopback, link-local, or metadata addresses are not allowed.' }
+}
 
-    if (address.family === 4 && isPrivateIpv4(address.value)) {
-        return { ok: false, code: 'private-ip-blocked', message: 'Private IPv4 addresses are not allowed.' }
-    }
-    if (address.family === 6 && isPrivateIpv6(address.value)) {
-        return { ok: false, code: 'private-ip-blocked', message: 'Private IPv6 addresses are not allowed.' }
-    }
-    return { ok: true }
+function isAllowedPrivateNetworkAddress(
+    hostnameOrAddress: string,
+    options: ProviderSecurityOptions
+): boolean {
+    return options.allowPrivateNetwork === true && getAddressRisk(hostnameOrAddress) === 'private-network'
+}
+
+function getAddressRisk(hostnameOrAddress: string): 'private-network' | 'blocked' | null {
+    const address = normalizeAddress(hostnameOrAddress)
+    if (!address) return null
+    return address.family === 4 ? getIpv4Risk(address.value) : getIpv6Risk(address.value)
 }
 
 function normalizeAddress(value: string): { family: 4 | 6; value: string } | null {
@@ -326,24 +355,29 @@ function ipv4ToNumber(address: string): number | null {
     return result >>> 0
 }
 
-function isPrivateIpv4(address: string): boolean {
-    if (address === METADATA_IPV4) return true
+function getIpv4Risk(address: string): 'private-network' | 'blocked' | null {
+    if (address === METADATA_IPV4) return 'blocked'
     const n = ipv4ToNumber(address)
-    if (n === null) return true
-    return inIpv4Range(n, '0.0.0.0', 8)
-        || inIpv4Range(n, '10.0.0.0', 8)
+    if (n === null) return 'blocked'
+    if (inIpv4Range(n, '10.0.0.0', 8)
         || inIpv4Range(n, '100.64.0.0', 10)
+        || inIpv4Range(n, '172.16.0.0', 12)
+        || inIpv4Range(n, '192.168.0.0', 16)) {
+        return 'private-network'
+    }
+    if (inIpv4Range(n, '0.0.0.0', 8)
         || inIpv4Range(n, '127.0.0.0', 8)
         || inIpv4Range(n, '169.254.0.0', 16)
-        || inIpv4Range(n, '172.16.0.0', 12)
         || inIpv4Range(n, '192.0.0.0', 24)
         || inIpv4Range(n, '192.0.2.0', 24)
-        || inIpv4Range(n, '192.168.0.0', 16)
         || inIpv4Range(n, '198.18.0.0', 15)
         || inIpv4Range(n, '198.51.100.0', 24)
         || inIpv4Range(n, '203.0.113.0', 24)
         || inIpv4Range(n, '224.0.0.0', 4)
-        || inIpv4Range(n, '240.0.0.0', 4)
+        || inIpv4Range(n, '240.0.0.0', 4)) {
+        return 'blocked'
+    }
+    return null
 }
 
 function inIpv4Range(address: number, base: string, prefix: number): boolean {
@@ -353,15 +387,19 @@ function inIpv4Range(address: number, base: string, prefix: number): boolean {
     return (address & mask) === (baseNumber & mask)
 }
 
-function isPrivateIpv6(address: string): boolean {
+function getIpv6Risk(address: string): 'private-network' | 'blocked' | null {
     const lower = address.toLowerCase()
-    return lower === '::'
+    if (lower.startsWith('fc') || lower.startsWith('fd')) {
+        return 'private-network'
+    }
+    if (lower === '::'
         || lower === '::1'
         || isIpv6Prefix(lower, 0xfe80, 0xffc0)
-        || lower.startsWith('fc')
-        || lower.startsWith('fd')
         || lower.startsWith('ff')
-        || lower.startsWith('2001:db8:')
+        || lower.startsWith('2001:db8:')) {
+        return 'blocked'
+    }
+    return null
 }
 
 function isIpv6Prefix(address: string, base: number, mask: number): boolean {
@@ -369,4 +407,9 @@ function isIpv6Prefix(address: string, base: number, mask: number): boolean {
     if (!firstGroupText || !/^[0-9a-f]{1,4}$/.test(firstGroupText)) return false
     const firstGroup = Number.parseInt(firstGroupText, 16)
     return (firstGroup & mask) === (base & mask)
+}
+
+function readBooleanEnv(name: string): boolean {
+    const value = process.env[name]?.trim().toLowerCase()
+    return value === '1' || value === 'true' || value === 'yes' || value === 'on'
 }

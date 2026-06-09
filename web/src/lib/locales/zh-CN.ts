@@ -653,7 +653,7 @@ export default {
   'settings.modelNexus.revealing': '显示中...',
   'settings.modelNexus.error.saveTitle': '供应商未保存',
   'settings.modelNexus.error.saveFailed': '保存失败：{error}',
-  'settings.modelNexus.error.dnsPrivateIpBlocked': '该地址解析到内网或元数据地址，模型星桥已阻断本次保存以防止 SSRF。请使用公网供应商端点或受控代理入口。',
+  'settings.modelNexus.error.dnsPrivateIpBlocked': '该地址解析到内网或元数据地址，模型星桥已阻断本次保存以防止 SSRF。公司内网供应商可由管理员开启受控私网供应商策略后使用。',
   'settings.modelNexus.error.nameConflict': '当前命名空间已存在同名供应商。',
   'settings.modelNexus.wizard.steps': '模型星桥接入步骤',
   'settings.modelNexus.wizard.protocol': '协议',

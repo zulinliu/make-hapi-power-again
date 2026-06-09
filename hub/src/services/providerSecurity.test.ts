@@ -69,6 +69,47 @@ describe('Provider SSRF 防护', () => {
         expect(result).toMatchObject({ ok: false, code: 'dns-private-ip-blocked' })
     })
 
+    test('显式策略可允许公司内网与 CGNAT 地址，并保留 warning', async () => {
+        const privateLiteral = await validateProviderBaseUrl('http://10.0.0.1/v1', {
+            allowPrivateNetwork: true,
+        })
+        expect(privateLiteral.ok).toBe(true)
+        if (privateLiteral.ok) {
+            expect(privateLiteral.warnings).toContain('private-network')
+            expect(privateLiteral.warnings).toContain('insecure-http')
+        }
+
+        const privateDns = await validateProviderBaseUrl('https://api.internal.example.com/v1', {
+            allowPrivateNetwork: true,
+            resolveHost: async () => ['192.168.1.20', '100.64.1.5'],
+        })
+        expect(privateDns.ok).toBe(true)
+        if (privateDns.ok) {
+            expect(privateDns.resolvedAddresses).toEqual(['100.64.1.5', '192.168.1.20'])
+            expect(privateDns.warnings).toContain('private-network')
+        }
+    })
+
+    test('私网策略不会放行 metadata、loopback 或 link-local 地址', async () => {
+        const blocked = [
+            'http://127.0.0.1',
+            'http://169.254.169.254',
+            'http://[::1]',
+            'http://[fe80::1]',
+        ]
+
+        for (const url of blocked) {
+            const result = await validateProviderBaseUrl(url, { allowPrivateNetwork: true })
+            expect({ url, result }).toMatchObject({ result: { ok: false, code: 'private-ip-blocked' } })
+        }
+
+        const metadataDns = await validateProviderBaseUrl('https://api.internal.example.com/v1', {
+            allowPrivateNetwork: true,
+            resolveHost: async () => ['169.254.169.254'],
+        })
+        expect(metadataDns).toMatchObject({ ok: false, code: 'dns-private-ip-blocked' })
+    })
+
     test('拒绝用户提交的敏感 query 参数', async () => {
         const result = await validateProviderBaseUrl('https://api.example.com/v1?key=abc', {
             resolveHost: async () => ['93.184.216.34'],

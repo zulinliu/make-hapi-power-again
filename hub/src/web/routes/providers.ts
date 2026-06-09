@@ -22,7 +22,11 @@ import type { StoredProvider } from '../../store/providerStore'
 import type { WebAppEnv } from '../middleware/auth'
 import { decryptAES256GCM, encryptAES256GCM, getEncryptionKey } from '../../utils/crypto'
 import { ModelDiscoveryService } from '../../services/modelDiscovery'
-import { getDefaultProviderCapabilities, validateProviderBaseUrl } from '../../services/providerSecurity'
+import {
+    getDefaultProviderCapabilities,
+    getProviderSecurityOptionsFromEnv,
+    validateProviderBaseUrl,
+} from '../../services/providerSecurity'
 
 const REVEAL_TTL_MS = 60_000
 type RevealGrant = {
@@ -119,6 +123,10 @@ export function createProviderRoutes(store: Store, discoveryService = new ModelD
     const app = new Hono<WebAppEnv>()
     const revealGrants = new Map<string, RevealGrant>()
 
+    function getProviderSecurityOptions() {
+        return getProviderSecurityOptionsFromEnv()
+    }
+
     function pruneRevealGrants(now = Date.now()): void {
         for (const [token, grant] of revealGrants.entries()) {
             if (grant.expiresAt <= now) {
@@ -156,7 +164,7 @@ export function createProviderRoutes(store: Store, discoveryService = new ModelD
         }
 
         const req: CreateProviderRequest = parsed.data
-        const validation = await validateProviderBaseUrl(req.baseUrl, { allowNonStandardPorts: false })
+        const validation = await validateProviderBaseUrl(req.baseUrl, getProviderSecurityOptions())
         if (!validation.ok) {
             return c.json({ error: validation.message, code: validation.code }, 400)
         }
@@ -208,7 +216,7 @@ export function createProviderRoutes(store: Store, discoveryService = new ModelD
             return c.json({ error: 'Provider name already exists', code: 'provider-name-conflict' }, 409)
         }
         if (req.baseUrl !== undefined) {
-            const validation = await validateProviderBaseUrl(req.baseUrl, { allowNonStandardPorts: false })
+            const validation = await validateProviderBaseUrl(req.baseUrl, getProviderSecurityOptions())
             if (!validation.ok) {
                 return c.json({ error: validation.message, code: validation.code }, 400)
             }
@@ -280,6 +288,7 @@ export function createProviderRoutes(store: Store, discoveryService = new ModelD
         const result = await discoveryService.discoverModels(id, provider.baseUrl, provider.apiKeyEncrypted, {
             namespace,
             protocol: provider.protocol,
+            security: getProviderSecurityOptions(),
         })
         applyDiscoveryResult(store, namespace, id, result.health, result.models)
         return c.json(result)
@@ -303,6 +312,7 @@ export function createProviderRoutes(store: Store, discoveryService = new ModelD
             namespace,
             protocol: provider.protocol,
             force: parsed.data.force,
+            security: getProviderSecurityOptions(),
         })
         const updated = applyDiscoveryResult(store, namespace, id, result.health, result.models)
         if (!updated || !result.diagnostic) {
@@ -411,6 +421,7 @@ export function createProviderRoutes(store: Store, discoveryService = new ModelD
                 : (await discoveryService.discoverModels(provider.id, provider.baseUrl, provider.apiKeyEncrypted, {
                     namespace,
                     protocol: provider.protocol,
+                    security: getProviderSecurityOptions(),
                 })).models ?? []
 
             for (const model of cachedModels) {
