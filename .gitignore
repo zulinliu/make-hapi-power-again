@@ -42,3 +42,8 @@ execplan/
 # Generated npm bundle output (local)
 cli/npm/main/
 .ace-tool/
+
+# Local agent indexes
+.codegraph/codegraph.db
+.codegraph/*.db-wal
+.codegraph/*.db-shm

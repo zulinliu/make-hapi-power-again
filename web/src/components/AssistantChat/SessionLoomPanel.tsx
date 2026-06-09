@@ -512,7 +512,10 @@ export function ConversationOutlinePanel(props: {
                                 <input
                                     type="checkbox"
                                     checked={filters.redactSecrets}
-                                    onChange={(event) => setFilters((prev) => ({ ...prev, redactSecrets: event.currentTarget.checked }))}
+                                    onChange={(event) => {
+                                        const checked = event.currentTarget.checked
+                                        setFilters((prev) => ({ ...prev, redactSecrets: checked }))
+                                    }}
                                 />
                                 {t('sessionLoom.filters.redactSecrets')}
                             </label>
@@ -520,7 +523,10 @@ export function ConversationOutlinePanel(props: {
                                 <input
                                     type="checkbox"
                                     checked={filters.includeSystemEvents}
-                                    onChange={(event) => setFilters((prev) => ({ ...prev, includeSystemEvents: event.currentTarget.checked }))}
+                                    onChange={(event) => {
+                                        const checked = event.currentTarget.checked
+                                        setFilters((prev) => ({ ...prev, includeSystemEvents: checked }))
+                                    }}
                                 />
                                 {t('sessionLoom.filters.includeSystemEvents')}
                             </label>
@@ -528,7 +534,10 @@ export function ConversationOutlinePanel(props: {
                                 <input
                                     type="checkbox"
                                     checked={filters.includeToolDetails}
-                                    onChange={(event) => setFilters((prev) => ({ ...prev, includeToolDetails: event.currentTarget.checked }))}
+                                    onChange={(event) => {
+                                        const checked = event.currentTarget.checked
+                                        setFilters((prev) => ({ ...prev, includeToolDetails: checked }))
+                                    }}
                                 />
                                 {t('sessionLoom.filters.includeToolDetails')}
                             </label>

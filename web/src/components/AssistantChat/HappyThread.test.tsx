@@ -304,6 +304,63 @@ describe('ConversationOutlinePanel', () => {
         expect(await screen.findByText('Export preview is ready.')).toBeInTheDocument()
     })
 
+    it('keeps the export panel mounted when system events are included and redaction is disabled', async () => {
+        const previewSessionLoomExport = vi.fn(async () => ({
+            success: true,
+            sessionId: 'session-1',
+            generatedAt: 4000,
+            markdown: '# Export',
+            title: 'project',
+            stats: {
+                messageCount: 2,
+                outlineCount: 1,
+                userMessages: 1,
+                assistantMessages: 1,
+                systemEvents: 1,
+                redactions: 0,
+                filteredToolDetails: 0
+            },
+            filters: {
+                redactSecrets: false,
+                includeSystemEvents: true,
+                includeToolDetails: false
+            },
+            warnings: ['Secret redaction is disabled for this preview.']
+        } satisfies SessionLoomExportPreviewResponse))
+        const api = createSessionLoomApi({ previewSessionLoomExport })
+
+        renderPanel({
+            api,
+            sessionId: 'session-1'
+        })
+
+        fireEvent.click(screen.getByRole('tab', { name: 'Export' }))
+        const includeSystemEvents = screen.getByLabelText('Include system events')
+        const redactSecrets = screen.getByLabelText('Redact secrets by default')
+
+        fireEvent.click(includeSystemEvents)
+        fireEvent.click(redactSecrets)
+
+        expect(includeSystemEvents).toBeChecked()
+        expect(redactSecrets).not.toBeChecked()
+        expect(screen.getByRole('tabpanel', { name: 'Export' })).toBeInTheDocument()
+
+        fireEvent.click(screen.getByRole('button', { name: 'Preview export' }))
+
+        await waitFor(() => {
+            expect(previewSessionLoomExport).toHaveBeenCalledWith(
+                'session-1',
+                expect.objectContaining({
+                    filters: {
+                        redactSecrets: false,
+                        includeSystemEvents: true,
+                        includeToolDetails: false
+                    }
+                } satisfies Partial<SessionLoomExportPreviewRequest>)
+            )
+        })
+    })
+
     it('copies Markdown when Web Share rejects', async () => {
         const share = vi.fn(async () => {
             throw new Error('share unavailable')

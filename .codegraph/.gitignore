@@ -1,4 +1,7 @@
-# CodeGraph persistent graph database is versioned for agent context.
+# CodeGraph persistent graph database is local-only agent state.
+
+# Runtime database
+codegraph.db
 
 # Runtime database sidecars
 *.db-wal
