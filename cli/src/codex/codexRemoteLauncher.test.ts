@@ -28,6 +28,10 @@ const harness = vi.hoisted(() => ({
     suppressGoalNotifications: false,
     suppressTurnCompletion: false,
     remainingThreadSystemErrors: 0,
+    delayFirstTurnStartedNotification: false,
+    emitDelayedFirstTurnStartedNotification: null as (() => void) | null,
+    delayFirstStartTurnResponse: false,
+    resolveFirstStartTurnResponse: null as (() => void) | null,
     startTurnMessages: [] as string[],
     failResumeThreadIds: [] as string[],
     nextThreadSystemErrorMessage: null as string | null,
@@ -181,8 +185,15 @@ vi.mock('./codexAppServerClient', () => {
             harness.startTurnMessages.push(params?.input?.[0]?.text ?? params?.message ?? params?.userMessage ?? '');
             const turnId = `turn-${harness.startTurnThreadIds.length}`;
             const started = { turn: { id: turnId } };
-            harness.notifications.push({ method: 'turn/started', params: started });
-            this.notificationHandler?.('turn/started', started);
+            const emitStarted = () => {
+                harness.notifications.push({ method: 'turn/started', params: started });
+                this.notificationHandler?.('turn/started', started);
+            };
+            if (harness.delayFirstTurnStartedNotification && harness.startTurnThreadIds.length === 1) {
+                harness.emitDelayedFirstTurnStartedNotification = emitStarted;
+            } else {
+                emitStarted();
+            }
 
             if (harness.remainingThreadSystemErrors > 0) {
                 harness.remainingThreadSystemErrors -= 1;
@@ -228,6 +239,11 @@ vi.mock('./codexAppServerClient', () => {
             }
 
             if (harness.suppressTurnCompletion) {
+                if (harness.delayFirstStartTurnResponse && harness.startTurnThreadIds.length === 1) {
+                    await new Promise<void>((resolve) => {
+                        harness.resolveFirstStartTurnResponse = resolve;
+                    });
+                }
                 return { turn: { id: turnId } };
             }
 
@@ -978,6 +994,10 @@ describe('codexRemoteLauncher', () => {
         harness.goal = null;
         harness.suppressGoalNotifications = false;
         harness.suppressTurnCompletion = false;
+        harness.delayFirstTurnStartedNotification = false;
+        harness.emitDelayedFirstTurnStartedNotification = null;
+        harness.delayFirstStartTurnResponse = false;
+        harness.resolveFirstStartTurnResponse = null;
         harness.startTurnMessages = [];
         harness.failResumeThreadIds = [];
         harness.remainingThreadSystemErrors = 0;
@@ -1384,6 +1404,87 @@ describe('codexRemoteLauncher', () => {
 
         await vi.waitFor(() => {
             expect(harness.startTurnMessages).toEqual(['first message', 'guide correction']);
+        });
+
+        const exitReason = await running;
+
+        expect(exitReason).toBe('exit');
+        expect(resetQueueSpy).not.toHaveBeenCalled();
+    });
+
+    it('waits briefly for a delayed turn id before falling back from guide delivery', async () => {
+        harness.suppressTurnCompletion = true;
+        harness.delayFirstTurnStartedNotification = true;
+        harness.delayFirstStartTurnResponse = true;
+        harness.emitTurnAbortedOnInterrupt = true;
+        const { session, guideFallbacks, resetQueueSpy } = createSessionStub(['first message'], createMode(), {
+            closeQueue: false
+        });
+
+        const running = codexRemoteLauncher(session as never);
+
+        await vi.waitFor(() => {
+            expect(harness.startTurnMessages).toEqual(['first message']);
+        });
+
+        session.queue.pushGuide('guide correction', createMode(), 'guide-local-1');
+        await new Promise(resolve => setTimeout(resolve, 50));
+        expect(guideFallbacks).toEqual([]);
+        expect(harness.interruptedTurns).toEqual([]);
+
+        harness.emitDelayedFirstTurnStartedNotification?.();
+        harness.resolveFirstStartTurnResponse?.();
+        harness.suppressTurnCompletion = false;
+        session.queue.close();
+
+        await vi.waitFor(() => {
+            expect(harness.interruptedTurns).toEqual([{ threadId: 'thread-1', turnId: 'turn-1' }]);
+            expect(harness.startTurnMessages).toEqual(['first message', 'guide correction']);
+        });
+
+        const exitReason = await running;
+
+        expect(exitReason).toBe('exit');
+        expect(guideFallbacks).toEqual([]);
+        expect(resetQueueSpy).not.toHaveBeenCalled();
+    });
+
+    it('falls back when no guide interrupt target appears before the wait window ends', async () => {
+        harness.suppressTurnCompletion = true;
+        harness.delayFirstTurnStartedNotification = true;
+        harness.delayFirstStartTurnResponse = true;
+        const { session, guideFallbacks, resetQueueSpy } = createSessionStub(['first message'], createMode(), {
+            closeQueue: false
+        });
+
+        const running = codexRemoteLauncher(session as never);
+
+        await vi.waitFor(() => {
+            expect(harness.startTurnMessages).toEqual(['first message']);
+        });
+
+        session.queue.pushGuide('guide correction', createMode(), 'guide-local-1');
+
+        await vi.waitFor(() => {
+            expect(guideFallbacks).toEqual([{
+                localIds: ['guide-local-1'],
+                reason: 'interrupt-failed'
+            }]);
+        }, { timeout: 1500 });
+        expect(harness.interruptedTurns).toEqual([]);
+
+        harness.resolveFirstStartTurnResponse?.();
+        harness.suppressTurnCompletion = false;
+        const completed = { status: 'Completed', turn: { id: 'turn-1' } };
+        harness.notifications.push({ method: 'turn/completed', params: completed });
+        harness.notificationHandler?.('turn/completed', completed);
+        session.queue.close();
+
+        await vi.waitFor(() => {
+            expect(harness.startTurnMessages).toEqual([
+                'first message',
+                'guide correction'
+            ]);
         });
 
         const exitReason = await running;

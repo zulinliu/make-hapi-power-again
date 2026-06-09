@@ -92,6 +92,8 @@ const CONTEXT_COMPACT_RETRYABLE_ERROR_PATTERNS = [
 const SAME_THREAD_MAX_RETRIES = 3;
 const SAME_THREAD_MAX_COMPACT_RETRIES = 1;
 const SAME_THREAD_COMPACT_TIMEOUT_MS = 10 * 60 * 1000;
+const GUIDE_INTERRUPT_TARGET_WAIT_MS = 750;
+const GUIDE_INTERRUPT_TARGET_POLL_MS = 25;
 const CODEX_GOALS_UNSUPPORTED_MESSAGE = 'Codex goals are not supported by this Codex runtime. Upgrade Codex or enable features.goals.';
 const MAX_CODEX_GOAL_OBJECTIVE_CHARS = 4_000;
 
@@ -1819,6 +1821,47 @@ class CodexRemoteLauncher extends RemoteLauncherBase {
             Boolean(this.currentThreadId && this.currentTurnId)
             || this.activeChildTurns.size > 0
         );
+        const emitGuideInterruptFallback = () => {
+            const localIds = session.queue.downgradePendingGuides();
+            if (localIds.length > 0) {
+                session.emitGuideFallback(localIds, 'interrupt-failed');
+            }
+        };
+        const waitForGuideInterruptTarget = async (signal: AbortSignal): Promise<boolean> => {
+            const deadline = Date.now() + GUIDE_INTERRUPT_TARGET_WAIT_MS;
+            while (!signal.aborted && (turnInFlight || recoveryInFlight)) {
+                if (hasActiveInterruptTarget()) {
+                    return true;
+                }
+                const remainingMs = deadline - Date.now();
+                if (remainingMs <= 0) {
+                    break;
+                }
+                await new Promise<void>((resolve) => {
+                    let timeout: ReturnType<typeof setTimeout> | null = null;
+                    const onAbort = () => {
+                        if (timeout) {
+                            clearTimeout(timeout);
+                        }
+                        signal.removeEventListener('abort', onAbort);
+                        resolve();
+                    };
+                    const finish = () => {
+                        signal.removeEventListener('abort', onAbort);
+                        resolve();
+                    };
+                    timeout = setTimeout(finish, Math.min(GUIDE_INTERRUPT_TARGET_POLL_MS, remainingMs));
+                    timeout.unref?.();
+                    if (signal.aborted) {
+                        clearTimeout(timeout);
+                        resolve();
+                        return;
+                    }
+                    signal.addEventListener('abort', onAbort, { once: true });
+                });
+            }
+            return hasActiveInterruptTarget();
+        };
         const finishGuideInterruptWait = () => {
             if (!guideInterruptInFlight) {
                 return;
@@ -1831,19 +1874,19 @@ class CodexRemoteLauncher extends RemoteLauncherBase {
             if (guideInterruptInFlight) {
                 return;
             }
-            if (!hasActiveInterruptTarget()) {
-                const localIds = session.queue.downgradePendingGuides();
-                session.emitGuideFallback(localIds, 'interrupt-failed');
-                wakeLoop();
-                return;
-            }
             guideInterruptInFlight = true;
             void (async () => {
                 try {
+                    const hasTarget = hasActiveInterruptTarget()
+                        || await waitForGuideInterruptTarget(this.abortController.signal);
+                    if (!hasTarget) {
+                        emitGuideInterruptFallback();
+                        finishGuideInterruptWait();
+                        return;
+                    }
                     const interrupted = await this.interruptActiveTurns('guide');
                     if (!interrupted) {
-                        const localIds = session.queue.downgradePendingGuides();
-                        session.emitGuideFallback(localIds, 'interrupt-failed');
+                        emitGuideInterruptFallback();
                         finishGuideInterruptWait();
                         return;
                     }
@@ -1852,8 +1895,7 @@ class CodexRemoteLauncher extends RemoteLauncherBase {
                     }
                 } catch (error) {
                     logger.debug('[Codex] Guide interrupt failed:', error);
-                    const localIds = session.queue.downgradePendingGuides();
-                    session.emitGuideFallback(localIds, 'interrupt-failed');
+                    emitGuideInterruptFallback();
                     finishGuideInterruptWait();
                 }
             })();

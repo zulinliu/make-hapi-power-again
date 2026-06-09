@@ -198,3 +198,56 @@
 ### 已知风险
 
 - 本次移动端验收覆盖设置项下拉、持久化和刷新回归；未重新覆盖真实 iOS Safari 键盘弹出场景，后续完整 PWA 回归仍需单独跑键盘与 safe-area 检查。
+
+## 14. 2026-06-09 引导中断竞态与会话页精简修正
+
+### 实施范围
+
+- 深度复查 Guide Beam 从 Web `deliveryMode=guide`、Hub capability gate、CLI isolated guide queue 到 Codex app-server interrupt 的完整链路。
+- 修复 CLI 中断目标竞态：当 session 已进入 thinking、但 `turn/started` 或 `startTurn()` 返回的 `turnId` 尚未建立时，Guide 不再立即降级为普通 queue，而是在短窗口内等待可中断目标出现。
+- 保留安全降级：等待窗口结束仍没有 parent/child turn target 时，继续 `downgradePendingGuides()` 并上报 `interrupt-failed`，避免 Guide stuck。
+- 精简会话页 Composer：移除 thinking 状态下额外显示的 `跟进行为：排队/引导` 与快捷切换按钮；会话页仍读取设置页持久偏好决定发送 `queue | guide`，但不再占用 StatusBar 与输入框之间的纵向空间。
+
+### 修改文件
+
+- `cli/src/codex/codexRemoteLauncher.ts`
+- `cli/src/codex/codexRemoteLauncher.test.ts`
+- `web/src/components/AssistantChat/HappyComposer.tsx`
+- `web/src/components/AssistantChat/HappyComposer.test.tsx`
+- `.planning/phases/37-v0.18.0-feature-redesign/39-GUIDE-BEAM-CONTEXT-PULSE-IMPLEMENTATION.md`
+
+### 测试结果
+
+- `bun run --cwd cli test -- src/codex/codexRemoteLauncher.test.ts`
+  - 1 file / 59 tests passed
+- `bun run --cwd web test -- src/components/AssistantChat/HappyComposer.test.tsx`
+  - 1 file / 2 tests passed
+- `bun run typecheck:cli`
+  - passed
+- `bun run typecheck:web`
+  - passed
+
+### 自审结论
+
+- 当前需求“引导模式应直接打断插入新对话”在 Web/Hub 协议层已存在实现，真实失败点更可能是 CLI turn target 建立前过早 fallback。本次已用回归测试覆盖 `turnId` 延迟出现时 Guide 等待并成功 interrupt 的路径。
+- Guide 仍不调用 `handleAbort()`、`queue.reset()` 或 `pushIsolateAndClear()`，不会清空普通 queued messages。
+- Guide 仍使用 `pushGuide()` 的 isolated queue；降级时只把 pending guide 转为普通 queue，并保持普通 queue 顺序。
+- `messages-consumed` 时序未改动，仍由 CLI queue collect 后触发。
+- 会话页不再渲染“跟进行为”内容，设置入口保留在设置页，减少移动端纵向挤压并避免遮挡 Context Pulse 信息。
+
+### 附录门禁
+
+- `37-PROTOCOL-ADDENDUM`：满足。Guide capability handshake、isolated delivery、fallback queue、queue collect 后 consumed 的协议边界保持不变，并补齐 interrupt target 竞态覆盖。
+- `37-SECURITY-ADDENDUM`：满足。本次没有放宽 Guide capability gate、permission pending gate 或任何队列清空路径；没有新增外部请求、敏感信息落盘或 redaction 改动。
+- `37-UX-ACCEPTANCE-MATRIX`：满足。设置页持久 `跟进行为` 仍决定中途发送模式；会话页去除重复控件后，StatusBar 与 Context Pulse 可用空间更稳定。
+- `37-BRAND-CONTRACT`：满足。保留“引导 / Guide”驾驶节点语义，会话页避免重复展示说明性文案，用户侧表达更克制。
+
+### 已知风险
+
+- 本次验证覆盖单元/组件层和 TypeScript 类型检查；尚未重新启动完整 Hub + Web + CLI 做真实 app-server interrupt 端到端录屏验收。
+- 等待窗口为 750ms，目的是覆盖 `thinking=true` 与 `turnId` 建立之间的短竞态；若未来 Codex app-server 在极慢环境下延迟更大，仍会安全降级为 queue，但不会卡死。
+
+### 下一阶段建议
+
+- 在下一轮移动端真实化验收中，使用设置页切到“引导”，进入真实 Codex 会话，在 thinking 期间发送一条纠偏消息，观察是否触发 interrupt 并优先消费 Guide。
+- 同时复查 QueuedMessagesBar 的 Guide 状态提示是否在窄屏下保持单行截断或自然换行，避免与 Context Pulse 争夺空间。

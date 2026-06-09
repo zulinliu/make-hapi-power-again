@@ -125,7 +125,7 @@ export function HappyComposer(props: {
 
     const api = useAssistantApi()
     const { composerEnterBehavior } = useComposerEnterBehavior()
-    const { followUpBehavior, setFollowUpBehavior } = useFollowUpBehavior()
+    const { followUpBehavior } = useFollowUpBehavior()
     const composerText = useAssistantState(({ composer }) => composer.text)
     const attachments = useAssistantState(({ composer }) => composer.attachments)
     const threadIsRunning = useAssistantState(({ thread }) => thread.isRunning)
@@ -163,9 +163,6 @@ export function HappyComposer(props: {
     const hasPendingPermission = Boolean(agentState?.requests && Object.keys(agentState.requests).length > 0)
     const guideModeAvailable = thinking && !hasPendingPermission && !hasAttachments && pendingSchedule === null
     const activeDeliveryMode: MessageDeliveryMode = guideModeAvailable && followUpBehavior === 'guide' ? 'guide' : 'queue'
-    const followUpBehaviorToggleLabel = followUpBehavior === 'guide'
-        ? t('composer.deliveryMode.switchToQueue')
-        : t('composer.deliveryMode.switchToGuide')
 
     const textareaRef = useRef<HTMLTextAreaElement>(null)
     const prevControlledByUser = useRef(controlledByUser)
@@ -187,10 +184,6 @@ export function HappyComposer(props: {
             deliveryModeRef.current = activeDeliveryMode
         }
     }, [deliveryModeRef, activeDeliveryMode])
-
-    const handleToggleFollowUpBehavior = useCallback(() => {
-        setFollowUpBehavior(followUpBehavior === 'guide' ? 'queue' : 'guide')
-    }, [followUpBehavior, setFollowUpBehavior])
 
     // Track one-time "continue" hint after switching from local to remote.
     useEffect(() => {
@@ -820,27 +813,6 @@ export function HappyComposer(props: {
                         threadGoal={threadGoal}
                         agentFlavor={agentFlavor}
                     />
-
-                    {thinking ? (
-                        <div className="mb-1 flex flex-wrap items-center justify-end gap-2 text-[11px] leading-4">
-                            <span className="min-w-0 text-right text-[var(--app-hint)]">
-                                {guideModeAvailable
-                                    ? activeDeliveryMode === 'guide'
-                                        ? t('composer.deliveryMode.guideActiveDescription')
-                                        : t('composer.deliveryMode.queueActiveDescription')
-                                    : t('composer.deliveryMode.queueOnlyDescription')}
-                            </span>
-                            {guideModeAvailable ? (
-                                <button
-                                    type="button"
-                                    onClick={handleToggleFollowUpBehavior}
-                                    className="min-h-8 rounded-(--hp-radius-sm) border border-(--hp-border) bg-(--hp-surface-1) px-2.5 text-xs font-medium text-(--hp-text-secondary) transition-colors hover:bg-(--hp-surface-2) hover:text-(--hp-text-primary)"
-                                >
-                                    {followUpBehaviorToggleLabel}
-                                </button>
-                            ) : null}
-                        </div>
-                    ) : null}
 
                     <div className="overflow-hidden rounded-(--hp-radius-md) border border-(--hp-border) bg-(--hp-surface-1) focus-within:ring-2 focus-within:ring-(--hp-primary) transition-shadow">
                         {attachments.length > 0 ? (

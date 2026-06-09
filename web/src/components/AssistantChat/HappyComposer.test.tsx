@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { cleanup, render, screen } from '@testing-library/react'
 import type { ButtonHTMLAttributes, FormEventHandler, MutableRefObject, ReactNode, TextareaHTMLAttributes } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { I18nProvider } from '@/lib/i18n-context'
@@ -142,7 +142,7 @@ function renderComposer(deliveryModeRef?: MutableRefObject<MessageDeliveryMode>)
     )
 }
 
-describe('HappyComposer Guide delivery mode control', () => {
+describe('HappyComposer Guide delivery mode', () => {
     beforeEach(() => {
         localStorage.clear()
         mockAssistantRuntime.state.composer.text = 'guide me'
@@ -160,13 +160,13 @@ describe('HappyComposer Guide delivery mode control', () => {
         vi.unstubAllGlobals()
     })
 
-    it('defaults follow-up behavior to queue while the agent is thinking', () => {
+    it('defaults follow-up behavior to queue without rendering composer-level controls', () => {
         const deliveryModeRef: MutableRefObject<MessageDeliveryMode> = { current: 'guide' }
 
         renderComposer(deliveryModeRef)
 
-        expect(screen.getByText('Follow-up behavior: queue')).toBeInTheDocument()
-        expect(screen.getByRole('button', { name: 'Use guide' })).toBeInTheDocument()
+        expect(screen.queryByText('Follow-up behavior: queue')).not.toBeInTheDocument()
+        expect(screen.queryByRole('button', { name: 'Use guide' })).not.toBeInTheDocument()
         expect(screen.getByRole('button', { name: 'Send' })).toBeInTheDocument()
         expect(screen.queryByRole('button', { name: 'Send guide now' })).not.toBeInTheDocument()
         expect(deliveryModeRef.current).toBe('queue')
@@ -178,29 +178,9 @@ describe('HappyComposer Guide delivery mode control', () => {
 
         renderComposer(deliveryModeRef)
 
-        expect(screen.getByText('Follow-up behavior: guide')).toBeInTheDocument()
-        expect(screen.getByRole('button', { name: 'Use queue' })).toBeInTheDocument()
+        expect(screen.queryByText('Follow-up behavior: guide')).not.toBeInTheDocument()
+        expect(screen.queryByRole('button', { name: 'Use queue' })).not.toBeInTheDocument()
         expect(screen.getByRole('button', { name: 'Send guide now' })).toBeInTheDocument()
         expect(deliveryModeRef.current).toBe('guide')
-    })
-
-    it('quick switch updates the persisted follow-up behavior', async () => {
-        const deliveryModeRef: MutableRefObject<MessageDeliveryMode> = { current: 'queue' }
-
-        renderComposer(deliveryModeRef)
-
-        fireEvent.click(screen.getByRole('button', { name: 'Use guide' }))
-        await waitFor(() => {
-            expect(screen.getByText('Follow-up behavior: guide')).toBeInTheDocument()
-        })
-        expect(localStorage.getItem('hapi-power-follow-up-behavior')).toBe('guide')
-        expect(deliveryModeRef.current).toBe('guide')
-
-        fireEvent.click(screen.getByRole('button', { name: 'Use queue' }))
-        await waitFor(() => {
-            expect(screen.getByText('Follow-up behavior: queue')).toBeInTheDocument()
-        })
-        expect(localStorage.getItem('hapi-power-follow-up-behavior')).toBeNull()
-        expect(deliveryModeRef.current).toBe('queue')
     })
 })
