@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { I18nProvider } from '@/lib/i18n-context'
 import { getContextPulseView, StatusBar } from './StatusBar'
@@ -91,5 +91,44 @@ describe('StatusBar', () => {
         )
 
         expect(screen.getByText('思考中')).toBeInTheDocument()
+    })
+
+    it('opens and closes Context Pulse details from mobile-friendly controls', async () => {
+        localStorage.setItem('hapi-power-lang', 'zh-CN')
+
+        render(
+            <I18nProvider>
+                <div>
+                    <StatusBar
+                        active={true}
+                        thinking={false}
+                        agentState={null}
+                        contextSize={40}
+                        contextWindow={100}
+                    />
+                    <button type="button">outside</button>
+                </div>
+            </I18nProvider>
+        )
+
+        fireEvent.click(screen.getByRole('button', { name: '打开 上下文：40% 详情' }))
+        expect(screen.getByRole('dialog', { name: '上下文脉冲' })).toBeInTheDocument()
+
+        fireEvent.click(screen.getByRole('button', { name: '关闭' }))
+        await waitFor(() => {
+            expect(screen.queryByRole('dialog', { name: '上下文脉冲' })).not.toBeInTheDocument()
+        })
+
+        fireEvent.click(screen.getByRole('button', { name: '打开 上下文：40% 详情' }))
+        fireEvent.keyDown(document, { key: 'Escape' })
+        await waitFor(() => {
+            expect(screen.queryByRole('dialog', { name: '上下文脉冲' })).not.toBeInTheDocument()
+        })
+
+        fireEvent.click(screen.getByRole('button', { name: '打开 上下文：40% 详情' }))
+        fireEvent.pointerDown(screen.getByRole('button', { name: 'outside' }))
+        await waitFor(() => {
+            expect(screen.queryByRole('dialog', { name: '上下文脉冲' })).not.toBeInTheDocument()
+        })
     })
 })

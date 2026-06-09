@@ -72,9 +72,13 @@ describe('convertCodexEvent', () => {
                         requestPath: '/home/tester/project'
                     },
                     total_token_usage: {
-                        input_tokens: 20,
-                        output_tokens: 4,
-                        apiKey: 'sk-test'
+                        prompt_tokens: 20,
+                        completion_tokens: 4,
+                        total_tokens: 24,
+                        prompt_tokens_details: {
+                            cached_tokens: 3
+                        },
+                        apiKey: 'redacted-test-key'
                     }
                 }
             }
@@ -90,8 +94,12 @@ describe('convertCodexEvent', () => {
                     outputTokens: 2
                 },
                 total_token_usage: {
-                    input_tokens: 20,
-                    output_tokens: 4
+                    prompt_tokens: 20,
+                    completion_tokens: 4,
+                    total_tokens: 24,
+                    prompt_tokens_details: {
+                        cached_tokens: 3
+                    }
                 }
             }
         });

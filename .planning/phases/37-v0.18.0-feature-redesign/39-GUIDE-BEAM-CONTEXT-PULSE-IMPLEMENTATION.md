@@ -299,3 +299,68 @@
 ### 下一阶段建议
 
 - 进入 Context Pulse 专项修复前，先复查 usage 数据从 CLI/Hub 到 Web normalizer 的来源链路，再处理详情 popover 和 ScheduleTimePicker 移动端遮挡问题。
+
+## 16. 2026-06-09 Context Pulse 用量与移动端弹层修正
+
+### 实施范围
+
+- 修复 OpenAI 兼容供应商 usage 字段无法进入 Context Pulse 的问题：`prompt_tokens / promptTokens` 映射为输入 token，`completion_tokens / completionTokens` 映射为输出 token，`prompt_tokens_details.cached_tokens` 等明确缓存字段映射为 cache read。
+- 同步 CLI app-server、legacy Codex event、ACP prompt response 与 Web normalizer 四条 usage 链路，避免 tsintergy / OpenCode / Codex 不同入口出现“已用一直为 0”的分叉。
+- 保持 usage 白名单脱敏策略，只允许明确 token 数值字段、scope 字段与 usage 嵌套对象通过，继续剔除 prompt、header、path、apiKey 等敏感内容。
+- 将 Context Pulse 详情从原生 `<details>` 改为受控弹层，支持显式关闭按钮、Escape 关闭、外部点击关闭，并在关闭后恢复焦点。
+- 修正移动端“定时发送”弹层定位：移除贴底 bottom sheet 逻辑，统一基于时钟按钮和 visualViewport 定位，优先在输入框上方展开，避免遮挡 composer。
+
+### 修改文件
+
+- `cli/src/agent/backends/acp/AcpSdkBackend.ts`
+- `cli/src/agent/backends/acp/AcpSdkBackend.test.ts`
+- `cli/src/codex/utils/appServerEventConverter.ts`
+- `cli/src/codex/utils/appServerEventConverter.test.ts`
+- `cli/src/codex/utils/codexEventConverter.ts`
+- `cli/src/codex/utils/codexEventConverter.test.ts`
+- `web/src/chat/normalizeAgent.ts`
+- `web/src/chat/normalize.test.ts`
+- `web/src/components/AssistantChat/StatusBar.tsx`
+- `web/src/components/AssistantChat/StatusBar.test.tsx`
+- `web/src/components/AssistantChat/ScheduleTimePicker.tsx`
+- `web/src/components/AssistantChat/ScheduleTimePicker.test.ts`
+- `web/src/components/AssistantChat/ScheduleTimePicker.test.tsx`
+- `.planning/phases/37-v0.18.0-feature-redesign/39-GUIDE-BEAM-CONTEXT-PULSE-IMPLEMENTATION.md`
+
+### 测试结果
+
+- `bun run --cwd web test -- src/chat/normalize.test.ts src/components/AssistantChat/StatusBar.test.tsx src/components/AssistantChat/ScheduleTimePicker.test.ts src/components/AssistantChat/ScheduleTimePicker.test.tsx`
+  - 4 files / 63 tests passed
+- `bun run --cwd cli test -- src/codex/utils/appServerEventConverter.test.ts src/codex/utils/codexEventConverter.test.ts src/agent/backends/acp/AcpSdkBackend.test.ts`
+  - 3 files / 57 tests passed
+- `bun run typecheck:web`
+  - passed
+- `bun run typecheck:cli`
+  - passed
+- `git diff --check`
+  - passed；仅 Windows 换行提示
+
+### 自审结论
+
+- Context Pulse 现可处理 OpenAI 兼容 usage schema，内网与公网 API 供应商在 usage 字段语义上不再被区别对待。
+- Context Pulse 仍依赖供应商或 Agent 实际返回 usage；如果上游完全不返回 token usage，UI 会继续显示 `上下文：--` 与等待用量原因。
+- usage 处理没有放宽为任意字段透传，安全白名单仍覆盖 token/path/header/apiKey 等常见敏感项剔除。
+- 详情弹层新增关闭按钮、Escape 与外部点击关闭，解决移动端展开后难以收回的问题。
+- 定时发送弹层不再固定在屏幕底部，避免覆盖主输入框；定位函数已有窄屏锚点回归测试。
+
+### 附录门禁
+
+- `37-PROTOCOL-ADDENDUM`：满足。本次不改 Guide protocol、queue collect 或 `messages-consumed` 时序；仅修复 usage 归一化和 UI 弹层。
+- `37-SECURITY-ADDENDUM`：满足。usage 仍按白名单重建，未新增外部请求、敏感信息落盘或 provider SSRF 策略变更。
+- `37-UX-ACCEPTANCE-MATRIX`：满足。Context Pulse 继续使用 `上下文：{percent}%`，详情可关闭，定时发送移动端不再遮挡输入框。
+- `37-BRAND-CONTRACT`：满足。保留“观测：上下文脉冲”表达，未新增第三方品牌残留。
+
+### 已知风险
+
+- 本次尚未用真实 tsintergy `glm-5.1` 发起完整一轮对话验证，因为需要用户本地供应商配置和真实会话运行环境；已通过四条数据入口的回归测试覆盖字段兼容性。
+- 如果上游只返回累计 total usage 而不返回当前 turn usage，Context Pulse 会按现有策略优先 last、再 fallback total；这是既有语义，本次未扩大为复杂聚合。
+
+### 下一阶段建议
+
+- 在真实移动端验收时，用 tsintergy `glm-5.1` 发一轮短对话，确认消息 metadata 中出现 usage 后 StatusBar 从 `上下文：--` 更新为百分比。
+- 同时验证 Context Pulse 详情关闭、定时发送弹层位置、iOS 键盘弹出后 visualViewport 重新定位。

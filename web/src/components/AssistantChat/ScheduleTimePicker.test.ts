@@ -208,4 +208,16 @@ describe('computeSchedulePickerPlacement', () => {
         expect(placement.top).toBeGreaterThanOrEqual(108)
         expect(placement.top + placement.maxHeight).toBeLessThanOrEqual(600 - 8)
     })
+
+    it('opens above the mobile composer anchor instead of attaching to the viewport bottom', () => {
+        const placement = computeSchedulePickerPlacement({
+            anchor: { top: 610, right: 370, bottom: 654, left: 326 },
+            panelWidth: 288,
+            panelHeight: 220,
+            viewport: { width: 390, height: 700 },
+        })
+
+        expect(placement.placement).toBe('above')
+        expect(placement.top + placement.maxHeight).toBeLessThanOrEqual(602)
+    })
 })

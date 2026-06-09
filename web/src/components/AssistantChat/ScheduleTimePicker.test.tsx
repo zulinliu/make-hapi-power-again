@@ -1,9 +1,39 @@
-import { fireEvent, render, screen } from '@testing-library/react'
-import { describe, expect, it, vi } from 'vitest'
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { I18nProvider } from '@/lib/i18n-context'
 import { ScheduleTimePicker } from './ScheduleTimePicker'
 
+function mockMediaQuery(matches: boolean) {
+    const original = window.matchMedia
+    Object.defineProperty(window, 'matchMedia', {
+        configurable: true,
+        writable: true,
+        value: vi.fn().mockImplementation((query: string) => ({
+            matches,
+            media: query,
+            onchange: null,
+            addEventListener: vi.fn(),
+            removeEventListener: vi.fn(),
+            addListener: vi.fn(),
+            removeListener: vi.fn(),
+            dispatchEvent: vi.fn()
+        }))
+    })
+    return () => {
+        Object.defineProperty(window, 'matchMedia', {
+            configurable: true,
+            writable: true,
+            value: original
+        })
+    }
+}
+
 describe('ScheduleTimePicker interactions', () => {
+    afterEach(() => {
+        cleanup()
+        vi.restoreAllMocks()
+    })
+
     it('submits the specific datetime when Enter is pressed in the datetime input', () => {
         const anchorRef = { current: document.createElement('button') }
         const onSchedule = vi.fn()
@@ -37,5 +67,44 @@ describe('ScheduleTimePicker interactions', () => {
         expect(onParentKeyDown).not.toHaveBeenCalled()
         expect(onSchedule).toHaveBeenCalledWith({ type: 'absolute', ms: new Date(value).getTime() })
         expect(onClose).toHaveBeenCalledTimes(1)
+    })
+
+    it('positions the mobile picker above the composer anchor', async () => {
+        const restoreMatchMedia = mockMediaQuery(true)
+        const anchor = document.createElement('button')
+        vi.spyOn(anchor, 'getBoundingClientRect').mockReturnValue({
+            top: 610,
+            right: 370,
+            bottom: 654,
+            left: 326,
+            width: 44,
+            height: 44,
+            x: 326,
+            y: 610,
+            toJSON: () => ({})
+        } as DOMRect)
+
+        Object.defineProperty(window, 'innerWidth', { configurable: true, value: 390 })
+        Object.defineProperty(window, 'innerHeight', { configurable: true, value: 700 })
+
+        render(
+            <I18nProvider>
+                <ScheduleTimePicker
+                    anchorRef={{ current: anchor }}
+                    onSchedule={vi.fn()}
+                    onClose={vi.fn()}
+                    pendingSchedule={null}
+                />
+            </I18nProvider>
+        )
+
+        const dialog = screen.getByRole('dialog', { name: /schedule/i })
+        await waitFor(() => {
+            expect(dialog).toHaveStyle({ position: 'fixed' })
+            expect(dialog.style.top).not.toBe('')
+            expect(dialog.className).not.toContain('bottom-[')
+        })
+
+        restoreMatchMedia()
     })
 })

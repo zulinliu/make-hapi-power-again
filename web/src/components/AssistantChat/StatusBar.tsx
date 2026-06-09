@@ -5,9 +5,10 @@ import {
     isPermissionModeAllowedForFlavor
 } from '@hapipower/protocol'
 import type { PermissionModeTone } from '@hapipower/protocol'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { AgentState, CodexCollaborationMode, PermissionMode } from '@/types/api'
 import type { ThreadGoal } from '@/types/api'
+import { CloseIcon } from '@/components/icons'
 import { getContextBudgetTokens } from '@/chat/modelConfig'
 import { useTranslation } from '@/lib/use-translation'
 
@@ -194,6 +195,9 @@ export function StatusBar(props: {
     agentFlavor?: string | null
 }) {
     const { t } = useTranslation()
+    const [contextDetailsOpen, setContextDetailsOpen] = useState(false)
+    const contextButtonRef = useRef<HTMLButtonElement | null>(null)
+    const contextPanelRef = useRef<HTMLDivElement | null>(null)
     const connectionStatus = useMemo(
         () => getConnectionStatus(props.active, props.thinking, props.agentState, props.backgroundTaskCount ?? 0, t),
         [props.active, props.thinking, props.agentState, props.backgroundTaskCount, t]
@@ -279,6 +283,35 @@ export function StatusBar(props: {
                 : t('status.goal.status', { status: props.threadGoal.status })
         : null
 
+    useEffect(() => {
+        if (!contextDetailsOpen) return
+
+        function closeAndRestoreFocus() {
+            setContextDetailsOpen(false)
+            contextButtonRef.current?.focus()
+        }
+
+        function handlePointerDown(event: PointerEvent) {
+            const target = event.target as Node
+            if (contextPanelRef.current?.contains(target)) return
+            if (contextButtonRef.current?.contains(target)) return
+            setContextDetailsOpen(false)
+        }
+
+        function handleKeyDown(event: KeyboardEvent) {
+            if (event.key !== 'Escape') return
+            event.preventDefault()
+            closeAndRestoreFocus()
+        }
+
+        document.addEventListener('pointerdown', handlePointerDown)
+        document.addEventListener('keydown', handleKeyDown)
+        return () => {
+            document.removeEventListener('pointerdown', handlePointerDown)
+            document.removeEventListener('keydown', handleKeyDown)
+        }
+    }, [contextDetailsOpen])
+
     return (
         <div className="flex min-w-0 flex-wrap items-center justify-between gap-x-2 gap-y-1 px-2 pb-1">
             <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1 sm:gap-x-3">
@@ -290,31 +323,56 @@ export function StatusBar(props: {
                         {connectionStatus.text}
                     </span>
                 </div>
-                <details className="group relative min-w-0">
-                    <summary
+                <div className="relative min-w-0">
+                    <button
+                        ref={contextButtonRef}
+                        type="button"
                         aria-label={t('contextPulse.detailsLabel', { label: contextPulse.label })}
-                        className={`list-none rounded-(--hp-radius-sm) px-1 py-0.5 text-[11px] leading-4 sm:text-[10px] ${CONTEXT_PULSE_TONE_CLASSES[contextPulse.tone]} cursor-pointer transition-colors hover:bg-(--hp-surface-2) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--hp-primary) [&::-webkit-details-marker]:hidden`}
+                        aria-expanded={contextDetailsOpen}
+                        aria-haspopup="dialog"
+                        onClick={() => setContextDetailsOpen((open) => !open)}
+                        className={`rounded-(--hp-radius-sm) px-1 py-0.5 text-[11px] leading-4 sm:text-[10px] ${CONTEXT_PULSE_TONE_CLASSES[contextPulse.tone]} cursor-pointer transition-colors hover:bg-(--hp-surface-2) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--hp-primary)`}
                     >
                         {contextPulse.label}
-                    </summary>
-                    <div className="fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+96px)] z-30 rounded-(--hp-radius-md) border border-(--hp-border) bg-(--hp-surface-0) p-2 shadow-lg sm:absolute sm:inset-x-auto sm:bottom-auto sm:left-0 sm:top-[calc(100%+4px)] sm:w-[260px]">
-                        <div className="mb-1 text-[11px] font-semibold text-(--hp-text-primary)">
-                            {t('contextPulse.detail.title')}
-                        </div>
-                        <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-[11px] leading-4">
-                            {contextDetailRows.map((row) => (
-                                <div key={row.label} className="contents">
-                                    <dt className="whitespace-nowrap text-[var(--app-hint)]">
-                                        {row.label}
-                                    </dt>
-                                    <dd className="min-w-0 break-words text-right text-(--hp-text-secondary)">
-                                        {row.value}
-                                    </dd>
+                    </button>
+                    {contextDetailsOpen ? (
+                        <div
+                            ref={contextPanelRef}
+                            role="dialog"
+                            aria-label={t('contextPulse.detail.title')}
+                            className="fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+96px)] z-30 rounded-(--hp-radius-md) border border-(--hp-border) bg-(--hp-surface-0) p-2 shadow-lg sm:absolute sm:inset-x-auto sm:bottom-auto sm:left-0 sm:top-[calc(100%+4px)] sm:w-[260px]"
+                        >
+                            <div className="mb-1 flex items-center justify-between gap-2">
+                                <div className="text-[11px] font-semibold text-(--hp-text-primary)">
+                                    {t('contextPulse.detail.title')}
                                 </div>
-                            ))}
-                        </dl>
-                    </div>
-                </details>
+                                <button
+                                    type="button"
+                                    aria-label={t('button.close')}
+                                    onClick={() => {
+                                        setContextDetailsOpen(false)
+                                        contextButtonRef.current?.focus()
+                                    }}
+                                    className="grid h-7 w-7 shrink-0 place-items-center rounded-(--hp-radius-sm) text-[var(--app-hint)] transition-colors hover:bg-(--hp-surface-2) hover:text-(--hp-text-primary) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--hp-primary)"
+                                >
+                                    <CloseIcon className="h-3.5 w-3.5" />
+                                </button>
+                            </div>
+                            <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-[11px] leading-4">
+                                {contextDetailRows.map((row) => (
+                                    <div key={row.label} className="contents">
+                                        <dt className="whitespace-nowrap text-[var(--app-hint)]">
+                                            {row.label}
+                                        </dt>
+                                        <dd className="min-w-0 break-words text-right text-(--hp-text-secondary)">
+                                            {row.value}
+                                        </dd>
+                                    </div>
+                                ))}
+                            </dl>
+                        </div>
+                    ) : null}
+                </div>
                 {cacheHitLabel ? (
                     <span className="hidden whitespace-nowrap text-[10px] text-[var(--app-hint)] sm:inline">
                         {cacheHitLabel}

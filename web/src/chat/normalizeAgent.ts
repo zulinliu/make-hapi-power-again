@@ -54,8 +54,12 @@ function normalizeThreadGoal(value: unknown) {
 const TOKEN_USAGE_NUMBER_KEYS = new Set([
     'input_tokens',
     'inputTokens',
+    'prompt_tokens',
+    'promptTokens',
     'output_tokens',
     'outputTokens',
+    'completion_tokens',
+    'completionTokens',
     'total_tokens',
     'totalTokens',
     'context_tokens',
@@ -69,7 +73,11 @@ const TOKEN_USAGE_NUMBER_KEYS = new Set([
     'cache_read_input_tokens',
     'cacheReadInputTokens',
     'cached_input_tokens',
-    'cachedInputTokens'
+    'cachedInputTokens',
+    'cached_tokens',
+    'cachedTokens',
+    'prompt_cache_hit_tokens',
+    'promptCacheHitTokens'
 ])
 
 const TOKEN_USAGE_OBJECT_KEYS = new Set([
@@ -78,7 +86,11 @@ const TOKEN_USAGE_OBJECT_KEYS = new Set([
     'lastTokenUsage',
     'total',
     'total_token_usage',
-    'totalTokenUsage'
+    'totalTokenUsage',
+    'prompt_tokens_details',
+    'promptTokensDetails',
+    'input_tokens_details',
+    'inputTokensDetails'
 ])
 
 const TOKEN_USAGE_STRING_KEYS = new Set([
@@ -141,9 +153,28 @@ function normalizeCodexTokenUsage(value: unknown, data?: Record<string, unknown>
                         : isObject(info.total_token_usage)
                             ? info.total_token_usage
                             : info
-    const inputTokens = asNumber(usageSource.inputTokens ?? usageSource.input_tokens)
-    const outputTokens = asNumber(usageSource.outputTokens ?? usageSource.output_tokens)
+    const inputTokens = asNumber(
+        usageSource.inputTokens
+        ?? usageSource.input_tokens
+        ?? usageSource.promptTokens
+        ?? usageSource.prompt_tokens
+    )
+    const outputTokens = asNumber(
+        usageSource.outputTokens
+        ?? usageSource.output_tokens
+        ?? usageSource.completionTokens
+        ?? usageSource.completion_tokens
+    )
     if (inputTokens === null || outputTokens === null) return null
+    const promptTokensDetails = isObject(usageSource.prompt_tokens_details)
+        ? usageSource.prompt_tokens_details
+        : isObject(usageSource.promptTokensDetails)
+            ? usageSource.promptTokensDetails
+            : isObject(usageSource.input_tokens_details)
+                ? usageSource.input_tokens_details
+                : isObject(usageSource.inputTokensDetails)
+                    ? usageSource.inputTokensDetails
+                    : null
 
     return {
         input_tokens: inputTokens,
@@ -156,6 +187,12 @@ function normalizeCodexTokenUsage(value: unknown, data?: Record<string, unknown>
             ?? usageSource.cached_input_tokens
             ?? usageSource.cacheReadInputTokens
             ?? usageSource.cache_read_input_tokens
+            ?? usageSource.cachedTokens
+            ?? usageSource.cached_tokens
+            ?? usageSource.promptCacheHitTokens
+            ?? usageSource.prompt_cache_hit_tokens
+            ?? promptTokensDetails?.cachedTokens
+            ?? promptTokensDetails?.cached_tokens
         ) ?? undefined,
         context_tokens: asNumber(
             info.contextTokens

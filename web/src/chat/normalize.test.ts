@@ -694,6 +694,58 @@ describe('normalizeDecryptedMessage', () => {
         })
     })
 
+    it('normalizes OpenAI-compatible token_count usage fields', () => {
+        const message = makeMessage({
+            role: 'agent',
+            content: {
+                type: 'codex',
+                data: {
+                    type: 'token_count',
+                    info: {
+                        total: {
+                            prompt_tokens: 12_345,
+                            completion_tokens: 678,
+                            total_tokens: 13_023,
+                            prompt_tokens_details: {
+                                cached_tokens: 2_048
+                            },
+                            prompt: 'do not persist this prompt'
+                        },
+                        model_context_window: 131_072,
+                        apiKey: 'redacted-test-key'
+                    }
+                }
+            }
+        })
+
+        const normalized = normalizeDecryptedMessage(message)
+
+        expect(normalized).toMatchObject({
+            role: 'event',
+            content: {
+                type: 'token-count',
+                info: {
+                    total: {
+                        prompt_tokens: 12_345,
+                        completion_tokens: 678,
+                        total_tokens: 13_023,
+                        prompt_tokens_details: {
+                            cached_tokens: 2_048
+                        }
+                    },
+                    model_context_window: 131_072
+                }
+            },
+            usage: {
+                input_tokens: 12_345,
+                output_tokens: 678,
+                cache_read_input_tokens: 2_048,
+                context_tokens: 12_345,
+                context_window: 131_072
+            }
+        })
+    })
+
     it('normalizes Codex context_compacted as a compact event', () => {
         const message = makeMessage({
             role: 'agent',

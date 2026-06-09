@@ -62,8 +62,12 @@ function asNumber(value: unknown): number | null {
 const TOKEN_USAGE_NUMBER_KEYS = new Set([
     'input_tokens',
     'inputTokens',
+    'prompt_tokens',
+    'promptTokens',
     'output_tokens',
     'outputTokens',
+    'completion_tokens',
+    'completionTokens',
     'total_tokens',
     'totalTokens',
     'context_tokens',
@@ -77,7 +81,11 @@ const TOKEN_USAGE_NUMBER_KEYS = new Set([
     'cache_read_input_tokens',
     'cacheReadInputTokens',
     'cached_input_tokens',
-    'cachedInputTokens'
+    'cachedInputTokens',
+    'cached_tokens',
+    'cachedTokens',
+    'prompt_cache_hit_tokens',
+    'promptCacheHitTokens'
 ]);
 
 const TOKEN_USAGE_OBJECT_KEYS = new Set([
@@ -86,7 +94,11 @@ const TOKEN_USAGE_OBJECT_KEYS = new Set([
     'lastTokenUsage',
     'total',
     'total_token_usage',
-    'totalTokenUsage'
+    'totalTokenUsage',
+    'prompt_tokens_details',
+    'promptTokensDetails',
+    'input_tokens_details',
+    'inputTokensDetails'
 ]);
 
 const TOKEN_USAGE_STRING_KEYS = new Set([
