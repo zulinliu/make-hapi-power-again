@@ -197,7 +197,7 @@ describe('providers routes', () => {
         expect(updateText).not.toContain('secret-token')
     })
 
-    it('check 会更新 health 与 model cache，并返回安全诊断', async () => {
+    it('check 只更新 health 并返回安全诊断，不刷新模型缓存', async () => {
         const created = await createProvider('Public Gateway', 'test-key')
         globalThis.fetch = mock(async () => {
             return new Response(
@@ -221,14 +221,14 @@ describe('providers routes', () => {
         expect(body.success).toBe(true)
         expect(body.provider.health.status).toBe('online')
         expect(body.provider.health.protocolDetected).toBe('openai')
-        expect(body.provider.modelCache).toEqual([{ id: 'gpt-example', name: 'GPT Example', ownedBy: 'example' }])
+        expect(body.provider.modelCache).toEqual([])
         expect(body.diagnostic.hostLabel).toBe('[ip-redacted]')
         expect(body.diagnostic.path).toBe('/v1/models')
         expect(body.diagnostic.statusCode).toBe(200)
         expect(body.diagnostic.capabilities.modelsEndpoint).toBe(true)
     })
 
-    it('discover 缓存命中后 check 仍返回完整诊断，force 会重新探测', async () => {
+    it('discover 刷新模型缓存，check 只刷新健康诊断且不覆盖模型缓存', async () => {
         const created = await createProvider('Cached Gateway', 'test-key')
         let callCount = 0
         globalThis.fetch = mock(async () => {
@@ -254,7 +254,7 @@ describe('providers routes', () => {
         })
         expect(check.status).toBe(200)
         const body = await check.json() as { provider: ProviderWithAssignments; diagnostic: { statusCode: number | null } }
-        expect(body.provider.modelCache[0]?.id).toBe('cached-2')
+        expect(body.provider.modelCache[0]?.id).toBe('cached-1')
         expect(body.diagnostic.statusCode).toBe(200)
         expect(callCount).toBe(2)
     })
@@ -297,12 +297,8 @@ describe('providers routes', () => {
             )
         }) as unknown as typeof fetch
 
-        const firstCheck = await app.request(`/api/providers/${created.provider.id}/check`, {
-            method: 'POST',
-            headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({ force: true }),
-        })
-        expect(firstCheck.status).toBe(200)
+        const discover = await app.request(`/api/providers/${created.provider.id}/discover-models`, { method: 'POST' })
+        expect(discover.status).toBe(200)
 
         globalThis.fetch = mock(async () => {
             return new Response('Authorization: Bearer leaked-token', { status: 500 })

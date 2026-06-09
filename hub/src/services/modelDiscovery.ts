@@ -55,6 +55,7 @@ type DiscoveryOptions = {
     protocol?: ProviderProtocol
     security?: ProviderSecurityOptions
     force?: boolean
+    cache?: boolean
     cacheVersion?: string | number
 }
 
@@ -103,9 +104,10 @@ export class ModelDiscoveryService {
     ): Promise<DiscoverModelsResponse> {
         const namespace = options.namespace ?? 'default'
         const protocol = options.protocol ?? 'auto'
+        const useCache = options.cache !== false
         const cacheKey = `${namespace}:${providerId}:${baseUrl}:${protocol}:${options.cacheVersion ?? 'current'}`
         const cached = this.cache.get(cacheKey)
-        if (!options.force && cached && cached.expiresAt > Date.now()) {
+        if (useCache && !options.force && cached && cached.expiresAt > Date.now()) {
             return {
                 success: true,
                 models: cached.models,
@@ -166,12 +168,14 @@ export class ModelDiscoveryService {
             })
             if (result.success) {
                 const models = result.models
-                this.cache.set(cacheKey, {
-                    models,
-                    diagnostic: result.diagnostic,
-                    health: result.health,
-                    expiresAt: Date.now() + CACHE_TTL_MS,
-                })
+                if (useCache) {
+                    this.cache.set(cacheKey, {
+                        models,
+                        diagnostic: result.diagnostic,
+                        health: result.health,
+                        expiresAt: Date.now() + CACHE_TTL_MS,
+                    })
+                }
                 return { success: true, models, diagnostic: result.diagnostic, health: result.health }
             }
 

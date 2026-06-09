@@ -169,9 +169,43 @@ describe('ProviderSettings', () => {
         expect(screen.getByText('Tools')).toBeInTheDocument()
         expect(screen.getAllByText('Online').length).toBeGreaterThanOrEqual(1)
         expect(screen.getByText('128 ms')).toBeInTheDocument()
-        expect(screen.getByText('glm-5.1')).toBeInTheDocument()
+        expect(screen.getAllByText('glm-5.1').length).toBeGreaterThanOrEqual(1)
+        expect(screen.getByText('Available models')).toBeInTheDocument()
+        expect(screen.getByText('2 models found')).toBeInTheDocument()
+        expect(screen.getByText('glm-5.1-air')).toBeInTheDocument()
+        expect(screen.getAllByText('Owner: example').length).toBe(2)
         expect(screen.getByText('Agent route matrix')).toBeInTheDocument()
         expect(screen.getByLabelText('Codex')).toHaveValue('11111111-1111-4111-8111-111111111111')
+    })
+
+    it('keeps health check and model discovery as separate provider actions', async () => {
+        const api = createApiMock()
+        renderProviderSettings(api)
+
+        fireEvent.click(await screen.findByRole('button', { name: 'Check' }))
+
+        await waitFor(() => {
+            expect(api.checkProvider).toHaveBeenCalledWith('11111111-1111-4111-8111-111111111111')
+        })
+        expect(api.discoverModels).not.toHaveBeenCalled()
+
+        fireEvent.click(screen.getByRole('button', { name: 'Discover Models' }))
+
+        await waitFor(() => {
+            expect(api.discoverModels).toHaveBeenCalledWith('11111111-1111-4111-8111-111111111111')
+        })
+        expect(api.checkProvider).toHaveBeenCalledTimes(1)
+    })
+
+    it('shows a clear model discovery empty state when cache has not been filled', async () => {
+        renderProviderSettings(createApiMock(providerFixture({
+            modelCache: [],
+            modelCacheUpdatedAt: null,
+        })))
+
+        expect(await screen.findByText('Available models')).toBeInTheDocument()
+        expect(screen.getByText('No models found')).toBeInTheDocument()
+        expect(screen.getByText(/Use Discover Models to fetch/)).toBeInTheDocument()
     })
 
     it('assigns and unassigns providers from the agent route matrix', async () => {

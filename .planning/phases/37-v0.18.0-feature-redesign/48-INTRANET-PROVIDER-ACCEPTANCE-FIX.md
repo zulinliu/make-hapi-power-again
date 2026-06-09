@@ -18,8 +18,11 @@
 - `hub/src/services/providerSecurity.test.ts`
 - `hub/src/services/modelDiscovery.test.ts`
 - `hub/src/web/routes/providers.test.ts`
+- `web/src/components/ProviderSettings.tsx`
+- `web/src/components/ProviderSettings.test.tsx`
 - `web/src/lib/locales/en.ts`
 - `web/src/lib/locales/zh-CN.ts`
+- `web/src/lib/locales/model-nexus-i18n.test.ts`
 
 ## 测试结果
 
@@ -64,6 +67,49 @@
   - 返回 `success: true`，模型数量 25。
 - 两个接口均未再出现 `results.sort is not a function`。
 
+## 追加修复：检查与发现模型职责拆分
+
+### 问题
+
+- “检查”和“发现模型”此前都使用模型探测链路，用户感知上像同一个按钮。
+- “发现模型”成功后没有在 Provider 卡片中直接展示模型列表，用户无法确认拉取结果。
+
+### 修复范围
+
+- `hub/src/services/modelDiscovery.ts`
+  - `DiscoveryOptions` 新增 `cache?: boolean`，允许健康检查绕过 discovery 内存缓存。
+- `hub/src/web/routes/providers.ts`
+  - `POST /api/providers/:id/check` 只刷新 `health` 和安全诊断，不写入 `modelCache`。
+  - `POST /api/providers/:id/discover-models` 继续负责刷新模型缓存。
+- `web/src/components/ProviderSettings.tsx`
+  - Provider 卡片拆分 `isChecking` / `isDiscovering` 状态。
+  - “检查”按钮只显示健康检查 loading。
+  - “发现模型”按钮显示发现模型 loading。
+  - 新增“可用模型 / Available models”列表，展示模型数量、更新时间、模型 ID/name/owner 和空态。
+- `web/src/lib/locales/en.ts`、`web/src/lib/locales/zh-CN.ts`
+  - 补齐模型列表中英文文案。
+
+### 追加验证
+
+- `bun test hub/src/web/routes/providers.test.ts hub/src/services/modelDiscovery.test.ts`
+  - 52 tests passed。
+- `cd web; bun run test -- src/components/ProviderSettings.test.tsx src/lib/locales/model-nexus-i18n.test.ts`
+  - 11 tests passed。
+- `bun run typecheck:hub`
+  - 通过。
+- `bun run typecheck:web`
+  - 通过。
+- `bun run build:web`
+  - 通过；当前 3016 页面加载 `/assets/index-kV22Fdfq.js`。
+- 本地 3016 运行态 API 验收：
+  - 使用开发 token `123456` 通过 `/api/auth` 换取 JWT。
+  - `GET /api/providers/overview` 返回内网 Provider `online`，模型缓存数量为 25。
+- 移动端真实化验收：
+  - 使用系统 Chrome + Playwright `iPhone 13` 视口访问 `http://127.0.0.1:3016/settings?acceptance=intranet-provider-mobile&token=123456`。
+  - 页面可见 `检查` / `发现模型` / `可用模型` / `25 models found`。
+  - 页面可见 Provider 名称和模型项，如 `claude-sonnet-4-6-web`、`deepseek-v4-flash`、`deepseek-v4-pro`。
+  - `pageErrors` 为空，过滤浏览器扩展噪声后无前端 console issue。
+
 ## 自审结论
 
 - 满足用户在公司内网环境同时支持公网和内网 API 供应商的验收诉求。
@@ -71,6 +117,7 @@
 - 显式策略只允许公司内网范围，不允许 metadata / loopback / link-local。
 - 诊断和错误提示仍不回显 API key。
 - 测试和文档未写入用户真实供应商 key。
+- “检查”与“发现模型”的用户可见语义已拆分：前者用于健康状态，后者用于拉取并展示模型列表。
 
 ## 已知风险
 
@@ -81,8 +128,8 @@
 ## 门禁符合性
 
 - `37-PROTOCOL-ADDENDUM`：无协议破坏；Provider 探测继续走安全校验和缓存链路。
-- `37-SECURITY-ADDENDUM`：默认阻断 SSRF 风险；显式内网策略保留 metadata / loopback / link-local 阻断。
-- `37-UX-ACCEPTANCE-MATRIX`：前端错误提示改为可执行的管理员策略说明。
+- `37-SECURITY-ADDENDUM`：默认阻断 SSRF 风险；显式内网策略保留 metadata / loopback / link-local 阻断；模型列表和诊断不泄露 API key。
+- `37-UX-ACCEPTANCE-MATRIX`：前端错误提示改为可执行的管理员策略说明；模型发现结果在移动端可见。
 - `37-BRAND-CONTRACT`：文案保持“模型星桥 / Model Nexus”命名，不新增第三方品牌残留。
 
 ## 下一阶段建议

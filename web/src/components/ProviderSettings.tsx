@@ -527,7 +527,8 @@ function SummaryMetric({ label, value }: { label: string; value: number | string
 
 function ProviderCard({
     provider,
-    busy,
+    isChecking,
+    isDiscovering,
     onCheck,
     onDiscover,
     onReveal,
@@ -535,7 +536,8 @@ function ProviderCard({
     onDeleteClick,
 }: {
     provider: ProviderWithAssignments
-    busy: boolean
+    isChecking: boolean
+    isDiscovering: boolean
     onCheck: (providerId: string) => void
     onDiscover: (providerId: string) => void
     onReveal: (provider: ProviderWithAssignments) => void
@@ -544,6 +546,7 @@ function ProviderCard({
 }) {
     const { t, locale } = useTranslation()
     const checkedAt = formatTime(provider.health.checkedAt, locale)
+    const modelCacheUpdatedAt = formatTime(provider.modelCacheUpdatedAt, locale)
     const protocol = provider.health.protocolDetected ?? provider.protocol
     const models = provider.modelCache.length
     const hostLabel = getHostLabel(provider.baseUrl)
@@ -613,6 +616,52 @@ function ProviderCard({
                 </div>
             )}
 
+            <div className="mt-3 rounded-(--hp-radius-md) border border-(--hp-border) bg-(--hp-surface-1)">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-(--hp-border) px-3 py-2">
+                    <div>
+                        <div className="text-xs font-semibold text-(--hp-text-primary)">{t('settings.modelNexus.modelListTitle')}</div>
+                        {modelCacheUpdatedAt ? (
+                            <div className="mt-0.5 text-[11px] text-(--hp-text-tertiary)">
+                                {t('settings.modelNexus.modelsUpdatedAt', { time: modelCacheUpdatedAt })}
+                            </div>
+                        ) : null}
+                    </div>
+                    <span className="rounded-full bg-(--hp-surface-0) px-2 py-1 text-[11px] text-(--hp-text-secondary)">
+                        {models > 0 ? t('settings.providers.modelsFound', { count: models }) : t('settings.providers.noModels')}
+                    </span>
+                </div>
+                {provider.modelCache.length > 0 ? (
+                    <div className="max-h-56 overflow-y-auto px-2 py-2">
+                        <div className="grid gap-1 sm:grid-cols-2 lg:grid-cols-3">
+                            {provider.modelCache.map(model => (
+                                <div
+                                    key={model.id}
+                                    className="min-w-0 rounded-(--hp-radius-sm) border border-(--hp-border) bg-(--hp-surface-0) px-2.5 py-2"
+                                >
+                                    <div className="truncate font-mono text-xs font-medium text-(--hp-text-primary)" title={model.id}>
+                                        {model.name || model.id}
+                                    </div>
+                                    {model.name && model.name !== model.id ? (
+                                        <div className="mt-1 truncate font-mono text-[11px] text-(--hp-text-tertiary)" title={model.id}>
+                                            {model.id}
+                                        </div>
+                                    ) : null}
+                                    {model.ownedBy ? (
+                                        <div className="mt-1 truncate text-[11px] text-(--hp-text-tertiary)" title={model.ownedBy}>
+                                            {t('settings.modelNexus.modelOwner', { owner: model.ownedBy })}
+                                        </div>
+                                    ) : null}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                ) : (
+                    <div className="px-3 py-3 text-xs leading-5 text-(--hp-text-tertiary)">
+                        {t('settings.modelNexus.modelListEmpty')}
+                    </div>
+                )}
+            </div>
+
             <div className="mt-3 flex flex-wrap gap-2">
                 {provider.assignments.length > 0 ? provider.assignments.map(assignment => (
                     <span key={assignment.agentFlavor} className="inline-flex items-center rounded-full bg-(--hp-primary-subtle) px-2.5 py-1 text-xs text-(--hp-text-primary)">
@@ -628,20 +677,20 @@ function ProviderCard({
                 <button
                     type="button"
                     onClick={() => onCheck(provider.id)}
-                    disabled={busy}
+                    disabled={isChecking}
                     className="inline-flex min-h-[44px] items-center gap-2 rounded-(--hp-radius-md) border border-(--hp-border) px-3 py-2 text-xs hover:bg-(--hp-surface-1) disabled:opacity-50 transition-colors"
                 >
                     <WrenchIcon className="h-4 w-4" />
-                    {busy ? t('settings.modelNexus.checking') : t('settings.modelNexus.check')}
+                    {isChecking ? t('settings.modelNexus.checking') : t('settings.modelNexus.check')}
                 </button>
                 <button
                     type="button"
                     onClick={() => onDiscover(provider.id)}
-                    disabled={busy}
+                    disabled={isDiscovering}
                     className="inline-flex min-h-[44px] items-center gap-2 rounded-(--hp-radius-md) border border-(--hp-border) px-3 py-2 text-xs hover:bg-(--hp-surface-1) disabled:opacity-50 transition-colors"
                 >
                     <GlobeIcon className="h-4 w-4" />
-                    {t('settings.providers.discoverModels')}
+                    {isDiscovering ? t('settings.providers.discovering') : t('settings.providers.discoverModels')}
                 </button>
                 <button
                     type="button"
@@ -844,7 +893,6 @@ export function ProviderSettings() {
         }
     }, [revealedKey])
 
-    const busy = isChecking || isDiscovering
     const summary = isLoading ? null : overview.summary
 
     return (
@@ -901,7 +949,8 @@ export function ProviderSettings() {
                             <ProviderCard
                                 key={provider.id}
                                 provider={provider}
-                                busy={busy}
+                                isChecking={isChecking}
+                                isDiscovering={isDiscovering}
                                 onCheck={(providerId) => { void checkProvider(providerId) }}
                                 onDiscover={(providerId) => { void discoverProviderModels(providerId) }}
                                 onReveal={(target) => { setRevealTarget(target); setRevealedKey(null); setCopied(false) }}

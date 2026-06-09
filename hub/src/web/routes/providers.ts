@@ -312,9 +312,10 @@ export function createProviderRoutes(store: Store, discoveryService = new ModelD
             namespace,
             protocol: provider.protocol,
             force: parsed.data.force,
+            cache: false,
             security: getProviderSecurityOptions(),
         })
-        const updated = applyDiscoveryResult(store, namespace, id, result.health, result.models)
+        const updated = applyDiscoveryResult(store, namespace, id, result.health, undefined)
         if (!updated || !result.diagnostic) {
             return c.json({ error: 'Provider check failed' }, 500)
         }
