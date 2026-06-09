@@ -251,3 +251,51 @@
 
 - 在下一轮移动端真实化验收中，使用设置页切到“引导”，进入真实 Codex 会话，在 thinking 期间发送一条纠偏消息，观察是否触发 interrupt 并优先消费 Guide。
 - 同时复查 QueuedMessagesBar 的 Guide 状态提示是否在窄屏下保持单行截断或自然换行，避免与 Context Pulse 争夺空间。
+
+## 15. 2026-06-09 引导发送真实能力收敛
+
+### 实施范围
+
+- 修复 Web Composer 只依据 `跟进行为=引导` 就发送 `deliveryMode=guide` 的问题。
+- 新增 Web 侧 Guide capability 判断，只有当前会话 metadata 同时声明 `supported`、`preservesQueue`、`isolatedDelivery` 时，Composer 才显示“Send guide now”并写入 `deliveryModeRef=guide`。
+- 未声明真实 Guide interrupt 能力的 Claude/OpenCode/Gemini/Cursor/Kimi、旧 CLI 或重连未确认会话，即使用户偏好为“引导”，会话页也按 queue 发送，避免 UI 承诺无法兑现的中断行为。
+- 保持设置页“跟进行为”作为持久偏好入口，会话页不重新显示该设置项，减少移动端纵向挤压。
+
+### 修改文件
+
+- `web/src/types/api.ts`
+- `web/src/lib/session-capabilities.ts`
+- `web/src/lib/session-capabilities.test.ts`
+- `web/src/components/SessionChat.tsx`
+- `web/src/components/AssistantChat/HappyComposer.tsx`
+- `web/src/components/AssistantChat/HappyComposer.test.tsx`
+- `.planning/phases/37-v0.18.0-feature-redesign/39-GUIDE-BEAM-CONTEXT-PULSE-IMPLEMENTATION.md`
+
+### 测试结果
+
+- `bun run --cwd web test -- src/components/AssistantChat/HappyComposer.test.tsx src/lib/session-capabilities.test.ts`
+  - 2 files / 5 tests passed
+- `bun run typecheck:web`
+  - passed
+
+### 自审结论
+
+- 满足用户反馈的核心预期：会话页不再误导不支持真实中断的会话进入 Guide；支持真实能力的 Codex 会话仍可在 thinking 期间按偏好发送 Guide。
+- 本次没有改动 Hub/CLI 队列协议，不触碰 abort/reset，不影响既有 `pushGuide()` isolated queue 与 `messages-consumed` 时序。
+- 会话页仍不展示“跟进行为”文字或控件，Context Pulse 和输入框区域不会被该设置挤占。
+
+### 附录门禁
+
+- `37-PROTOCOL-ADDENDUM`：满足。Web 侧现在与 Hub 的 capability handshake 门禁一致，旧 CLI 和未声明能力会话降级 queue，不会 stuck。
+- `37-SECURITY-ADDENDUM`：满足。未新增外部请求、敏感信息落盘或权限绕过；Guide 仍受 permission pending、附件、定时发送等 gate 限制。
+- `37-UX-ACCEPTANCE-MATRIX`：满足。非真实可用时不显示 Guide 发送态；真实可用时只通过发送按钮状态表达，不额外占用会话页空间。
+- `37-BRAND-CONTRACT`：满足。保留“引导 / Guide”驾驶语义，同时避免对不支持能力的会话作过度承诺。
+
+### 已知风险
+
+- 本次验证为组件测试和类型检查，尚未启动完整 Hub + CLI 做真实 Codex Guide interrupt 端到端验收。
+- Context Pulse 的已用量为 0、详情弹层无法收回、定时发送弹层遮挡输入框等新问题未纳入本次提交，按用户要求留到下一步处理。
+
+### 下一阶段建议
+
+- 进入 Context Pulse 专项修复前，先复查 usage 数据从 CLI/Hub 到 Web normalizer 的来源链路，再处理详情 popover 和 ScheduleTimePicker 移动端遮挡问题。

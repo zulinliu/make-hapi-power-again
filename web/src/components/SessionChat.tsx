@@ -38,6 +38,7 @@ import { useOpencodeModels } from '@/hooks/queries/useOpencodeModels'
 import { useFlavorModels } from '@/hooks/queries/useFlavorModels'
 import { getClaudeComposerModelOptions } from '@/components/AssistantChat/claudeModelOptions'
 import { isRemoteTerminalSupported } from '@/utils/terminalSupport'
+import { hasGuideInterruptCapability } from '@/lib/session-capabilities'
 
 /**
  * Returns whether a PendingSchedule should trigger an auto-clear timer.
@@ -130,6 +131,7 @@ export function SessionChat(props: {
     const navigate = useNavigate()
     const sessionInactive = !props.session.active
     const terminalSupported = isRemoteTerminalSupported(props.session.metadata)
+    const guideInterruptSupported = hasGuideInterruptCapability(props.session.metadata)
     const normalizedCacheRef = useRef<Map<string, { source: DecryptedMessage; normalized: NormalizedMessage | null }>>(new Map())
     const blocksByIdRef = useRef<Map<string, ChatBlock>>(new Map())
     const visibleGroupsRef = useRef<ToolGroupBlock[]>([])
@@ -607,6 +609,7 @@ export function SessionChat(props: {
                         onSwitchToRemote={handleSwitchToRemote}
                         onTerminal={props.session.active && terminalSupported ? handleViewTerminal : undefined}
                         terminalUnsupported={props.session.active && !terminalSupported}
+                        guideInterruptSupported={guideInterruptSupported}
                         autocompleteSuggestions={props.autocompleteSuggestions}
                     />
                 </div>

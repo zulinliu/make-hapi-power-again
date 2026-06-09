@@ -96,6 +96,12 @@ export type SessionMetadataSummary = {
     flavor?: string | null
     capabilities?: {
         terminal?: boolean
+        guideInterrupt?: {
+            supported: boolean
+            preservesQueue: boolean
+            isolatedDelivery: boolean
+            version?: number
+        }
     }
     worktree?: WorktreeMetadata
 }

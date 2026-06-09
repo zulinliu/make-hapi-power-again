@@ -71,6 +71,7 @@ export function HappyComposer(props: {
     onSwitchToRemote?: () => void
     onTerminal?: () => void
     terminalUnsupported?: boolean
+    guideInterruptSupported?: boolean
     autocompletePrefixes?: string[]
     autocompleteSuggestions?: (query: string) => Promise<Suggestion[]>
     // Schedule props (lifted from internal state when provided)
@@ -108,6 +109,7 @@ export function HappyComposer(props: {
         onSwitchToRemote,
         onTerminal,
         terminalUnsupported = false,
+        guideInterruptSupported = false,
         autocompletePrefixes = ['@', '/', '$'],
         autocompleteSuggestions = defaultSuggestionHandler,
         pendingSchedule: pendingScheduleProp,
@@ -161,7 +163,11 @@ export function HappyComposer(props: {
     const pendingSchedule = isControlled ? (pendingScheduleProp ?? null) : pendingScheduleLocal
     const setPendingSchedule = isControlled ? onScheduleProp : setPendingScheduleLocal
     const hasPendingPermission = Boolean(agentState?.requests && Object.keys(agentState.requests).length > 0)
-    const guideModeAvailable = thinking && !hasPendingPermission && !hasAttachments && pendingSchedule === null
+    const guideModeAvailable = thinking
+        && guideInterruptSupported
+        && !hasPendingPermission
+        && !hasAttachments
+        && pendingSchedule === null
     const activeDeliveryMode: MessageDeliveryMode = guideModeAvailable && followUpBehavior === 'guide' ? 'guide' : 'queue'
 
     const textareaRef = useRef<HTMLTextAreaElement>(null)

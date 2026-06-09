@@ -127,7 +127,10 @@ vi.mock('@/hooks/usePWAInstall', () => ({
     })
 }))
 
-function renderComposer(deliveryModeRef?: MutableRefObject<MessageDeliveryMode>) {
+function renderComposer(options: {
+    deliveryModeRef?: MutableRefObject<MessageDeliveryMode>
+    guideInterruptSupported?: boolean
+} = {}) {
     return render(
         <I18nProvider>
             <HappyComposer
@@ -136,7 +139,8 @@ function renderComposer(deliveryModeRef?: MutableRefObject<MessageDeliveryMode>)
                 thinking={true}
                 agentState={null}
                 agentFlavor="codex"
-                deliveryModeRef={deliveryModeRef}
+                deliveryModeRef={options.deliveryModeRef}
+                guideInterruptSupported={options.guideInterruptSupported ?? false}
             />
         </I18nProvider>
     )
@@ -163,7 +167,7 @@ describe('HappyComposer Guide delivery mode', () => {
     it('defaults follow-up behavior to queue without rendering composer-level controls', () => {
         const deliveryModeRef: MutableRefObject<MessageDeliveryMode> = { current: 'guide' }
 
-        renderComposer(deliveryModeRef)
+        renderComposer({ deliveryModeRef })
 
         expect(screen.queryByText('Follow-up behavior: queue')).not.toBeInTheDocument()
         expect(screen.queryByRole('button', { name: 'Use guide' })).not.toBeInTheDocument()
@@ -172,15 +176,26 @@ describe('HappyComposer Guide delivery mode', () => {
         expect(deliveryModeRef.current).toBe('queue')
     })
 
-    it('uses guide delivery when the stored follow-up behavior is guide', () => {
+    it('uses guide delivery when the stored follow-up behavior is guide and the session supports guide interrupt', () => {
         const deliveryModeRef: MutableRefObject<MessageDeliveryMode> = { current: 'queue' }
         localStorage.setItem('hapi-power-follow-up-behavior', 'guide')
 
-        renderComposer(deliveryModeRef)
+        renderComposer({ deliveryModeRef, guideInterruptSupported: true })
 
         expect(screen.queryByText('Follow-up behavior: guide')).not.toBeInTheDocument()
         expect(screen.queryByRole('button', { name: 'Use queue' })).not.toBeInTheDocument()
         expect(screen.getByRole('button', { name: 'Send guide now' })).toBeInTheDocument()
         expect(deliveryModeRef.current).toBe('guide')
+    })
+
+    it('falls back to queue when guide is preferred but the session lacks guide interrupt capability', () => {
+        const deliveryModeRef: MutableRefObject<MessageDeliveryMode> = { current: 'guide' }
+        localStorage.setItem('hapi-power-follow-up-behavior', 'guide')
+
+        renderComposer({ deliveryModeRef, guideInterruptSupported: false })
+
+        expect(screen.getByRole('button', { name: 'Send' })).toBeInTheDocument()
+        expect(screen.queryByRole('button', { name: 'Send guide now' })).not.toBeInTheDocument()
+        expect(deliveryModeRef.current).toBe('queue')
     })
 })
