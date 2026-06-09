@@ -17,6 +17,7 @@
 <p align="center">
   <a href="#why-hapi-power">Why</a> ·
   <a href="#the-hapi-power-loop">Loop</a> ·
+  <a href="#v0180-five-modules">v0.18</a> ·
   <a href="#features">Features</a> ·
   <a href="#install">Install</a> ·
   <a href="#quick-start">Quick Start</a> ·
@@ -47,6 +48,24 @@ Hapi Power turns agent chats into a controllable engineering loop: connect trust
 3. **Observe**: Context Pulse shows reliability risk at a glance with `Context: 40%` and clear diagnostics when usage is unavailable.
 4. **Trace**: Git Atlas maps branch state, agent changes, diffs, commit basket, and remote sync risk in one Git workspace.
 5. **Preserve**: Session Loom turns conversations into Markdown exports, decision records, drift checks, and reusable project memory.
+
+---
+
+## v0.18.0 Five Modules
+
+v0.18.0 is organized around five product modules. Each module has a clear entry point, a concrete output, and a safe fallback when the connected agent or provider cannot support the advanced path.
+
+| Step | Module | Entry | What it does |
+|------|--------|-------|--------------|
+| Connect | **Model Nexus** | Settings -> Model Nexus | Adds provider governance, health checks, model discovery, capability cache, encrypted keys, and default agent route assignment. |
+| Drive | **Guide Beam** | Session composer while the agent is thinking | Sends urgent corrections as isolated guide messages when supported, otherwise falls back to the normal queue without dropping text. |
+| Observe | **Context Pulse** | Session status bar | Shows `Context: n%`, token/cache details, source diagnostics, and unavailable reasons instead of a silent zero or vague token string. |
+| Trace | **Git Atlas** | Session -> Git | Combines branch state, change map, diff preview, commit basket, sync center, and dangerous-operation confirmations in one Git page. |
+| Preserve | **Session Loom** | Session -> Loom | Builds server-side outlines, Markdown exports, background design synthesis, and downloadable session assets. |
+
+Session Loom has two separate output paths: **Export** creates deterministic Markdown from stored conversation history, while **Synthesis** calls the current session agent's configured provider API model in the background to produce a reusable Design Plan Markdown file. Synthesis does not insert a message into the active chat.
+
+See [v0.18.0 Five Modules](./docs/v0.18-five-modules.md) for detailed behavior, safety boundaries, and implementation references.
 
 ---
 
@@ -117,7 +136,7 @@ Hapi Power turns agent chats into a controllable engineering loop: connect trust
 
 **Git Atlas** — See branch state, agent changes, diffs, commit basket, and remote sync risk in one Git map. Review, commit, and sync from desktop or iOS PWA.
 
-**Session Loom** — Turn the Outline panel into a conversation asset workbench. Export Markdown transcripts, filter noise, and synthesize design plans, PRDs, decision logs, drift checks, and reusable lessons.
+**Session Loom** — Turn the Outline panel into a standalone conversation asset workbench. Export deterministic Markdown transcripts, filter noise, and run background design synthesis through the current session agent's provider route.
 
 **Mobile-First PWA** — Responsive mobile UI with tap and long-press gestures for change review, read-only terminal, and iOS-optimized PWA experience. Review and approve AI agent changes from your phone, anytime, anywhere.
 
@@ -133,6 +152,7 @@ Hapi Power turns agent chats into a controllable engineering loop: connect trust
 **Context Pulse** — Real-time context usage uses the consumed percentage, not remaining tokens. Popovers show source, used/max, model, cache details, and unavailable reasons.
 
 **Session Loom** — Server-side outlines and exports read the full session history, apply secret redaction by default, and provide copy, download, and share fallbacks.
+Export is deterministic Markdown generation; synthesis is a separate background model call that produces a Design Plan Markdown asset without interrupting the active conversation.
 
 ### Platform
 
@@ -333,6 +353,7 @@ Three-layer monorepo connected via Socket.IO and REST/SSE:
 - [CLI Reference](./cli/README.md) — commands, configuration, agent setup
 - [Hub API Reference](./hub/README.md) — REST endpoints, Socket.IO events
 - [Web Architecture](./web/README.md) — routes, components, data flow
+- [v0.18.0 Five Modules](./docs/v0.18-five-modules.md) — Model Nexus, Guide Beam, Context Pulse, Git Atlas, and Session Loom
 - [AGENTS.md](./AGENTS.md) — development guide for contributors and AI agents
 
 ---
