@@ -1,8 +1,9 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation, type Locale } from '@/lib/use-translation'
 import { useAppGoBack } from '@/hooks/useAppGoBack'
 import { useAppContext } from '@/lib/app-context'
 import { ProviderSettings } from '@/components/ProviderSettings'
+import { Select } from '@/components/ui/Select'
 import { getFontScaleOptions, useFontScale, type FontScale } from '@/hooks/useFontScale'
 import { getTerminalFontSizeOptions, useTerminalFontSize, type TerminalFontSize } from '@/hooks/useTerminalFontSize'
 import { getComposerEnterBehaviorOptions, useComposerEnterBehavior, type ComposerEnterBehavior } from '@/hooks/useComposerEnterBehavior'
@@ -47,44 +48,6 @@ function BackIcon(props: { className?: string }) {
             className={props.className}
         >
             <polyline points="15 18 9 12 15 6" />
-        </svg>
-    )
-}
-
-function CheckIcon(props: { className?: string }) {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className={props.className}
-        >
-            <polyline points="20 6 9 17 4 12" />
-        </svg>
-    )
-}
-
-function ChevronDownIcon(props: { className?: string }) {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className={props.className}
-        >
-            <polyline points="6 9 12 15 18 9" />
         </svg>
     )
 }
@@ -269,22 +232,6 @@ export default function SettingsPage() {
     const { t, locale, setLocale } = useTranslation()
     const { api } = useAppContext()
     const goBack = useAppGoBack()
-    const [isOpen, setIsOpen] = useState(false)
-    const [isAppearanceOpen, setIsAppearanceOpen] = useState(false)
-    const [isFontOpen, setIsFontOpen] = useState(false)
-    const [isTerminalFontOpen, setIsTerminalFontOpen] = useState(false)
-    const [isChatOpen, setIsChatOpen] = useState(false)
-    const [isFollowUpOpen, setIsFollowUpOpen] = useState(false)
-    const [isTerminalToolDisplayOpen, setIsTerminalToolDisplayOpen] = useState(false)
-    const [isSessionListStatusOpen, setIsSessionListStatusOpen] = useState(false)
-    const containerRef = useRef<HTMLDivElement>(null)
-    const appearanceContainerRef = useRef<HTMLDivElement>(null)
-    const fontContainerRef = useRef<HTMLDivElement>(null)
-    const terminalFontContainerRef = useRef<HTMLDivElement>(null)
-    const chatContainerRef = useRef<HTMLDivElement>(null)
-    const followUpContainerRef = useRef<HTMLDivElement>(null)
-    const terminalToolDisplayContainerRef = useRef<HTMLDivElement>(null)
-    const sessionListStatusContainerRef = useRef<HTMLDivElement>(null)
     const { fontScale, setFontScale } = useFontScale()
     const { terminalFontSize, setTerminalFontSize } = useTerminalFontSize()
     const { sessionPreviewLimit, setSessionPreviewLimit } = useSessionPreviewLimit()
@@ -307,110 +254,38 @@ export default function SettingsPage() {
     const terminalToolDisplayModeOptions = getTerminalToolDisplayModeOptions()
     const sessionListStatusModeOptions = getSessionListStatusModeOptions()
     const appearanceOptions = getAppearanceOptions()
-    const currentLocale = locales.find((loc) => loc.value === locale)
-    const currentAppearanceLabel = appearanceOptions.find((opt) => opt.value === appearance)?.labelKey ?? 'settings.display.appearance.system'
-    const currentFontScaleLabel = fontScaleOptions.find((opt) => opt.value === fontScale)?.label ?? '100%'
-    const currentTerminalFontSizeLabel = terminalFontSizeOptions.find((opt) => opt.value === terminalFontSize)?.label ?? '13px'
-    const currentComposerEnterBehaviorLabel = composerEnterBehaviorOptions.find((opt) => opt.value === composerEnterBehavior)?.labelKey ?? 'settings.chat.enterBehavior.send'
-    const currentFollowUpBehaviorLabel = followUpBehaviorOptions.find((opt) => opt.value === followUpBehavior)?.labelKey ?? 'settings.chat.followUpBehavior.queue'
-    const currentTerminalToolDisplayModeLabel = terminalToolDisplayModeOptions.find((opt) => opt.value === terminalToolDisplayMode)?.labelKey ?? 'settings.chat.terminalToolDisplay.compact'
-    const currentSessionListStatusModeLabel = sessionListStatusModeOptions.find((opt) => opt.value === sessionListStatusMode)?.labelKey ?? 'settings.display.sessionListStatus.standard'
 
     const handleLocaleChange = (newLocale: Locale) => {
         setLocale(newLocale)
-        setIsOpen(false)
     }
 
     const handleAppearanceChange = (pref: AppearancePreference) => {
         setAppearance(pref)
-        setIsAppearanceOpen(false)
     }
 
     const handleFontScaleChange = (newScale: FontScale) => {
         setFontScale(newScale)
-        setIsFontOpen(false)
     }
 
     const handleTerminalFontSizeChange = (newSize: TerminalFontSize) => {
         setTerminalFontSize(newSize)
-        setIsTerminalFontOpen(false)
     }
 
     const handleComposerEnterBehaviorChange = (newBehavior: ComposerEnterBehavior) => {
         setComposerEnterBehavior(newBehavior)
-        setIsChatOpen(false)
     }
 
     const handleFollowUpBehaviorChange = (newBehavior: FollowUpBehavior) => {
         setFollowUpBehavior(newBehavior)
-        setIsFollowUpOpen(false)
     }
 
     const handleTerminalToolDisplayModeChange = (newMode: TerminalToolDisplayMode) => {
         setTerminalToolDisplayMode(newMode)
-        setIsTerminalToolDisplayOpen(false)
     }
 
     const handleSessionListStatusModeChange = (newMode: SessionListStatusMode) => {
         setSessionListStatusMode(newMode)
-        setIsSessionListStatusOpen(false)
     }
-
-    // Close dropdown when clicking outside
-    useEffect(() => {
-        if (!isOpen && !isAppearanceOpen && !isFontOpen && !isTerminalFontOpen && !isChatOpen && !isFollowUpOpen && !isTerminalToolDisplayOpen && !isSessionListStatusOpen) return
-
-        const handleClickOutside = (event: MouseEvent) => {
-            if (isOpen && containerRef.current && !containerRef.current.contains(event.target as Node)) {
-                setIsOpen(false)
-            }
-            if (isAppearanceOpen && appearanceContainerRef.current && !appearanceContainerRef.current.contains(event.target as Node)) {
-                setIsAppearanceOpen(false)
-            }
-            if (isFontOpen && fontContainerRef.current && !fontContainerRef.current.contains(event.target as Node)) {
-                setIsFontOpen(false)
-            }
-            if (isTerminalFontOpen && terminalFontContainerRef.current && !terminalFontContainerRef.current.contains(event.target as Node)) {
-                setIsTerminalFontOpen(false)
-            }
-            if (isChatOpen && chatContainerRef.current && !chatContainerRef.current.contains(event.target as Node)) {
-                setIsChatOpen(false)
-            }
-            if (isFollowUpOpen && followUpContainerRef.current && !followUpContainerRef.current.contains(event.target as Node)) {
-                setIsFollowUpOpen(false)
-            }
-            if (isTerminalToolDisplayOpen && terminalToolDisplayContainerRef.current && !terminalToolDisplayContainerRef.current.contains(event.target as Node)) {
-                setIsTerminalToolDisplayOpen(false)
-            }
-            if (isSessionListStatusOpen && sessionListStatusContainerRef.current && !sessionListStatusContainerRef.current.contains(event.target as Node)) {
-                setIsSessionListStatusOpen(false)
-            }
-        }
-
-        document.addEventListener('mousedown', handleClickOutside)
-        return () => document.removeEventListener('mousedown', handleClickOutside)
-    }, [isOpen, isAppearanceOpen, isFontOpen, isTerminalFontOpen, isChatOpen, isFollowUpOpen, isTerminalToolDisplayOpen, isSessionListStatusOpen])
-
-    // Close on escape key
-    useEffect(() => {
-        if (!isOpen && !isAppearanceOpen && !isFontOpen && !isTerminalFontOpen && !isChatOpen && !isFollowUpOpen && !isTerminalToolDisplayOpen && !isSessionListStatusOpen) return
-
-        const handleEscape = (event: KeyboardEvent) => {
-            if (event.key === 'Escape') {
-                setIsOpen(false)
-                setIsAppearanceOpen(false)
-                setIsFontOpen(false)
-                setIsTerminalFontOpen(false)
-                setIsChatOpen(false)
-                setIsFollowUpOpen(false)
-                setIsTerminalToolDisplayOpen(false)
-                setIsSessionListStatusOpen(false)
-            }
-        }
-
-        document.addEventListener('keydown', handleEscape)
-        return () => document.removeEventListener('keydown', handleEscape)
-    }, [isOpen, isAppearanceOpen, isFontOpen, isTerminalFontOpen, isChatOpen, isFollowUpOpen, isTerminalToolDisplayOpen, isSessionListStatusOpen])
 
     return (
         <div className="flex h-full min-h-0 flex-col">
@@ -434,53 +309,13 @@ export default function SettingsPage() {
                         <div className="px-3 py-2 text-xs font-medium text-(--hp-text-tertiary) uppercase tracking-wider">
                             {t('settings.language.title')}
                         </div>
-                        <div ref={containerRef} className="relative">
-                            <button
-                                type="button"
-                                onClick={() => setIsOpen(!isOpen)}
-                                className="flex w-full items-center justify-between px-3 py-3 text-left transition-colors hover:bg-(--hp-surface-1)"
-                                aria-expanded={isOpen}
-                                aria-haspopup="listbox"
-                            >
-                                <span className="text-(--hp-text-primary)">{t('settings.language.label')}</span>
-                                <span className="flex items-center gap-1 text-(--hp-text-tertiary)">
-                                    <span>{currentLocale?.nativeLabel}</span>
-                                    <ChevronDownIcon className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-                                </span>
-                            </button>
-
-                            {isOpen && (
-                                <div
-                                    className="absolute right-3 top-full mt-1 min-w-[160px] rounded-(--hp-radius-md) border border-(--hp-border) bg-(--hp-surface-0) shadow-(--hp-shadow-md) overflow-hidden z-50"
-                                    role="listbox"
-                                    aria-label={t('settings.language.title')}
-                                >
-                                    {locales.map((loc) => {
-                                        const isSelected = locale === loc.value
-                                        return (
-                                            <button
-                                                key={loc.value}
-                                                type="button"
-                                                role="option"
-                                                aria-selected={isSelected}
-                                                onClick={() => handleLocaleChange(loc.value)}
-                                                className={`flex items-center justify-between w-full px-3 py-2 text-base text-left transition-colors ${
-                                                    isSelected
-                                                        ? 'text-(--hp-primary) bg-(--hp-surface-1)'
-                                                        : 'text-(--hp-text-primary) hover:bg-(--hp-surface-1)'
-                                                }`}
-                                            >
-                                                <span>{loc.nativeLabel}</span>
-                                                {isSelected && (
-                                                    <span className="ml-2 text-(--hp-primary)">
-                                                        <CheckIcon />
-                                                    </span>
-                                                )}
-                                            </button>
-                                        )
-                                    })}
-                                </div>
-                            )}
+                        <div className="px-3 py-3">
+                            <Select
+                                label={t('settings.language.label')}
+                                value={locale}
+                                onChange={handleLocaleChange}
+                                options={locales.map((loc) => ({ value: loc.value, label: loc.nativeLabel }))}
+                            />
                         </div>
                     </div>
 
@@ -489,149 +324,29 @@ export default function SettingsPage() {
                         <div className="px-3 py-2 text-xs font-medium text-(--hp-text-tertiary) uppercase tracking-wider">
                             {t('settings.display.title')}
                         </div>
-                        <div ref={appearanceContainerRef} className="relative">
-                            <button
-                                type="button"
-                                onClick={() => setIsAppearanceOpen(!isAppearanceOpen)}
-                                className="flex w-full items-center justify-between px-3 py-3 text-left transition-colors hover:bg-(--hp-surface-1)"
-                                aria-expanded={isAppearanceOpen}
-                                aria-haspopup="listbox"
-                            >
-                                <span className="text-(--hp-text-primary)">{t('settings.display.appearance')}</span>
-                                <span className="flex items-center gap-1 text-(--hp-text-tertiary)">
-                                    <span>{t(currentAppearanceLabel)}</span>
-                                    <ChevronDownIcon className={`transition-transform ${isAppearanceOpen ? 'rotate-180' : ''}`} />
-                                </span>
-                            </button>
-
-                            {isAppearanceOpen && (
-                                <div
-                                    className="absolute right-3 top-full mt-1 min-w-[160px] rounded-(--hp-radius-md) border border-(--hp-border) bg-(--hp-surface-0) shadow-(--hp-shadow-md) overflow-hidden z-50"
-                                    role="listbox"
-                                    aria-label={t('settings.display.appearance')}
-                                >
-                                    {appearanceOptions.map((opt) => {
-                                        const isSelected = appearance === opt.value
-                                        return (
-                                            <button
-                                                key={opt.value}
-                                                type="button"
-                                                role="option"
-                                                aria-selected={isSelected}
-                                                onClick={() => handleAppearanceChange(opt.value)}
-                                                className={`flex items-center justify-between w-full px-3 py-2 text-base text-left transition-colors ${
-                                                    isSelected
-                                                        ? 'text-(--hp-primary) bg-(--hp-surface-1)'
-                                                        : 'text-(--hp-text-primary) hover:bg-(--hp-surface-1)'
-                                                }`}
-                                            >
-                                                <span>{t(opt.labelKey)}</span>
-                                                {isSelected && (
-                                                    <span className="ml-2 text-(--hp-primary)">
-                                                        <CheckIcon />
-                                                    </span>
-                                                )}
-                                            </button>
-                                        )
-                                    })}
-                                </div>
-                            )}
+                        <div className="px-3 py-3">
+                            <Select
+                                label={t('settings.display.appearance')}
+                                value={appearance}
+                                onChange={handleAppearanceChange}
+                                options={appearanceOptions.map((opt) => ({ value: opt.value, label: t(opt.labelKey) }))}
+                            />
                         </div>
-                        <div ref={fontContainerRef} className="relative">
-                            <button
-                                type="button"
-                                onClick={() => setIsFontOpen(!isFontOpen)}
-                                className="flex w-full items-center justify-between px-3 py-3 text-left transition-colors hover:bg-(--hp-surface-1)"
-                                aria-expanded={isFontOpen}
-                                aria-haspopup="listbox"
-                            >
-                                <span className="text-(--hp-text-primary)">{t('settings.display.fontSize')}</span>
-                                <span className="flex items-center gap-1 text-(--hp-text-tertiary)">
-                                    <span>{currentFontScaleLabel}</span>
-                                    <ChevronDownIcon className={`transition-transform ${isFontOpen ? 'rotate-180' : ''}`} />
-                                </span>
-                            </button>
-
-                            {isFontOpen && (
-                                <div
-                                    className="absolute right-3 top-full mt-1 min-w-[140px] rounded-(--hp-radius-md) border border-(--hp-border) bg-(--hp-surface-0) shadow-(--hp-shadow-md) overflow-hidden z-50"
-                                    role="listbox"
-                                    aria-label={t('settings.display.fontSize')}
-                                >
-                                    {fontScaleOptions.map((opt) => {
-                                        const isSelected = fontScale === opt.value
-                                        return (
-                                            <button
-                                                key={opt.value}
-                                                type="button"
-                                                role="option"
-                                                aria-selected={isSelected}
-                                                onClick={() => handleFontScaleChange(opt.value)}
-                                                className={`flex items-center justify-between w-full px-3 py-2 text-base text-left transition-colors ${
-                                                    isSelected
-                                                        ? 'text-(--hp-primary) bg-(--hp-surface-1)'
-                                                        : 'text-(--hp-text-primary) hover:bg-(--hp-surface-1)'
-                                                }`}
-                                            >
-                                                <span>{opt.label}</span>
-                                                {isSelected && (
-                                                    <span className="ml-2 text-(--hp-primary)">
-                                                        <CheckIcon />
-                                                    </span>
-                                                )}
-                                            </button>
-                                        )
-                                    })}
-                                </div>
-                            )}
+                        <div className="px-3 py-3">
+                            <Select
+                                label={t('settings.display.fontSize')}
+                                value={fontScale}
+                                onChange={handleFontScaleChange}
+                                options={fontScaleOptions}
+                            />
                         </div>
-                        <div ref={terminalFontContainerRef} className="relative">
-                            <button
-                                type="button"
-                                onClick={() => setIsTerminalFontOpen(!isTerminalFontOpen)}
-                                className="flex w-full items-center justify-between px-3 py-3 text-left transition-colors hover:bg-(--hp-surface-1)"
-                                aria-expanded={isTerminalFontOpen}
-                                aria-haspopup="listbox"
-                            >
-                                <span className="text-(--hp-text-primary)">{t('settings.display.terminalFontSize')}</span>
-                                <span className="flex items-center gap-1 text-(--hp-text-tertiary)">
-                                    <span>{currentTerminalFontSizeLabel}</span>
-                                    <ChevronDownIcon className={`transition-transform ${isTerminalFontOpen ? 'rotate-180' : ''}`} />
-                                </span>
-                            </button>
-
-                            {isTerminalFontOpen && (
-                                <div
-                                    className="absolute right-3 top-full mt-1 min-w-[140px] rounded-(--hp-radius-md) border border-(--hp-border) bg-(--hp-surface-0) shadow-(--hp-shadow-md) overflow-hidden z-50"
-                                    role="listbox"
-                                    aria-label={t('settings.display.terminalFontSize')}
-                                >
-                                    {terminalFontSizeOptions.map((opt) => {
-                                        const isSelected = terminalFontSize === opt.value
-                                        return (
-                                            <button
-                                                key={opt.value}
-                                                type="button"
-                                                role="option"
-                                                aria-selected={isSelected}
-                                                onClick={() => handleTerminalFontSizeChange(opt.value)}
-                                                className={`flex items-center justify-between w-full px-3 py-2 text-base text-left transition-colors ${
-                                                    isSelected
-                                                        ? 'text-(--hp-primary) bg-(--hp-surface-1)'
-                                                        : 'text-(--hp-text-primary) hover:bg-(--hp-surface-1)'
-                                                }`}
-                                            >
-                                                <span>{opt.label}</span>
-                                                {isSelected && (
-                                                    <span className="ml-2 text-(--hp-primary)">
-                                                        <CheckIcon />
-                                                    </span>
-                                                )}
-                                            </button>
-                                        )
-                                    })}
-                                </div>
-                            )}
+                        <div className="px-3 py-3">
+                            <Select
+                                label={t('settings.display.terminalFontSize')}
+                                value={terminalFontSize}
+                                onChange={handleTerminalFontSizeChange}
+                                options={terminalFontSizeOptions}
+                            />
                         </div>
                         <SessionPreviewLimitControl
                             label={t('settings.display.sessionPreviewLimit')}
@@ -640,53 +355,13 @@ export default function SettingsPage() {
                             decreaseLabel={t('settings.display.sessionPreviewLimit.decrease')}
                             increaseLabel={t('settings.display.sessionPreviewLimit.increase')}
                         />
-                        <div ref={sessionListStatusContainerRef} className="relative">
-                            <button
-                                type="button"
-                                onClick={() => setIsSessionListStatusOpen(!isSessionListStatusOpen)}
-                                className="flex w-full items-center justify-between px-3 py-3 text-left transition-colors hover:bg-(--hp-surface-1)"
-                                aria-expanded={isSessionListStatusOpen}
-                                aria-haspopup="listbox"
-                            >
-                                <span className="text-(--hp-text-primary)">{t('settings.display.sessionListStatus')}</span>
-                                <span className="flex items-center gap-1 text-(--hp-text-tertiary)">
-                                    <span>{t(currentSessionListStatusModeLabel)}</span>
-                                    <ChevronDownIcon className={`transition-transform ${isSessionListStatusOpen ? 'rotate-180' : ''}`} />
-                                </span>
-                            </button>
-
-                            {isSessionListStatusOpen && (
-                                <div
-                                    className="absolute right-3 top-full mt-1 min-w-[220px] rounded-(--hp-radius-md) border border-(--hp-border) bg-(--hp-surface-0) shadow-(--hp-shadow-md) overflow-hidden z-50"
-                                    role="listbox"
-                                    aria-label={t('settings.display.sessionListStatus')}
-                                >
-                                    {sessionListStatusModeOptions.map((opt) => {
-                                        const isSelected = sessionListStatusMode === opt.value
-                                        return (
-                                            <button
-                                                key={opt.value}
-                                                type="button"
-                                                role="option"
-                                                aria-selected={isSelected}
-                                                onClick={() => handleSessionListStatusModeChange(opt.value)}
-                                                className={`flex items-center justify-between w-full px-3 py-2 text-base text-left transition-colors ${
-                                                    isSelected
-                                                        ? 'text-(--hp-primary) bg-(--hp-surface-1)'
-                                                        : 'text-(--hp-text-primary) hover:bg-(--hp-surface-1)'
-                                                }`}
-                                            >
-                                                <span>{t(opt.labelKey)}</span>
-                                                {isSelected && (
-                                                    <span className="ml-2 text-(--hp-primary)">
-                                                        <CheckIcon />
-                                                    </span>
-                                                )}
-                                            </button>
-                                        )
-                                    })}
-                                </div>
-                            )}
+                        <div className="px-3 py-3">
+                            <Select
+                                label={t('settings.display.sessionListStatus')}
+                                value={sessionListStatusMode}
+                                onChange={handleSessionListStatusModeChange}
+                                options={sessionListStatusModeOptions.map((opt) => ({ value: opt.value, label: t(opt.labelKey) }))}
+                            />
                         </div>
                         {sessionListStatusMode === 'detailed' ? (
                             <div className="px-3 pb-3 text-xs text-(--hp-text-tertiary)">
@@ -700,152 +375,32 @@ export default function SettingsPage() {
                         <div className="px-3 py-2 text-xs font-medium text-(--hp-text-tertiary) uppercase tracking-wider">
                             {t('settings.chat.title')}
                         </div>
-                        <div ref={chatContainerRef} className="relative">
-                            <button
-                                type="button"
-                                onClick={() => setIsChatOpen(!isChatOpen)}
-                                className="flex w-full items-center justify-between px-3 py-3 text-left transition-colors hover:bg-(--hp-surface-1)"
-                                aria-expanded={isChatOpen}
-                                aria-haspopup="listbox"
-                            >
-                                <span className="text-(--hp-text-primary)">{t('settings.chat.enterBehavior')}</span>
-                                <span className="flex items-center gap-1 text-(--hp-text-tertiary)">
-                                    <span>{t(currentComposerEnterBehaviorLabel)}</span>
-                                    <ChevronDownIcon className={`transition-transform ${isChatOpen ? 'rotate-180' : ''}`} />
-                                </span>
-                            </button>
-
-                            {isChatOpen && (
-                                <div
-                                    className="absolute right-3 top-full mt-1 min-w-[170px] rounded-(--hp-radius-md) border border-(--hp-border) bg-(--hp-surface-0) shadow-(--hp-shadow-md) overflow-hidden z-50"
-                                    role="listbox"
-                                    aria-label={t('settings.chat.enterBehavior')}
-                                >
-                                    {composerEnterBehaviorOptions.map((opt) => {
-                                        const isSelected = composerEnterBehavior === opt.value
-                                        return (
-                                            <button
-                                                key={opt.value}
-                                                type="button"
-                                                role="option"
-                                                aria-selected={isSelected}
-                                                onClick={() => handleComposerEnterBehaviorChange(opt.value)}
-                                                className={`flex items-center justify-between w-full px-3 py-2 text-base text-left transition-colors ${
-                                                    isSelected
-                                                        ? 'text-(--hp-primary) bg-(--hp-surface-1)'
-                                                        : 'text-(--hp-text-primary) hover:bg-(--hp-surface-1)'
-                                                }`}
-                                            >
-                                                <span>{t(opt.labelKey)}</span>
-                                                {isSelected && (
-                                                    <span className="ml-2 text-(--hp-primary)">
-                                                        <CheckIcon />
-                                                    </span>
-                                                )}
-                                            </button>
-                                        )
-                                    })}
-                                </div>
-                            )}
+                        <div className="px-3 py-3">
+                            <Select
+                                label={t('settings.chat.enterBehavior')}
+                                value={composerEnterBehavior}
+                                onChange={handleComposerEnterBehaviorChange}
+                                options={composerEnterBehaviorOptions.map((opt) => ({ value: opt.value, label: t(opt.labelKey) }))}
+                            />
                         </div>
-                        <div ref={followUpContainerRef} className="relative">
-                            <button
-                                type="button"
-                                onClick={() => setIsFollowUpOpen(!isFollowUpOpen)}
-                                className="flex w-full items-center justify-between px-3 py-3 text-left transition-colors hover:bg-(--hp-surface-1)"
-                                aria-expanded={isFollowUpOpen}
-                                aria-haspopup="listbox"
-                            >
-                                <span className="text-(--hp-text-primary)">{t('settings.chat.followUpBehavior')}</span>
-                                <span className="flex items-center gap-1 text-(--hp-text-tertiary)">
-                                    <span>{t(currentFollowUpBehaviorLabel)}</span>
-                                    <ChevronDownIcon className={`transition-transform ${isFollowUpOpen ? 'rotate-180' : ''}`} />
-                                </span>
-                            </button>
-
-                            {isFollowUpOpen && (
-                                <div
-                                    className="absolute right-3 top-full mt-1 min-w-[190px] rounded-(--hp-radius-md) border border-(--hp-border) bg-(--hp-surface-0) shadow-(--hp-shadow-md) overflow-hidden z-50"
-                                    role="listbox"
-                                    aria-label={t('settings.chat.followUpBehavior')}
-                                >
-                                    {followUpBehaviorOptions.map((opt) => {
-                                        const isSelected = followUpBehavior === opt.value
-                                        return (
-                                            <button
-                                                key={opt.value}
-                                                type="button"
-                                                role="option"
-                                                aria-selected={isSelected}
-                                                onClick={() => handleFollowUpBehaviorChange(opt.value)}
-                                                className={`flex items-center justify-between w-full px-3 py-2 text-base text-left transition-colors ${
-                                                    isSelected
-                                                        ? 'text-(--hp-primary) bg-(--hp-surface-1)'
-                                                        : 'text-(--hp-text-primary) hover:bg-(--hp-surface-1)'
-                                                }`}
-                                            >
-                                                <span>{t(opt.labelKey)}</span>
-                                                {isSelected && (
-                                                    <span className="ml-2 text-(--hp-primary)">
-                                                        <CheckIcon />
-                                                    </span>
-                                                )}
-                                            </button>
-                                        )
-                                    })}
-                                </div>
-                            )}
+                        <div className="px-3 py-3">
+                            <Select
+                                label={t('settings.chat.followUpBehavior')}
+                                value={followUpBehavior}
+                                onChange={handleFollowUpBehaviorChange}
+                                options={followUpBehaviorOptions.map((opt) => ({ value: opt.value, label: t(opt.labelKey) }))}
+                            />
                         </div>
                         <div className="px-3 pb-3 text-xs leading-5 text-(--hp-text-tertiary)">
                             {t('settings.chat.followUpBehavior.description')}
                         </div>
-                        <div ref={terminalToolDisplayContainerRef} className="relative">
-                            <button
-                                type="button"
-                                onClick={() => setIsTerminalToolDisplayOpen(!isTerminalToolDisplayOpen)}
-                                className="flex w-full items-center justify-between px-3 py-3 text-left transition-colors hover:bg-(--hp-surface-1)"
-                                aria-expanded={isTerminalToolDisplayOpen}
-                                aria-haspopup="listbox"
-                            >
-                                <span className="text-(--hp-text-primary)">{t('settings.chat.terminalToolDisplay')}</span>
-                                <span className="flex items-center gap-1 text-(--hp-text-tertiary)">
-                                    <span>{t(currentTerminalToolDisplayModeLabel)}</span>
-                                    <ChevronDownIcon className={`transition-transform ${isTerminalToolDisplayOpen ? 'rotate-180' : ''}`} />
-                                </span>
-                            </button>
-
-                            {isTerminalToolDisplayOpen && (
-                                <div
-                                    className="absolute right-3 top-full mt-1 min-w-[230px] rounded-(--hp-radius-md) border border-(--hp-border) bg-(--hp-surface-0) shadow-(--hp-shadow-md) overflow-hidden z-50"
-                                    role="listbox"
-                                    aria-label={t('settings.chat.terminalToolDisplay')}
-                                >
-                                    {terminalToolDisplayModeOptions.map((opt) => {
-                                        const isSelected = terminalToolDisplayMode === opt.value
-                                        return (
-                                            <button
-                                                key={opt.value}
-                                                type="button"
-                                                role="option"
-                                                aria-selected={isSelected}
-                                                onClick={() => handleTerminalToolDisplayModeChange(opt.value)}
-                                                className={`flex items-center justify-between w-full px-3 py-2 text-base text-left transition-colors ${
-                                                    isSelected
-                                                        ? 'text-(--hp-primary) bg-(--hp-surface-1)'
-                                                        : 'text-(--hp-text-primary) hover:bg-(--hp-surface-1)'
-                                                }`}
-                                            >
-                                                <span>{t(opt.labelKey)}</span>
-                                                {isSelected && (
-                                                    <span className="ml-2 text-(--hp-primary)">
-                                                        <CheckIcon />
-                                                    </span>
-                                                )}
-                                            </button>
-                                        )
-                                    })}
-                                </div>
-                            )}
+                        <div className="px-3 py-3">
+                            <Select
+                                label={t('settings.chat.terminalToolDisplay')}
+                                value={terminalToolDisplayMode}
+                                onChange={handleTerminalToolDisplayModeChange}
+                                options={terminalToolDisplayModeOptions.map((opt) => ({ value: opt.value, label: t(opt.labelKey) }))}
+                            />
                         </div>
                         <ChatSurfaceColorControl
                             label={t('settings.chat.groupedToolBackground')}

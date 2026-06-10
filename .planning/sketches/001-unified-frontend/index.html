@@ -1,0 +1,701 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hapi Power Unified Frontend Prototype</title>
+  <style>
+    :root {
+      --hp-primary: oklch(68% 0.18 55);
+      --hp-primary-hover: oklch(62% 0.20 50);
+      --hp-primary-subtle: oklch(68% 0.06 55 / 0.12);
+      --hp-primary-text: oklch(13% 0.02 55);
+      --hp-canvas: oklch(99% 0.003 75);
+      --hp-surface-0: oklch(100% 0 0);
+      --hp-surface-1: oklch(98.5% 0.003 55);
+      --hp-surface-2: oklch(96% 0.005 55);
+      --hp-surface-3: oklch(94% 0.008 55);
+      --hp-text-primary: oklch(13% 0.02 55);
+      --hp-text-secondary: oklch(40% 0.01 55);
+      --hp-text-tertiary: oklch(52% 0.01 55);
+      --hp-border: oklch(80% 0.005 55 / 0.28);
+      --hp-divider: oklch(85% 0.003 55 / 0.22);
+      --hp-success: oklch(65% 0.16 155);
+      --hp-warning: oklch(75% 0.15 80);
+      --hp-danger: oklch(60% 0.20 22);
+      --hp-info: oklch(65% 0.12 230);
+      --hp-success-subtle: oklch(65% 0.08 155 / 0.12);
+      --hp-warning-subtle: oklch(75% 0.08 80 / 0.14);
+      --hp-danger-subtle: oklch(60% 0.10 22 / 0.12);
+      --hp-info-subtle: oklch(65% 0.06 230 / 0.12);
+      --hp-radius-sm: 6px;
+      --hp-radius-md: 10px;
+      --hp-radius-lg: 14px;
+      --hp-shadow-lg: 0 8px 32px oklch(13% 0.02 55 / 0.15);
+      --hp-shadow-xl: 0 16px 48px oklch(13% 0.02 55 / 0.25);
+      --hp-ease: cubic-bezier(0.16, 1, 0.3, 1);
+      color-scheme: light;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--hp-canvas);
+      color: var(--hp-text-primary);
+      font-family: "Geist Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr) 340px;
+      grid-template-rows: 56px minmax(0, 1fr);
+    }
+    .topbar {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 16px;
+      border-bottom: 1px solid var(--hp-divider);
+      background: var(--hp-surface-0);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 260px;
+      font-weight: 700;
+    }
+    .mark {
+      width: 30px;
+      height: 30px;
+      border-radius: 9px;
+      background: var(--hp-primary);
+      color: var(--hp-primary-text);
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+    }
+    .mode-switch {
+      display: inline-flex;
+      padding: 3px;
+      gap: 2px;
+      border: 1px solid var(--hp-border);
+      border-radius: var(--hp-radius-md);
+      background: var(--hp-surface-1);
+    }
+    .mode-switch button,
+    .nav button,
+    .icon-button,
+    .button,
+    .tab,
+    .list-row,
+    .setting-row {
+      min-height: 36px;
+      border: 0;
+      border-radius: var(--hp-radius-sm);
+      background: transparent;
+      color: var(--hp-text-secondary);
+      transition: background 150ms var(--hp-ease), color 150ms var(--hp-ease), border-color 150ms var(--hp-ease);
+    }
+    .mode-switch button { padding: 0 10px; font-size: 13px; }
+    .mode-switch button.active,
+    .nav button.active,
+    .tab.active {
+      background: var(--hp-surface-0);
+      color: var(--hp-text-primary);
+      box-shadow: inset 0 0 0 1px var(--hp-border);
+    }
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 14px;
+      border: 1px solid var(--hp-border);
+      background: var(--hp-surface-0);
+      color: var(--hp-text-primary);
+      font-weight: 600;
+    }
+    .button.primary {
+      border-color: var(--hp-primary);
+      background: var(--hp-primary);
+      color: var(--hp-primary-text);
+    }
+    .button.danger {
+      border-color: var(--hp-danger);
+      background: var(--hp-danger);
+      color: white;
+    }
+    .icon-button {
+      width: 36px;
+      display: inline-grid;
+      place-items: center;
+    }
+    .sidebar, .inspector {
+      min-height: 0;
+      overflow: auto;
+      background: var(--hp-surface-0);
+    }
+    .sidebar { border-right: 1px solid var(--hp-divider); }
+    .inspector { border-left: 1px solid var(--hp-divider); }
+    .section-title {
+      padding: 12px 14px 6px;
+      color: var(--hp-text-tertiary);
+      font-size: 12px;
+      font-weight: 650;
+    }
+    .session-list, .panel-stack { display: grid; gap: 8px; padding: 10px; }
+    .list-row {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 28px minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      padding: 10px;
+      text-align: left;
+    }
+    .list-row.active, .list-row:hover, .setting-row:hover, .nav button:hover, .icon-button:hover, .button:hover {
+      background: var(--hp-surface-1);
+      color: var(--hp-text-primary);
+    }
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--hp-success);
+    }
+    .meta { color: var(--hp-text-tertiary); font-size: 12px; }
+    .workspace {
+      min-width: 0;
+      min-height: 0;
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: 54px minmax(0, 1fr) auto;
+      background: var(--hp-canvas);
+    }
+    .module-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 0 14px;
+      border-bottom: 1px solid var(--hp-divider);
+      background: var(--hp-surface-0);
+    }
+    .nav { display: flex; gap: 4px; }
+    .nav button { padding: 0 10px; font-weight: 600; }
+    .content {
+      min-height: 0;
+      overflow: auto;
+      padding: 14px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(280px, .9fr);
+      gap: 14px;
+      align-items: start;
+    }
+    .card {
+      border: 1px solid var(--hp-border);
+      border-radius: var(--hp-radius-lg);
+      background: var(--hp-surface-0);
+      overflow: hidden;
+    }
+    .card.pad { padding: 14px; }
+    .card-head {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--hp-divider);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .card-title { font-weight: 700; }
+    .status-line {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 26px;
+      padding: 0 8px;
+      border-radius: 999px;
+      border: 1px solid var(--hp-border);
+      background: var(--hp-surface-1);
+      color: var(--hp-text-secondary);
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .chip.primary { color: var(--hp-text-primary); background: var(--hp-primary-subtle); border-color: oklch(68% 0.18 55 / .25); }
+    .chip.warn { color: var(--hp-text-primary); background: var(--hp-warning-subtle); }
+    .chip.danger { color: var(--hp-danger); background: var(--hp-danger-subtle); }
+    .chat {
+      display: grid;
+      gap: 12px;
+    }
+    .message {
+      max-width: 78%;
+      padding: 10px 12px;
+      border-radius: var(--hp-radius-md);
+      background: var(--hp-surface-0);
+      border: 1px solid var(--hp-border);
+    }
+    .message.user {
+      justify-self: end;
+      background: var(--hp-primary-subtle);
+    }
+    .tool-card {
+      border: 1px solid var(--hp-border);
+      border-radius: var(--hp-radius-md);
+      background: var(--hp-surface-1);
+      padding: 10px;
+    }
+    .composer {
+      border-top: 1px solid var(--hp-divider);
+      background: var(--hp-surface-0);
+      padding: 10px 14px max(10px, env(safe-area-inset-bottom));
+      display: grid;
+      gap: 8px;
+    }
+    .composer textarea,
+    .field {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid var(--hp-border);
+      border-radius: var(--hp-radius-md);
+      background: var(--hp-surface-0);
+      color: var(--hp-text-primary);
+      padding: 10px 12px;
+      resize: vertical;
+    }
+    .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .toolbar .left, .toolbar .right { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .tabs { display: flex; gap: 4px; padding: 4px; border: 1px solid var(--hp-border); background: var(--hp-surface-1); border-radius: var(--hp-radius-md); }
+    .tab { padding: 0 10px; font-size: 13px; font-weight: 650; }
+    .rows { display: grid; }
+    .row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--hp-divider);
+      align-items: center;
+    }
+    .row:last-child { border-bottom: 0; }
+    .code {
+      background: oklch(16% 0.015 55);
+      color: oklch(92% 0.005 55);
+      border-radius: var(--hp-radius-md);
+      padding: 12px;
+      font-family: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 13px;
+      overflow: auto;
+    }
+    .setting-row {
+      width: 100%;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 14px;
+      text-align: left;
+      border-radius: 0;
+    }
+    .inspector .card { margin: 10px; }
+    .bottom-bar {
+      display: none;
+      position: sticky;
+      bottom: 0;
+      background: var(--hp-surface-0);
+      border-top: 1px solid var(--hp-divider);
+      padding: 8px 10px max(8px, env(safe-area-inset-bottom));
+      gap: 8px;
+      z-index: 18;
+    }
+    .overlay-backdrop {
+      position: fixed;
+      inset: 0;
+      background: oklch(0% 0 0 / .42);
+      z-index: 80;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .overlay-backdrop.open { display: flex; }
+    .overlay {
+      width: min(520px, 100%);
+      max-height: min(720px, 90vh);
+      overflow: auto;
+      border-radius: var(--hp-radius-lg);
+      background: var(--hp-surface-0);
+      box-shadow: var(--hp-shadow-xl);
+      border: 1px solid var(--hp-border);
+    }
+    .overlay header, .overlay footer { padding: 14px; border-bottom: 1px solid var(--hp-divider); }
+    .overlay footer { border-top: 1px solid var(--hp-divider); border-bottom: 0; display: flex; justify-content: flex-end; gap: 8px; }
+    .overlay main { padding: 14px; }
+    .toast {
+      position: fixed;
+      top: calc(12px + env(safe-area-inset-top));
+      right: 12px;
+      z-index: 90;
+      display: none;
+      width: min(360px, calc(100vw - 24px));
+      border: 1px solid var(--hp-border);
+      border-radius: var(--hp-radius-md);
+      background: var(--hp-surface-0);
+      box-shadow: var(--hp-shadow-lg);
+      padding: 12px;
+    }
+    .toast.open { display: block; }
+    [data-module] { display: none; }
+    [data-module].active { display: block; }
+    .mobile-only { display: none; }
+
+    @media (max-width: 1023px) {
+      .app {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: 56px minmax(0, 1fr);
+      }
+      .brand { width: auto; }
+      .sidebar, .inspector { display: none; }
+      .workspace { grid-column: 1; }
+      .grid { grid-template-columns: 1fr; }
+      .topbar { padding-left: max(12px, env(safe-area-inset-left)); padding-right: max(12px, env(safe-area-inset-right)); }
+      .nav { overflow: auto; }
+      .nav button, .button, .icon-button, .mode-switch button, .tab, .setting-row {
+        min-height: 44px;
+      }
+      .icon-button { width: 44px; }
+      .bottom-bar {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+      .bottom-bar .button { padding: 0 8px; font-size: 13px; }
+      .overlay-backdrop { align-items: flex-end; padding: 0; }
+      .overlay {
+        width: 100%;
+        max-height: min(86vh, 720px);
+        border-radius: 16px 16px 0 0;
+      }
+      .message { max-width: 92%; }
+      .desktop-only { display: none !important; }
+      .mobile-only { display: inline-flex; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand"><div class="mark">H</div><span>Hapi Power</span></div>
+      <div class="mode-switch" aria-label="Viewport mode">
+        <button class="active" data-viewport="desktop">Desktop</button>
+        <button data-viewport="tablet">Tablet</button>
+        <button data-viewport="mobile">Mobile</button>
+      </div>
+      <span class="chip primary">window: expanded</span>
+      <span class="chip">input: mouse + keyboard</span>
+      <span class="chip warn">Context: 40%</span>
+      <button class="button primary" data-open="toast">Show toast</button>
+    </header>
+
+    <aside class="sidebar">
+      <div class="section-title">Workbench</div>
+      <div class="session-list">
+        <button class="list-row active"><span class="dot"></span><span><strong>v0.19 frontend unification</strong><br><span class="meta">codex · /work/hapi-power</span></span><span class="meta">now</span></button>
+        <button class="list-row"><span class="dot" style="background:var(--hp-warning)"></span><span><strong>Git Atlas review</strong><br><span class="meta">claude · feat/v0.18.0</span></span><span class="meta">12m</span></button>
+        <button class="list-row"><span class="dot" style="background:var(--hp-info)"></span><span><strong>Model Nexus probe</strong><br><span class="meta">gemini · provider test</span></span><span class="meta">1h</span></button>
+      </div>
+      <div class="section-title">System states</div>
+      <div class="panel-stack">
+        <div class="card pad"><strong>Offline banner</strong><br><span class="meta">Queue local changes, retry SSE.</span></div>
+        <div class="card pad"><strong>PWA update</strong><br><span class="meta">Install waiting, user applies update.</span></div>
+        <div class="card pad"><strong>Telegram fallback</strong><br><span class="meta">Open via bot button, not browser.</span></div>
+      </div>
+    </aside>
+
+    <main class="workspace">
+      <div class="module-header">
+        <nav class="nav" aria-label="Module navigation">
+          <button class="active" data-target="chat">Chat</button>
+          <button data-target="new">New Session</button>
+          <button data-target="files">Files</button>
+          <button data-target="terminal">Terminal</button>
+          <button data-target="git">Git Atlas</button>
+          <button data-target="loom">Loom</button>
+          <button data-target="extensions">Extensions</button>
+          <button data-target="settings">Settings</button>
+          <button data-target="login">Auth</button>
+        </nav>
+        <div class="toolbar desktop-only">
+          <button class="button" data-open="popover">Context Pulse</button>
+          <button class="button primary" data-open="dialog">Guide now</button>
+        </div>
+      </div>
+
+      <section class="content">
+        <article data-module="chat" class="active">
+          <div class="grid">
+            <div class="card pad chat">
+              <div class="status-line">
+                <span class="chip primary">Guide Beam ready</span>
+                <span class="chip">queue: 2</span>
+                <span class="chip warn">Context: 40%</span>
+              </div>
+              <div class="message user">把 Settings 和 FileManager 的弹窗统一，不要再新增局部 overlay。</div>
+              <div class="message">收到。我会先扩展共享 OverlaySurface，再迁移 Settings select 和 FileManager dialog。</div>
+              <div class="tool-card">
+                <strong>Tool group · frontend audit</strong>
+                <div class="meta">Read 32 files · 4 issues · 2 accepted edits pending</div>
+              </div>
+              <div class="message user">立即引导：优先移动端底部操作栏。</div>
+            </div>
+            <div class="card">
+              <div class="card-head"><span class="card-title">Permission queue</span><span class="chip danger">needs decision</span></div>
+              <div class="rows">
+                <div class="row"><span>Apply UI primitive migration</span><button class="button primary">Allow</button></div>
+                <div class="row"><span>Run screenshot audit</span><button class="button">Review</button></div>
+                <div class="row"><span>Cancel stale subagent</span><button class="button danger">Deny</button></div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article data-module="new">
+          <div class="grid">
+            <div class="card pad">
+              <h2>New Session</h2>
+              <label>Machine<input class="field" value="local · hapi-dev"></label><br><br>
+              <label>Directory<input class="field" value="/home/tester/project"></label><br><br>
+              <div class="tabs"><button class="tab active">Simple</button><button class="tab">Worktree</button><button class="tab">Clone via Git Portal</button></div><br>
+              <div class="status-line"><span class="chip primary">Codex</span><span class="chip">Claude</span><span class="chip">Gemini</span><span class="chip">OpenCode</span><span class="chip">Cursor</span></div>
+            </div>
+            <div class="card">
+              <div class="card-head"><span class="card-title">Git Portal clone</span><button class="button primary" data-open="sheet">Open sheet</button></div>
+              <div class="rows">
+                <div class="row"><span>Repository</span><span class="meta">git.internal.example.com/hapi.git</span></div>
+                <div class="row"><span>Destination</span><span class="meta">/home/tester/project</span></div>
+                <div class="row"><span>State</span><span class="chip primary">ready</span></div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article data-module="files">
+          <div class="grid">
+            <div class="card">
+              <div class="card-head"><span class="card-title">Files</span><div class="toolbar"><button class="button">Upload</button><button class="button">Search</button><button class="button primary">New</button></div></div>
+              <div class="rows">
+                <div class="row"><span>web/src/components/ui</span><span class="chip">folder</span></div>
+                <div class="row"><span>web/src/routes/settings/index.tsx</span><span class="chip warn">modified</span></div>
+                <div class="row"><span>DESIGN.md</span><span class="chip primary">new</span></div>
+                <div class="row"><span>.planning/sketches/001-unified-frontend/index.html</span><span class="chip primary">prototype</span></div>
+              </div>
+            </div>
+            <div class="card pad">
+              <h3>Editor / Diff</h3>
+              <div class="tabs"><button class="tab active">Preview</button><button class="tab">Edit</button><button class="tab">Diff</button></div><br>
+              <pre class="code">+ export function OverlaySurface()
++ maps dialog to sheet on compact
++ returns focus after close</pre>
+            </div>
+          </div>
+        </article>
+
+        <article data-module="terminal">
+          <div class="card pad">
+            <div class="status-line"><span class="chip primary">connected</span><span class="chip">desktop: interactive</span><span class="chip warn">mobile: read-only recent 200 lines</span></div><br>
+            <pre class="code">$ bun run typecheck
+web typecheck queued
+$ git status --short
+A DESIGN.md
+A docs/adaptive-ui.md</pre>
+            <br>
+            <div class="toolbar"><button class="button">Copy</button><button class="button">Paste fallback</button><button class="button primary">Keyboard bar</button></div>
+          </div>
+        </article>
+
+        <article data-module="git">
+          <div class="grid">
+            <div class="card pad">
+              <h2>Git Atlas</h2>
+              <div class="status-line"><span class="chip primary">feat/v0.19.0</span><span class="chip warn">8 changed</span><span class="chip">ahead 0</span><span class="chip">behind 0</span></div>
+              <p>Recommended action: review design artifacts, then commit prototype and architecture base.</p>
+            </div>
+            <div class="card">
+              <div class="card-head"><span class="card-title">Commit basket</span><button class="button primary">Commit selected</button></div>
+              <div class="rows">
+                <div class="row"><span>DESIGN.md</span><span>+</span></div>
+                <div class="row"><span>docs/frontend-architecture.md</span><span>+</span></div>
+                <div class="row"><span>web/src/components/layout/*</span><span>+</span></div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article data-module="loom">
+          <div class="grid">
+            <div class="card pad">
+              <h2>Session Loom</h2>
+              <div class="tabs"><button class="tab active">Outline</button><button class="tab">Export</button><button class="tab">Synthesis</button><button class="tab">Assets</button></div>
+              <p>Exports default to redaction and provide download, copy, and share fallback.</p>
+            </div>
+            <div class="card pad">
+              <h3>Markdown preview</h3>
+              <pre class="code"># Frontend Architecture
+[REDACTED_PATH]
+Decision: adaptive shell first</pre>
+            </div>
+          </div>
+        </article>
+
+        <article data-module="extensions">
+          <div class="card">
+            <div class="card-head"><span class="card-title">Extensions / Skills / Plugins</span><button class="button primary">Install</button></div>
+            <div class="rows">
+              <div class="row"><span>goalflow</span><span class="chip primary">installed</span></div>
+              <div class="row"><span>impeccable</span><span class="chip primary">installed</span></div>
+              <div class="row"><span>frontend-design</span><span class="chip">available</span></div>
+            </div>
+          </div>
+        </article>
+
+        <article data-module="settings">
+          <div class="grid">
+            <div class="card">
+              <div class="card-head"><span class="card-title">Settings</span><span class="chip">shared rows</span></div>
+              <button class="setting-row"><span>Language</span><span>简体中文</span></button>
+              <button class="setting-row"><span>Appearance</span><span>System</span></button>
+              <button class="setting-row"><span>Composer enter behavior</span><span>Queue</span></button>
+              <button class="setting-row"><span>Terminal font size</span><span>13px</span></button>
+            </div>
+            <div class="card">
+              <div class="card-head"><span class="card-title">Model Nexus</span><button class="button primary">Add provider</button></div>
+              <div class="rows">
+                <div class="row"><span>GLM Bridge</span><span class="chip primary">healthy · 128K</span></div>
+                <div class="row"><span>OpenAI-compatible</span><span class="chip warn">usage unknown</span></div>
+                <div class="row"><span>Anthropic</span><span class="chip">not configured</span></div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article data-module="login">
+          <div class="grid">
+            <div class="card pad">
+              <h1>Hapi Power</h1>
+              <p>随时 AI，编程自在。登录、Hub URL 绑定、Telegram fallback 和 PWA 安装状态共用同一认证布局。</p>
+            </div>
+            <div class="card pad">
+              <label>Hub URL<input class="field" value="https://hub.example.com"></label><br><br>
+              <label>Access token<input class="field" value="hp_example_token"></label><br><br>
+              <button class="button primary">Connect workbench</button>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <div class="bottom-bar">
+        <button class="button primary">Send</button>
+        <button class="button">Files</button>
+        <button class="button">Git</button>
+        <button class="button" data-open="sheet">More</button>
+      </div>
+    </main>
+
+    <aside class="inspector">
+      <div class="card">
+        <div class="card-head"><span class="card-title">Inspector</span><span class="chip primary">desktop</span></div>
+        <div class="rows">
+          <div class="row"><span>Window class</span><span>expanded</span></div>
+          <div class="row"><span>Input mode</span><span>mouse</span></div>
+          <div class="row"><span>Overlay mode</span><span>side panel</span></div>
+          <div class="row"><span>Keyboard</span><span>stable</span></div>
+        </div>
+      </div>
+      <div class="card pad">
+        <strong>Overlay matrix</strong>
+        <p class="meta">Dialog, alert, side panel, bottom sheet, popover, context menu, toast and banner share one taxonomy.</p>
+        <button class="button" data-open="context">Context menu</button>
+      </div>
+    </aside>
+  </div>
+
+  <div class="overlay-backdrop" id="overlay">
+    <section class="overlay" role="dialog" aria-modal="true" aria-labelledby="overlay-title">
+      <header><strong id="overlay-title">Unified OverlaySurface</strong><div class="meta">Desktop dialog · compact bottom sheet</div></header>
+      <main>
+        <p>This surface demonstrates the shared overlay taxonomy. It can represent confirmation, provider form, picker, popover fallback, or mobile sheet.</p>
+        <label>Provider name<input class="field" value="GLM Bridge"></label><br><br>
+        <label>Capability<select class="field"><option>128K context · usage supported</option><option>Usage unavailable</option></select></label>
+      </main>
+      <footer><button class="button" data-close>Cancel</button><button class="button primary" data-close>Save provider</button></footer>
+    </section>
+  </div>
+
+  <div class="toast" id="toast"><strong>Saved</strong><br><span class="meta">Toast uses the safe-area stack and never blocks required decisions.</span></div>
+
+  <script>
+    const modules = document.querySelectorAll('[data-module]');
+    document.querySelectorAll('[data-target]').forEach((button) => {
+      button.addEventListener('click', () => {
+        document.querySelectorAll('[data-target]').forEach((b) => b.classList.remove('active'));
+        button.classList.add('active');
+        modules.forEach((module) => module.classList.toggle('active', module.dataset.module === button.dataset.target));
+      });
+    });
+    const overlay = document.getElementById('overlay');
+    const toast = document.getElementById('toast');
+    document.querySelectorAll('[data-open]').forEach((button) => {
+      button.addEventListener('click', () => {
+        if (button.dataset.open === 'toast') {
+          toast.classList.add('open');
+          setTimeout(() => toast.classList.remove('open'), 2400);
+        } else {
+          overlay.classList.add('open');
+        }
+      });
+    });
+    document.querySelectorAll('[data-close]').forEach((button) => button.addEventListener('click', () => overlay.classList.remove('open')));
+    overlay.addEventListener('click', (event) => {
+      if (event.target === overlay) overlay.classList.remove('open');
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') overlay.classList.remove('open');
+    });
+    document.querySelectorAll('[data-viewport]').forEach((button) => {
+      button.addEventListener('click', () => {
+        document.querySelectorAll('[data-viewport]').forEach((b) => b.classList.remove('active'));
+        button.classList.add('active');
+        const label = document.querySelector('.topbar .chip.primary');
+        if (button.dataset.viewport === 'mobile') {
+          label.textContent = 'window: compact';
+          document.documentElement.style.setProperty('--prototype-width', '390px');
+        } else if (button.dataset.viewport === 'tablet') {
+          label.textContent = 'window: medium';
+        } else {
+          label.textContent = 'window: expanded';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

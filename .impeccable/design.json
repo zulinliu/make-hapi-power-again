@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-10T00:00:00+08:00",
+  "title": "Design System: Hapi Power",
+  "extensions": {
+    "colorMeta": {
+      "electric-orange": {
+        "role": "primary",
+        "displayName": "Electric Orange",
+        "canonical": "oklch(68% 0.18 55)",
+        "usage": "Primary actions, selected navigation, active route, and focus accent."
+      },
+      "canvas": {
+        "role": "neutral",
+        "displayName": "Canvas Warm White",
+        "canonical": "oklch(99% 0.003 75)",
+        "usage": "Global app canvas."
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "oklch(13% 0.02 55)",
+        "usage": "Primary text and icons."
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Rare brand and empty-state scale only; not for app chrome."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Main product UI text with fixed rem sizing."
+      },
+      "mono": {
+        "displayName": "Geist Mono",
+        "purpose": "Paths, commands, code, terminal, model IDs, and token-like values."
+      }
+    },
+    "motion": {
+      "instant": "80ms",
+      "fast": "150ms",
+      "normal": "220ms",
+      "overlay": "220ms cubic-bezier(0.16, 1, 0.3, 1)",
+      "rule": "Motion conveys state, placement, or feedback only. Every animation has a reduced-motion fallback."
+    },
+    "adaptive": {
+      "windowClasses": {
+        "compact": "< 640px",
+        "medium": "640px-1023px",
+        "expanded": "1024px-1439px",
+        "large": "1440px-1919px",
+        "xlarge": ">= 1920px"
+      },
+      "inputModes": [
+        "touch",
+        "mouse",
+        "keyboard",
+        "hybrid"
+      ],
+      "rules": [
+        "Compact uses stack navigation and bottom command bars.",
+        "Expanded uses split panes and supporting inspectors.",
+        "Touch surfaces use 44px minimum targets.",
+        "Desktop can expose hover, keyboard shortcuts, right click, and resizable panes."
+      ]
+    },
+    "overlayTaxonomy": {
+      "dialog": "Blocking short form or decision.",
+      "alert": "Destructive or irreversible confirmation.",
+      "sidePanel": "Desktop inspector or secondary task.",
+      "sheet": "Compact task surface or selector.",
+      "popover": "Lightweight non-destructive disclosure.",
+      "contextMenu": "Pointer contextual action list with visible mobile alternate.",
+      "toast": "Transient feedback with optional action."
+    },
+    "doNotUse": [
+      "Page-local overlay systems",
+      "Decorative glass panels",
+      "Thick colored side stripes",
+      "Gradient text",
+      "Fluid app typography",
+      "Required hover-only or long-press-only actions",
+      "Arbitrary z-index values outside the semantic scale"
+    ]
+  }
+}

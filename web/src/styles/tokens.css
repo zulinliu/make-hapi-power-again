@@ -91,6 +91,30 @@
   --hp-ease-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
   --hp-ease-overlay: cubic-bezier(0.16, 1, 0.3, 1);
 
+  /* === 统一重构语义别名 === */
+  --hp-duration-feedback: 80ms;
+  --hp-duration-control: 150ms;
+  --hp-duration-overlay: 220ms;
+
+  /* === Z-index 语义层 === */
+  --hp-z-base: 0;
+  --hp-z-sticky: 20;
+  --hp-z-dropdown: 40;
+  --hp-z-overlay: 50;
+  --hp-z-modal: 60;
+  --hp-z-toast: 70;
+  --hp-z-tooltip: 80;
+
+  /* === Overlay === */
+  --hp-overlay-bg: oklch(0% 0 0 / 0.50);
+  --hp-overlay-blur: 4px;
+
+  /* === Safe area runtime defaults === */
+  --hp-safe-area-top: env(safe-area-inset-top, 0px);
+  --hp-safe-area-right: env(safe-area-inset-right, 0px);
+  --hp-safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --hp-safe-area-left: env(safe-area-inset-left, 0px);
+
   /* === 布局 === */
   --hp-sidebar-width: 260px;
   --hp-sidebar-collapsed-width: 56px;

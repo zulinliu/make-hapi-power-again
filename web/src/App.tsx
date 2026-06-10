@@ -29,6 +29,7 @@ import { ReconnectingBanner } from '@/components/ReconnectingBanner'
 import { LoadingState } from '@/components/LoadingState'
 import { ToastContainer } from '@/components/ToastContainer'
 import { ToastProvider, useToast } from '@/lib/toast-context'
+import { AdaptiveProvider } from '@/components/layout/AdaptiveContext'
 import type { SyncEvent } from '@/types/api'
 
 type ToastEvent = Extract<SyncEvent, { type: 'toast' }>
@@ -38,7 +39,9 @@ const REQUIRE_SERVER_URL = requireHubUrlForLogin()
 export function App() {
     return (
         <ToastProvider>
-            <AppInner />
+            <AdaptiveProvider>
+                <AppInner />
+            </AdaptiveProvider>
         </ToastProvider>
     )
 }
