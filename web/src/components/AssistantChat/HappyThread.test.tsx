@@ -228,7 +228,7 @@ describe('ConversationOutlinePanel', () => {
         const onSelect = vi.fn()
         renderPanel({ onSelect })
 
-        expect(screen.getByRole('complementary', { name: 'Session Loom' })).toBeInTheDocument()
+        expect(screen.getByRole('complementary', { name: 'Session Assets' })).toBeInTheDocument()
         fireEvent.click(screen.getByText('Implement the panel'))
 
         expect(onSelect).toHaveBeenCalledWith(outlineItems[0])

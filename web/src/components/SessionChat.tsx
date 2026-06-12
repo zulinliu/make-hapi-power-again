@@ -458,7 +458,7 @@ export function SessionChat(props: {
 
             {sessionInactive ? (
                 <div className="px-3 pt-3">
-                    <div className="mx-auto w-full max-w-content rounded-md bg-[var(--app-subtle-bg)] p-3 text-sm text-[var(--app-hint)]">
+                    <div className="mx-auto w-full max-w-content rounded-(--hp-radius-md) bg-(--hp-surface-1) p-3 text-sm text-(--hp-text-tertiary)">
                         Session is inactive. Sending will resume it automatically.
                     </div>
                 </div>
@@ -503,7 +503,7 @@ export function SessionChat(props: {
 
                     {codexCollaborationModeSupported && codexModelsState.error ? (
                         <div className="px-3 pb-2">
-                            <div className="mx-auto w-full max-w-content rounded-md bg-[var(--app-subtle-bg)] p-3 text-sm text-(--hp-danger)">
+                            <div className="mx-auto w-full max-w-content rounded-(--hp-radius-md) bg-(--hp-surface-1) p-3 text-sm text-(--hp-danger)">
                                 {t('session.codexModelsLoadFailed')}: {codexModelsState.error}
                             </div>
                         </div>

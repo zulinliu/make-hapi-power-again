@@ -36,6 +36,6 @@ describe('Session Loom i18n', () => {
     })
 
     it('uses the canonical branded title in Chinese', () => {
-        expect(zhCN['sessionLoom.title']).toBe('会话织锦')
+        expect(zhCN['sessionLoom.title']).toBe('会话资产')
     })
 })
