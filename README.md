@@ -35,7 +35,7 @@ Hapi Power turns agent chats into a controllable engineering loop: connect trust
 
 **Code on your phone.** Review AI agent changes with a swipe, monitor terminal output, and approve or reject file edits — all from your phone. No laptop needed.
 
-**A complete development toolkit in the browser.** Model Nexus, Guide Beam, Context Pulse, Git Atlas, Session Loom, full file operations, Monaco code editor, and terminal access. Everything you need to code with AI agents, in one place.
+**A complete development toolkit in the browser.** Models & Providers, Live Guidance, Context Monitor, Git Manager, Session Assets, full file operations, Monaco code editor, and terminal access. Everything you need to code with AI agents, in one place.
 
 **Deploy anywhere in seconds.** Single binary, zero dependencies. Self-host on any server, or run locally with one command.
 
@@ -43,11 +43,11 @@ Hapi Power turns agent chats into a controllable engineering loop: connect trust
 
 ## The Hapi Power Loop
 
-1. **Connect**: Model Nexus connects trusted model providers, checks health and capabilities, and routes each agent to the right model.
-2. **Drive**: Guide Beam lets you correct course while an agent is still working, without dropping the normal message queue.
-3. **Observe**: Context Pulse shows reliability risk at a glance with `Context: 40%` and clear diagnostics when usage is unavailable.
-4. **Trace**: Git Atlas maps branch state, agent changes, diffs, commit basket, and remote sync risk in one Git workspace.
-5. **Preserve**: Session Loom turns conversations into Markdown exports, decision records, drift checks, and reusable project memory.
+1. **Connect**: Models & Providers connects trusted model providers, checks health and capabilities, and routes each agent to the right model.
+2. **Drive**: Live Guidance lets you correct course while an agent is still working, without dropping the normal message queue.
+3. **Observe**: Context Monitor shows reliability risk at a glance with `Context: 40%` and clear diagnostics when usage is unavailable.
+4. **Trace**: Git Manager maps branch state, agent changes, diffs, commit basket, and remote sync risk in one Git workspace.
+5. **Preserve**: Session Assets turns conversations into Markdown exports, decision records, drift checks, and reusable project memory.
 
 ---
 
@@ -57,13 +57,13 @@ v0.18.0 is organized around five product modules. Each module has a clear entry 
 
 | Step | Module | Entry | What it does |
 |------|--------|-------|--------------|
-| Connect | **Model Nexus** | Settings -> Model Nexus | Adds provider governance, health checks, model discovery, capability cache, encrypted keys, and default agent route assignment. |
-| Drive | **Guide Beam** | Session composer while the agent is thinking | Sends urgent corrections as isolated guide messages when supported, otherwise falls back to the normal queue without dropping text. |
-| Observe | **Context Pulse** | Session status bar | Shows `Context: n%`, token/cache details, source diagnostics, and unavailable reasons instead of a silent zero or vague token string. |
-| Trace | **Git Atlas** | Session -> Git | Combines branch state, change map, diff preview, commit basket, sync center, and dangerous-operation confirmations in one Git page. |
-| Preserve | **Session Loom** | Session -> Loom | Builds server-side outlines, Markdown exports, background design synthesis, and downloadable session assets. |
+| Connect | **Models & Providers** | Settings -> Models & Providers | Adds provider governance, health checks, model discovery, capability cache, encrypted keys, and default agent route assignment. |
+| Drive | **Live Guidance** | Session composer while the agent is thinking | Sends urgent corrections as isolated guide messages when supported, otherwise falls back to the normal queue without dropping text. |
+| Observe | **Context Monitor** | Session status bar | Shows `Context: n%`, token/cache details, source diagnostics, and unavailable reasons instead of a silent zero or vague token string. |
+| Trace | **Git Manager** | Session -> Git | Combines branch state, change map, diff preview, commit basket, sync center, and dangerous-operation confirmations in one Git page. |
+| Preserve | **Session Assets** | Session -> Assets | Builds server-side outlines, Markdown exports, background design synthesis, and downloadable session assets. |
 
-Session Loom has two separate output paths: **Export** creates deterministic Markdown from stored conversation history, while **Synthesis** calls the current session agent's configured provider API model in the background to produce a reusable Design Plan Markdown file. Synthesis does not insert a message into the active chat.
+Session Assets has two separate output paths: **Export** creates deterministic Markdown from stored conversation history, while **Synthesis** calls the current session agent's configured provider API model in the background to produce a reusable Design Plan Markdown file. Synthesis does not insert a message into the active chat.
 
 See [v0.18.0 Five Modules](./docs/v0.18-five-modules.md) for detailed behavior, safety boundaries, and implementation references.
 
@@ -85,7 +85,7 @@ See [v0.18.0 Five Modules](./docs/v0.18-five-modules.md) for detailed behavior, 
     <td><img src="docs/assets/screenshot-new-session.png" alt="Multi-agent selection" width="360"></td>
   </tr>
   <tr>
-    <td align="center"><b>Settings & Model Nexus</b></td>
+    <td align="center"><b>Settings & Models & Providers</b></td>
     <td align="center"><b>Dark Mode</b></td>
   </tr>
   <tr>
