@@ -10,15 +10,9 @@ import { useTranslation } from '@/lib/use-translation'
 import { randomId } from '@/lib/randomId'
 import { TerminalView } from '@/components/Terminal/TerminalView'
 import { LoadingState } from '@/components/LoadingState'
-import { Button } from '@/components/ui/button'
+import { OverlaySurface } from '@/components/ui/OverlaySurface'
 import { isRemoteTerminalSupported } from '@/utils/terminalSupport'
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle
-} from '@/components/ui/dialog'
+
 function ConnectionIndicator(props: { status: 'idle' | 'connecting' | 'connected' | 'error' }) {
     const { t } = useTranslation()
     const isConnected = props.status === 'connected'
@@ -496,7 +490,7 @@ export default function TerminalPage() {
                 </div>
             </div>
 
-            <Dialog
+            <OverlaySurface
                 open={pasteDialogOpen}
                 onOpenChange={(open) => {
                     setPasteDialogOpen(open)
@@ -504,43 +498,41 @@ export default function TerminalPage() {
                         setManualPasteText('')
                     }
                 }}
-            >
-                <DialogContent className="max-w-md">
-                    <DialogHeader>
-                        <DialogTitle>{t('terminal.paste.fallbackTitle')}</DialogTitle>
-                        <DialogDescription>
-                            {t('terminal.paste.fallbackDescription')}
-                        </DialogDescription>
-                    </DialogHeader>
-                    <textarea
-                        value={manualPasteText}
-                        onChange={(event) => setManualPasteText(event.target.value)}
-                        placeholder={t('terminal.paste.placeholder')}
-                        className="mt-2 min-h-32 w-full resize-y rounded-(--hp-radius-sm) border border-(--hp-border) bg-(--hp-surface-0) p-2 text-sm focus:outline-none focus:ring-2 focus:ring-(--hp-primary)"
-                        autoCapitalize="none"
-                        autoCorrect="off"
-                    />
-                    <div className="mt-3 flex justify-end gap-2">
-                        <Button
+                kind="dialog"
+                title={t('terminal.paste.fallbackTitle')}
+                description={t('terminal.paste.fallbackDescription')}
+                footer={
+                    <>
+                        <button
                             type="button"
-                            variant="secondary"
+                            className="rounded-(--hp-radius-md) border border-(--hp-border) bg-(--hp-surface-0) px-3 py-2 text-sm font-medium text-(--hp-text-primary) hover:bg-(--hp-surface-1) min-h-[44px]"
                             onClick={() => {
                                 setPasteDialogOpen(false)
                                 setManualPasteText('')
                             }}
                         >
                             {t('button.cancel')}
-                        </Button>
-                        <Button
+                        </button>
+                        <button
                             type="button"
+                            className="rounded-(--hp-radius-md) bg-(--hp-primary) px-3 py-2 text-sm font-medium text-(--hp-primary-text) hover:bg-(--hp-primary-hover) disabled:opacity-50 min-h-[44px]"
                             onClick={handleManualPasteSubmit}
                             disabled={!manualPasteText.trim()}
                         >
                             {t('button.paste')}
-                        </Button>
-                    </div>
-                </DialogContent>
-            </Dialog>
+                        </button>
+                    </>
+                }
+            >
+                <textarea
+                    value={manualPasteText}
+                    onChange={(event) => setManualPasteText(event.target.value)}
+                    placeholder={t('terminal.paste.placeholder')}
+                    className="min-h-32 w-full resize-y rounded-(--hp-radius-md) border border-(--hp-border) bg-(--hp-surface-0) p-3 text-sm focus:outline-none focus:ring-2 focus:ring-(--hp-primary)"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                />
+            </OverlaySurface>
         </div>
     )
 }

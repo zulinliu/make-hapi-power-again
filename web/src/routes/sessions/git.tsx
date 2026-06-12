@@ -22,6 +22,7 @@ import { GitCloneDialog } from '@/components/git/GitCloneDialog'
 import { GitRemoteManager } from '@/components/git/GitRemoteManager'
 import { LoadingState } from '@/components/LoadingState'
 import { SubPageLayout } from '@/components/ui/SubPageLayout'
+import { loadingState, errorState } from '@/components/ui/DataBoundary'
 import { useSession } from '@/hooks/queries/useSession'
 
 type SyncPhase = 'idle' | 'running' | 'done' | 'error'
@@ -291,13 +292,44 @@ export default function GitPage() {
     void refreshDashboard()
   }
 
-  if (isLoading) return <LoadingState label={t('loading')} />
+  if (isLoading) {
+    const dataState = loadingState(t('loading'))
+    return (
+      <SubPageLayout
+        toolbar={
+          <div className="flex min-w-0 flex-col gap-1">
+            <div className="text-sm font-semibold text-(--hp-text-primary)">{t('gitAtlas.title')}</div>
+          </div>
+        }
+      >
+        <div className="p-3">
+          {dataState && (
+            <div className="flex flex-col gap-3">
+              {Array.from({ length: 8 }, (_, i) => (
+                <div key={i} className="h-4 animate-pulse rounded-(--hp-radius-md) bg-(--hp-surface-2)" style={{ width: `${[68, 94, 48, 82, 56, 72, 60, 88][i]}%` }} />
+              ))}
+            </div>
+          )}
+        </div>
+      </SubPageLayout>
+    )
+  }
   if (!session) {
     return (
-      <div className="p-4">
-        <p className="text-sm text-[var(--app-danger)]">{t('git.sessionNotFound')}</p>
-        <button onClick={() => navigate({ to: '/sessions' })} className="mt-2 text-xs underline">{t('git.backToSessions')}</button>
-      </div>
+      <SubPageLayout
+        toolbar={
+          <div className="flex min-w-0 flex-col gap-1">
+            <div className="text-sm font-semibold text-(--hp-text-primary)">{t('gitAtlas.title')}</div>
+          </div>
+        }
+      >
+        <div className="p-4">
+          <div className="rounded-(--hp-radius-md) border border-(--hp-danger) bg-(--hp-danger-subtle) px-3 py-2 text-sm text-(--hp-danger)">
+            {t('git.sessionNotFound')}
+          </div>
+          <button onClick={() => navigate({ to: '/sessions' })} className="mt-2 text-xs text-(--hp-primary) hover:underline">{t('git.backToSessions')}</button>
+        </div>
+      </SubPageLayout>
     )
   }
 
