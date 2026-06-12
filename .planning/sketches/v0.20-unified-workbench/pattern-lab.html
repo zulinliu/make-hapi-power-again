@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hapi Power v0.20.0 Pattern Lab — Unified Components</title>
+    <link rel="stylesheet" href="assets/prototype.css" />
+</head>
+<body>
+    <div class="power-grid" aria-hidden="true"></div>
+    <header class="topbar">
+        <div class="logo-lockup">
+            <div class="brand-mark">H</div>
+            <div>
+                <div class="logo-title">Pattern Lab</div>
+                <div class="logo-subtitle">v0.20.0 unified component matrix</div>
+            </div>
+        </div>
+        <div class="topbar-center">
+            <button class="search-box" data-open-overlay="command-palette"><span>检查组件、状态、动效</span><span class="row-spacer"></span><kbd>⌘K</kbd></button>
+            <span class="status-pill active"><span class="status-dot"></span>AA / 44px / focus return</span>
+        </div>
+        <div class="topbar-actions"><button class="btn secondary" data-open-overlay="motion-sheet">Motion</button><button class="btn primary" data-open-overlay="component-checklist">验收清单</button></div>
+    </header>
+
+    <main class="pattern-shell">
+        <section class="pattern-hero">
+            <div class="card brand">
+                <div class="module-kicker">Command Deck With Warm Power</div>
+                <h1 class="module-title" style="font-size:32px; margin-top:6px;">统一组件系统基准台</h1>
+                <p class="card-desc" style="max-width:70ch; margin-top:10px;">本页面不是营销稿，而是 v0.20.0 重构前的组件和交互验收矩阵：Layout、Overlay、Controls、State、Feature Shell 必须先在这里达成一致，再迁移生产页面。</p>
+                <div class="control-row" style="margin-top:16px;"><span class="chip active">OverlaySurface</span><span class="chip active">PageScaffold</span><span class="chip active">BottomCommandBar</span><span class="chip active">ActionMenu</span><span class="chip active">DataBoundary</span></div>
+            </div>
+            <div class="card">
+                <div class="card-title">交互测试入口</div>
+                <p class="card-desc">点击下方按钮检查统一 z-index、焦点恢复、移动映射和 Toast 层。</p>
+                <div class="control-row" style="margin-top:14px;"><button class="btn primary" data-open-overlay="dialog-demo">Dialog</button><button class="btn secondary" data-open-overlay="sidepanel-demo">Side Panel</button><button class="btn secondary" data-open-overlay="popover-demo">Popover</button><button class="btn danger" data-open-overlay="alert-demo">Alert</button><button class="btn secondary" data-toast="Toast viewport" data-toast-detail="Toast 不遮挡 bottom command bar 和 composer。">Toast</button></div>
+            </div>
+        </section>
+
+        <section class="component-grid">
+            <div class="card span-12">
+                <div class="card-title">Design Tokens</div>
+                <p class="card-desc">电光橙作为主行动信号；橙色预算不超过单屏 10%。状态色只表达语义，不做装饰。</p>
+            </div>
+            <div class="swatch span-3" style="background:var(--orange); color:var(--ink);">Electric Orange<br><code>oklch(68% .18 55)</code></div>
+            <div class="swatch span-3" style="background:var(--gold); color:var(--ink);">Amber Gold<br><code>support accent</code></div>
+            <div class="swatch span-3" style="background:var(--ink); color:white;">Ink<br><code>primary text</code></div>
+            <div class="swatch span-3" style="background:var(--surface-1); color:var(--ink);">Surface Stack<br><code>flat by default</code></div>
+
+            <div class="card span-6">
+                <div class="card-title">Controls / Buttons</div>
+                <p class="card-desc">每个控件覆盖 default、hover、focus、active、disabled、loading 和 error。</p>
+                <div class="control-row" style="margin-top:12px;"><button class="btn primary">Primary</button><button class="btn secondary">Secondary</button><button class="btn ghost">Ghost</button><button class="btn danger">Danger</button><button class="btn secondary" disabled>Disabled</button><button class="icon-btn" aria-label="Icon button">⚙</button></div>
+                <div class="control-row" style="margin-top:12px;"><span class="chip active">Selected</span><span class="chip success">Success</span><span class="chip warn">Warning</span><span class="chip danger">Danger</span><span class="chip info">Info</span></div>
+            </div>
+
+            <div class="card span-6">
+                <div class="card-title">Tabs / Segmented Control / Toolbar</div>
+                <div class="toolbar" style="margin: 12px 0 0; border:1px solid var(--line); border-radius:14px;">
+                    <div class="tabs"><button class="tab active">Chat</button><button class="tab">Files</button><button class="tab">Git</button></div>
+                    <div class="toolbar-group"><button class="btn secondary">Filter</button><button class="btn primary">Run</button></div>
+                </div>
+                <div class="segmented" style="margin-top:12px;"><button class="segment-btn active">桌面</button><button class="segment-btn">移动</button><button class="segment-btn">Hybrid</button></div>
+            </div>
+
+            <div class="card span-7">
+                <div class="card-title">Overlay Mapping Matrix</div>
+                <table class="state-table">
+                    <thead><tr><th>用户任务</th><th>Desktop</th><th>Mobile</th><th>规则</th></tr></thead>
+                    <tbody>
+                        <tr><td>短表单 / 新建会话</td><td>Dialog</td><td>Bottom Sheet</td><td>焦点陷阱 + 关闭后返回</td></tr>
+                        <tr><td>持续辅助 / 实时引导</td><td>Side Panel</td><td>Full-screen Sheet</td><td>不阻断主任务</td></tr>
+                        <tr><td>文件操作菜单</td><td>Popover / Context Menu</td><td>Action Sheet</td><td>移动端必须有可见按钮入口</td></tr>
+                        <tr><td>危险同步 / 删除</td><td>Alert Dialog</td><td>Confirm Sheet</td><td>原因、影响、撤销路径</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card span-5">
+                <div class="card-title">Z-index Semantic Layers</div>
+                <div class="timeline" style="margin-top:12px;">
+                    <div class="timeline-item"><span class="timeline-dot"></span><div class="timeline-copy"><strong>Shell</strong> topbar / sidebar / inspector.</div></div>
+                    <div class="timeline-item"><span class="timeline-dot"></span><div class="timeline-copy"><strong>Sticky</strong> toolbar / bottom command.</div></div>
+                    <div class="timeline-item"><span class="timeline-dot"></span><div class="timeline-copy"><strong>Overlay</strong> dialog / side panel / sheet.</div></div>
+                    <div class="timeline-item"><span class="timeline-dot"></span><div class="timeline-copy"><strong>Toast</strong> topmost feedback viewport.</div></div>
+                </div>
+            </div>
+
+            <div class="card span-4">
+                <div class="card-title">Loading</div>
+                <div class="skeleton" style="height:18px; width:68%; margin-top:14px;"></div>
+                <div class="skeleton" style="height:18px; width:94%; margin-top:10px;"></div>
+                <div class="skeleton" style="height:18px; width:48%; margin-top:10px;"></div>
+                <p class="card-desc" style="margin-top:14px;">优先 skeleton，不孤立展示 spinner。</p>
+            </div>
+
+            <div class="card span-4">
+                <div class="card-title">Empty State</div>
+                <div class="empty-illustration" style="margin-top:12px;"></div>
+                <p class="card-desc" style="margin-top:12px;">空状态必须给出下一步动作。</p>
+                <button class="btn primary" style="width:100%;">创建第一个资产</button>
+            </div>
+
+            <div class="card span-4">
+                <div class="card-title">Error / Disabled Reason</div>
+                <div class="banner" style="border-color:oklch(60% .20 22 / .3); background:oklch(95% .045 25); color:oklch(36% .12 25);"><span>Provider health check failed.</span></div>
+                <p class="card-desc" style="margin-top:12px;">说明原因、影响和恢复路径。</p>
+                <button class="btn secondary" disabled title="Hub 离线时不可同步">同步不可用</button>
+            </div>
+
+            <div class="card span-6">
+                <div class="card-title">Data Rows / Action Menu</div>
+                <div class="pattern-row-with-action"><button class="data-row active"><span>▦</span><span><span class="row-title">Files / 文件管理</span><span class="row-sub">rename target for Browse</span></span></button><button class="icon-btn compact" data-open-overlay="action-menu-demo" aria-label="More actions for Files">⋯</button></div>
+                <button class="data-row"><span>⑂</span><span><span class="row-title">Git Manager</span><span class="row-sub">commit basket, sync risk</span></span><span class="row-spacer chip warn">risk</span></button>
+                <button class="data-row"><span>◎</span><span><span class="row-title">Models & Providers</span><span class="row-sub">provider health, model matrix</span></span><span class="row-spacer chip success">ok</span></button>
+            </div>
+
+            <div class="card span-6">
+                <div class="card-title">Code / Diff / Terminal</div>
+                <div class="diff-block"><span class="code-line del">- Model Nexus / 模型星桥</span>
+<span class="code-line add">+ Models & Providers / 模型与供应商</span>
+<span class="code-line del">- Session Loom / 会话织锦</span>
+<span class="code-line add">+ Session Assets / 会话资产</span></div>
+            </div>
+
+            <div class="card span-12">
+                <div class="card-title">First Component API Acceptance</div>
+                <table class="state-table">
+                    <thead><tr><th>组件</th><th>API 风格</th><th>必须内建</th><th>禁止绕过</th></tr></thead>
+                    <tbody>
+                        <tr><td>OverlaySurface</td><td>slot-driven shell</td><td>portal、focus trap、focus return、z-index、motion</td><td>页面自建 fixed z-50</td></tr>
+                        <tr><td>PageScaffold</td><td>slot-driven layout</td><td>header、toolbar、content、footer、inspector、state</td><td>页面重复拼 toolbar/state</td></tr>
+                        <tr><td>BottomCommandBar</td><td>data-driven actions</td><td>safe-area、keyboard avoidance、44px targets</td><td>移动端隐藏主操作</td></tr>
+                        <tr><td>ActionMenu</td><td>data-driven menu</td><td>desktop popover/context + mobile action sheet</td><td>hover/right-click 作为唯一入口</td></tr>
+                        <tr><td>DataBoundary</td><td>slot-driven fallback</td><td>loading、empty、error、offline、permission denied</td><td>孤立 spinner / 无恢复路径</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <div class="overlay-root" id="command-palette" data-open="false" aria-hidden="true"><div class="scrim"></div><section class="overlay-surface overlay-dialog" role="dialog" aria-modal="true" aria-label="Pattern Commands"><div class="overlay-head"><h2 class="overlay-title">Pattern Commands</h2><button class="icon-btn" data-close-overlay aria-label="关闭">×</button></div><div class="overlay-body"><button class="data-row" data-open-overlay="dialog-demo">Open Dialog demo</button><button class="data-row" data-open-overlay="sidepanel-demo">Open Side Panel demo</button><button class="data-row" data-toast="Reduced motion" data-toast-detail="实际实现需读取 prefers-reduced-motion。">Test motion toast</button></div></section></div>
+    <div class="overlay-root" id="dialog-demo" data-open="false" aria-hidden="true"><div class="scrim"></div><section class="overlay-surface overlay-dialog" role="dialog" aria-modal="true" aria-label="Dialog Demo"><div class="overlay-head"><h2 class="overlay-title">Dialog Demo</h2><button class="icon-btn" data-close-overlay aria-label="关闭">×</button></div><div class="overlay-body"><p>用于短表单、轻量配置和阻断性较低的确认。移动端映射到 bottom sheet。</p><input data-autofocus placeholder="Focus starts here" style="width:100%; height:44px; border:1px solid var(--line); border-radius:12px; padding:0 12px;" /></div><div class="overlay-foot"><button class="btn secondary" data-close-overlay>取消</button><button class="btn primary" data-toast="Dialog saved" data-toast-detail="Focus will return to trigger.">保存</button></div></section></div>
+    <div class="overlay-root" id="sidepanel-demo" data-open="false" aria-hidden="true"><div class="scrim"></div><section class="overlay-surface overlay-panel" role="dialog" aria-modal="true" aria-label="Side Panel Demo"><div class="overlay-head"><h2 class="overlay-title">Side Panel Demo</h2><button class="icon-btn" data-close-overlay aria-label="关闭">×</button></div><div class="overlay-body"><div class="card brand"><div class="card-title">持续辅助任务</div><p class="card-desc">比如实时引导、上下文监控、Git 提交篮、文件详情。</p></div><div class="timeline" style="margin-top:12px;"><div class="timeline-item"><span class="timeline-dot"></span><div class="timeline-copy"><strong>Open</strong> slides from right.</div></div><div class="timeline-item"><span class="timeline-dot"></span><div class="timeline-copy"><strong>Close</strong> restores focus.</div></div></div></div></section></div>
+    <div class="overlay-root" id="popover-demo" data-open="false" aria-hidden="true"><div class="scrim"></div><section class="overlay-surface overlay-popover" role="dialog" aria-modal="true" aria-label="Popover Demo"><div class="overlay-head"><h2 class="overlay-title">Popover Demo</h2><button class="icon-btn" data-close-overlay aria-label="关闭">×</button></div><div class="overlay-body"><button class="data-row">复制路径</button><button class="data-row">加入上下文</button><button class="data-row">在 Git 中查看</button></div></section></div>
+    <div class="overlay-root" id="alert-demo" data-open="false" aria-hidden="true"><div class="scrim"></div><section class="overlay-surface overlay-dialog" role="alertdialog" aria-modal="true" aria-label="Dangerous Action"><div class="overlay-head"><h2 class="overlay-title">Dangerous Action</h2><button class="icon-btn" data-close-overlay aria-label="关闭">×</button></div><div class="overlay-body"><p>危险动作必须说明原因、影响、是否可撤销，并使用统一 ConfirmAction。</p></div><div class="overlay-foot"><button class="btn secondary" data-close-overlay>取消</button><button class="btn danger" data-toast="危险动作已模拟" data-toast-detail="真实实现需二次校验。">确认</button></div></section></div>
+    <div class="overlay-root" id="action-menu-demo" data-open="false" aria-hidden="true"><div class="scrim"></div><section class="overlay-surface overlay-popover" role="dialog" aria-modal="true" aria-label="ActionMenu"><div class="overlay-head"><h2 class="overlay-title">ActionMenu</h2><button class="icon-btn" data-close-overlay aria-label="关闭">×</button></div><div class="overlay-body"><button class="data-row">Open</button><button class="data-row">Rename</button><button class="data-row">Move</button><button class="data-row">Delete…</button></div></section></div>
+    <div class="overlay-root" id="motion-sheet" data-open="false" aria-hidden="true"><div class="scrim"></div><section class="overlay-surface overlay-dialog" role="dialog" aria-modal="true" aria-label="Motion Rules"><div class="overlay-head"><h2 class="overlay-title">Motion Rules</h2><button class="icon-btn" data-close-overlay aria-label="关闭">×</button></div><div class="overlay-body"><table class="state-table"><tr><th>场景</th><th>动效</th></tr><tr><td>页面切换</td><td>120-220ms subtle fade/translate</td></tr><tr><td>Dialog</td><td>scale + fade, no bounce</td></tr><tr><td>Side Panel</td><td>x-axis slide</td></tr><tr><td>Bottom Sheet</td><td>y-axis rise, respects safe-area</td></tr><tr><td>Reduced motion</td><td>almost instant, no spatial travel</td></tr></table></div></section></div>
+    <div class="overlay-root" id="component-checklist" data-open="false" aria-hidden="true"><div class="scrim"></div><section class="overlay-surface overlay-panel" role="dialog" aria-modal="true" aria-label="验收清单"><div class="overlay-head"><h2 class="overlay-title">验收清单</h2><button class="icon-btn" data-close-overlay aria-label="关闭">×</button></div><div class="overlay-body"><div class="timeline"><div class="timeline-item"><span class="timeline-dot"></span><div class="timeline-copy"><strong>Keyboard</strong> Tab order, Escape close, focus return.</div></div><div class="timeline-item"><span class="timeline-dot"></span><div class="timeline-copy"><strong>Touch</strong> all visible controls at least 44px.</div></div><div class="timeline-item"><span class="timeline-dot"></span><div class="timeline-copy"><strong>Viewport</strong> no horizontal body overflow.</div></div><div class="timeline-item"><span class="timeline-dot"></span><div class="timeline-copy"><strong>Overlay</strong> no collision with composer or bottom nav.</div></div><div class="timeline-item"><span class="timeline-dot"></span><div class="timeline-copy"><strong>Copy</strong> zh-CN / en parity for user-facing text.</div></div></div></div></section></div>
+
+    <div class="toast-stack" aria-live="polite" aria-atomic="false"></div>
+    <script src="assets/prototype.js"></script>
+</body>
+</html>

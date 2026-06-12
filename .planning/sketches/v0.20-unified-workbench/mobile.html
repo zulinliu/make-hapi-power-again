@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Hapi Power v0.20.0 Mobile Prototype — Touch Task Flow</title>
+    <link rel="stylesheet" href="assets/prototype.css" />
+</head>
+<body>
+    <div class="power-grid" aria-hidden="true"></div>
+    <main class="mobile-device prototype-frame" aria-label="Mobile touch prototype">
+        <div class="mobile-status"><span>9:41</span><span>Hapi PWA</span><span>100%</span></div>
+        <header class="mobile-topbar">
+            <div class="logo-lockup">
+                <div class="brand-mark" style="width:32px;height:32px;">H</div>
+                <div>
+                    <div class="logo-title" data-mobile-title>聊天</div>
+                    <div class="logo-subtitle">/home/tester/project</div>
+                </div>
+            </div>
+            <div class="toolbar-group">
+                <button class="icon-btn" data-open-overlay="mobile-search" aria-label="搜索">⌕</button>
+                <button class="icon-btn" data-open-overlay="mobile-more" aria-label="更多">⋯</button>
+            </div>
+        </header>
+
+        <section class="mobile-content">
+            <article class="mobile-page active" data-mobile-page="chat">
+                <div class="banner" style="margin-bottom:12px;"><span>移动端不是桌面缩小版：关键操作固定在底部命令栏。</span></div>
+                <div class="mobile-card brand">
+                    <div class="card-title">Agent 正在执行</div>
+                    <p class="card-desc">你可以在移动端用可见按钮纠偏，不依赖 hover 或右键。</p>
+                    <div class="progress" style="margin: 12px 0 8px;"><span style="width:68%"></span></div>
+                    <div class="control-row"><span class="chip warn">上下文 68%</span><span class="chip success">Hub 在线</span></div>
+                </div>
+                <div class="message" style="grid-template-columns: 32px minmax(0,1fr); margin-bottom: 12px;">
+                    <div class="avatar agent">H</div>
+                    <div class="bubble">
+                        <div class="bubble-title"><span>移动任务流建议</span><span class="chip active">touch</span></div>
+                        <p>Git 拆成“概览 → 文件 → Diff → 提交篮 → 同步”，Files 使用全屏 Sheet 承载移动、上传和删除。</p>
+                    </div>
+                </div>
+                <div class="message" style="grid-template-columns: 32px minmax(0,1fr); margin-bottom: 12px;">
+                    <div class="avatar">U</div>
+                    <div class="bubble user">确认采用聊天 / 文件 / Git / 终端 / 资产底栏。</div>
+                </div>
+                <button class="touch-btn" data-keyboard-toggle style="width:100%;">⌨︎ 预览键盘弹起避让</button>
+            </article>
+
+            <article class="mobile-page" data-mobile-page="files">
+                <div class="mobile-card brand">
+                    <div class="card-title">Files / 文件</div>
+                    <p class="card-desc">Browse 已彻底改名。移动端以任务为主，长任务使用全屏 Sheet，短任务使用底部 Sheet。</p>
+                </div>
+                <div class="mobile-card">
+                    <div class="control-row" style="margin-bottom: 10px;"><button class="touch-btn primary" data-open-overlay="mobile-upload">上传</button><button class="touch-btn" data-open-overlay="mobile-file-move">移动</button><button class="touch-btn" data-open-overlay="mobile-file-actions">更多</button></div>
+                    <button class="data-row active"><span>▾</span><span><span class="row-title">web/src/components</span><span class="row-sub">84 files · React UI</span></span></button>
+                    <button class="data-row"><span>TSX</span><span><span class="row-title">OverlaySurface.tsx</span><span class="row-sub">shared overlay shell</span></span><span class="row-spacer chip success">new</span></button>
+                    <button class="data-row"><span>TSX</span><span><span class="row-title">PageScaffold.tsx</span><span class="row-sub">header / toolbar / inspector</span></span></button>
+                    <button class="data-row"><span>CSS</span><span><span class="row-title">tokens.css</span><span class="row-sub">electric orange, spacing, z-index</span></span></button>
+                </div>
+                <div class="mobile-card">
+                    <div class="card-title">文件预览</div>
+                    <div class="code-block" style="font-size:11px;">type OverlaySurfaceKind =
+  | 'dialog'
+  | 'side-panel'
+  | 'bottom-sheet'
+  | 'action-sheet';</div>
+                </div>
+            </article>
+
+            <article class="mobile-page" data-mobile-page="git">
+                <div class="mobile-card brand">
+                    <div class="card-title">Git 管理</div>
+                    <p class="card-desc">移动端使用分步流，避免把桌面 Diff 舱硬缩小。</p>
+                    <div class="control-row" style="margin-top:10px;"><span class="chip warn">12 changed</span><span class="chip danger">1 risky sync</span></div>
+                </div>
+                <div class="segmented" data-segments role="tablist" aria-label="Git 移动端分步流" style="width:100%; margin-bottom:12px;">
+                    <button class="segment-btn git-flow-step git-step-tab active" data-step="1" role="tab" aria-selected="true" style="flex:1;">概览</button>
+                    <button class="segment-btn git-flow-step git-step-tab" data-step="2" role="tab" aria-selected="false" style="flex:1;">文件</button>
+                    <button class="segment-btn git-flow-step git-step-tab" data-step="3" role="tab" aria-selected="false" style="flex:1;">Diff</button>
+                    <button class="segment-btn git-flow-step git-step-tab" data-step="4" role="tab" aria-selected="false" style="flex:1;">提交</button>
+                </div>
+                <div data-git-step="1">
+                    <div class="grid-2">
+                        <div class="mobile-card"><div class="metric">12</div><div class="metric-label">changed files</div></div>
+                        <div class="mobile-card"><div class="metric">3</div><div class="metric-label">staged</div></div>
+                    </div>
+                    <div class="mobile-card">
+                        <div class="card-title">推荐动作</div>
+                        <p class="card-desc">先查看命名迁移 Diff，再加入提交篮。危险同步必须确认。</p>
+                        <button class="touch-btn primary git-flow-step" data-step="2" style="width:100%;">查看变更文件</button>
+                    </div>
+                </div>
+                <div data-git-step="2" hidden>
+                    <div class="mobile-card">
+                        <button class="data-row active"><span class="chip warn">M</span><span><span class="row-title">web/src/router.tsx</span><span class="row-sub">Browse → Files labels</span></span></button>
+                        <button class="data-row"><span class="chip success">A</span><span><span class="row-title">OverlaySurface.tsx</span><span class="row-sub">new component</span></span></button>
+                        <button class="data-row"><span class="chip success">A</span><span><span class="row-title">BottomCommandBar.tsx</span><span class="row-sub">mobile actions</span></span></button>
+                        <button class="touch-btn primary git-flow-step" data-step="3" style="width:100%; margin-top:10px;">查看 Diff</button>
+                    </div>
+                </div>
+                <div data-git-step="3" hidden>
+                    <div class="mobile-card">
+                        <div class="diff-block" style="font-size:11px;"><span class="code-line del">- Browse / 浏览</span>
+<span class="code-line add">+ Files / 文件</span>
+<span class="code-line del">- Git Atlas</span>
+<span class="code-line add">+ Git Manager</span></div>
+                        <div class="control-row" style="margin-top:10px;"><button class="touch-btn" data-toast="已复制 hunk" data-toast-detail="Diff 片段已复制。">复制</button><button class="touch-btn primary git-flow-step" data-step="4">加入提交篮</button></div>
+                    </div>
+                </div>
+                <div data-git-step="4" hidden>
+                    <div class="mobile-card">
+                        <div class="card-title">提交篮</div>
+                        <p class="card-desc">3 files staged. Commit message 遵守 GIT-STANDARDS，禁止第三方品牌残留。</p>
+                        <textarea style="width:100%; min-height:86px; border:1px solid var(--line); border-radius:14px; padding:12px;">prototype: 新增 v0.20.0 移动端任务流原型</textarea>
+                        <button class="touch-btn primary" data-open-overlay="mobile-sync-confirm" style="width:100%; margin-top:10px;">提交并同步</button>
+                    </div>
+                </div>
+            </article>
+
+            <article class="mobile-page" data-mobile-page="terminal">
+                <div class="mobile-card brand">
+                    <div class="card-title">Terminal</div>
+                    <p class="card-desc">移动端提供 quick keys、粘贴 fallback、运行态可见。</p>
+                </div>
+                <div class="terminal-screen" style="min-height: 260px;">test-user@hapi:/home/tester/project$ bun run test:web
+watch mode ready
+
+Press Ctrl+C to stop.</div>
+                <div class="mobile-card">
+                    <div class="card-title">Quick Keys</div>
+                    <div class="control-row"><button class="touch-btn">Ctrl</button><button class="touch-btn">Esc</button><button class="touch-btn">Tab</button><button class="touch-btn">↑</button><button class="touch-btn">↓</button><button class="touch-btn" data-toast="已粘贴" data-toast-detail="命令通过移动 fallback 写入终端。">Paste</button></div>
+                </div>
+            </article>
+
+            <article class="mobile-page" data-mobile-page="assets">
+                <div class="mobile-card brand">
+                    <div class="card-title">Session Assets / 会话资产</div>
+                    <p class="card-desc">保留一级入口。摘要、导出、决策、项目记忆从这里沉淀。</p>
+                </div>
+                <div class="mobile-card">
+                    <button class="data-row active"><span>◇</span><span><span class="row-title">v0.20.0 设计方案</span><span class="row-sub">统一工作台与多端体验</span></span></button>
+                    <button class="data-row"><span>□</span><span><span class="row-title">命名迁移表</span><span class="row-sub">Files, Git Manager, Models & Providers</span></span></button>
+                    <button class="data-row"><span>↧</span><span><span class="row-title">发布截图清单</span><span class="row-sub">hero, mobile, OG, README</span></span></button>
+                    <button class="touch-btn primary" data-open-overlay="mobile-export" style="width:100%; margin-top:10px;">导出资产</button>
+                </div>
+            </article>
+        </section>
+
+        <div class="bottom-command" aria-label="Mobile command bar">
+            <div>
+                <div style="font-weight:760; font-size:13px;">当前任务</div>
+                <div style="font-size:12px; color:var(--ink-3);">可见主操作 · 安全区避让</div>
+            </div>
+            <button class="touch-btn primary" data-open-overlay="mobile-guidance">实时引导</button>
+        </div>
+
+        <nav class="mobile-bottom-nav" data-mobile-tabs role="tablist" aria-label="Mobile primary navigation">
+            <button class="mobile-tab active" data-mobile-tab="chat" role="tab" aria-selected="true"><span class="ico">◐</span><span>聊天</span></button>
+            <button class="mobile-tab" data-mobile-tab="files" role="tab" aria-selected="false"><span class="ico">▦</span><span>文件</span></button>
+            <button class="mobile-tab" data-mobile-tab="git" role="tab" aria-selected="false"><span class="ico">⑂</span><span>Git</span></button>
+            <button class="mobile-tab" data-mobile-tab="terminal" role="tab" aria-selected="false"><span class="ico">▣</span><span>终端</span></button>
+            <button class="mobile-tab" data-mobile-tab="assets" role="tab" aria-selected="false"><span class="ico">◇</span><span>资产</span></button>
+        </nav>
+    </main>
+
+    <div class="overlay-root mobile-sheet" id="mobile-more" data-open="false" aria-hidden="true">
+        <div class="scrim"></div>
+        <section class="overlay-surface overlay-sheet" role="dialog" aria-modal="true" aria-labelledby="more-title">
+            <div class="overlay-body">
+                <div class="sheet-grabber"></div>
+                <button class="icon-btn sheet-close" data-close-overlay aria-label="关闭">×</button>
+                <h2 class="overlay-title" id="more-title">更多</h2>
+                <p class="card-desc">移动底栏保持 5 个一级任务，其余入口进入 More Sheet。</p>
+                <button class="data-row" data-open-overlay="mobile-models"><span>◎</span><span><span class="row-title">Models & Providers</span><span class="row-sub">模型与供应商</span></span></button>
+                <button class="data-row"><span>⬡</span><span><span class="row-title">Extensions</span><span class="row-sub">Skills / Plugins</span></span></button>
+                <button class="data-row"><span>⚙</span><span><span class="row-title">Settings</span><span class="row-sub">外观、语言、通知、安全</span></span></button>
+                <button class="data-row"><span>ⓘ</span><span><span class="row-title">Open-source trust</span><span class="row-sub">License, Security, Contributing</span></span></button>
+            </div>
+        </section>
+    </div>
+
+    <div class="overlay-root mobile-sheet" id="mobile-guidance" data-open="false" aria-hidden="true">
+        <div class="scrim"></div>
+        <section class="overlay-surface overlay-sheet" role="dialog" aria-modal="true" aria-labelledby="guide-mobile-title">
+            <div class="overlay-body">
+                <div class="sheet-grabber"></div>
+                <button class="icon-btn sheet-close" data-close-overlay aria-label="关闭">×</button>
+                <h2 class="overlay-title" id="guide-mobile-title">Live Guidance / 实时引导</h2>
+                <p class="card-desc">移动端用 Bottom Sheet，主操作按钮固定且不被键盘遮挡。</p>
+                <textarea style="width:100%; min-height:116px; border:1px solid var(--line); border-radius:14px; padding:12px;" data-autofocus>请优先完成 Files 命名迁移，并保留移动端五栏。</textarea>
+                <div class="grid-2" style="margin-top: 12px;"><button class="touch-btn" data-toast="已排队" data-toast-detail="引导将在当前步骤后发送。">排队</button><button class="touch-btn primary" data-toast="已立即引导" data-toast-detail="Agent 将收到移动端纠偏。">立即发送</button></div>
+            </div>
+        </section>
+    </div>
+
+    <div class="overlay-root mobile-sheet" id="mobile-models" data-open="false" aria-hidden="true">
+        <div class="scrim"></div>
+        <section class="overlay-surface overlay-sheet" role="dialog" aria-modal="true" aria-label="Models &amp; Providers">
+            <div class="overlay-body">
+                <div class="sheet-grabber"></div>
+                <button class="icon-btn sheet-close" data-close-overlay aria-label="关闭">×</button>
+                <h2 class="overlay-title">Models & Providers</h2>
+                <div class="mobile-card"><div class="card-title">Cloud Gateway</div><p class="card-desc">Healthy · code high · image yes</p><span class="chip success">OK</span></div>
+                <div class="mobile-card"><div class="card-title">Local Model</div><p class="card-desc">Slow · code medium · image no</p><span class="chip warn">Degraded</span></div>
+            </div>
+        </section>
+    </div>
+
+    <div class="overlay-root mobile-sheet" id="mobile-upload" data-open="false" aria-hidden="true"><div class="scrim"></div><section class="overlay-surface overlay-sheet" role="dialog" aria-modal="true" aria-label="上传文件"><div class="overlay-body"><div class="sheet-grabber"></div><button class="icon-btn sheet-close" data-close-overlay aria-label="关闭">×</button><h2 class="overlay-title">上传文件</h2><div class="empty-illustration" style="margin:12px 0;"></div><p class="card-desc">支持图片、文本和补丁文件。移动端上传会显示进度与失败恢复。</p><button class="touch-btn primary" style="width:100%;" data-toast="上传已开始" data-toast-detail="文件将进入当前会话资产。">选择文件</button></div></section></div>
+    <div class="overlay-root mobile-sheet" id="mobile-file-move" data-open="false" aria-hidden="true"><div class="scrim"></div><section class="overlay-surface overlay-sheet" role="dialog" aria-modal="true" aria-label="移动文件"><div class="overlay-body"><div class="sheet-grabber"></div><button class="icon-btn sheet-close" data-close-overlay aria-label="关闭">×</button><h2 class="overlay-title">移动文件</h2><button class="data-row active">web/src/components</button><button class="data-row">web/src/routes/sessions</button><button class="data-row">website/src</button><button class="touch-btn primary" style="width:100%; margin-top:10px;" data-toast="已移动" data-toast-detail="Git 管理中可撤销。">确认移动</button></div></section></div>
+    <div class="overlay-root mobile-sheet" id="mobile-file-actions" data-open="false" aria-hidden="true"><div class="scrim"></div><section class="overlay-surface overlay-sheet" role="dialog" aria-modal="true" aria-label="文件操作"><div class="overlay-body"><div class="sheet-grabber"></div><button class="icon-btn sheet-close" data-close-overlay aria-label="关闭">×</button><h2 class="overlay-title">文件操作</h2><button class="data-row" data-toast="已复制路径" data-toast-detail="/home/tester/project/web/src/components/OverlaySurface.tsx">复制路径</button><button class="data-row" data-toast="已加入上下文" data-toast-detail="文件将附加到 Chat。">加入上下文</button><button class="data-row" data-open-overlay="mobile-delete-confirm">删除…</button></div></section></div>
+    <div class="overlay-root mobile-sheet" id="mobile-delete-confirm" data-open="false" aria-hidden="true"><div class="scrim"></div><section class="overlay-surface overlay-sheet" role="alertdialog" aria-modal="true" aria-label="删除文件？"><div class="overlay-body"><div class="sheet-grabber"></div><button class="icon-btn sheet-close" data-close-overlay aria-label="关闭">×</button><h2 class="overlay-title">删除文件？</h2><p class="card-desc">删除会进入 Git 变更列表，提交前可撤销。</p><div class="grid-2"><button class="touch-btn" data-close-overlay>取消</button><button class="touch-btn primary" data-toast="文件已删除" data-toast-detail="变更已加入 Git 管理。">删除</button></div></div></section></div>
+    <div class="overlay-root mobile-sheet" id="mobile-sync-confirm" data-open="false" aria-hidden="true"><div class="scrim"></div><section class="overlay-surface overlay-sheet" role="alertdialog" aria-modal="true" aria-label="确认提交并同步？"><div class="overlay-body"><div class="sheet-grabber"></div><button class="icon-btn sheet-close" data-close-overlay aria-label="关闭">×</button><h2 class="overlay-title">确认提交并同步？</h2><p class="card-desc">将提交 3 个文件并同步到远端。已检查作者、分支和敏感信息规则。</p><div class="grid-2"><button class="touch-btn" data-close-overlay>取消</button><button class="touch-btn primary" data-toast="已提交并同步" data-toast-detail="Git 状态将在底栏徽标更新。">确认同步</button></div></div></section></div>
+    <div class="overlay-root mobile-sheet" id="mobile-export" data-open="false" aria-hidden="true"><div class="scrim"></div><section class="overlay-surface overlay-sheet" role="dialog" aria-modal="true" aria-label="导出会话资产"><div class="overlay-body"><div class="sheet-grabber"></div><button class="icon-btn sheet-close" data-close-overlay aria-label="关闭">×</button><h2 class="overlay-title">导出会话资产</h2><div class="control-row"><span class="chip active">Markdown</span><span class="chip active">PDF</span><span class="chip">Screenshots</span></div><p class="card-desc" style="margin-top:12px;">移动端提供分享 fallback；导出前脱敏真实路径和密钥。</p><button class="touch-btn primary" style="width:100%;" data-toast="资产已导出" data-toast-detail="已调用系统分享面板 fallback。">导出</button></div></section></div>
+    <div class="overlay-root mobile-sheet" id="mobile-search" data-open="false" aria-hidden="true"><div class="scrim"></div><section class="overlay-surface overlay-sheet" role="dialog" aria-modal="true" aria-label="搜索"><div class="overlay-body"><div class="sheet-grabber"></div><button class="icon-btn sheet-close" data-close-overlay aria-label="关闭">×</button><h2 class="overlay-title">搜索</h2><div class="search-box" style="width:100%; max-width:none;"><span>搜索会话、文件、命令</span></div><button class="data-row">Files: OverlaySurface.tsx</button><button class="data-row">Git: Browse → Files</button><button class="data-row">Assets: v0.20.0 设计方案</button></div></section></div>
+
+    <div class="toast-stack" aria-live="polite" aria-atomic="false"></div>
+    <script src="assets/prototype.js"></script>
+</body>
+</html>

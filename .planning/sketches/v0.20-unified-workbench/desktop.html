@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hapi Power v0.20.0 Desktop Prototype — Unified Workbench</title>
+    <link rel="stylesheet" href="assets/prototype.css" />
+</head>
+<body>
+    <div class="power-grid" aria-hidden="true"></div>
+    <div class="prototype-frame">
+        <header class="topbar">
+            <div class="logo-lockup" aria-label="Hapi Power">
+                <div class="brand-mark">H</div>
+                <div>
+                    <div class="logo-title">Hapi Power</div>
+                    <div class="logo-subtitle">Command Deck With Warm Power</div>
+                </div>
+            </div>
+            <div class="topbar-center">
+                <div class="status-pill active"><span class="status-dot"></span>Hub 已连接</div>
+                <div class="status-pill"><span class="status-dot warn"></span>上下文 68%</div>
+                <button class="search-box" data-open-overlay="command-palette" aria-label="打开命令面板">
+                    <span>搜索会话、文件、命令</span><span class="row-spacer"></span><kbd>⌘K</kbd>
+                </button>
+            </div>
+            <div class="topbar-actions">
+                <button class="btn secondary hide-sm" data-open-overlay="live-guidance">实时引导</button>
+                <button class="btn primary hide-sm" data-open-overlay="new-session">新建会话</button>
+                <button class="icon-btn" data-open-overlay="settings-panel" aria-label="打开设置">⚙</button>
+            </div>
+        </header>
+
+        <main class="app-shell" aria-label="Desktop workbench prototype">
+            <aside class="sidebar">
+                <div class="section-label">工作区</div>
+                <div class="card brand" style="margin-bottom: 12px;">
+                    <div class="card-title">/home/tester/project</div>
+                    <p class="card-desc">main · 12 changed · test-user@example.com</p>
+                    <div class="control-row" style="margin-top: 10px;">
+                        <span class="chip success">Runner 在线</span>
+                        <span class="chip warn">需同步</span>
+                    </div>
+                </div>
+
+                <div class="section-label">核心工具链</div>
+                <nav class="nav-list" data-module-tabs aria-label="Workbench modules">
+                    <button class="nav-btn active" data-module="chat" aria-current="page">◐ Chat <span class="nav-meta">运行中</span></button>
+                    <button class="nav-btn" data-module="files" aria-current="false">▦ Files <span class="nav-meta">184</span></button>
+                    <button class="nav-btn" data-module="git" aria-current="false">⑂ Git <span class="nav-meta">12</span></button>
+                    <button class="nav-btn" data-module="terminal" aria-current="false">▣ Terminal <span class="nav-meta">2</span></button>
+                    <button class="nav-btn" data-module="assets" aria-current="false">◇ Assets <span class="nav-meta">7</span></button>
+                    <button class="nav-btn" data-module="extensions" aria-current="false">⬡ Extensions <span class="nav-meta">15</span></button>
+                    <button class="nav-btn" data-module="models" aria-current="false">◎ Models & Providers <span class="nav-meta">4</span></button>
+                    <button class="nav-btn" data-module="settings" aria-current="false">⚙ Settings</button>
+                </nav>
+
+                <div class="section-label">会话</div>
+                <button class="session-card active">
+                    <div class="session-title"><span>统一工作台重构</span><span class="chip active">remote</span></div>
+                    <div class="session-meta"><span>正在分析 Files 命名迁移</span><span>2m ago</span></div>
+                </button>
+                <button class="session-card">
+                    <div class="session-title"><span>Git 同步风险排查</span><span class="chip warn">review</span></div>
+                    <div class="session-meta"><span>等待提交篮确认</span><span>18m ago</span></div>
+                </button>
+                <button class="session-card">
+                    <div class="session-title"><span>官网截图更新</span><span class="chip">local</span></div>
+                    <div class="session-meta"><span>生成 OG 图前检查</span><span>1h ago</span></div>
+                </button>
+            </aside>
+
+            <section class="module-pane">
+                <div class="module-header">
+                    <div>
+                        <div class="module-kicker">v0.20.0 Unified Workbench</div>
+                        <h1 class="module-title" data-current-module>Chat</h1>
+                        <div class="module-subtitle" data-current-subtitle>驾驶 Agent、发送实时引导、观察上下文风险。</div>
+                    </div>
+                    <div class="toolbar-group">
+                        <button class="btn secondary" data-open-overlay="context-monitor">上下文监控</button>
+                        <button class="btn secondary" data-open-overlay="git-commit-panel">提交篮</button>
+                        <button class="icon-btn" data-open-overlay="command-palette" aria-label="命令面板">⌘</button>
+                    </div>
+                </div>
+
+                <div class="toolbar">
+                    <div class="toolbar-group">
+                        <div class="tabs" aria-label="Session tools">
+                            <button class="tab active">工作台</button>
+                            <button class="tab">运行日志</button>
+                            <button class="tab">权限</button>
+                        </div>
+                        <span class="chip info">计划模式</span>
+                    </div>
+                    <div class="toolbar-group">
+                        <button class="btn ghost" data-toast="权限模式已切换" data-toast-detail="当前为 accept edits，危险命令仍需确认。">accept edits</button>
+                        <button class="btn secondary" data-open-overlay="session-actions">更多操作</button>
+                    </div>
+                </div>
+
+                <div class="module-body">
+                    <article data-module-view="chat">
+                        <div class="message-stream">
+                            <div class="banner">
+                                <div><strong>统一交互层提示：</strong>后续弹窗、抽屉、菜单、Toast、Banner 均走 OverlaySurface。</div>
+                                <button class="btn secondary" data-open-overlay="overlay-rules">查看规则</button>
+                            </div>
+                            <div class="message">
+                                <div class="avatar">U</div>
+                                <div class="bubble user">请继续将 Hapi Power 的前端统一重构方案推进为高保真原型，桌面和移动端要分开设计。</div>
+                            </div>
+                            <div class="message">
+                                <div class="avatar agent">H</div>
+                                <div class="bubble">
+                                    <div class="bubble-title"><span>Agent 计划</span><span class="chip active">可驾驶</span></div>
+                                    <p>已确认先做底层组件系统，再逐页迁移。本原型把 Chat、Files、Git、Terminal、Session Assets、Extensions、Settings、Models & Providers 放入统一工作台壳层。</p>
+                                    <div class="grid-3" style="margin-top: 12px;">
+                                        <div class="card soft"><div class="metric">8</div><div class="metric-label">一级模块</div></div>
+                                        <div class="card soft"><div class="metric">5</div><div class="metric-label">核心组件 API</div></div>
+                                        <div class="card soft"><div class="metric">44px</div><div class="metric-label">触控底线</div></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="message">
+                                <div class="avatar agent">⚡</div>
+                                <div class="bubble">
+                                    <div class="bubble-title"><span>实时引导队列</span><button class="btn secondary" data-open-overlay="live-guidance">插入引导</button></div>
+                                    <div class="code-block">Queued guidance:
+1. Rename Browse route labels to Files across UI copy.
+2. Move destructive Git sync behind ConfirmAction.
+3. Replace page-local fixed overlays with OverlaySurface.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article data-module-view="files" hidden>
+                        <div class="file-layout">
+                            <div class="card">
+                                <div class="card-title">Files / 文件管理</div>
+                                <p class="card-desc">Browse 已彻底改名为 Files。文件树、搜索、上传、预览、编辑共用同一个 Shell。</p>
+                                <div class="section-label">目录</div>
+                                <div class="file-tree">
+                                    <button class="tree-row active"><span>▾</span><span class="row-title">web/src</span><span class="row-spacer chip">React</span></button>
+                                    <button class="tree-row"><span>▸</span><span class="row-title">components</span><span class="row-spacer">84</span></button>
+                                    <button class="tree-row"><span>▸</span><span class="row-title">routes/sessions</span><span class="row-spacer">19</span></button>
+                                    <button class="tree-row"><span>▸</span><span class="row-title">hooks</span><span class="row-spacer">31</span></button>
+                                    <button class="tree-row"><span>▸</span><span class="row-title">website</span><span class="row-spacer chip warn">品牌</span></button>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="toolbar" style="margin: -14px -14px 14px; border-radius: 14px 14px 0 0;">
+                                    <div class="toolbar-group"><span class="chip active">/web/src/components/PageScaffold.tsx</span></div>
+                                    <div class="toolbar-group">
+                                        <button class="btn secondary" data-open-overlay="file-actions">文件操作</button>
+                                        <button class="btn primary" data-toast="已加入上下文" data-toast-detail="PageScaffold.tsx 已发送给当前会话。">加入上下文</button>
+                                    </div>
+                                </div>
+                                <div class="code-block">export function PageScaffold(props: PageScaffoldProps) {
+    return (
+        &lt;AdaptiveSurface
+            header={props.header}
+            toolbar={props.toolbar}
+            inspector={props.inspector}
+            state={props.state}
+        /&gt;
+    );
+}</div>
+                                <div class="grid-2" style="margin-top: 12px;">
+                                    <div class="card soft"><div class="card-title">统一入口</div><p class="card-desc">文件查看不再分散在 Browse 页面和 Session 文件页面。</p></div>
+                                    <div class="card soft"><div class="card-title">移动任务流</div><p class="card-desc">上传、移动、删除按任务长度映射为全屏 Sheet 或底部确认。</p></div>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article data-module-view="git" hidden>
+                        <div class="git-layout">
+                            <div class="card">
+                                <div class="card-title">Git 管理</div>
+                                <p class="card-desc">从“Git 脉络”改为工具型命名。桌面端使用 split pane + inspector。</p>
+                                <div class="section-label">变更</div>
+                                <div class="list-panel">
+                                    <button class="git-row active"><span class="chip warn">M</span><span><span class="row-title">web/src/router.tsx</span><span class="row-sub">Browse → Files label migration</span></span></button>
+                                    <button class="git-row"><span class="chip success">A</span><span><span class="row-title">components/ui/OverlaySurface.tsx</span><span class="row-sub">new shared overlay shell</span></span></button>
+                                    <button class="git-row"><span class="chip danger">D</span><span><span class="row-title">components/legacy/Drawer.tsx</span><span class="row-sub">remove page-local drawer</span></span></button>
+                                </div>
+                                <button class="btn primary" style="width:100%; margin-top: 12px;" data-open-overlay="git-commit-panel">打开提交篮</button>
+                            </div>
+                            <div class="card">
+                                <div class="toolbar" style="margin: -14px -14px 14px; border-radius: 14px 14px 0 0;">
+                                    <div class="toolbar-group"><span class="chip active">Diff Preview</span><span class="chip">12 files</span></div>
+                                    <div class="toolbar-group"><button class="btn secondary" data-toast="Diff 已折叠" data-toast-detail="大文件仅展示关键 hunk。">折叠无关</button></div>
+                                </div>
+                                <div class="diff-block"><span class="code-line del">- Browse / 浏览</span>
+<span class="code-line add">+ Files / 文件管理</span>
+
+<span class="code-line del">- Git Atlas / Git 脉络</span>
+<span class="code-line add">+ Git Manager / Git 管理</span>
+
+<span class="code-line warn">! destructive sync requires ConfirmAction</span></div>
+                                <div class="grid-3" style="margin-top:12px;">
+                                    <div class="card soft"><div class="metric">12</div><div class="metric-label">changed files</div></div>
+                                    <div class="card soft"><div class="metric">3</div><div class="metric-label">risk flags</div></div>
+                                    <div class="card soft"><div class="metric">1</div><div class="metric-label">commit basket</div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article data-module-view="terminal" hidden>
+                        <div class="grid-2">
+                            <div class="card">
+                                <div class="card-title">Terminal</div>
+                                <p class="card-desc">桌面端保留键盘效率，移动端使用 quick keys 和粘贴 fallback。</p>
+                                <div class="terminal-screen">test-user@hapi:/home/tester/project$ bun run typecheck:web
+web/src/components/ui/OverlaySurface.tsx ✓
+web/src/routes/sessions/files.tsx ✓
+
+watching for changes...</div>
+                            </div>
+                            <div class="card">
+                                <div class="card-title">快捷动作</div>
+                                <div class="control-row" style="margin-top: 10px;">
+                                    <button class="btn secondary" data-toast="命令已复制" data-toast-detail="bun run typecheck:web">复制 typecheck</button>
+                                    <button class="btn secondary" data-toast="终端已分屏" data-toast-detail="新的 PTY 面板已创建。">分屏</button>
+                                    <button class="btn danger" data-open-overlay="stop-terminal">停止进程</button>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article data-module-view="assets" hidden>
+                        <div class="grid-3">
+                            <div class="card brand"><div class="metric">7</div><div class="metric-label">会话资产</div><p class="card-desc">会话资产保留一级功能。</p></div>
+                            <div class="card"><div class="card-title">设计方案</div><p class="card-desc">v0.20.0 统一工作台与多端体验重构。</p><button class="btn secondary" data-toast="已打开资产" data-toast-detail="设计方案会在 Inspector 中预览。">预览</button></div>
+                            <div class="card"><div class="card-title">导出包</div><p class="card-desc">PRD、ADR、发布说明、截图清单。</p><button class="btn primary" data-open-overlay="export-assets">导出</button></div>
+                        </div>
+                    </article>
+
+                    <article data-module-view="extensions" hidden>
+                        <div class="grid-3">
+                            <div class="card"><div class="card-title">Skills</div><p class="card-desc">15 installed · 3 updates</p><button class="btn secondary" data-toast="Skill 已启用" data-toast-detail="新增功能需遵守统一组件系统。">启用</button></div>
+                            <div class="card"><div class="card-title">Plugins</div><p class="card-desc">Session scoped extensions.</p><button class="btn secondary">管理</button></div>
+                            <div class="card"><div class="card-title">安全边界</div><p class="card-desc">扩展配置走统一 DataBoundary 和 ConfirmAction。</p><button class="btn secondary">查看策略</button></div>
+                        </div>
+                    </article>
+
+                    <article data-module-view="models" hidden>
+                        <div class="grid-2">
+                            <div class="card brand"><div class="card-title">Models & Providers / 模型与供应商</div><p class="card-desc">旧“Model Nexus / 模型星桥”改为工具型命名。</p><div class="control-row" style="margin-top:10px;"><span class="chip success">4 healthy</span><span class="chip warn">1 degraded</span></div></div>
+                            <div class="card"><div class="card-title">能力矩阵</div><table class="state-table"><tr><th>Provider</th><th>代码</th><th>图像</th><th>状态</th></tr><tr><td>Cloud Gateway</td><td>High</td><td>Yes</td><td><span class="chip success">OK</span></td></tr><tr><td>Local Model</td><td>Medium</td><td>No</td><td><span class="chip warn">Slow</span></td></tr></table></div>
+                        </div>
+                    </article>
+
+                    <article data-module-view="settings" hidden>
+                        <div class="grid-2">
+                            <div class="card"><div class="card-title">Appearance</div><p class="card-desc">Command Deck With Warm Power · Orange budget &lt; 10%。</p><button class="btn secondary" data-toast="主题已应用" data-toast-detail="电光橙只用于主行动和状态能量。">应用主题</button></div>
+                            <div class="card"><div class="card-title">Accessibility</div><p class="card-desc">44px touch target、focus return、reduced motion、AA 对比度。</p><button class="btn secondary">检查</button></div>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="module-footer">
+                    <div class="composer" aria-label="Chat composer">
+                        <button class="icon-btn" aria-label="上传图片">＋</button>
+                        <textarea placeholder="输入给 Agent 的下一步指令；支持排队引导、立即引导和文件引用。"></textarea>
+                        <button class="btn primary" data-toast="消息已排队" data-toast-detail="Agent thinking 时不会清空普通队列。">发送</button>
+                    </div>
+                </div>
+            </section>
+
+            <aside class="inspector">
+                <div class="inspector-header">
+                    <div>
+                        <div class="module-kicker">Inspector</div>
+                        <h2 class="inspector-title" data-inspector-focus>统一工作台重构</h2>
+                    </div>
+                    <button class="icon-btn compact" data-open-overlay="inspector-settings" aria-label="Inspector 设置">⋯</button>
+                </div>
+                <div class="inspector-stack">
+                    <div class="card brand">
+                        <div class="card-title">Context Monitor / 上下文监控</div>
+                        <p class="card-desc">旧“Context Pulse”已改名。显示风险、原因和下一步。</p>
+                        <div class="progress" aria-label="context usage" style="margin: 12px 0 8px;"><span style="width:68%"></span></div>
+                        <div class="control-row"><span class="chip warn">68% used</span><span class="chip">可靠性中</span></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Git 提交篮</div>
+                        <p class="card-desc">3 files staged · 1 dangerous sync check pending.</p>
+                        <button class="btn primary" style="width:100%;" data-open-overlay="git-commit-panel">Review basket</button>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">活动时间线</div>
+                        <div class="timeline">
+                            <div class="timeline-item"><span class="timeline-dot"></span><div class="timeline-copy"><strong>Files</strong> 命名迁移加入计划。</div></div>
+                            <div class="timeline-item"><span class="timeline-dot"></span><div class="timeline-copy"><strong>OverlaySurface</strong> 设为首批 API。</div></div>
+                            <div class="timeline-item"><span class="timeline-dot"></span><div class="timeline-copy"><strong>Mobile Git</strong> 将拆为分步任务流。</div></div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <div class="overlay-root" id="command-palette" data-open="false" aria-hidden="true">
+        <div class="scrim"></div>
+        <section class="overlay-surface overlay-dialog" role="dialog" aria-modal="true" aria-labelledby="cmd-title">
+            <div class="overlay-head"><h2 class="overlay-title" id="cmd-title">Command Palette</h2><button class="icon-btn" data-close-overlay aria-label="关闭">×</button></div>
+            <div class="overlay-body">
+                <div class="search-box" style="width:100%; max-width:none;"><span>输入命令，例如 Files、Git、Models...</span><span class="row-spacer"></span><kbd>Enter</kbd></div>
+                <div class="section-label">推荐动作</div>
+                <button class="data-row" data-close-overlay data-toast="已打开 Files" data-toast-detail="命名迁移后的文件管理入口。"><span>▦</span><span><span class="row-title">Open Files</span><span class="row-sub">文件管理、搜索、预览、上传</span></span></button>
+                <button class="data-row" data-close-overlay data-open-overlay="git-commit-panel"><span>⑂</span><span><span class="row-title">Review Git basket</span><span class="row-sub">检查提交内容和同步风险</span></span></button>
+                <button class="data-row" data-close-overlay data-open-overlay="live-guidance"><span>⚡</span><span><span class="row-title">Insert Live Guidance</span><span class="row-sub">Agent 运行中纠偏</span></span></button>
+            </div>
+        </section>
+    </div>
+
+    <div class="overlay-root" id="live-guidance" data-open="false" aria-hidden="true">
+        <div class="scrim"></div>
+        <section class="overlay-surface overlay-panel" role="dialog" aria-modal="true" aria-labelledby="guide-title">
+            <div class="overlay-head"><h2 class="overlay-title" id="guide-title">Live Guidance / 实时引导</h2><button class="icon-btn" data-close-overlay aria-label="关闭">×</button></div>
+            <div class="overlay-body">
+                <p class="card-desc">旧“Guide Beam”改为实时引导。桌面端用侧栏，不阻塞主工作区。</p>
+                <textarea style="width:100%; min-height:130px; border:1px solid var(--line); border-radius:14px; padding:12px;" data-autofocus>优先迁移 OverlaySurface，禁止新增 page-local fixed z-index 弹层。</textarea>
+                <div class="grid-2" style="margin-top: 12px;"><button class="btn secondary" data-toast="已排队" data-toast-detail="引导将在当前步骤后发送。">排队发送</button><button class="btn primary" data-toast="已立即引导" data-toast-detail="Agent 将在当前 thinking 中收到纠偏。">立即引导</button></div>
+            </div>
+        </section>
+    </div>
+
+    <div class="overlay-root" id="git-commit-panel" data-open="false" aria-hidden="true">
+        <div class="scrim"></div>
+        <section class="overlay-surface overlay-panel" role="dialog" aria-modal="true" aria-labelledby="commit-title">
+            <div class="overlay-head"><h2 class="overlay-title" id="commit-title">Git Commit Basket</h2><button class="icon-btn" data-close-overlay aria-label="关闭">×</button></div>
+            <div class="overlay-body">
+                <div class="banner"><span>危险同步动作必须通过 ConfirmAction；提交作者按仓库规范校验。</span></div>
+                <div class="section-label">Included files</div>
+                <button class="data-row active"><span class="chip warn">M</span><span class="row-title">50-DESIGN-SCHEME.md</span><span class="row-spacer">docs</span></button>
+                <button class="data-row"><span class="chip success">A</span><span class="row-title">desktop.html</span><span class="row-spacer">prototype</span></button>
+                <button class="data-row"><span class="chip success">A</span><span class="row-title">mobile.html</span><span class="row-spacer">prototype</span></button>
+                <label class="section-label" for="commit-message">Commit message</label>
+                <textarea id="commit-message" style="width:100%; min-height:88px; border:1px solid var(--line); border-radius:14px; padding:12px;">prototype: 新增 v0.20.0 统一工作台高保真原型</textarea>
+            </div>
+            <div class="overlay-foot"><button class="btn secondary" data-close-overlay>取消</button><button class="btn primary" data-toast="提交篮已校验" data-toast-detail="作者、分支、敏感信息门禁通过后才允许提交。">校验提交</button></div>
+        </section>
+    </div>
+
+    <div class="overlay-root" id="context-monitor" data-open="false" aria-hidden="true">
+        <div class="scrim"></div>
+        <section class="overlay-surface overlay-popover" role="dialog" aria-modal="true" aria-labelledby="context-title">
+            <div class="overlay-head"><h2 class="overlay-title" id="context-title">Context Monitor</h2><button class="icon-btn" data-close-overlay aria-label="关闭">×</button></div>
+            <div class="overlay-body">
+                <div class="metric">68%</div><div class="metric-label">current context usage</div>
+                <div class="progress" style="margin:14px 0;"><span style="width:68%"></span></div>
+                <p class="card-desc">建议在进入生产代码迁移前压缩旧讨论，保留设计决策、命名表和组件 API。</p>
+            </div>
+        </section>
+    </div>
+
+    <div class="overlay-root" id="new-session" data-open="false" aria-hidden="true"><div class="scrim"></div><section class="overlay-surface overlay-dialog" role="dialog" aria-modal="true" aria-label="新建会话"><div class="overlay-head"><h2 class="overlay-title">新建会话</h2><button class="icon-btn" data-close-overlay aria-label="关闭">×</button></div><div class="overlay-body"><label class="section-label">目标</label><textarea style="width:100%; min-height:110px; border:1px solid var(--line); border-radius:14px; padding:12px;" data-autofocus>实现 v0.20.0 统一组件系统首批 API。</textarea></div><div class="overlay-foot"><button class="btn secondary" data-close-overlay>取消</button><button class="btn primary" data-toast="会话已创建" data-toast-detail="新会话将继承当前工作区。">创建</button></div></section></div>
+    <div class="overlay-root" id="settings-panel" data-open="false" aria-hidden="true"><div class="scrim"></div><section class="overlay-surface overlay-panel" role="dialog" aria-modal="true" aria-label="Settings"><div class="overlay-head"><h2 class="overlay-title">Settings</h2><button class="icon-btn" data-close-overlay aria-label="关闭">×</button></div><div class="overlay-body"><div class="grid-2"><div class="card"><div class="card-title">Models & Providers</div><p class="card-desc">统一 API Key、健康检测、能力矩阵。</p></div><div class="card"><div class="card-title">Appearance</div><p class="card-desc">电光橙、力量几何、减少动画。</p></div><div class="card"><div class="card-title">Notifications</div><p class="card-desc">PWA 推送、后台任务、Git 风险。</p></div><div class="card"><div class="card-title">About</div><p class="card-desc">Open-source trust, license, security.</p></div></div></div></section></div>
+    <div class="overlay-root" id="file-actions" data-open="false" aria-hidden="true"><div class="scrim"></div><section class="overlay-surface overlay-popover" role="dialog" aria-modal="true" aria-label="File Actions"><div class="overlay-head"><h2 class="overlay-title">File Actions</h2><button class="icon-btn" data-close-overlay aria-label="关闭">×</button></div><div class="overlay-body"><button class="data-row" data-toast="已重命名" data-toast-detail="Browse label references will be replaced by Files.">Rename label</button><button class="data-row" data-toast="已复制路径" data-toast-detail="/home/tester/project/web/src/components/PageScaffold.tsx">Copy path</button><button class="data-row" data-open-overlay="delete-file-confirm">Delete…</button></div></section></div>
+    <div class="overlay-root" id="session-actions" data-open="false" aria-hidden="true"><div class="scrim"></div><section class="overlay-surface overlay-popover" role="dialog" aria-modal="true" aria-label="Session Actions"><div class="overlay-head"><h2 class="overlay-title">Session Actions</h2><button class="icon-btn" data-close-overlay aria-label="关闭">×</button></div><div class="overlay-body"><button class="data-row" data-toast="已导出摘要" data-toast-detail="会话摘要已加入 Session Assets。">导出摘要</button><button class="data-row" data-toast="已标记为资产" data-toast-detail="关键决策已沉淀。">沉淀为资产</button><button class="data-row" data-open-overlay="archive-session">归档会话…</button></div></section></div>
+    <div class="overlay-root" id="overlay-rules" data-open="false" aria-hidden="true"><div class="scrim"></div><section class="overlay-surface overlay-dialog" role="dialog" aria-modal="true" aria-label="OverlaySurface 规则"><div class="overlay-head"><h2 class="overlay-title">OverlaySurface 规则</h2><button class="icon-btn" data-close-overlay aria-label="关闭">×</button></div><div class="overlay-body"><table class="state-table"><tr><th>任务</th><th>桌面</th><th>移动</th></tr><tr><td>短表单</td><td>Dialog</td><td>Bottom Sheet</td></tr><tr><td>持续辅助</td><td>Side Panel</td><td>Full-screen Sheet</td></tr><tr><td>危险确认</td><td>Alert Dialog</td><td>Confirm Sheet</td></tr><tr><td>菜单</td><td>Popover / Context Menu</td><td>Action Sheet</td></tr></table></div></section></div>
+    <div class="overlay-root" id="stop-terminal" data-open="false" aria-hidden="true"><div class="scrim"></div><section class="overlay-surface overlay-dialog" role="alertdialog" aria-modal="true" aria-label="停止终端进程？"><div class="overlay-head"><h2 class="overlay-title">停止终端进程？</h2><button class="icon-btn" data-close-overlay aria-label="关闭">×</button></div><div class="overlay-body"><p>正在运行的 typecheck 将被终止。此危险动作使用统一 ConfirmAction。</p></div><div class="overlay-foot"><button class="btn secondary" data-close-overlay>取消</button><button class="btn danger" data-toast="进程已停止" data-toast-detail="Terminal 状态已同步。">停止</button></div></section></div>
+    <div class="overlay-root" id="export-assets" data-open="false" aria-hidden="true"><div class="scrim"></div><section class="overlay-surface overlay-dialog" role="dialog" aria-modal="true" aria-label="导出会话资产"><div class="overlay-head"><h2 class="overlay-title">导出会话资产</h2><button class="icon-btn" data-close-overlay aria-label="关闭">×</button></div><div class="overlay-body"><div class="control-row"><span class="chip active">PRD</span><span class="chip active">ADR</span><span class="chip active">Design Scheme</span><span class="chip">Screenshots</span></div><p class="card-desc" style="margin-top:12px;">导出前将脱敏真实路径、真实用户和密钥。</p></div><div class="overlay-foot"><button class="btn secondary" data-close-overlay>取消</button><button class="btn primary" data-toast="资产已导出" data-toast-detail="使用 example.com 和 /home/tester/project 示例数据。">导出</button></div></section></div>
+    <div class="overlay-root" id="inspector-settings" data-open="false" aria-hidden="true"><div class="scrim"></div><section class="overlay-surface overlay-popover" role="dialog" aria-modal="true" aria-label="Inspector"><div class="overlay-head"><h2 class="overlay-title">Inspector</h2><button class="icon-btn" data-close-overlay aria-label="关闭">×</button></div><div class="overlay-body"><button class="data-row">固定右栏</button><button class="data-row">隐藏低风险项</button><button class="data-row">导出时间线</button></div></section></div>
+    <div class="overlay-root" id="delete-file-confirm" data-open="false" aria-hidden="true"><div class="scrim"></div><section class="overlay-surface overlay-dialog" role="alertdialog" aria-modal="true" aria-label="删除文件？"><div class="overlay-head"><h2 class="overlay-title">删除文件？</h2><button class="icon-btn" data-close-overlay aria-label="关闭">×</button></div><div class="overlay-body"><p>该操作会进入 Git 变更列表，提交前仍可撤销。</p></div><div class="overlay-foot"><button class="btn secondary" data-close-overlay>取消</button><button class="btn danger" data-toast="文件已删除" data-toast-detail="变更已加入 Git 管理。">删除</button></div></section></div>
+    <div class="overlay-root" id="archive-session" data-open="false" aria-hidden="true"><div class="scrim"></div><section class="overlay-surface overlay-dialog" role="dialog" aria-modal="true" aria-label="归档会话"><div class="overlay-head"><h2 class="overlay-title">归档会话</h2><button class="icon-btn" data-close-overlay aria-label="关闭">×</button></div><div class="overlay-body"><p>归档前建议把关键内容沉淀为会话资产。</p></div><div class="overlay-foot"><button class="btn secondary" data-close-overlay>取消</button><button class="btn primary" data-toast="会话已归档" data-toast-detail="资产仍保留在一级入口。">归档</button></div></section></div>
+
+    <div class="toast-stack" aria-live="polite" aria-atomic="false"></div>
+    <script src="assets/prototype.js"></script>
+</body>
+</html>
