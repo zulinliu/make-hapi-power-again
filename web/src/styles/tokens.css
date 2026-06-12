@@ -100,14 +100,45 @@
   --hp-z-base: 0;
   --hp-z-sticky: 20;
   --hp-z-dropdown: 40;
+  --hp-z-sticky-footer: 45;
   --hp-z-overlay: 50;
   --hp-z-modal: 60;
   --hp-z-toast: 70;
   --hp-z-tooltip: 80;
+  --hp-z-max: 90;
 
   /* === Overlay === */
   --hp-overlay-bg: oklch(0% 0 0 / 0.50);
   --hp-overlay-blur: 4px;
+
+  /* === Motion — Overlay & Component === */
+  --hp-motion-overlay-enter: var(--hp-duration-overlay) var(--hp-ease-overlay);
+  --hp-motion-overlay-exit: var(--hp-duration-fast) var(--hp-ease-in);
+  --hp-motion-sheet-enter: var(--hp-duration-slow) var(--hp-ease-emphasized);
+  --hp-motion-sheet-exit: var(--hp-duration-normal) var(--hp-ease-in);
+  --hp-motion-panel-enter: var(--hp-duration-overlay) var(--hp-ease-emphasized);
+  --hp-motion-panel-exit: var(--hp-duration-fast) var(--hp-ease-in);
+  --hp-motion-fade: var(--hp-duration-fast) var(--hp-ease-default);
+  --hp-motion-control: var(--hp-duration-control) var(--hp-ease-default);
+
+  /* === Reduced motion overrides === */
+  --hp-motion-reduced-duration: 0ms;
+  --hp-motion-reduced-scale: 1;
+
+  /* === Touch targets === */
+  --hp-touch-target: 44px;
+  --hp-touch-target-compact: 36px;
+
+  /* === Keyboard === */
+  --hp-keyboard-height: 0px; /* runtime: set by AdaptiveProvider */
+
+  /* === Typography === */
+  --hp-font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --hp-font-mono: ui-monospace, 'SF Mono', 'Cascadia Code', 'Fira Code', monospace;
+  --hp-font-weight-normal: 400;
+  --hp-font-weight-medium: 500;
+  --hp-font-weight-semibold: 600;
+  --hp-font-weight-bold: 700;
 
   /* === Safe area runtime defaults === */
   --hp-safe-area-top: env(safe-area-inset-top, 0px);
@@ -158,4 +189,26 @@
   --hp-shadow-lg: 0 8px 32px oklch(0% 0 0 / 0.5);
   --hp-shadow-xl: 0 16px 48px oklch(0% 0 0 / 0.6);
   --hp-shadow-focus: 0 0 0 2px oklch(72% 0.12 55 / 0.4);
+}
+
+/* === Reduced motion: 几乎瞬时，不做空间位移 === */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --hp-duration-instant: 0ms;
+    --hp-duration-fast: 0ms;
+    --hp-duration-normal: 0ms;
+    --hp-duration-slow: 0ms;
+    --hp-duration-slower: 0ms;
+    --hp-duration-feedback: 0ms;
+    --hp-duration-control: 0ms;
+    --hp-duration-overlay: 0ms;
+    --hp-motion-overlay-enter: 0ms;
+    --hp-motion-overlay-exit: 0ms;
+    --hp-motion-sheet-enter: 0ms;
+    --hp-motion-sheet-exit: 0ms;
+    --hp-motion-panel-enter: 0ms;
+    --hp-motion-panel-exit: 0ms;
+    --hp-motion-fade: 0ms;
+    --hp-motion-control: 0ms;
+  }
 }
