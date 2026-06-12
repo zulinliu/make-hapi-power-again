@@ -3,6 +3,7 @@ import { useTranslation, type Locale } from '@/lib/use-translation'
 import { useAppGoBack } from '@/hooks/useAppGoBack'
 import { useAppContext } from '@/lib/app-context'
 import { ProviderSettings } from '@/components/ProviderSettings'
+import { PageScaffold } from '@/components/layout/PageScaffold'
 import { Select } from '@/components/ui/Select'
 import { getFontScaleOptions, useFontScale, type FontScale } from '@/hooks/useFontScale'
 import { getTerminalFontSizeOptions, useTerminalFontSize, type TerminalFontSize } from '@/hooks/useTerminalFontSize'
@@ -288,22 +289,20 @@ export default function SettingsPage() {
     }
 
     return (
-        <div className="flex h-full min-h-0 flex-col">
-            <div className="bg-(--hp-surface-0) pt-[env(safe-area-inset-top)]">
-                <div className="mx-auto w-full max-w-content flex items-center gap-2 p-3 border-b border-(--hp-divider)">
-                    <button
-                        type="button"
-                        onClick={goBack}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg text-(--hp-text-secondary) transition-colors hover:bg-(--hp-surface-1) hover:text-(--hp-text-primary)"
-                    >
-                        <BackIcon />
-                    </button>
-                    <div className="flex-1 font-medium text-(--hp-text-primary)">{t('settings.title')}</div>
-                </div>
-            </div>
-
-            <div className="app-scroll-y flex-1 min-h-0">
-                <div className="mx-auto w-full max-w-content">
+        <PageScaffold
+            title={t('settings.title')}
+            actions={
+                <button
+                    type="button"
+                    onClick={goBack}
+                    className="flex h-8 w-8 items-center justify-center rounded-(--hp-radius-md) text-(--hp-text-secondary) transition-colors hover:bg-(--hp-surface-1) hover:text-(--hp-text-primary)"
+                    aria-label={t('common.back')}
+                >
+                    <BackIcon />
+                </button>
+            }
+        >
+            <div className="mx-auto w-full max-w-content">
                     {/* Language section */}
                     <div className="border-b border-(--hp-divider)">
                         <div className="px-3 py-2 text-xs font-medium text-(--hp-text-tertiary) uppercase tracking-wider">
@@ -446,8 +445,7 @@ export default function SettingsPage() {
                             <span className="text-(--hp-text-tertiary)">{PROTOCOL_VERSION}</span>
                         </div>
                     </div>
-                </div>
             </div>
-        </div>
+        </PageScaffold>
     )
 }

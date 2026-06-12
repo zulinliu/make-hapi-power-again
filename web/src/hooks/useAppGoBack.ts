@@ -15,8 +15,8 @@ export function useAppGoBack(): () => void {
                 ? (search as { returnTo?: unknown }).returnTo
                 : undefined
             const target = parseSafeReturnTo(returnTo)
-            if (target?.type === 'browse') {
-                navigate({ to: '/browse', search: target.search, replace: true })
+            if (target?.type === 'files') {
+                navigate({ to: '/files', search: target.search, replace: true })
                 return
             }
             if (target?.type === 'sessionFiles') {
@@ -32,7 +32,7 @@ export function useAppGoBack(): () => void {
             return
         }
 
-        if (pathname === '/browse') {
+        if (pathname === '/files') {
             navigate({ to: '/sessions' })
             return
         }

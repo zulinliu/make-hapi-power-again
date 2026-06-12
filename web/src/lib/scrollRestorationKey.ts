@@ -30,7 +30,7 @@ export function getScrollRestorationKey(location: ParsedLocation): string {
     if (FILES_ROUTE.test(location.pathname) && search.tab === 'directories') {
         return `${location.pathname}?tab=directories`
     }
-    if (location.pathname === '/browse' && typeof search.machineId === 'string') {
+    if (location.pathname === '/files' && typeof search.machineId === 'string') {
         return `${location.pathname}?machineId=${search.machineId}`
     }
     return location.pathname

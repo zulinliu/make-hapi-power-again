@@ -708,17 +708,17 @@ export default {
   'settings.modelNexus.wizard.next': '下一步',
   'settings.modelNexus.wizard.finish': '保存供应商',
 
-  // Browse / Workspace
-  'browse.title': '浏览',
-  'browse.goUp': '返回上层',
-  'browse.empty': '未找到子目录',
-  'browse.refresh': '刷新',
-  'browse.startSession': '启动会话',
-  'browse.nav': '浏览',
-'browse.noRootTitle': '未启用 workspace 浏览',
-  'browse.noRootHint': '浏览功能是可选的。带一个或多个 --workspace-root 参数重启 runner，即可启用文件树浏览和受限的会话启动。',
-  'browse.noRootFooter': '你仍然可以在「新建会话」页面直接创建会话。',
-  'browse.noMachinesConnected': '没有已连接的 CLI。在某台机器上运行 `hapi-power runner start --workspace-root /path/a --workspace-root /path/b` 来开始。',
+  // Files / Workspace
+  'files.title': '文件',
+  'files.goUp': '返回上层',
+  'files.empty': '未找到子目录',
+  'files.refresh': '刷新',
+  'files.startSession': '启动会话',
+  'files.nav': '文件',
+'files.noRootTitle': '未启用 workspace 浏览',
+  'files.noRootHint': '浏览功能是可选的。带一个或多个 --workspace-root 参数重启 runner，即可启用文件树浏览和受限的会话启动。',
+  'files.noRootFooter': '你仍然可以在「新建会话」页面直接创建会话。',
+  'files.noMachinesConnected': '没有已连接的 CLI。在某台机器上运行 `hapi-power runner start --workspace-root /path/a --workspace-root /path/b` 来开始。',
 
   // Misc
   'misc.noMachines': '无可用机器',

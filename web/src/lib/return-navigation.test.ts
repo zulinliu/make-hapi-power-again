@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest'
 import { parseSafeReturnTo } from './return-navigation'
 
 describe('parseSafeReturnTo', () => {
-    it('accepts browse return targets with machine and path search', () => {
-        expect(parseSafeReturnTo('/browse?machineId=m-1&path=L3JlcG8vc3Jj')).toEqual({
-            type: 'browse',
+    it('accepts files return targets with machine and path search', () => {
+        expect(parseSafeReturnTo('/files?machineId=m-1&path=L3JlcG8vc3Jj')).toEqual({
+            type: 'files',
             search: {
                 machineId: 'm-1',
                 path: 'L3JlcG8vc3Jj',
@@ -21,8 +21,8 @@ describe('parseSafeReturnTo', () => {
     })
 
     it('rejects external or unsupported return targets', () => {
-        expect(parseSafeReturnTo('https://example.com/browse')).toBeNull()
-        expect(parseSafeReturnTo('//example.com/browse')).toBeNull()
+        expect(parseSafeReturnTo('https://example.com/files')).toBeNull()
+        expect(parseSafeReturnTo('//example.com/files')).toBeNull()
         expect(parseSafeReturnTo('/settings')).toBeNull()
     })
 })

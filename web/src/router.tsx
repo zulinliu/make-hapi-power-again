@@ -42,7 +42,7 @@ import { markSessionSeen } from '@/lib/sessionLastSeen'
 import type { Machine } from '@/types/api'
 import FilesPage from '@/routes/sessions/files'
 import FilePage from '@/routes/sessions/file'
-import BrowseFilePage from '@/routes/browse/file'
+import FileViewPage from '@/routes/files/file'
 import TerminalPage from '@/routes/sessions/terminal'
 import GitPage from '@/routes/sessions/git'
 import ExtensionsPage from '@/routes/sessions/extensions'
@@ -193,9 +193,9 @@ function SessionsPage() {
                         <div className="flex items-center gap-2">
                             <button
                                 type="button"
-                                onClick={() => navigate({ to: '/browse' })}
+                                onClick={() => navigate({ to: '/files' })}
                                 className="p-2.5 rounded-full text-(--hp-text-tertiary) hover:text-(--hp-text-primary) hover:bg-(--hp-surface-1) transition-colors"
-                                title={t('browse.nav')}
+                                title={t('files.nav')}
                             >
                                 <FolderOpenIcon className="h-5 w-5" />
                             </button>
@@ -234,7 +234,7 @@ function SessionsPage() {
                         })}
                         onNewSession={() => navigate({ to: '/sessions/new' })}
                         onNewSessionInDirectory={handleNewSessionInDirectory}
-                        onBrowse={() => navigate({ to: '/browse' })}
+                        onBrowse={() => navigate({ to: '/files' })}
                         onRefresh={handleRefresh}
                         isLoading={isLoading}
                         renderHeader={false}
@@ -516,8 +516,8 @@ function NewSessionPage() {
 
     const navigateToReturnTarget = useCallback(() => {
         const target = parseSafeReturnTo(returnTo)
-        if (target?.type === 'browse') {
-            navigate({ to: '/browse', search: target.search, replace: true })
+        if (target?.type === 'files') {
+            navigate({ to: '/files', search: target.search, replace: true })
             return
         }
         if (target?.type === 'sessionFiles') {
@@ -550,12 +550,12 @@ function NewSessionPage() {
     }, [navigate, queryClient])
 
     const handleChooseFolder = useCallback((args: { machineId: string | null; directory: string }) => {
-        // Forward the currently-selected machine so /browse opens scoped to
+        // Forward the currently-selected machine so /files opens scoped to
         // it rather than falling back to `hapi-power:lastMachineId`, which can
         // disagree if the user changed machines without yet creating a
         // session.
         navigate({
-            to: '/browse',
+            to: '/files',
             search: args.machineId ? { machineId: args.machineId } : {}
         })
     }, [navigate])
@@ -601,7 +601,7 @@ function NewSessionPage() {
     )
 }
 
-function BrowsePage() {
+function StandaloneFilesPage() {
     const { t } = useTranslation()
     const goBack = useAppGoBack()
     const { api } = useAppContext()
@@ -632,7 +632,7 @@ function BrowsePage() {
                         <BackIcon />
                     </button>
                 )}
-                <div className="flex-1 font-semibold text-(--hp-text-primary)">{t('browse.title')}</div>
+                <div className="flex-1 font-semibold text-(--hp-text-primary)">{t('files.title')}</div>
             </div>
 
             <div className="flex-1 min-h-0">
@@ -646,16 +646,16 @@ function BrowsePage() {
                     </div>
                 ) : machines.length === 0 ? (
                     <div className="flex items-center justify-center h-full px-6 text-center">
-                        <div className="max-w-md text-sm text-(--hp-text-tertiary)">{t('browse.noMachinesConnected')}</div>
+                        <div className="max-w-md text-sm text-(--hp-text-tertiary)">{t('files.noMachinesConnected')}</div>
                     </div>
                 ) : !machine || !workspaceRoot ? (
                     <div className="flex flex-col items-center justify-center h-full gap-3 px-6 text-center">
-                        <div className="text-sm font-medium text-(--hp-text-primary)">{t('browse.noRootTitle')}</div>
-                        <div className="max-w-md text-sm text-(--hp-text-tertiary)">{t('browse.noRootHint')}</div>
+                        <div className="text-sm font-medium text-(--hp-text-primary)">{t('files.noRootTitle')}</div>
+                        <div className="max-w-md text-sm text-(--hp-text-tertiary)">{t('files.noRootHint')}</div>
                         <code className="px-3 py-1.5 text-xs rounded-[var(--hp-radius-sm,6px)] bg-(--hp-surface-1) text-(--hp-text-primary)">
                             hapi-power runner start --workspace-root /path/a --workspace-root /path/b
                         </code>
-                        <div className="text-xs text-(--hp-text-tertiary)">{t('browse.noRootFooter')}</div>
+                        <div className="text-xs text-(--hp-text-tertiary)">{t('files.noRootFooter')}</div>
                     </div>
                 ) : initialPath ? (
                     <FileManager api={api} machineId={machine.id} initialPath={initialPath} rootPath={workspaceRoot} />
@@ -784,9 +784,9 @@ const newSessionRoute = createRoute({
     component: NewSessionPage,
 })
 
-const browseRoute = createRoute({
+const filesRoute = createRoute({
     getParentRoute: () => rootRoute,
-    path: '/browse',
+    path: '/files',
     validateSearch: (search: Record<string, unknown>): { machineId?: string; path?: string } => {
         const result: { machineId?: string; path?: string } = {}
         if (typeof search.machineId === 'string' && search.machineId) {
@@ -797,25 +797,25 @@ const browseRoute = createRoute({
         }
         return result
     },
-    component: BrowsePage,
+    component: StandaloneFilesPage,
 })
 
-type BrowseFileSearch = {
+type FileViewSearch = {
     machineId?: string
     path: string
 }
 
-const browseFileRoute = createRoute({
+const fileViewRoute = createRoute({
     getParentRoute: () => rootRoute,
-    path: '/browse/file',
-    validateSearch: (search: Record<string, unknown>): BrowseFileSearch => {
-        const result: BrowseFileSearch = { path: typeof search.path === 'string' ? search.path : '' }
+    path: '/files/file',
+    validateSearch: (search: Record<string, unknown>): FileViewSearch => {
+        const result: FileViewSearch = { path: typeof search.path === 'string' ? search.path : '' }
         if (typeof search.machineId === 'string' && search.machineId) {
             result.machineId = search.machineId
         }
         return result
     },
-    component: BrowseFilePage,
+    component: FileViewPage,
 })
 
 const sessionGitRoute = createRoute({
@@ -856,8 +856,8 @@ export const routeTree = rootRoute.addChildren([
             sessionExtensionsRoute,
         ]),
     ]),
-    browseRoute,
-    browseFileRoute,
+    filesRoute,
+    fileViewRoute,
     settingsRoute,
 ])
 

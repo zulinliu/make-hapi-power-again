@@ -112,7 +112,7 @@ function buildReturnTo(machineId: string | null | undefined, path: string, sessi
   if (machineId) params.set('machineId', machineId)
   if (path) params.set('path', encodeBase64(path))
   const query = params.toString()
-  return query ? `/browse?${query}` : '/browse'
+  return query ? `/files?${query}` : '/files'
 }
 
 function isValidDestinationDir(path: string, rootPath: string): boolean {
@@ -517,7 +517,7 @@ export function FileManager({ api, machineId, sessionId, initialPath, rootPath: 
     }
     if (machineId) {
       navigate({
-        to: '/browse/file',
+        to: '/files/file',
         search: { machineId, path: encodeBase64(filePath) },
       })
       return

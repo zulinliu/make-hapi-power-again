@@ -2,8 +2,8 @@ import { useParams } from '@tanstack/react-router'
 import { useAppContext } from '@/lib/app-context'
 import { useTranslation } from '@/lib/use-translation'
 import { useSession } from '@/hooks/queries/useSession'
-import { LoadingState } from '@/components/LoadingState'
 import { SubPageLayout } from '@/components/ui/SubPageLayout'
+import { DataBoundary, loadingState, errorState } from '@/components/ui/DataBoundary'
 import { SessionLoomContent } from '@/components/AssistantChat/SessionLoomPanel'
 import type { Session } from '@/types/api'
 
@@ -26,17 +26,19 @@ export default function LoomPage() {
     const { t } = useTranslation()
     const { session, isLoading, error } = useSession(api, sessionId)
 
-    if (isLoading) {
-        return <LoadingState label={t('loading.session')} />
-    }
-
-    if (!session) {
+    // Loading / error states via DataBoundary in a standalone layout
+    if (isLoading || !session) {
+        const state = isLoading
+            ? loadingState(t('loading.session'))
+            : errorState(
+                t('session.unavailable'),
+                error ?? undefined,
+                { label: t('common.retry'), onSelect: () => window.location.reload() },
+            )
         return (
-            <div className="p-4">
-                <div className="rounded-[var(--hp-radius-md)] border border-[var(--hp-danger)] bg-[var(--hp-danger-subtle)] px-3 py-2 text-sm text-[var(--hp-danger)]">
-                    {error || t('session.unavailable')}
-                </div>
-            </div>
+            <SubPageLayout>
+                <DataBoundary state={state}>{() => null}</DataBoundary>
+            </SubPageLayout>
         )
     }
 
@@ -44,8 +46,8 @@ export default function LoomPage() {
         <SubPageLayout
             toolbar={
                 <div className="flex min-w-0 flex-col gap-1">
-                    <div className="text-sm font-semibold text-[var(--hp-text-primary)]">{t('sessionLoom.title')}</div>
-                    <div className="truncate text-xs text-[var(--hp-text-secondary)]">
+                    <div className="text-sm font-semibold text-(--hp-text-primary)">{t('sessionLoom.title')}</div>
+                    <div className="truncate text-xs text-(--hp-text-secondary)">
                         {session.metadata?.path ?? getSessionLoomTitle(session)}
                     </div>
                 </div>

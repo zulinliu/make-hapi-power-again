@@ -297,7 +297,7 @@ export function WorkspaceBrowser(props: {
                 <div className="px-3 py-2 border-b border-(--hp-divider)">{machineSelector}</div>
                 <div className="flex-1 flex flex-col items-center justify-center gap-3 px-6 text-center">
                     <FolderIcon className="h-10 w-10 text-(--hp-text-tertiary) opacity-50" />
-                    <div className="text-sm text-(--hp-text-tertiary)">{t('browse.noMachinesConnected')}</div>
+                    <div className="text-sm text-(--hp-text-tertiary)">{t('files.noMachinesConnected')}</div>
                 </div>
             </div>
         )
@@ -310,13 +310,13 @@ export function WorkspaceBrowser(props: {
             <div className="flex flex-col h-full bg-(--hp-surface-0)">
                 <div className="px-3 py-2 border-b border-(--hp-divider)">{machineSelector}</div>
                 <div className="flex-1 flex flex-col items-center justify-center gap-3 px-6 text-center">
-                    <div className="text-sm text-(--hp-text-primary) font-medium">{t('browse.noRootTitle')}</div>
-                    <div className="max-w-md text-sm text-(--hp-text-tertiary)">{t('browse.noRootHint')}</div>
+                    <div className="text-sm text-(--hp-text-primary) font-medium">{t('files.noRootTitle')}</div>
+                    <div className="max-w-md text-sm text-(--hp-text-tertiary)">{t('files.noRootHint')}</div>
                     <code className="px-3 py-1.5 text-xs rounded-[var(--hp-radius-sm,6px)] bg-(--hp-surface-1) text-(--hp-text-primary)">
                         hapi-power runner start --workspace-root /path/a --workspace-root /path/b
                     </code>
                     <div className="text-xs text-(--hp-text-tertiary) mt-2">
-                        {t('browse.noRootFooter')}
+                        {t('files.noRootFooter')}
                     </div>
                 </div>
             </div>
@@ -351,8 +351,8 @@ export function WorkspaceBrowser(props: {
                             onClick={handleGoUp}
                             disabled={atRoot}
                             className="shrink-0 p-0.5 rounded-[var(--hp-radius-xs,4px)] hover:bg-(--hp-surface-1) text-(--hp-text-tertiary) hover:text-(--hp-text-primary) transition-colors disabled:opacity-30"
-                            title={t('browse.goUp')}
-                            aria-label={t('browse.goUp')}
+                            title={t('files.goUp')}
+                            aria-label={t('files.goUp')}
                         >
                             <ChevronLeftIcon className="h-4 w-4" />
                         </button>
@@ -373,7 +373,7 @@ export function WorkspaceBrowser(props: {
                             onClick={handleRefresh}
                             disabled={isLoading}
                             className="ml-auto shrink-0 p-0.5 rounded-[var(--hp-radius-xs,4px)] hover:bg-(--hp-surface-1) text-(--hp-text-tertiary) hover:text-(--hp-text-primary) transition-colors"
-                            title={t('browse.refresh')}
+                            title={t('files.refresh')}
                         >
                             <RefreshIcon className={`h-3.5 w-3.5 ${isLoading ? 'animate-spin' : ''}`} />
                         </button>
@@ -391,7 +391,7 @@ export function WorkspaceBrowser(props: {
                 ) : directories.length === 0 ? (
                     <div className="flex flex-col items-center justify-center gap-2 py-8">
                         <FolderIcon className="h-8 w-8 text-(--hp-text-tertiary) opacity-50" />
-                        <div className="text-sm text-(--hp-text-tertiary)">{t('browse.empty')}</div>
+                        <div className="text-sm text-(--hp-text-tertiary)">{t('files.empty')}</div>
                     </div>
                 ) : (
                     <div className="flex flex-col px-2 py-1">
@@ -429,7 +429,7 @@ export function WorkspaceBrowser(props: {
                             disabled={!machineId || !currentPath}
                             className="px-4 py-1.5 text-sm rounded-[var(--hp-radius-sm,6px)] bg-(--hp-primary) text-(--hp-primary-text) font-medium disabled:opacity-50 transition-colors hover:opacity-90"
                         >
-                            {t('browse.startSession')}
+                            {t('files.startSession')}
                         </button>
                     </div>
                 </div>

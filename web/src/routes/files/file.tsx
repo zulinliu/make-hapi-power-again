@@ -56,7 +56,7 @@ export default function BrowseFilePage() {
     const queryClient = useQueryClient()
     const { copied: pathCopied, copy: copyPath } = useCopyToClipboard()
     const { copied: contentCopied, copy: copyContent } = useCopyToClipboard()
-    const search = useSearch({ from: '/browse/file' })
+    const search = useSearch({ from: '/files/file' })
     const machineId = typeof search.machineId === 'string' ? search.machineId : ''
     const encodedPath = typeof search.path === 'string' ? search.path : ''
 
@@ -237,7 +237,7 @@ export default function BrowseFilePage() {
     const handleGoBack = useCallback(() => {
         const parentPath = filePath ? getParentPath(filePath) : ''
         const go = () => navigate({
-            to: '/browse',
+            to: '/files',
             search: {
                 ...(machineId ? { machineId } : {}),
                 ...(parentPath ? { path: encodeBase64(parentPath) } : {}),

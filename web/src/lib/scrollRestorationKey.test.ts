@@ -20,7 +20,7 @@ describe('getScrollRestorationKey', () => {
         expect(getScrollRestorationKey(makeLocation({ pathname: '/sessions/abc123' }))).toBe('/sessions/abc123')
         expect(getScrollRestorationKey(makeLocation({ pathname: '/sessions/abc123/terminal' }))).toBe('/sessions/abc123/terminal')
         expect(getScrollRestorationKey(makeLocation({ pathname: '/settings' }))).toBe('/settings')
-        expect(getScrollRestorationKey(makeLocation({ pathname: '/browse' }))).toBe('/browse')
+        expect(getScrollRestorationKey(makeLocation({ pathname: '/files' }))).toBe('/files')
     })
 
     it('differentiates file routes by the path search param', () => {
@@ -65,13 +65,13 @@ describe('getScrollRestorationKey', () => {
         expect(getScrollRestorationKey(unstaged)).not.toBe(getScrollRestorationKey(staged))
     })
 
-    it('differentiates browse route by machineId', () => {
-        const noMachine = makeLocation({ pathname: '/browse', search: {} })
-        const machineA = makeLocation({ pathname: '/browse', search: { machineId: 'm-aaa' } })
-        const machineB = makeLocation({ pathname: '/browse', search: { machineId: 'm-bbb' } })
-        expect(getScrollRestorationKey(noMachine)).toBe('/browse')
-        expect(getScrollRestorationKey(machineA)).toBe('/browse?machineId=m-aaa')
-        expect(getScrollRestorationKey(machineB)).toBe('/browse?machineId=m-bbb')
+    it('differentiates files route by machineId', () => {
+        const noMachine = makeLocation({ pathname: '/files', search: {} })
+        const machineA = makeLocation({ pathname: '/files', search: { machineId: 'm-aaa' } })
+        const machineB = makeLocation({ pathname: '/files', search: { machineId: 'm-bbb' } })
+        expect(getScrollRestorationKey(noMachine)).toBe('/files')
+        expect(getScrollRestorationKey(machineA)).toBe('/files?machineId=m-aaa')
+        expect(getScrollRestorationKey(machineB)).toBe('/files?machineId=m-bbb')
         expect(getScrollRestorationKey(machineA)).not.toBe(getScrollRestorationKey(machineB))
     })
 
@@ -103,9 +103,9 @@ describe('getScrollRestorationKey', () => {
 
     it('ignores hash', () => {
         const location = makeLocation({
-            pathname: '/browse',
+            pathname: '/files',
             hash: '#section-2',
         })
-        expect(getScrollRestorationKey(location)).toBe('/browse')
+        expect(getScrollRestorationKey(location)).toBe('/files')
     })
 })

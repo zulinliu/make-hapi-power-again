@@ -1,5 +1,5 @@
 export type SafeReturnTarget =
-    | { type: 'browse'; search: { machineId?: string; path?: string } }
+    | { type: 'files'; search: { machineId?: string; path?: string } }
     | { type: 'sessions' }
     | { type: 'sessionFiles'; sessionId: string; search: { tab?: 'changes' | 'directories'; path?: string } }
 
@@ -19,13 +19,13 @@ export function parseSafeReturnTo(value: unknown): SafeReturnTarget | null {
         return null
     }
 
-    if (url.pathname === '/browse') {
+    if (url.pathname === '/files') {
         const search: { machineId?: string; path?: string } = {}
         const machineId = url.searchParams.get('machineId')
         const path = url.searchParams.get('path')
         if (machineId) search.machineId = machineId
         if (path) search.path = path
-        return { type: 'browse', search }
+        return { type: 'files', search }
     }
 
     if (url.pathname === '/sessions') {

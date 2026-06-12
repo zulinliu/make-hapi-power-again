@@ -706,17 +706,17 @@ export default {
   'settings.modelNexus.wizard.next': 'Next',
   'settings.modelNexus.wizard.finish': 'Save provider',
 
-  // Browse / Workspace
-  'browse.title': 'Browse',
-  'browse.goUp': 'Go up',
-  'browse.empty': 'No subdirectories found',
-  'browse.refresh': 'Refresh',
-  'browse.startSession': 'Start Session',
-  'browse.nav': 'Browse',
-'browse.noRootTitle': 'Workspace browsing is off',
-  'browse.noRootHint': 'Browsing is opt-in. Restart the runner with one or more workspace roots to enable file-tree navigation and scoped session spawning.',
-  'browse.noRootFooter': 'You can still create sessions from the “New Session” page.',
-  'browse.noMachinesConnected': 'No CLI connected. Run `hapi-power runner start --workspace-root /path/a --workspace-root /path/b` on a machine to get started.',
+  // Files / Workspace
+  'files.title': 'Files',
+  'files.goUp': 'Go up',
+  'files.empty': 'No subdirectories found',
+  'files.refresh': 'Refresh',
+  'files.startSession': 'Start Session',
+  'files.nav': 'Files',
+'files.noRootTitle': 'Workspace browsing is off',
+  'files.noRootHint': 'Browsing is opt-in. Restart the runner with one or more workspace roots to enable file-tree navigation and scoped session spawning.',
+  'files.noRootFooter': 'You can still create sessions from the “New Session” page.',
+  'files.noMachinesConnected': 'No CLI connected. Run `hapi-power runner start --workspace-root /path/a --workspace-root /path/b` on a machine to get started.',
 
   // Misc
   'misc.noMachines': 'No machines available',

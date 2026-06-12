@@ -1,96 +1,66 @@
 import * as React from 'react'
+import { PageScaffold, type PageTab } from '@/components/layout/PageScaffold'
 
 export interface SubPageTab {
-  id: string
-  label: string
+    id: string
+    label: string
 }
 
 export interface SubPageLayoutProps {
-  tabs?: SubPageTab[]
-  activeTab?: string
-  onTabChange?: (tabId: string) => void
-  toolbar?: React.ReactNode
-  children: React.ReactNode
+    tabs?: SubPageTab[]
+    activeTab?: string
+    onTabChange?: (tabId: string) => void
+    toolbar?: React.ReactNode
+    children: React.ReactNode
 }
 
+/**
+ * SubPageLayout — tabbed sub-page layout.
+ *
+ * Internally delegates to PageScaffold for:
+ * - Consistent header/toolbar/tabs/content/footer structure
+ * - Safe-area insets
+ * - Touch-friendly tab targets
+ *
+ * This is the preferred layout for session-scoped sub-pages
+ * (Extensions, Loom, etc.) that need tabs and toolbar.
+ */
 export function SubPageLayout({
-  tabs,
-  activeTab,
-  onTabChange,
-  toolbar,
-  children,
+    tabs,
+    activeTab,
+    onTabChange,
+    toolbar,
+    children,
 }: SubPageLayoutProps) {
-  return (
-    <div className="flex h-full min-h-0 flex-col">
-      {toolbar && (
-        <div className="shrink-0 overflow-x-auto"
-          style={{
-            borderBottom: '1px solid var(--app-border)',
-            background: 'var(--app-bg)',
-            padding: 'var(--hp-space-2) var(--hp-space-3)',
-          }}
-        >
-          <div className="mx-auto w-full max-w-content">
+    // Convert SubPageTab[] to PageTab[] for PageScaffold
+    const pageTabs: PageTab[] | undefined = tabs?.map((tab) => ({
+        id: tab.id,
+        label: tab.label,
+    }))
+
+    // Build toolbar slot
+    const toolbarSlot = toolbar ? (
+        <div className="mx-auto w-full max-w-content px-3 py-2">
             {toolbar}
-          </div>
         </div>
-      )}
+    ) : undefined
 
-      {tabs && tabs.length > 0 && (
-        <div
-          className="flex shrink-0"
-          style={{
-            borderBottom: '1px solid var(--app-border)',
-            background: 'var(--app-bg)',
-          }}
-          role="tablist"
+    return (
+        <PageScaffold
+            toolbar={toolbarSlot}
+            tabs={pageTabs}
+            activeTabId={activeTab}
+            onTabChange={onTabChange}
         >
-          <div className="mx-auto w-full max-w-content">
-            <div className="flex overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-              {tabs.map((tab) => {
-                const isActive = tab.id === activeTab
-                return (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    role="tab"
-                    aria-selected={isActive}
-                    onClick={() => onTabChange?.(tab.id)}
-                    className="relative flex-1 text-center text-sm font-semibold transition-colors whitespace-nowrap"
-                    style={{ paddingTop: 'var(--hp-space-3)', paddingBottom: 'var(--hp-space-3)' }}
-                  >
-                    <span
-                      style={{
-                        color: isActive ? 'var(--app-fg)' : 'var(--app-hint)',
-                      }}
-                    >
-                      {tab.label}
-                    </span>
-                    <span
-                      className="absolute bottom-0 left-[10%] w-4/5 transition-colors"
-                      style={{
-                        height: 2,
-                        borderRadius: 'var(--hp-radius-full)',
-                        background: isActive ? 'var(--hp-primary)' : 'transparent',
-                        transitionDuration: 'var(--hp-duration-fast)',
-                      }}
-                    />
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-        </div>
-      )}
+            <SubPageContent>{children}</SubPageContent>
+        </PageScaffold>
+    )
+}
 
-      <div
-        className="flex-1 min-h-0 overflow-y-auto app-scroll-y"
-        role="tabpanel"
-      >
+function SubPageContent({ children }: { children: React.ReactNode }) {
+    return (
         <div className="mx-auto w-full max-w-content">
-          {children}
+            {children}
         </div>
-      </div>
-    </div>
-  )
+    )
 }
