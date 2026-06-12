@@ -1322,4 +1322,7 @@ export default {
   'gitPortal.a11y.urlInput': '输入要克隆的 Git 仓库地址',
   'gitPortal.a11y.cloneProgress': 'Git 克隆进度',
 
+  // Common
+  'common.back': '返回',
+
 } as const

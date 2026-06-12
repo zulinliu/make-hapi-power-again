@@ -1320,4 +1320,7 @@ export default {
   'gitPortal.a11y.urlInput': 'Enter a Git repository URL to clone',
   'gitPortal.a11y.cloneProgress': 'Git clone progress',
 
+  // Common
+  'common.back': 'Go back',
+
 } as const
